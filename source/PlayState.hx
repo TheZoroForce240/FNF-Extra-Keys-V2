@@ -287,7 +287,7 @@ class PlayState extends MusicBeatState
 		if (Assets.exists(EventFile))											//unfinished event code!
 		{
 			PlayState.EVENT = SongEvent.loadFromJson('events', SONG.song.toLowerCase());
-			eventsEnabled = true;
+			//eventsEnabled = true;
 		}
 
 		switch (SONG.song.toLowerCase()) //dialogue
@@ -2471,7 +2471,6 @@ class PlayState extends MusicBeatState
 	{
 
 		// HOLDS, check for sustain notes
-		var holdArray:Array<Bool> = hold;
 		if (keys.contains(true) && /*!boyfriend.stunned && */ generatedMusic)
 		{
 			if (flipped)
