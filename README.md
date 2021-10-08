@@ -15,14 +15,13 @@ WARNING: this mod is still pretty early in development, so expect bugs and missi
  - Bunch of note types already set up
  - Note Specfic Speed + Velocity Changes
  - Custom Song Support (no compiling required!)
- - Playing as the oppenent
  - A lot of randomizaton options
  - New Difficulty System which is based on the chart files (currently only in freeplay)
+ - Local Multiplayer Support
 
 ## Planned Features
  - Unhardcoding most things
  - Documenting as much code as i can, to help noob coders understand the game better and how it works
- - Local Multiplayer support
  - Android Support (not guaranteed, might not happen)
  - Editors for most things
  - Modchart creator??
