@@ -1,3 +1,35 @@
+# FNF Extra Keys V2
+
+This is a mod for Friday Night Funkin, and is a new version of the FNF with extra key support mod I made a while ago.
+
+The old Kade Engine version is still available here: https://github.com/TheZoroForce240/FNF-with-extra-keys
+
+WARNING: this mod is still pretty early in development, so expect bugs and missing features from the original mod
+
+## Some Features
+ - Better Input + rebindable keys
+ - Downscroll
+ - Middlescroll
+ - Crazy Note Customization with an interactable menu
+ - 1-9 Key Support
+ - Bunch of note types already set up
+ - Note Specfic Speed + Velocity Changes
+ - Custom Song Support (no compiling required!)
+ - Playing as the oppenent
+ - A lot of randomizaton options
+ - New Difficulty System which is based on the chart files (currently only in freeplay)
+
+## Planned Features
+ - Unhardcoding most things
+ - Documenting as much code as i can, to help noob coders understand the game better and how it works
+ - Local Multiplayer support
+ - Android Support (not guaranteed, might not happen)
+ - Editors for most things
+ - Modchart creator??
+ - Note offset menu (for note types)
+ - Changing Mania Mid Song (want to remake the system i used for it)
+ - probably some other stuff as well i forgot
+
 # Friday Night Funkin
 
 This is the repository for Friday Night Funkin, a game originally made for Ludum Dare 47 "Stuck In a Loop".
