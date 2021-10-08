@@ -413,14 +413,21 @@ class FreeplayState extends MusicBeatState
 
 		if (accepted)
 		{
-			if (FlxG.keys.pressed.CONTROL)
+			if (FlxG.keys.pressed.SHIFT)
 			{
-
+				var poop:String = CoolUtil.getSongFromJsons(songs[curSelected].songName.toLowerCase(), curDifficulty);
+				trace(poop);
+	
+				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
+				PlayState.isStoryMode = false;
+				PlayState.storyDifficulty = curDifficulty;
+				PlayState.storyWeek = songs[curSelected].week;
+				trace('CUR WEEK' + PlayState.storyWeek);
+				LoadingState.loadAndSwitchState(new ChartingState());
 			}
 			else
 			{
 				var poop:String = CoolUtil.getSongFromJsons(songs[curSelected].songName.toLowerCase(), curDifficulty);
-
 				trace(poop);
 	
 				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
@@ -511,7 +518,7 @@ class SongMetadata
 	public var week:Int = 0;
 	public var songCharacter:String = "";
 
-	public function new(song:String, week:Int, songCharacter:String)
+	public function new(song:String = "tutorial", week:Int = 0, songCharacter:String = "bf")
 	{
 		this.songName = song;
 		this.week = week;

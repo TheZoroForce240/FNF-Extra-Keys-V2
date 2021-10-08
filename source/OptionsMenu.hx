@@ -17,8 +17,8 @@ class OptionsMenu extends MusicBeatState //redo all this shit later
 	var selector:FlxText;
 	var curSelected:Int = 0;
 
-	var settings:Array<String> = ["Keybinds", 'Use Downscroll', 'Use Ghost Tapping', 'Use Note Splash', "Use Botplay", "P2 Downscroll"];
-	var settingsData:Array<Bool> = [false, SaveData.downscroll, SaveData.ghost, SaveData.noteSplash, SaveData.botplay, SaveData.P2downscroll];
+	var settings:Array<String> = ["Keybinds", 'Use Downscroll', 'Use Ghost Tapping', 'Use Note Splash', "Use Botplay", "P2 Downscroll", "multiplayer"];
+	var settingsData:Array<Bool> = [false, SaveData.downscroll, SaveData.ghost, SaveData.noteSplash, SaveData.botplay, SaveData.P2downscroll, SaveData.multiplayer];
 
 	private var grpSettings:FlxTypedGroup<Alphabet>;
 
@@ -134,10 +134,12 @@ class OptionsMenu extends MusicBeatState //redo all this shit later
 				SaveData.noteSplash = !SaveData.noteSplash;
 			case 5: 
 				SaveData.P2downscroll = !SaveData.P2downscroll;
+			case 6: 
+				SaveData.multiplayer = !SaveData.multiplayer;
 		}
 		checkArray.clear();
 		grpSettings.clear();
-		settingsData = [false, SaveData.downscroll, SaveData.ghost, SaveData.noteSplash, SaveData.botplay, SaveData.P2downscroll];
+		settingsData = [false, SaveData.downscroll, SaveData.ghost, SaveData.noteSplash, SaveData.botplay, SaveData.P2downscroll, SaveData.multiplayer];
 		for (i in 0...settings.length)
 			{
 				var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, settings[i], true, false);

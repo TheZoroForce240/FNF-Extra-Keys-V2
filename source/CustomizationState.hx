@@ -41,7 +41,7 @@ using StringTools;
 
 
 class CustomizationState extends MusicBeatState //i literally copied like half of playstate lol
-{                                               //this is probably the messiest piece of code i've ever written
+{                                               //this is probably the messiest piece of code i've ever written, even though i improved most of it, its still a mess
     var bf:Boyfriend;
     var dad:Character;
 
@@ -69,16 +69,17 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     var inMain:Bool = true;
 
     //this shit is painful, but its how i did the keybind saving, i have to do it indivually for every mania
-    var ZeroKeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
-    var OneKeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
-    var TwoKeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N4Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
-    var ThreeKeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.N4Bind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
-    var FourKeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind,FlxG.save.data.N4Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
-    var FiveKeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
-    var SixKeybindList = [FlxG.save.data.N4Bind];
-    var SevenKeybindList = [FlxG.save.data.leftBind, FlxG.save.data.rightBind];
-    var EightKeybindList = [FlxG.save.data.leftBind, FlxG.save.data.N4Bind, FlxG.save.data.rightBind];
+    /*public static var ZeroKeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
+    public static var OneKeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
+    public static var TwoKeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N4Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
+    public static var ThreeKeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.N4Bind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
+    public static var FourKeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind,FlxG.save.data.N4Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
+    public static var FiveKeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
+    public static var SixKeybindList = [FlxG.save.data.N4Bind];
+    public static var SevenKeybindList = [FlxG.save.data.leftBind, FlxG.save.data.rightBind];
+    public static var EightKeybindList = [FlxG.save.data.leftBind, FlxG.save.data.N4Bind, FlxG.save.data.rightBind];*/
 
+    //got rid of this shitty system i used
 
     var curSelected:Int = 0;
     var curSelectedNote:Int = 0;
@@ -105,7 +106,6 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
     var sliderThing:FlxSprite; //sliders are weird as fuck and i used a sprite to track the hsv, you literally have to have an object for it, idk why its coded like that, was thinking for editing it but who cares this system works
 
-
     public static var maniaToChange = 0; //the mania
 
     var keys = [false, false, false, false, false, false, false, false, false]; //tracks inputs
@@ -117,6 +117,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
     var menuList:Array<String> = ['Keybinds', 'Notes', 'Gameplay'];                           //used for creating menus
     var KeybindList:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
+    var selectedPlayer:Int = 1;
     var NotesList:Array<String> = ['Color', '', '', '', '', 'Assets','Note Scale', 'Color Presets', 'Reset Colors'];
 
     var settings:Array<String> = ['Use Downscroll', 'Use Ghost Tapping', 'Use Note Splash', "Use Botplay", "Middlescroll"];
@@ -335,7 +336,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                     {
                         case 0: 
                             curMenu = 'keybinds';
-                            infoText.text = "--Keybinds--\nClick a Note to edit its Keybind.\nFeel Free to test keybinds.\nPress R to Reset Keybinds.\nPress ESC to go Back.\nPress 1-9 to Change amount of keys.";
+                            infoText.text = "--Keybinds--\nClick a Note to edit its Keybind.\nFeel Free to test keybinds.\nPress BACKSPACE to Reset Keybinds.\nPress TAB to Change Selected Player\nSelected Player: P" + selectedPlayer + "\nPress ESC to go Back.\nPress 1-9 to Change amount of keys.";
                         case 1: 
                             for (ii in grpNotes.members)
                                 FlxTween.tween(ii, {x: 150}, 1, {ease: FlxEase.elasticInOut});
@@ -467,8 +468,17 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                     changeMania(5);
                 if (FlxG.keys.justPressed.NINE)
                     changeMania(2);
-                if (FlxG.keys.justPressed.R && curMenu == 'keybinds')
+                if (FlxG.keys.justPressed.BACKSPACE && curMenu == 'keybinds')
                     SaveData.resetBinds();
+                if (FlxG.keys.justPressed.TAB && curMenu == 'keybinds')
+                {
+                    if (selectedPlayer == 1)
+                        selectedPlayer = 0;
+                    else
+                        selectedPlayer = 1;
+                    infoText.text = "--Keybinds--\nClick a Note to edit its Keybind.\nFeel Free to test keybinds.\nPress BACKSPACE to Reset Keybinds.\nPress TAB to Change Selected Player\nSelected Player: P" + selectedPlayer + "\nPress ESC to go Back.\nPress 1-9 to Change amount of keys.";
+                    updateKeybinds();
+                }
             }
 
         }
@@ -716,27 +726,10 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
     function updateKeybinds():Void
     {
-        switch(maniaToChange) //updates the keybinds for the text
-		{
-			case 0: 
-				KeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
-			case 1: 
-				KeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
-			case 2: 
-				KeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N4Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
-			case 3: 
-				KeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.N4Bind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
-			case 4: 
-				KeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind,FlxG.save.data.N4Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
-			case 5: 
-				KeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
-			case 6: 
-				KeybindList = [FlxG.save.data.N4Bind];
-			case 7: 
-				KeybindList = [FlxG.save.data.leftBind, FlxG.save.data.rightBind];
-			case 8: 
-				KeybindList = [FlxG.save.data.leftBind, FlxG.save.data.N4Bind, FlxG.save.data.rightBind];
-        }
+        KeybindList = CoolUtil.bindCheck(maniaToChange);
+        if (selectedPlayer != 1)
+            KeybindList = CoolUtil.P2bindCheck(maniaToChange);
+
         grpKeybinds.clear();
         for (i in 0...KeybindList.length)
         {
@@ -818,7 +811,8 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         var binds:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
         var data = -1;
 		binds = CoolUtil.bindCheck(maniaToChange);
-		data = CoolUtil.arrowKeyCheck(maniaToChange, evt.keyCode);
+        if (selectedPlayer != 1)
+			binds = CoolUtil.P2bindCheck(maniaToChange);
 
         for (i in 0...binds.length) // binds
         {
@@ -839,8 +833,8 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         var data = -1;
         var binds:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind]; 
         binds = CoolUtil.bindCheck(maniaToChange);
-		data = CoolUtil.arrowKeyCheck(maniaToChange, evt.keyCode);
-        
+        if (selectedPlayer != 1)
+			binds = CoolUtil.P2bindCheck(maniaToChange);
 
         for (i in 0...binds.length) // binds
             {
@@ -852,81 +846,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                 waitingForInput = false;
                 if (key.toLowerCase() != "escape" && key.toLowerCase() != "enter" && key.toLowerCase() != "backspace")
                 {
-                    switch (maniaToChange) //i hate this
-                    {
-                        case 0: 
-                            ZeroKeybindList[curSelectedNote] = key;
-                            FlxG.save.data.leftBind = ZeroKeybindList[0];
-                            FlxG.save.data.downBind = ZeroKeybindList[1];
-                            FlxG.save.data.upBind = ZeroKeybindList[2];
-                            FlxG.save.data.rightBind = ZeroKeybindList[3];
-                            ZeroKeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
-                        case 1: 
-                            OneKeybindList[curSelectedNote] = key;
-                            FlxG.save.data.L1Bind = OneKeybindList[0];
-                            FlxG.save.data.U1Bind = OneKeybindList[1];
-                            FlxG.save.data.R1Bind = OneKeybindList[2];
-                            FlxG.save.data.L2Bind = OneKeybindList[3];
-                            FlxG.save.data.D1Bind = OneKeybindList[4];
-                            FlxG.save.data.R2Bind = OneKeybindList[5];
-                            OneKeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
-                        case 2: 
-                            TwoKeybindList[curSelectedNote] = key;
-                            FlxG.save.data.N0Bind = TwoKeybindList[0];
-                            FlxG.save.data.N1Bind = TwoKeybindList[1];
-                            FlxG.save.data.N2Bind = TwoKeybindList[2];
-                            FlxG.save.data.N3Bind = TwoKeybindList[3];
-                            FlxG.save.data.N4Bind = TwoKeybindList[4];
-                            FlxG.save.data.N5Bind = TwoKeybindList[5];
-                            FlxG.save.data.N6Bind = TwoKeybindList[6];
-                            FlxG.save.data.N7Bind = TwoKeybindList[7];
-                            FlxG.save.data.N8Bind = TwoKeybindList[8];
-                            TwoKeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N4Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
-                        case 3: 
-                            ThreeKeybindList[curSelectedNote] = key;
-                            FlxG.save.data.leftBind = ThreeKeybindList[0];
-                            FlxG.save.data.downBind = ThreeKeybindList[1];
-                            FlxG.save.data.N4Bind = ThreeKeybindList[2];
-                            FlxG.save.data.upBind = ThreeKeybindList[3];
-                            FlxG.save.data.rightBind = ThreeKeybindList[4];
-                            ThreeKeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.N4Bind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
-                        case 4: 
-                            FourKeybindList[curSelectedNote] = key;
-                            FlxG.save.data.L1Bind = FourKeybindList[0];
-                            FlxG.save.data.U1Bind = FourKeybindList[1];
-                            FlxG.save.data.R1Bind = FourKeybindList[2];
-                            FlxG.save.data.N4Bind = FourKeybindList[3];
-                            FlxG.save.data.L2Bind = FourKeybindList[4];
-                            FlxG.save.data.D1Bind = FourKeybindList[5];
-                            FlxG.save.data.R2Bind = FourKeybindList[6];
-                            FourKeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind,FlxG.save.data.N4Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
-                        case 5: 
-                            FiveKeybindList[curSelectedNote] = key;
-                            FlxG.save.data.N0Bind = FiveKeybindList[0];
-                            FlxG.save.data.N1Bind = FiveKeybindList[1];
-                            FlxG.save.data.N2Bind = FiveKeybindList[2];
-                            FlxG.save.data.N3Bind = FiveKeybindList[3];
-                            FlxG.save.data.N5Bind = FiveKeybindList[4];
-                            FlxG.save.data.N6Bind = FiveKeybindList[5];
-                            FlxG.save.data.N7Bind = FiveKeybindList[6];
-                            FlxG.save.data.N8Bind = FiveKeybindList[7];
-                            FiveKeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
-                        case 6: 
-                            SixKeybindList[curSelectedNote] = key;
-                            FlxG.save.data.N4Bind = SixKeybindList[0];
-                            SixKeybindList = [FlxG.save.data.N4Bind];
-                        case 7: 
-                            SevenKeybindList[curSelectedNote] = key;
-                            FlxG.save.data.leftBind = SevenKeybindList[0];
-                            FlxG.save.data.rightBind = SevenKeybindList[1];
-                            SevenKeybindList = [FlxG.save.data.leftBind, FlxG.save.data.rightBind];
-                        case 8: 
-                            EightKeybindList[curSelectedNote] = key;
-                            FlxG.save.data.leftBind = EightKeybindList[0];
-                            FlxG.save.data.N4Bind = EightKeybindList[1];
-                            FlxG.save.data.rightBind = EightKeybindList[2];
-                            EightKeybindList = [FlxG.save.data.leftBind, FlxG.save.data.N4Bind, FlxG.save.data.rightBind];
-                    }
+                    CoolUtil.complexAssKeybindSaving(maniaToChange, key, curSelectedNote, selectedPlayer);
                     updateKeybinds();
                     FlxG.save.flush();
                     PlayerSettings.player1.controls.loadKeyBinds();
@@ -946,9 +866,14 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         
         keys[data] = true;
 
+        switch (selectedPlayer)
+        {
+            case 0: 
+                dad.playAnim('sing' + sDir[data], true);
+            case 1: 
+                bf.playAnim('sing' + sDir[data], true);
+        }
         
-
-        bf.playAnim('sing' + sDir[data], true);
                      
     }
 

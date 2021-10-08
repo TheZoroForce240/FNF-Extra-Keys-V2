@@ -53,7 +53,12 @@ class Song
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
+
+
 		var rawJson = File.getContent(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
+
+		if (Note.MaxNoteData != 9)
+			rawJson = File.getContent(Paths.json(folder.toLowerCase() + '/' + "Fuck You")).trim();
 
 		while (!rawJson.endsWith("}"))
 		{

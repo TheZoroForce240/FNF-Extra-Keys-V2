@@ -11,6 +11,7 @@ class SaveData
     public static var botplay:Bool = false;
     public static var noteSplash:Bool = true;
     public static var middlescroll:Bool = false;
+    public static var multiplayer:Bool = false;
     /*public static var noteColors:Map<String, FlxColor> = [
         'purple' = '0x00FFFFFF',
         'blue' = '0x00FFFFFF',
@@ -75,6 +76,9 @@ class SaveData
 		if (FlxG.save.data.randomNoteTypes == null)
 			FlxG.save.data.randomNoteTypes = 0;
 
+        if (FlxG.save.data.multiplayer == null)
+			FlxG.save.data.multiplayer = false;
+
         if (FlxG.save.data.purple == null)
             FlxG.save.data.purple = [0, 0, 0, 0];
         if (FlxG.save.data.blue == null)
@@ -105,6 +109,7 @@ class SaveData
         FlxG.save.data.botplay = botplay;
         FlxG.save.data.noteSplash = noteSplash;
         FlxG.save.data.middlescroll = middlescroll;
+        FlxG.save.data.multiplayer = multiplayer;
 
         FlxG.save.data.purple = purple;
         FlxG.save.data.blue = blue;
@@ -129,6 +134,7 @@ class SaveData
         botplay = FlxG.save.data.botplay;
         noteSplash = FlxG.save.data.noteSplash;
         middlescroll = FlxG.save.data.middlescroll;
+        multiplayer = FlxG.save.data.multiplayer;
 
         purple = FlxG.save.data.purple;
         blue = FlxG.save.data.blue;
@@ -144,31 +150,19 @@ class SaveData
     public static function ResetData()
     {
         FlxG.save.data.ghost = true;
-
         FlxG.save.data.downscroll = false;
-
         FlxG.save.data.P2downscroll = false;
-
         FlxG.save.data.botplay = false;
-
         FlxG.save.data.noteSplash = true;
-
         FlxG.save.data.middlescroll = false;
-
         FlxG.save.data.randomNotes = false;
-
         FlxG.save.data.randomSection = true;
-
         FlxG.save.data.mania = 0;
-
         FlxG.save.data.randomMania = 0;
-
         FlxG.save.data.flip = false;
-
         FlxG.save.data.bothSide = false;
-
         FlxG.save.data.randomNoteTypes = 0;
-
+        FlxG.save.data.multiplayer = false;
         FlxG.save.data.purple = [0, 0, 0, 0];
         FlxG.save.data.blue = [0, 0, 0, 0];
         FlxG.save.data.green = [0, 0, 0, 0];
@@ -208,6 +202,29 @@ class SaveData
         FlxG.save.data.L2Bind = "J";
         FlxG.save.data.D1Bind = "K";
         FlxG.save.data.R2Bind = "L";
+
+        FlxG.save.data.P2upBind = "UP";
+        FlxG.save.data.P2downBind = "DOWN";
+        FlxG.save.data.P2leftBind = "LEFT";
+        FlxG.save.data.P2rightBind = "RIGHT";
+
+        FlxG.save.data.P2N0Bind = "Q";
+        FlxG.save.data.P2N1Bind = "W";
+        FlxG.save.data.P2N2Bind = "E";
+        FlxG.save.data.P2N3Bind = "R";
+        FlxG.save.data.P2N4Bind = "B";
+        FlxG.save.data.P2N5Bind = "U";
+        FlxG.save.data.P2N6Bind = "I";
+        FlxG.save.data.P2N7Bind = "O";
+        FlxG.save.data.P2N8Bind = "P";
+
+        FlxG.save.data.P2L1Bind = "Z";
+        FlxG.save.data.P2U1Bind = "X";
+        FlxG.save.data.P2R1Bind = "C";
+        FlxG.save.data.P2L2Bind = "B";
+        FlxG.save.data.P2D1Bind = "N";
+        FlxG.save.data.P2R2Bind = "M";
+
         PlayerSettings.player1.controls.loadKeyBinds();
 
         keyBindCheck();
@@ -254,6 +271,49 @@ class SaveData
                 FlxG.save.data.D1Bind = "K";
             if(FlxG.save.data.R2Bind == null)
                 FlxG.save.data.R2Bind = "L";
+
+            ////////////////////////////////////////// player 2 shit
+
+            if(FlxG.save.data.P2upBind == null)
+                FlxG.save.data.P2upBind = "UP";
+            if(FlxG.save.data.P2downBind == null)
+                FlxG.save.data.P2downBind = "DOWN";
+            if(FlxG.save.data.P2leftBind == null)
+                FlxG.save.data.P2leftBind = "LEFT";
+            if(FlxG.save.data.P2rightBind == null)
+                FlxG.save.data.P2rightBind = "RIGHT";
+            
+            if(FlxG.save.data.P2N0Bind == null)
+                FlxG.save.data.P2N0Bind = "Q";
+            if(FlxG.save.data.P2N1Bind == null)
+                FlxG.save.data.P2N1Bind = "W";
+            if(FlxG.save.data.P2N2Bind == null)
+                FlxG.save.data.P2N2Bind = "E";
+            if(FlxG.save.data.P2N3Bind == null)
+                FlxG.save.data.P2N3Bind = "R";
+            if(FlxG.save.data.P2N4Bind == null)
+                FlxG.save.data.P2N4Bind = "B";
+            if(FlxG.save.data.P2N5Bind == null)
+                FlxG.save.data.P2N5Bind = "U";
+            if(FlxG.save.data.P2N6Bind == null)
+                FlxG.save.data.P2N6Bind = "I";
+            if(FlxG.save.data.P2N7Bind == null)
+                FlxG.save.data.P2N7Bind = "O";
+            if(FlxG.save.data.P2N8Bind == null)
+                FlxG.save.data.P2N8Bind = "P";
+            
+            if(FlxG.save.data.P2L1Bind == null)
+                FlxG.save.data.P2L1Bind = "Z";
+            if(FlxG.save.data.P2U1Bind == null)
+                FlxG.save.data.P2U1Bind = "X";
+            if(FlxG.save.data.P2R1Bind == null)
+                FlxG.save.data.P2R1Bind = "C";
+            if(FlxG.save.data.P2L2Bind == null)
+                FlxG.save.data.P2L2Bind = "B";
+            if(FlxG.save.data.P2D1Bind == null)
+                FlxG.save.data.P2D1Bind = "N";
+            if(FlxG.save.data.P2R2Bind == null)
+                FlxG.save.data.P2R2Bind = "M";
         }    
     public static function updateColorArray(mania:Int):Void //its better than having shit loads of case statements for every single thing
     {

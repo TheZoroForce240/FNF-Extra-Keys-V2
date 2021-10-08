@@ -30,6 +30,8 @@ class Note extends FlxSprite
 	public var prevNote:Note;
 	public var noteType:Int = 0;
 
+	public var rawNoteData:Int = 0; //for charter
+
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
 	public var noteColor:Int;
@@ -61,6 +63,8 @@ class Note extends FlxSprite
 	public var localAngle:Float = 0; 
 	public static var frameN:Array<String> = ['purple', 'blue', 'green', 'red'];
 
+	public var playedSound:Bool = true; //for charter
+
 	var pathList:Array<String> = [
         'noteassets/NOTE_assets',
         'noteassets/PURPLE_NOTE_assets',
@@ -84,14 +88,13 @@ class Note extends FlxSprite
 	var pathToUse:Int = 0;
 	public var scaleMulti:Float = 1;
 
-
-	
 	public var changedSpeed:Bool = false;
 	public var velocityData:Array<Float>;
 	public var speedMulti:Float = 1;
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
 
+	public static var MaxNoteData:Int = 9;
 
 	public var speed:Float = 1; //yes this is happening, per note speed
 
@@ -102,17 +105,17 @@ class Note extends FlxSprite
 		pixelnoteScale = 1;
 		mania = 0;
 		if (PlayState.SONG.mania != 0)
-			{
-				mania = PlayState.SONG.mania;
-				swagWidth = noteWidths[mania];
-				noteScale = noteScales[mania];
-				pixelnoteScale = pixelNoteScales[mania];
-				
-			}
-			if (_speed == 1)
-				speed = PlayState.SongSpeed;
-			else
-				speed = _speed;
+		{
+			mania = PlayState.SONG.mania;
+			swagWidth = noteWidths[mania];
+			noteScale = noteScales[mania];
+			pixelnoteScale = pixelNoteScales[mania];
+			
+		}
+		if (_speed <= 1) //sets speed to song speed if the speed value of a note is 1 or less, just as a backup in case it becomes 0
+			speed = PlayState.SongSpeed;
+		else
+			speed = _speed;
 
 		super();
 
@@ -127,9 +130,6 @@ class Note extends FlxSprite
 
 		//speed = FlxMath.roundDecimal(FlxG.random.float(1.5, 3.8), 2);
 		speed = FlxMath.roundDecimal((speed / 0.7) * (noteScale * scaleMulti), 2); //adjusts speed based on note size
-
-		
-
 
 		x += 50;
 
@@ -158,10 +158,7 @@ class Note extends FlxSprite
 		//speedMulti = FlxMath.roundDecimal(FlxG.random.float(0.5, 2.5), 2);
 		//velocityChangeTime = FlxMath.roundDecimal(FlxG.random.float(0, 800), 2);
 
-		this.noteData = noteData % 9;
-
-
-
+		this.noteData = noteData % MaxNoteData;
 
 		regular = noteType == 0;
 		burning = noteType == 1;
@@ -654,7 +651,7 @@ class Note extends FlxSprite
 				//scaleSwitch = true;
 			}
 
-		if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped))
+		if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped) || (PlayState.multiplayer))
 		{
 			if (burning || death)
 			{

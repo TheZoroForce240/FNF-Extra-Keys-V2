@@ -130,100 +130,164 @@ class CoolUtil
 		}
 		return binds;
 	}
-	public static function arrowKeyCheck(mania:Int, keycode:Int)
-	{
-		var data = -1;
-		switch(mania)
+
+	public static function P2bindCheck(mania:Int)
 		{
-			case 0: 
-				switch(keycode) // arrow keys // why the fuck are arrow keys hardcoded it fucking breaks the controls with extra keys
-				{
-					case 37:
-						data = 0;
-					case 40:
-						data = 1;
-					case 38:
-						data = 2;
-					case 39:
-						data = 3;
-				}
-			case 1: 
-				switch(keycode) // arrow keys
-				{
-					case 37:
-						data = 3;
-					case 40:
-						data = 4;
-					case 39:
-						data = 5;
-				}
-			case 2: 
-				switch(keycode) // arrow keys
-				{
-					case 37:
-						data = 5;
-					case 40:
-						data = 6;
-					case 38:
-						data = 7;
-					case 39:
-						data = 8;
-				}
-			case 3: 
-				switch(keycode) // arrow keys
-				{
-					case 37:
-						data = 0;
-					case 40:
-						data = 1;
-					case 38:
-						data = 3;
-					case 39:
-						data = 4;
-				}
-			case 4: 
-				switch(keycode) // arrow keys
-				{
-					case 37:
-						data = 4;
-					case 40:
-						data = 5;
-					case 39:
-						data = 6;
-				}
-			case 5: 
-				switch(keycode) // arrow keys
-				{
-					case 37:
-						data = 4;
-					case 40:
-						data = 5;
-					case 38:
-						data = 6;
-					case 39:
-						data = 7;
-				}
-			case 7: 
-				switch(keycode) // arrow keys 
-				{
-					case 37:
-						data = 0;
-					case 39:
-						data = 1;
-				}
-
-			case 8: 
-				switch(keycode) // arrow keys 
-				{
-					case 37:
-						data = 0;
-					case 39:
-						data = 2;
-				}
+			var P2binds:Array<String> = [FlxG.save.data.P2leftBind,FlxG.save.data.P2downBind, FlxG.save.data.P2upBind, FlxG.save.data.P2rightBind];
+			switch(mania)
+			{
+				case 0: 
+					P2binds = [FlxG.save.data.P2leftBind,FlxG.save.data.P2downBind, FlxG.save.data.P2upBind, FlxG.save.data.P2rightBind];
+				case 1: 
+					P2binds = [FlxG.save.data.P2L1Bind, FlxG.save.data.P2U1Bind, FlxG.save.data.P2R1Bind, FlxG.save.data.P2L2Bind, FlxG.save.data.P2D1Bind, FlxG.save.data.P2R2Bind];
+				case 2: 
+					P2binds = [FlxG.save.data.P2N0Bind, FlxG.save.data.P2N1Bind, FlxG.save.data.P2N2Bind, FlxG.save.data.P2N3Bind, FlxG.save.data.P2N4Bind, FlxG.save.data.P2N5Bind, FlxG.save.data.P2N6Bind, FlxG.save.data.P2N7Bind, FlxG.save.data.P2N8Bind];
+				case 3: 
+					P2binds = [FlxG.save.data.P2leftBind,FlxG.save.data.P2downBind, FlxG.save.data.P2N4Bind, FlxG.save.data.P2upBind, FlxG.save.data.P2rightBind];
+				case 4: 
+					P2binds = [FlxG.save.data.P2L1Bind, FlxG.save.data.P2U1Bind, FlxG.save.data.P2R1Bind,FlxG.save.data.P2N4Bind, FlxG.save.data.P2L2Bind, FlxG.save.data.P2D1Bind, FlxG.save.data.P2R2Bind];
+				case 5: 
+					P2binds = [FlxG.save.data.P2N0Bind, FlxG.save.data.P2N1Bind, FlxG.save.data.P2N2Bind, FlxG.save.data.P2N3Bind, FlxG.save.data.P2N5Bind, FlxG.save.data.P2N6Bind, FlxG.save.data.P2N7Bind, FlxG.save.data.P2N8Bind];
+				case 6: 
+					P2binds = [FlxG.save.data.P2N4Bind];
+				case 7:
+					P2binds = [FlxG.save.data.P2leftBind, FlxG.save.data.P2rightBind];
+				case 8: 
+					P2binds = [FlxG.save.data.P2leftBind, FlxG.save.data.P2N4Bind, FlxG.save.data.P2rightBind];
+			}
+			return P2binds;
 		}
-		return data;
-	}
 
+	public static function complexAssKeybindSaving(maniaToChange:Int, key:String, curSelectedNote:Int, player:Int = 1) //wait shouldnt i put this in save data?? who cares lol
+	{
+		var binds = bindCheck(maniaToChange);
+		if (player != 1)
+			binds = P2bindCheck(maniaToChange);
+
+		binds[curSelectedNote] = key;
+
+		if (player == 1)
+		{
+			switch (maniaToChange) //i hate this //i fix it, am happy now
+			{
+				case 0: 
+					FlxG.save.data.leftBind = binds[0];
+					FlxG.save.data.downBind = binds[1];
+					FlxG.save.data.upBind = binds[2];
+					FlxG.save.data.rightBind = binds[3];
+				case 1: 
+					FlxG.save.data.L1Bind = binds[0];
+					FlxG.save.data.U1Bind = binds[1];
+					FlxG.save.data.R1Bind = binds[2];
+					FlxG.save.data.L2Bind = binds[3];
+					FlxG.save.data.D1Bind = binds[4];
+					FlxG.save.data.R2Bind = binds[5];
+				case 2: 
+					FlxG.save.data.N0Bind = binds[0];
+					FlxG.save.data.N1Bind = binds[1];
+					FlxG.save.data.N2Bind = binds[2];
+					FlxG.save.data.N3Bind = binds[3];
+					FlxG.save.data.N4Bind = binds[4];
+					FlxG.save.data.N5Bind = binds[5];
+					FlxG.save.data.N6Bind = binds[6];
+					FlxG.save.data.N7Bind = binds[7];
+					FlxG.save.data.N8Bind = binds[8];
+				case 3: 
+					FlxG.save.data.leftBind = binds[0];
+					FlxG.save.data.downBind = binds[1];
+					FlxG.save.data.N4Bind = binds[2];
+					FlxG.save.data.upBind = binds[3];
+					FlxG.save.data.rightBind = binds[4];
+				case 4: 
+					FlxG.save.data.L1Bind = binds[0];
+					FlxG.save.data.U1Bind = binds[1];
+					FlxG.save.data.R1Bind = binds[2];
+					FlxG.save.data.N4Bind = binds[3];
+					FlxG.save.data.L2Bind = binds[4];
+					FlxG.save.data.D1Bind = binds[5];
+					FlxG.save.data.R2Bind = binds[6];
+				case 5: 
+					FlxG.save.data.N0Bind = binds[0];
+					FlxG.save.data.N1Bind = binds[1];
+					FlxG.save.data.N2Bind = binds[2];
+					FlxG.save.data.N3Bind = binds[3];
+					FlxG.save.data.N5Bind = binds[4];
+					FlxG.save.data.N6Bind = binds[5];
+					FlxG.save.data.N7Bind = binds[6];
+					FlxG.save.data.N8Bind = binds[7];
+				case 6: 
+					FlxG.save.data.N4Bind = binds[0];
+				case 7: 
+					FlxG.save.data.leftBind = binds[0];
+					FlxG.save.data.rightBind = binds[1];
+				case 8: 
+					FlxG.save.data.leftBind = binds[0];
+					FlxG.save.data.N4Bind = binds[1];
+					FlxG.save.data.rightBind = binds[2];
+			}
+		}
+		else 
+		{
+			switch (maniaToChange) //for player 2
+			{
+				case 0: 
+					FlxG.save.data.P2leftBind = binds[0];
+					FlxG.save.data.P2downBind = binds[1];
+					FlxG.save.data.P2upBind = binds[2];
+					FlxG.save.data.P2rightBind = binds[3];
+				case 1: 
+					FlxG.save.data.P2L1Bind = binds[0];
+					FlxG.save.data.P2U1Bind = binds[1];
+					FlxG.save.data.P2R1Bind = binds[2];
+					FlxG.save.data.P2L2Bind = binds[3];
+					FlxG.save.data.P2D1Bind = binds[4];
+					FlxG.save.data.P2R2Bind = binds[5];
+				case 2: 
+					FlxG.save.data.P2N0Bind = binds[0];
+					FlxG.save.data.P2N1Bind = binds[1];
+					FlxG.save.data.P2N2Bind = binds[2];
+					FlxG.save.data.P2N3Bind = binds[3];
+					FlxG.save.data.P2N4Bind = binds[4];
+					FlxG.save.data.P2N5Bind = binds[5];
+					FlxG.save.data.P2N6Bind = binds[6];
+					FlxG.save.data.P2N7Bind = binds[7];
+					FlxG.save.data.P2N8Bind = binds[8];
+				case 3: 
+					FlxG.save.data.P2leftBind = binds[0];
+					FlxG.save.data.P2downBind = binds[1];
+					FlxG.save.data.P2N4Bind = binds[2];
+					FlxG.save.data.P2upBind = binds[3];
+					FlxG.save.data.P2rightBind = binds[4];
+				case 4: 
+					FlxG.save.data.P2L1Bind = binds[0];
+					FlxG.save.data.P2U1Bind = binds[1];
+					FlxG.save.data.P2R1Bind = binds[2];
+					FlxG.save.data.P2N4Bind = binds[3];
+					FlxG.save.data.P2L2Bind = binds[4];
+					FlxG.save.data.P2D1Bind = binds[5];
+					FlxG.save.data.P2R2Bind = binds[6];
+				case 5: 
+					FlxG.save.data.P2N0Bind = binds[0];
+					FlxG.save.data.P2N1Bind = binds[1];
+					FlxG.save.data.P2N2Bind = binds[2];
+					FlxG.save.data.P2N3Bind = binds[3];
+					FlxG.save.data.P2N5Bind = binds[4];
+					FlxG.save.data.P2N6Bind = binds[5];
+					FlxG.save.data.P2N7Bind = binds[6];
+					FlxG.save.data.P2N8Bind = binds[7];
+				case 6: 
+					FlxG.save.data.P2N4Bind = binds[0];
+				case 7: 
+					FlxG.save.data.P2leftBind = binds[0];
+					FlxG.save.data.P2rightBind = binds[1];
+				case 8: 
+					FlxG.save.data.P2leftBind = binds[0];
+					FlxG.save.data.P2N4Bind = binds[1];
+					FlxG.save.data.P2rightBind = binds[2];
+			}
+		}
+		
+	}
 	public static function numberArray(max:Int, ?min = 0):Array<Int>
 	{
 		var dumbArray:Array<Int> = [];
