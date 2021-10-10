@@ -14,8 +14,8 @@ WARNING: this mod is still pretty early in development, so expect bugs and missi
  - 1-9 Key Support
  - Bunch of note types already set up
  - Note Specfic Speed + Velocity Changes
- - Custom Song Support (no compiling required!)
- - A lot of randomizaton options
+ - Custom Song and Character Support (no compiling required!, currently pretty basic though)
+ - A lot of randomizaton options (not all are readded yet)
  - New Difficulty System which is based on the chart files (currently only in freeplay)
  - Local Multiplayer Support
 
