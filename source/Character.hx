@@ -5,7 +5,36 @@ import flixel.FlxSprite;
 import flixel.animation.FlxBaseAnimation;
 import flixel.graphics.frames.FlxAtlasFrames;
 
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+import flixel.graphics.FlxGraphic;
+import openfl.display.BitmapData;
+#end
+import haxe.Json;
+import haxe.format.JsonParser;
+
 using StringTools;
+
+typedef OffsetFile =  //just doing some basic shit rn
+{
+	var anims:Array<AnimOffsetShit>;
+	var otherOffsets:Array<OtherOffsetShit>;
+}
+typedef OtherOffsetShit = 
+{
+	var type:String;
+	var offsets:Array<Int>;
+}
+
+typedef AnimOffsetShit = 
+{
+	var anim:String; 
+	var xmlname:String;
+	var offsets:Array<Int>;
+	var frameRate:Int;
+	var loop:Bool;
+}
 
 class Character extends FlxSprite
 {
@@ -532,6 +561,55 @@ class Character extends FlxSprite
 
 				playAnim('idle');
 				addPosOffset('pos', -500, 0);
+
+			default:  	///custom character shit
+				//trying this shitty method cuz i cant get it to work lol
+				var imageGraphic = BitmapData.fromFile("assets/images/characters/" + curCharacter + "/" + curCharacter + ".png");
+				var xml = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".xml";
+				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, File.getContent(xml));
+				frames = tex;
+
+				var rawJson = File.getContent(Paths.characterJson("characters/" + curCharacter + "/offsets"));
+				if (rawJson != null)
+					trace("got raw json");
+				var json:OffsetFile = cast Json.parse(rawJson);
+				if (json != null)
+					trace("got json");
+
+				if (json.otherOffsets.length != 0 && frames != null)
+				{
+					trace("doing other offsets");
+					for (i in json.otherOffsets)
+					{
+						var type:String = i.type;
+						var offsets:Array<Int> = i.offsets; 
+						trace(type);
+						trace(offsets);
+
+						addPosOffset(type, offsets[0], offsets[1]);
+					}
+				}
+				if (json.anims.length != 0 && frames != null)
+				{
+					trace("doing anim offsets");
+					for (i in json.anims)
+					{
+						var animname:String = i.anim;
+						var xmlname:String = i.xmlname;
+						var fps:Int = i.frameRate;
+						var loop:Bool = i.loop;
+						var offsets:Array<Int> = i.offsets;
+						trace(animname);
+						trace(xmlname);
+						trace(fps);
+						trace(loop);
+						trace(offsets);
+
+						animation.addByPrefix(animname, xmlname, fps, loop);
+						addOffset(animname, offsets[0], offsets[1]);
+					}
+				}
+				trace("hopefully loaded the character"); //why is it still crashing????? AAAAAAAAAAAAAAAAAA
 		}
 
 		dance();

@@ -128,7 +128,8 @@ class Note extends FlxSprite
 		velocityData = _velocityData;
 		mustPress = _mustPress;
 
-		//speed = FlxMath.roundDecimal(FlxG.random.float(1.5, 3.8), 2);
+		if (SaveData.randomNoteSpeed)
+			speed = FlxMath.roundDecimal(FlxG.random.float(2.2, 3.8), 2);
 		speed = FlxMath.roundDecimal((speed / 0.7) * (noteScale * scaleMulti), 2); //adjusts speed based on note size
 
 		x += 50;
@@ -155,8 +156,12 @@ class Note extends FlxSprite
 			speedMulti = _velocityData[0];
 			velocityChangeTime = _velocityData[1];
 		}
-		//speedMulti = FlxMath.roundDecimal(FlxG.random.float(0.5, 2.5), 2);
-		//velocityChangeTime = FlxMath.roundDecimal(FlxG.random.float(0, 800), 2);
+		if (SaveData.randomNoteVelocity)
+		{
+			speedMulti = FlxMath.roundDecimal(FlxG.random.float(0.5, 2.5), 2);
+			velocityChangeTime = FlxMath.roundDecimal(FlxG.random.float(0, 800), 2);
+		}
+
 
 		this.noteData = noteData % MaxNoteData;
 
@@ -664,12 +669,12 @@ class Note extends FlxSprite
 			else
 			{
 				if (strumTime - Conductor.songPosition <= (145 * Conductor.timeScale)
-					&& strumTime - Conductor.songPosition >= (-166 * Conductor.timeScale))
+					&& strumTime - Conductor.songPosition >= (-145 * Conductor.timeScale))
 					canBeHit = true;
 				else
 					canBeHit = false;
 			}
-			if (strumTime - Conductor.songPosition < -166 && !wasGoodHit)
+			if (strumTime - Conductor.songPosition < -145 && !wasGoodHit)
 				tooLate = true;
 		}
 		else

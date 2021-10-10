@@ -9,6 +9,8 @@ import openfl.utils.Assets as OpenFlAssets;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
+import flixel.graphics.FlxGraphic;
+import openfl.display.BitmapData;
 #end
 
 import flash.media.Sound;
@@ -19,6 +21,9 @@ class Paths
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 
 	static var currentLevel:String;
+
+	public static var loadedImages:Array<FlxGraphic> = [];
+	public static var loadedImagePath:Array<String> = [];
 
 	static public function setCurrentLevel(name:String)
 	{
@@ -80,9 +85,9 @@ class Paths
 	}
 
 	inline static public function customChartjson(key:String, ?library:String)
-		{
-			return getPath('data/customCharts/$key.json', TEXT, library);
-		}
+	{
+		return getPath('data/customCharts/$key.json', TEXT, library);
+	}
 
 	static public function sound(key:String, ?library:String)
 	{
@@ -111,7 +116,21 @@ class Paths
 
 	inline static public function image(key:String, ?library:String)
 	{
+		/*var imageShit:FlxGraphic = checkForImage(key);
+		if (imageShit != null)
+			return imageShit;*/
+
 		return getPath('images/$key.png', IMAGE, library);
+	}
+
+	inline static public function characterJson(key:String, ?library:String)
+	{
+		return getPath('images/$key.json', TEXT, library);
+	}
+
+	inline static public function characterXml(key:String, ?library:String)
+	{
+		return getPath('images/$key.xml', TEXT, library);
 	}
 
 	inline static public function font(key:String)
@@ -121,11 +140,49 @@ class Paths
 
 	inline static public function getSparrowAtlas(key:String, ?library:String)
 	{
-		return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
+		var daImage = checkForImage(key);
+		var isCustom:Bool = true;
+		if (daImage == null)
+			isCustom = false;
+
+		if (isCustom)
+		{
+			trace("loaded custom image pog but loading custom xml");
+			return FlxAtlasFrames.fromSparrow(daImage, File.getContent('assets/images/$key.xml'));
+		}
+		else
+		{
+			trace("not a custom image lol");
+			return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
+		}
+
 	}
 
 	inline static public function getPackerAtlas(key:String, ?library:String)
 	{
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), file('images/$key.txt', library));
 	}
+
+	static private function checkForImage(path:String)
+	{
+		if(FileSystem.exists(image(path)))
+		{
+			if (!loadedImagePath.contains(path))
+			{
+				var imageGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(image(path)));
+				imageGraphic.persist = true;
+				loadedImagePath.push(path);
+				loadedImages.push(imageGraphic);
+				trace("added custom image");
+			}
+			var i = loadedImagePath.indexOf(path);
+			trace("got dat image");
+			return loadedImages[i];
+			
+
+		}
+		return null;
+	}
+
+
 }

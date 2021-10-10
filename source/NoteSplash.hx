@@ -34,7 +34,7 @@ class NoteSplash extends FlxSprite
 		this.shader = HSV.shader;
 		
 	}
-	public function makeSplash(nX:Float, nY:Float, color:Int) 
+	public function makeSplash(nX:Float, nY:Float, color:Int, playernum:Int = 1) 
 	{
 
         setPosition(nX - (102 * (Note.swagWidth / 66.5)), nY - (110 * (Note.swagWidth / 66.5)));
@@ -43,14 +43,18 @@ class NoteSplash extends FlxSprite
         
 		var colorShit:Array<Float>;
 		colorShit = SaveData.colorArray[color];
-		HSV.hue = colorShit[0];
-		HSV.saturation = colorShit[1];
-		HSV.brightness = colorShit[2];
-		HSV.update();
+		if (playernum == 1)
+		{
+			HSV.hue = colorShit[0];
+			HSV.saturation = colorShit[1];
+			HSV.brightness = colorShit[2];
+			HSV.update();
+		}
 
-		if (colorShit[3] != 1 && colorShit[3] != 2 && colorShit[3] != 3 && colorShit[3] != 4)
+
+		if ((colorShit[3] != 1 && colorShit[3] != 2 && colorShit[3] != 3 && colorShit[3] != 4) || playernum != 1)
 			animation.play(colors[color] + ' splash', true);
-		else
+		else if (playernum == 1)
 		{
 			var newColors:Array<String> = ['nonelol','purple', 'blue', 'green', 'red'];
 			animation.play(newColors[Std.int(colorShit[3])] + ' splash', true);

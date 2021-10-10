@@ -1,0 +1,16 @@
+so this engine uses new stage system i made, currently CAN'T make custom ones without hardcoding it
+
+so to start you wanna go into stagePiece.hx, and add a case for every sprite used in the stage,
+you can copy paste the examples i set up to use for your own pieces, 
+danceable stage pieces mean you can make them do something every beat (for example, play bop animation)
+
+once you done that go into playstate.hx, search for pieceArray, you should fine the big case statement
+for the stages, so firstly you wanna go up and look for the SONG.stage case statement, stick in your song name
+for your stage in case it doesnt work properly (it probably will), 
+now you wanna add in a case for your stage inside the stageCheck case statement, to do this you wanna first 
+set the stage name, then add a line for the pieceArray, in the array, you wanna stick in the stage piece names
+in the add order (it goes from left to right, this is the layering order), you can then set the stage offsets for
+each character, look at some of the other stages for examples
+
+
+also btw you dont have to use this stage system if you dont like it, just do stageExpecption = true; inside your case

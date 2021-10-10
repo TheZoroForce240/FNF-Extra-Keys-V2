@@ -189,7 +189,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         dad = new Character(100, 100, 'dad');
         add(dad);
 
-        bf = new Boyfriend(770, 450, 'bf');
+        bf = new Boyfriend(770, 450, 'bf', true, true);
         add(bf);
 
         var camPos:FlxPoint = new FlxPoint(dad.getGraphicMidpoint().x + 400, dad.getGraphicMidpoint().y);
@@ -343,13 +343,12 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                             curMenu = 'notes';
                             infoText.text = "--Note Customization--\nClick a Note to Select it.\nUse the Sliders to Change colors, \nand other options to change extra attributes.\nPress ESC to go Back.\nPress 1-9 to Change amount of keys.";
                         case 2: 
-                            for (ii in grpSettings.members)
-                                FlxTween.tween(ii, {x: 150}, 1, {ease: FlxEase.elasticInOut});
-                            curMenu = 'gameplay';
-                            infoText.text = "--Gameplay Options--\nClick an option to Toggle it.\nPress ESC to go Back.\nPress 1-9 to Change amount of keys.";
+                            openSubState(new QuickOptions());
+                            inMain = true;
                     }
-                    for (ii in grpMenuList.members)
-                        FlxTween.tween(ii, {x: 2000}, 1, {ease: FlxEase.elasticInOut});  //moves the menu text to the side
+                    if (i != 2)
+                        for (ii in grpMenuList.members)
+                            FlxTween.tween(ii, {x: 2000}, 1, {ease: FlxEase.elasticInOut});  //moves the menu text to the side
                 }
             }
             for (i in 0...NotesList.length)
@@ -478,6 +477,11 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                         selectedPlayer = 1;
                     infoText.text = "--Keybinds--\nClick a Note to edit its Keybind.\nFeel Free to test keybinds.\nPress BACKSPACE to Reset Keybinds.\nPress TAB to Change Selected Player\nSelected Player: P" + selectedPlayer + "\nPress ESC to go Back.\nPress 1-9 to Change amount of keys.";
                     updateKeybinds();
+                }
+
+                if (FlxG.keys.justPressed.C)
+                {
+                    
                 }
             }
 

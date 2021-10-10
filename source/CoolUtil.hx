@@ -73,7 +73,7 @@ class CoolUtil
 				}
 			}
 			if (easy != "")
-				sortedDiffs.push(easy);
+				sortedDiffs.push(easy); //pushes them in correct order
 			if (normal != "")
 				sortedDiffs.push(normal);
 			if (hard != "")
@@ -88,16 +88,21 @@ class CoolUtil
 			{
 				var noJson = StringTools.replace(file,".json", "");
 				var noSongName = StringTools.replace(noJson,song.toLowerCase(), "");
-				outputDiffs.push(noSongName);
+				outputDiffs.push(noSongName); //gets just the difficulty on the end of the file
 			}
 			trace(outputDiffs);
 			var textDiffs:Array<String> = [];
 			for (file in outputDiffs)
 			{
 				var fixedShit = StringTools.replace(file,"-", "");
-				textDiffs.push(fixedShit.toUpperCase());
+				textDiffs.push(fixedShit.toUpperCase()); //upper cases the difficulty to use them in the array
 			}
 			CurSongDiffs = textDiffs;
+			for (i in CurSongDiffs)
+			{
+				if (i == "")
+					i = "NORMAL"; //fixes normal
+			}
 			return song + outputDiffs[diff];
 		}
 		else 

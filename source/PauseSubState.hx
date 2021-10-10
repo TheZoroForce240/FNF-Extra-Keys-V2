@@ -88,6 +88,11 @@ class PauseSubState extends MusicBeatSubstate
 		var downP = controls.DOWN_P;
 		var accepted = controls.ACCEPT;
 
+		if (FlxG.keys.justPressed.C)
+		{
+			openSubState(new QuickOptions());
+		}
+
 		if (upP)
 		{
 			changeSelection(-1);

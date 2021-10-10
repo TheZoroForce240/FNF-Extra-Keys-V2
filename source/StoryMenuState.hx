@@ -241,6 +241,11 @@ class StoryMenuState extends MusicBeatState
 			lock.y = grpWeekText.members[lock.ID].y;
 		});
 
+		if (FlxG.keys.justPressed.C)
+			{
+				openSubState(new QuickOptions());
+			}
+
 		if (!movedBack)
 		{
 			if (!selectedWeek)

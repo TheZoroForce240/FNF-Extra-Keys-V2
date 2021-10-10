@@ -1,0 +1,3 @@
+go into assets/images/characters for the guide
+
+the system is currently pretty basic so i suggest adding them the regular way by hardcoding it inside character.hx

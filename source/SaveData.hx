@@ -5,24 +5,26 @@ import flixel.util.FlxColor;
 
 class SaveData
 {
+    public static var ghost:Bool = true;
     public static var downscroll:Bool = false;
     public static var P2downscroll:Bool = false;
-    public static var ghost:Bool = true;
     public static var botplay:Bool = false;
     public static var noteSplash:Bool = true;
     public static var middlescroll:Bool = false;
     public static var multiplayer:Bool = false;
-    /*public static var noteColors:Map<String, FlxColor> = [
-        'purple' = '0x00FFFFFF',
-        'blue' = '0x00FFFFFF',
-        'green' = '0x00FFFFFF',
-        'red' = '0x00FFFFFF',
-        'white' = '0x00FFFFFF',
-        'yellow' = '0x00FFFFFF',
-        'violet' = '0x00FFFFFF',
-        'darkred' = '0x00FFFFFF',
-        'dark' = '0x00FFFFFF'
-    ];*/                                //hue, saturation, brightness, asset
+    public static var ScrollSpeed:Float = 1;
+    public static var fps:Float = 60;
+    public static var casual:Bool = false;
+
+    public static var randomNotes:Bool = false;
+    public static var randomSection:Bool = true;
+    public static var randomNoteSpeed:Bool = false;
+    public static var randomNoteVelocity:Bool = false;
+    public static var flip:Bool = false;
+    public static var Hellchart:Bool = false;
+
+
+    //hue, saturation, brightness, asset
     public static var purple:Array<Float> = [0, 0, 0, 0];
     public static var blue:Array<Float> = [0, 0, 0, 0];
     public static var green:Array<Float> = [0, 0, 0, 0];
@@ -37,6 +39,7 @@ class SaveData
 
     public static function saveDataCheck()
     {
+        /////////////////////////////////////////////////////////
         if (FlxG.save.data.ghost == null)
 			FlxG.save.data.ghost = true;
 
@@ -55,29 +58,39 @@ class SaveData
         if (FlxG.save.data.middlescroll == null)
 			FlxG.save.data.middlescroll = false;
 
+        if (FlxG.save.data.multiplayer == null)
+			FlxG.save.data.multiplayer = false;
+
+        if (FlxG.save.data.ScrollSpeed == null || FlxG.save.data.ScrollSpeed < 1 || FlxG.save.data.ScrollSpeed > 10)
+			FlxG.save.data.ScrollSpeed = 1;
+
+        if (FlxG.save.data.fps == null || FlxG.save.data.fps < 60 || FlxG.save.data.fps > 300)
+            FlxG.save.data.fps = 60;
+
+        if (FlxG.save.data.casual == null)
+			FlxG.save.data.casual = false;
+
+        /////////////////////////////////////////////////////////////////
+
         if (FlxG.save.data.randomNotes == null)
 			FlxG.save.data.randomNotes = false;
 
 		if (FlxG.save.data.randomSection == null)
 			FlxG.save.data.randomSection = true;
 
-		if (FlxG.save.data.mania == null)
-			FlxG.save.data.mania = 0;
-
-		if (FlxG.save.data.randomMania == null)
-	    	FlxG.save.data.randomMania = 0;
-
-		if (FlxG.save.data.flip == null)
+        if (FlxG.save.data.flip == null)
 			FlxG.save.data.flip = false;
 
-		if (FlxG.save.data.bothSide == null)
-			FlxG.save.data.bothSide = false;
+        if (FlxG.save.data.randomNoteSpeed == null)
+			FlxG.save.data.randomNoteSpeed = false;
 
-		if (FlxG.save.data.randomNoteTypes == null)
-			FlxG.save.data.randomNoteTypes = 0;
+        if (FlxG.save.data.randomNoteVelocity == null)
+			FlxG.save.data.randomNoteVelocity = false;
 
-        if (FlxG.save.data.multiplayer == null)
-			FlxG.save.data.multiplayer = false;
+        if (FlxG.save.data.Hellchart == null)
+			FlxG.save.data.Hellchart = false;
+
+        //////////////////////////////////////////////////////////////
 
         if (FlxG.save.data.purple == null)
             FlxG.save.data.purple = [0, 0, 0, 0];
@@ -110,6 +123,16 @@ class SaveData
         FlxG.save.data.noteSplash = noteSplash;
         FlxG.save.data.middlescroll = middlescroll;
         FlxG.save.data.multiplayer = multiplayer;
+        FlxG.save.data.ScrollSpeed = ScrollSpeed;
+        FlxG.save.data.fps = fps;
+        FlxG.save.data.casual = casual;
+
+        FlxG.save.data.randomNotes = randomNotes;
+        FlxG.save.data.randomSection = randomSection;
+        FlxG.save.data.flip = flip;
+        FlxG.save.data.randomNoteSpeed = randomNoteSpeed;
+        FlxG.save.data.randomNoteVelocity = randomNoteVelocity;
+        FlxG.save.data.Hellchart = Hellchart;
 
         FlxG.save.data.purple = purple;
         FlxG.save.data.blue = blue;
@@ -135,6 +158,17 @@ class SaveData
         noteSplash = FlxG.save.data.noteSplash;
         middlescroll = FlxG.save.data.middlescroll;
         multiplayer = FlxG.save.data.multiplayer;
+
+        ScrollSpeed = FlxG.save.data.ScrollSpeed;
+        fps = FlxG.save.data.fps;
+        casual = FlxG.save.data.casual;
+
+        randomNotes = FlxG.save.data.randomNotes;
+        randomSection = FlxG.save.data.randomSection;
+        flip = FlxG.save.data.flip;
+        randomNoteSpeed = FlxG.save.data.randomNoteSpeed;
+        randomNoteVelocity = FlxG.save.data.randomNoteVelocity;
+        Hellchart = FlxG.save.data.Hellchart;
 
         purple = FlxG.save.data.purple;
         blue = FlxG.save.data.blue;
@@ -213,17 +247,17 @@ class SaveData
         FlxG.save.data.P2N2Bind = "E";
         FlxG.save.data.P2N3Bind = "R";
         FlxG.save.data.P2N4Bind = "B";
-        FlxG.save.data.P2N5Bind = "U";
-        FlxG.save.data.P2N6Bind = "I";
-        FlxG.save.data.P2N7Bind = "O";
-        FlxG.save.data.P2N8Bind = "P";
+        FlxG.save.data.P2N5Bind = "Y";
+        FlxG.save.data.P2N6Bind = "U";
+        FlxG.save.data.P2N7Bind = "I";
+        FlxG.save.data.P2N8Bind = "O";
 
-        FlxG.save.data.P2L1Bind = "Z";
-        FlxG.save.data.P2U1Bind = "X";
-        FlxG.save.data.P2R1Bind = "C";
-        FlxG.save.data.P2L2Bind = "B";
-        FlxG.save.data.P2D1Bind = "N";
-        FlxG.save.data.P2R2Bind = "M";
+        FlxG.save.data.P2L1Bind = "W";
+        FlxG.save.data.P2U1Bind = "E";
+        FlxG.save.data.P2R1Bind = "R";
+        FlxG.save.data.P2L2Bind = "U";
+        FlxG.save.data.P2D1Bind = "I";
+        FlxG.save.data.P2R2Bind = "O";
 
         PlayerSettings.player1.controls.loadKeyBinds();
 
@@ -294,26 +328,26 @@ class SaveData
             if(FlxG.save.data.P2N4Bind == null)
                 FlxG.save.data.P2N4Bind = "B";
             if(FlxG.save.data.P2N5Bind == null)
-                FlxG.save.data.P2N5Bind = "U";
+                FlxG.save.data.P2N5Bind = "Y";
             if(FlxG.save.data.P2N6Bind == null)
-                FlxG.save.data.P2N6Bind = "I";
+                FlxG.save.data.P2N6Bind = "U";
             if(FlxG.save.data.P2N7Bind == null)
-                FlxG.save.data.P2N7Bind = "O";
+                FlxG.save.data.P2N7Bind = "I";
             if(FlxG.save.data.P2N8Bind == null)
-                FlxG.save.data.P2N8Bind = "P";
+                FlxG.save.data.P2N8Bind = "O";
             
             if(FlxG.save.data.P2L1Bind == null)
-                FlxG.save.data.P2L1Bind = "Z";
+                FlxG.save.data.P2L1Bind = "W";
             if(FlxG.save.data.P2U1Bind == null)
-                FlxG.save.data.P2U1Bind = "X";
+                FlxG.save.data.P2U1Bind = "E";
             if(FlxG.save.data.P2R1Bind == null)
-                FlxG.save.data.P2R1Bind = "C";
+                FlxG.save.data.P2R1Bind = "R";
             if(FlxG.save.data.P2L2Bind == null)
-                FlxG.save.data.P2L2Bind = "B";
+                FlxG.save.data.P2L2Bind = "U";
             if(FlxG.save.data.P2D1Bind == null)
-                FlxG.save.data.P2D1Bind = "N";
+                FlxG.save.data.P2D1Bind = "I";
             if(FlxG.save.data.P2R2Bind == null)
-                FlxG.save.data.P2R2Bind = "M";
+                FlxG.save.data.P2R2Bind = "O";
         }    
     public static function updateColorArray(mania:Int):Void //its better than having shit loads of case statements for every single thing
     {

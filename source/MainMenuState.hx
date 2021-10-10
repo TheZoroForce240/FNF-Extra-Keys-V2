@@ -34,6 +34,8 @@ class MainMenuState extends MusicBeatState
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
 
+	var XOffset:Float = 0;
+
 	override function create()
 	{
 		#if desktop
@@ -123,6 +125,8 @@ class MainMenuState extends MusicBeatState
 		}
 
 
+
+
 		if (!selectedSomethin)
 		{
 			if (FlxG.keys.justPressed.UP)
@@ -203,7 +207,7 @@ class MainMenuState extends MusicBeatState
 
 		menuItems.forEach(function(spr:FlxSprite)
 		{
-			spr.screenCenter(X);
+			spr.x = (FlxG.width / 2) - (spr.width / 2) + XOffset;
 		});
 	}
 

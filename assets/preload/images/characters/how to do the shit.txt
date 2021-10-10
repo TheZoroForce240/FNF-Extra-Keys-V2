@@ -1,0 +1,5 @@
+make a folder for character name,
+put in spritesheet and xml,
+copy paste the offset json from the test folder and stick it into your folder,
+open it up and stick in your offsets and anim names,
+then go into data folder and put character into character list, that should be it

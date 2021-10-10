@@ -18,7 +18,7 @@ class StagePiece extends FlxSprite
     public var part:String = "stageFront";
     public var newx:Float = 0;
     public var newy:Float = 0;
-    public var dancable:Bool = false;
+    public var danceable:Bool = false;
     public static var daBeat:Int = 0;
 
 	public function new(x:Float = 0, y:Float = 0, ?piece:String = "stageFront")
@@ -57,7 +57,7 @@ class StagePiece extends FlxSprite
 
                 /////////////////////////////////////////////////////// week 2
                 case 'halloweenBG': 
-                    dancable = true;
+                    danceable = true;
                     tex = Paths.getSparrowAtlas('halloween_bg');
                     frames = tex;
                     newx = -200;
@@ -84,7 +84,7 @@ class StagePiece extends FlxSprite
 					scrollFactor.set(0.4, 0.4);
                     animation.play('drive');
                 case 'bgDancer': 
-                    dancable = true;
+                    danceable = true;
                     tex = Paths.getSparrowAtlas("limo/limoDancer");
                     frames = tex;
                     animation.addByIndices('danceLeft', 'bg dancer sketch PINK', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
@@ -106,7 +106,7 @@ class StagePiece extends FlxSprite
                     animation.addByPrefix('drive', "Limo stage", 24);
 					animation.play('drive');
                 case 'fastCar': 
-                    dancable = true;
+                    danceable = true;
                     loadGraphic(Paths.image('limo/fastCarLol'));
                     newx = -300;
                     newy = 160;
@@ -121,7 +121,7 @@ class StagePiece extends FlxSprite
 					setGraphicSize(Std.int(width * 0.8));
 					updateHitbox();
                 case 'mallUpperBoppers':
-                    dancable = true;
+                    danceable = true;
                     tex = Paths.getSparrowAtlas('christmas/upperBop');
                     frames = tex;
                     newx = -240;
@@ -144,7 +144,7 @@ class StagePiece extends FlxSprite
                     newy = -250;
                     scrollFactor.set(0.40, 0.40);
                 case 'mallBottomBoppers': 
-                    dancable = true;
+                    danceable = true;
                     tex = Paths.getSparrowAtlas('christmas/bottomBop');
                     frames = tex;
                     newx = -300;
@@ -159,7 +159,7 @@ class StagePiece extends FlxSprite
                     newy = 700;
                     active = false;
                 case 'mallSanta': 
-                    dancable = true;
+                    danceable = true;
                     tex = Paths.getSparrowAtlas('christmas/santa');
                     frames = tex;
                     newx = -840;
@@ -228,7 +228,7 @@ class StagePiece extends FlxSprite
                     newx = -100;
                     newy = 190;
                     scrollFactor.set(0.9, 0.9);
-                    dancable = true;
+                    danceable = true;
                     if (PlayState.SONG.song.toLowerCase() == 'roses')
                     {
                             getScared();
@@ -247,7 +247,26 @@ class StagePiece extends FlxSprite
                     scrollFactor.set(0.8, 0.9);
                     scale.set(6, 6);
                     antialiasing = false;
-                //////////////////////////////////////////////////////////////
+                ////////////////////////////////////////////////////////////// your own stage pieces go here
+
+                case "non-animated example": //please use these examples to copy paste for your own
+                    loadGraphic(Paths.image('file path here'));
+                    newx = -400; //x and y
+                    newy = -500;
+                    scrollFactor.set(0.2, 0.2); //scroll factor
+                    setGraphicSize(Std.int(width * 0.8)); //do this or scale.set
+                    updateHitbox();
+                    danceable = false; //danceble means it can do something every beat, set this in dance()
+                case "animated example": 
+                    tex = Paths.getSparrowAtlas('path here');
+                    frames = tex;
+                    newx = 400;
+                    newy = 200;
+                    animation.addByPrefix('idle', 'background 2', 24); //set the animations here
+                    animation.play('idle');
+                    scrollFactor.set(0.8, 0.9);
+                    scale.set(6, 6);
+                    danceable = false; //danceble means it can do something every beat, set this in dance()
             }
             
         }
@@ -265,7 +284,7 @@ class StagePiece extends FlxSprite
 	var lightningOffset:Int = 8;
     public function dance():Void //not always dance, just what the piece does every beat
         {
-            if (dancable)
+            if (danceable)
             {
                 switch (part)
                 {
