@@ -6,6 +6,8 @@ The old Kade Engine version is still available here: https://github.com/TheZoroF
 
 WARNING: this mod is still pretty early in development, so expect bugs and missing features from the original mod
 
+**Probably only works on desktop rn**
+
 ## Some Features
  - Better Input + rebindable keys
  - Downscroll
