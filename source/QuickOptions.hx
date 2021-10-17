@@ -33,14 +33,14 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
         ["Note Splash", SaveData.noteSplash, true, "Turn on the funni effect when hitting sicks"],
         ["Scroll Speed", SaveData.ScrollSpeed, false, "Change the default scroll speed (does not include notes changed by the chart)"],
         ["FPS Cap", SaveData.fps, false, "Turn up for more frames"],
-        ["Casual Mode (not added)", SaveData.casual, false, "not done yet, but will have new input system (more spammable), heal from sustains\nand no health loss from shits and bads"],
+        ["Casual Mode", SaveData.casual, true, "More Spammable Input, Heal from Sustains and no health loss from bad accuracy"],
         ["", "", false, "how did you get here"],
         ["Randomize Notes (not added)", SaveData.randomNotes, true, "what else do you think it does"],
         ["Randomization Mode (not added)", SaveData.randomSection, true, "change the mode, please just use section based it makes good charts"],
         ["Randomize Note Speed", SaveData.randomNoteSpeed, true, "yes pain"],
         ["Randomize Note Velocity", SaveData.randomNoteVelocity, true, "now its even worse"],
         ["Hellchart (not added)", SaveData.Hellchart, true, "oh fuck it gets worse"],
-        ["Play As Oppenent", SaveData.flip, true, "ok that isnt as bad"]
+        ["Play As Oppenent", SaveData.flip, true, "figure it out lol"]
     ];
 	override function create()
     {	
@@ -183,14 +183,14 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
             ["Note Splash", SaveData.noteSplash, true, "Turn on the funni effect when hitting sicks"],
             ["Scroll Speed", SaveData.ScrollSpeed, false, "Change the default scroll speed (does not include notes changed by the chart)"],
             ["FPS Cap", SaveData.fps, false, "Turn up for more frames"],
-            ["Casual Mode (not added)", SaveData.casual, false, "not done yet, but will have new input system (more spammable), heal from sustains\nand no health loss from shits and bads"],
+            ["Casual Mode", SaveData.casual, true, "More Spammable Input, Heal from Sustains and no health loss from bad accuracy"],
             ["", "", false, "how did you get here"],
             ["Randomize Notes (not added)", SaveData.randomNotes, true, "what else do you think it does"],
             ["Randomization Mode (not added)", SaveData.randomSection, true, "change the mode, please just use section based it makes good charts"],
             ["Randomize Note Speed", SaveData.randomNoteSpeed, true, "yes pain"],
             ["Randomize Note Velocity", SaveData.randomNoteVelocity, true, "now its even worse"],
             ["Hellchart (not added)", SaveData.Hellchart, true, "oh fuck it gets worse"],
-            ["Play As Oppenent", SaveData.flip, true, "ok that isnt as bad"]
+            ["Play As Oppenent", SaveData.flip, true, "figure it out lol"]
         ];
     }
 

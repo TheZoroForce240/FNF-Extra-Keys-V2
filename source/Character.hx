@@ -51,6 +51,7 @@ class Character extends FlxSprite
 	public var flip:Bool = false;
 
 
+
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false, ?flip:Bool = false)
 	{
 		super(x, y);

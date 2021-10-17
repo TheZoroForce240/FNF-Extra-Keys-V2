@@ -147,12 +147,12 @@ class Paths
 
 		if (isCustom)
 		{
-			trace("loaded custom image pog but loading custom xml");
+			//trace("loaded custom image pog");
 			return FlxAtlasFrames.fromSparrow(daImage, File.getContent('assets/images/$key.xml'));
 		}
 		else
 		{
-			trace("not a custom image lol");
+			//trace("not a custom image lol");
 			return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
 		}
 

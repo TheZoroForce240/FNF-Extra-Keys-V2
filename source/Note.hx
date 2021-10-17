@@ -17,8 +17,6 @@ class Note extends FlxSprite
 {
 	public var strumTime:Float = 0;
 	public var baseStrum:Float = 0;
-	
-	public var charterSelected:Bool = false;
 
 	public var rStrumTime:Float = 0;
 
@@ -62,8 +60,10 @@ class Note extends FlxSprite
 	public var modAngle:Float = 0;
 	public var localAngle:Float = 0; 
 	public static var frameN:Array<String> = ['purple', 'blue', 'green', 'red'];
+	var GFframeN:Array<String> = ['purple', 'blue', 'green', 'red']; //gf cant have more than 4k
 
 	public var playedSound:Bool = true; //for charter
+	public var canPlaySound:Bool = true;
 
 	var pathList:Array<String> = [
         'noteassets/NOTE_assets',
@@ -80,6 +80,7 @@ class Note extends FlxSprite
 	public static var noteScales:Array<Float> = [0.7, 0.6, 0.5, 0.65, 0.58, 0.55, 0.7, 0.7, 0.7];
 	public static var pixelNoteScales:Array<Float> = [1, 0.83, 0.7, 0.9, 0.8, 0.74, 1, 1, 1];
 	public static var noteWidths:Array<Float> = [112, 84, 66.5, 91, 77, 70, 140, 126, 119];
+	public static var sustainXOffsets:Array<Float> = [97, 84, 70, 91, 77, 78, 97, 97, 97];
 	public var sustainOffset:Float = 0;
 	public var sustainEndOffset:Float = 0;
 	public var isSustainEnd:Bool = false;
@@ -93,12 +94,19 @@ class Note extends FlxSprite
 	public var speedMulti:Float = 1;
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
+	var changedVelocityScale:Bool = false;
 
 	public static var MaxNoteData:Int = 9;
 
 	public var speed:Float = 1; //yes this is happening, per note speed
 
-	public function new(strumTime:Float, noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Float>, ?_mustPress:Bool = false, ?prevNote:Note)
+	public var isGFNote:Bool = false;
+	public var daShit:Int = 0;
+
+	public var inCharter:Bool = false;
+	var charterMulti:Int = 0;
+
+	public function new(strumTime:Float, _noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Float>, ?charter = false, ?_gfNote, ?_mustPress:Bool = false, ?prevNote:Note)
 	{
 		swagWidth = 160 * 0.7; //factor not the same as noteScale
 		noteScale = 0.7;
@@ -127,6 +135,7 @@ class Note extends FlxSprite
 
 		velocityData = _velocityData;
 		mustPress = _mustPress;
+		inCharter = charter;
 
 		if (SaveData.randomNoteSpeed)
 			speed = FlxMath.roundDecimal(FlxG.random.float(2.2, 3.8), 2);
@@ -162,8 +171,16 @@ class Note extends FlxSprite
 			velocityChangeTime = FlxMath.roundDecimal(FlxG.random.float(0, 800), 2);
 		}
 
+		
 
-		this.noteData = noteData % MaxNoteData;
+		this.noteData = _noteData % MaxNoteData;
+
+
+		isGFNote = _gfNote;
+
+		daShit = noteData;
+
+
 
 		regular = noteType == 0;
 		burning = noteType == 1;
@@ -211,7 +228,8 @@ class Note extends FlxSprite
 			colorShit = SaveData.colorArray[noteData];
 		}
 
-		pathToUse = Std.int(colorShit[3]);
+		if (!isGFNote)
+			pathToUse = Std.int(colorShit[3]);
 
 		if (pathToUse == 5)
 			style = 'pixel';
@@ -311,8 +329,6 @@ class Note extends FlxSprite
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom * pixelnoteScale * scaleMulti));
 				updateHitbox();
 			default:
-				var color:String = frameN[noteData];
-                
 				frames = Paths.getSparrowAtlas(pathList[pathToUse]);
 				for (i in 0...9)
 					{
@@ -375,7 +391,7 @@ class Note extends FlxSprite
 				updateHitbox();
 				antialiasing = true;
 		}
-		if (regular || alt)
+		if ((regular || alt) && !isGFNote)
 		{
 			HSV.hue = colorShit[0];
 			HSV.saturation = colorShit[1];
@@ -386,7 +402,24 @@ class Note extends FlxSprite
 
 
 		x += swagWidth * noteData;
-		animation.play(frameN[noteData] + 'Scroll');
+		if (inCharter) //this shit took so long to figure out, most of it is in charting state
+		{
+			if (isGFNote)
+				animation.play(GFframeN[daShit] + 'Scroll');
+			else
+			{
+				animation.play(frameN[daShit] + 'Scroll');
+			}
+		}
+		/*if (isGFNote)
+			animation.play(GFframeN[daShit + 4] + 'Scroll'); //just for chart editor
+		else if (inCharter)
+			animation.play(frameN[(daShit - 4) + PlayState.keyAmmo[mania] % 9] + 'Scroll'); //just for chart editor*/
+		else
+		{
+			animation.play(frameN[daShit] + 'Scroll');
+		}	
+			
 		noteColor = noteData;
 
 		if (isSustainNote && prevNote != null)
@@ -399,7 +432,10 @@ class Note extends FlxSprite
 
 			x += width / 2;
 
-			animation.play(frameN[noteData] + 'holdend');
+			//setGraphicSize(Std.int(width * 2));
+
+			
+			animation.play(frameN[daShit] + 'holdend');
 
 			updateHitbox();
 
@@ -410,15 +446,18 @@ class Note extends FlxSprite
 
 			if (prevNote.isSustainNote)
 			{
-				prevNote.animation.play(frameN[prevNote.noteData] + 'hold');
+				prevNote.animation.play(frameN[prevNote.daShit] + 'hold');
 				prevNote.updateHitbox();
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * speedMulti * (0.7 / (noteScale * scaleMulti));
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (noteScale * scaleMulti));
 				prevNote.updateHitbox();
 
 				prevNote.sustainOffset = Math.round(-prevNote.offset.y);
 				sustainOffset = Math.round(-offset.y);
 
 			}
+
+			//scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * speedMulti * (0.7 / (noteScale * scaleMulti));
+			//updateHitbox(); //just testin stuff
 
 
 		}
@@ -431,7 +470,7 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
-		if (animation.curAnim.name.endsWith('holdend') && prevNote.isSustainNote)
+		if ((animation.curAnim.name.endsWith('holdend') && prevNote.isSustainNote) && !isGFNote)
 		{
 			isSustainEnd = true;
 		}
@@ -685,6 +724,16 @@ class Note extends FlxSprite
 				wasGoodHit = true;
 		}
 
+		if (isGFNote)
+			if (strumTime <= Conductor.songPosition)
+				wasGoodHit = true;
+
+		if (!changedVelocityScale)
+			if (speedMulti != 0 || speedMulti != 1)
+				if ((strumTime - velocityChangeTime) <= Conductor.songPosition)
+						fixSustains();
+				
+
 		if (tooLate && !wasGoodHit)
 		{
 			if (alpha > 0.3)
@@ -694,13 +743,17 @@ class Note extends FlxSprite
 
 
 
-	public function fixSustains():Void
+	function fixSustains():Void
 	{
-		if (animation.curAnim.name.endsWith('hold') && isSustainNote)
+		if (!changedVelocityScale)
 		{
-			scale.y = 1;
-			scale.y *= Conductor.stepCrochet / 100 * 1.5 * FlxMath.roundDecimal(speed * speedMulti, 2) * (0.7 / (noteScale * scaleMulti));
-			updateHitbox();
+			changedVelocityScale = true;
+			if (animation.curAnim.name.endsWith('hold') && isSustainNote)
+				{
+					scale.y *= speedMulti;
+					updateHitbox();
+				}
 		}
+
 	} 
 }

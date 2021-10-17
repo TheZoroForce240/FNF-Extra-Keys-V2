@@ -92,7 +92,7 @@ class FreeplayState extends MusicBeatState
 					{
 						hard = file;
 					}
-					else
+					else if (file.endsWith(".json"))
 					{
 						var text:String = StringTools.replace(file, data[0].toLowerCase() + "-", "");
 						var fixedText:String = StringTools.replace(text,".json", "");
@@ -352,6 +352,7 @@ class FreeplayState extends MusicBeatState
 		{
 			if (FlxG.keys.pressed.SHIFT)
 			{
+				Main.editor = true;
 				var poop:String = CoolUtil.getSongFromJsons(songs[curSelected].songName.toLowerCase(), curDifficulty);
 				trace(poop);
 	
