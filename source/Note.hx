@@ -46,6 +46,10 @@ class Note extends FlxSprite
 	public var bob:Bool = false; //bob arrow
 	public var glitch:Bool = false; //glitch
 
+	public var normalNote:Bool = true; //just to make checking easier i guess
+	public var warningNoteType:Bool = false;
+	public var badNoteType:Bool = false;
+
 	public var noteScore:Float = 1;
 	public static var mania:Int = 0;
 
@@ -336,7 +340,7 @@ class Note extends FlxSprite
 						animation.addByPrefix(noteColors[i] + 'hold', noteColors[i] + ' hold piece'); // Hold
 						animation.addByPrefix(noteColors[i] + 'holdend', noteColors[i] + ' hold end'); // Tails
 					}
-				if (burning || death || warning || angel || bob || glitch)
+				if (!regular || !alt)
 					{
 						frames = Paths.getSparrowAtlas('noteassets/notetypes/NOTE_types');
 						switch(noteType)

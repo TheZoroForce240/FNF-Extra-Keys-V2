@@ -145,15 +145,32 @@ class Paths
 		if (daImage == null)
 			isCustom = false;
 
+		var xml:String;
+
+		if (CacheShit.xmls[key] != null)
+		{
+			xml = CacheShit.xmls[key];
+			trace("loaded xml from cache");
+		}
+		else
+		{
+			if (isCustom)
+				xml = File.getContent('assets/images/$key.xml');
+			else
+				xml = file('images/$key.xml', library);
+
+			CacheShit.SaveXml(key, xml);
+		}
+
 		if (isCustom)
 		{
 			//trace("loaded custom image pog");
-			return FlxAtlasFrames.fromSparrow(daImage, File.getContent('assets/images/$key.xml'));
+			return FlxAtlasFrames.fromSparrow(daImage, xml);
 		}
 		else
 		{
 			//trace("not a custom image lol");
-			return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
+			return FlxAtlasFrames.fromSparrow(image(key, library), xml);
 		}
 
 	}
