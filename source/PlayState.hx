@@ -1420,12 +1420,17 @@ class PlayState extends MusicBeatState
 		{
 			if (closestNotes.length > 0) //basic ass input system, it doesnt need to be complicated
 				{
-					var daNote = closestNotes[0];
-		
+					//var daNote = closestNotes[0];
+
+					/*for (daNote in closestNotes)
+					{
 						if (daNote.noteData == data)
-							goodNoteHit(daNote, playernum);
+							goodNoteHit(daNote, playernum); //ok its just gonna be this lol, it makes spamming way too easy, so i reduced the hit timings for balancing
+					}*/
 		
-						if (closestNotes.length > 1) // gets rid of silly stacked notes
+						
+		
+						/*if (closestNotes.length > 1) // gets rid of silly stacked notes
 						{							 
 							for (i in 0...closestNotes.length)
 							{
@@ -1437,7 +1442,45 @@ class PlayState extends MusicBeatState
 									removeNote(sillyNote);
 								}
 							}
+						}*/
+
+					//time to redo this lol
+					var daNote = closestNotes[0];
+
+					if (daNote.noteData == data)
+						goodNoteHit(daNote);
+
+					if (closestNotes.length > 1)
+					{
+						var nextNote = closestNotes[1];
+
+						if (nextNote.noteData == daNote.noteData)
+							goodNoteHit(nextNote);
+
+						else
+						{
+							for (shitNote in closestNotes)
+							{
+								if (shitNote.strumTime == daNote.strumTime)
+								{
+									if (shitNote.noteData == data)
+										goodNoteHit(shitNote);
+								}
+								else if ((!shitNote.isSustainNote && (shitNote.strumTime - daNote.strumTime) < 35) && shitNote.noteData == daNote.noteData)
+								{
+									goodNoteHit(shitNote);
+								}
+								else
+								{
+									if (shitNote.noteData == data)
+										goodNoteHit(shitNote);
+								}
+							}
+		
 						}
+
+
+					}
 				}
 				else if (!SaveData.ghost && songStarted && !grace)
 				{

@@ -184,17 +184,15 @@ class Paths
 	{
 		if(FileSystem.exists(image(path)))
 		{
-			if (!loadedImagePath.contains(path))
+			if (CacheShit.images[path] == null)
 			{
 				var imageGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(image(path)));
 				imageGraphic.persist = true;
-				loadedImagePath.push(path);
-				loadedImages.push(imageGraphic);
+				CacheShit.images[path] = imageGraphic;
 				trace("added custom image");
 			}
-			var i = loadedImagePath.indexOf(path);
 			trace("got dat image");
-			return loadedImages[i];
+			return CacheShit.images[path];
 			
 
 		}
