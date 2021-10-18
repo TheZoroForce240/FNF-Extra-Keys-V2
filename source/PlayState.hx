@@ -68,10 +68,29 @@ import Shaders;
 import ModchartUtil;
 
 #if sys
+import sys.io.File;
+import sys.FileSystem;
 import flash.media.Sound;
 #end
 
 using StringTools;
+
+typedef Stages = 
+{
+	var stageList:Array<StageFile>;
+}
+typedef StageFile = 
+{
+	var name:String;
+	var camZoom:Float;
+	var pieceArray:Array<String>;
+	var offsets:Array<StageOffset>;
+}
+typedef StageOffset = 
+{
+	var type:String;
+	var offsets:Array<Int>;
+}
 
 class PlayState extends MusicBeatState
 {
@@ -576,7 +595,7 @@ class PlayState extends MusicBeatState
 				}
 		}
 		
-		ColorPresets.setColors(dad.curCharacter, mania);
+		ColorPresets.setColors(dad, mania);
 
 		
 
@@ -878,8 +897,38 @@ class PlayState extends MusicBeatState
 					defaultCamZoom = 0.9;
 					curStage = "stage";
 					pieceArray = ['stageBG', 'stageFront', 'stageCurtains'];
+				default: 
+					var stageList:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
+					if (!stageList.contains(stage))
+						return;
+
+					curStage = stage;
+					var rawJson = File.getContent("assets/data/customStages.json");
+					var json:Stages = cast Json.parse(rawJson);
+
+					if (json.stageList.length != 0)
+						for (i in json.stageList)
+							if (i.name == stage)
+							{
+								pieceArray = i.pieceArray;
+								defaultCamZoom = i.camZoom;
+
+								if (i.offsets.length != 0)
+									for (ii in i.offsets)
+									{
+										var type:String = ii.type;
+										var offsets:Array<Int> = ii.offsets; 
+										addStageOffset(type, offsets[0], offsets[1]);
+									}
+								break;
+							}
+
 			}
 			/////////////////////////////////////////////////////////////////////////////
+		}
+	public function addStageOffset(name:String, x:Float = 0, y:Float = 0)
+		{
+			stageOffsets[name] = [x, y];
 		}
 
 	function schoolIntro(?dialogueBox:DialogueBox):Void
@@ -1201,6 +1250,9 @@ class PlayState extends MusicBeatState
 			return null;
 		}
 
+	public var closestNotes:Array<Note> = [];
+	public var P2closestNotes:Array<Note> = [];
+
 	/////////////////////////////////////////////////////////// input code - originally from kade engine, i modified it a bit
 	private function releaseInput(evt:KeyboardEvent):Void
 	{
@@ -1253,8 +1305,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public var closestNotes:Array<Note> = [];
-	public var P2closestNotes:Array<Note> = [];
+
 
 	private function handleInput(evt:KeyboardEvent):Void 
 	{
@@ -1307,187 +1358,9 @@ class PlayState extends MusicBeatState
 				keys[data] = true;
 		}
 		if (!SaveData.casual)
-		{
-			var hittableNotes = [];
-			switch(playernum)
-			{
-				case 0: 
-					for(i in P2closestNotes)
-						if (i.noteData == data)
-							hittableNotes.push(i);
-				case 1: 
-					for(i in closestNotes)
-						if (i.noteData == data)
-							hittableNotes.push(i);
-			}
-
-	
-	
-			if (hittableNotes.length != 0)
-			{
-				var daNote = null;
-	
-				for (i in hittableNotes)
-					if (!i.isSustainNote)
-					{
-						daNote = i;
-						break;
-					}
-	
-				if (daNote == null)
-					return;
-	
-				if (hittableNotes.length > 1) // gets rid of stacked notes
-				{
-					for (i in 0...hittableNotes.length)
-					{
-						if (i == 0)
-							continue;
-						var note = hittableNotes[i];
-						if (!note.isSustainNote && (note.strumTime - daNote.strumTime) < 10)
-						{
-							removeNote(note);
-						}
-					}
-				}
-	
-				goodNoteHit(daNote, playernum);
-			}
-			else if (!SaveData.ghost && songStarted && !grace)
-			{
-				trace("you mispressed you dumbass");
-				missPress(data, playernum);
-			}
-		}
-		//else		//testin new input systems (want a more spammable one for casual mode)
-		//{
-			/*closestNotes = [];
-
-			P1notes.forEachAlive(function(daNote:Note)
-			{
-				if (daNote.canBeHit && daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit)
-					closestNotes.push(daNote);
-			}); // Collect notes that can be hit
-			closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
-
-			if (closestNotes.length > 0)
-				{
-					var daNote = closestNotes[0];
-
-					if (closestNotes.length >= 2)
-					{
-						if (closestNotes[0].strumTime == closestNotes[1].strumTime)
-						{
-							for (coolNote in closestNotes)
-							{
-								if (coolNote.noteData == data)
-									goodNoteHit(coolNote);
-							}
-						}
-						else if (closestNotes[0].noteData == closestNotes[1].noteData)
-						{
-							if (daNote.noteData == data)
-								goodNoteHit(daNote);
-						}
-						else
-						{
-							for (coolNote in closestNotes)
-							{
-								if (coolNote.noteData == data)
-									goodNoteHit(coolNote);
-							}
-						}
-					}
-					else // regular notes?
-					{
-						if (daNote.noteData == data)
-							goodNoteHit(daNote);
-					}
-
-					if (daNote.wasGoodHit)
-					{
-						removeNote(daNote);
-					}
-				}
-				else if (!SaveData.ghost && songStarted && !grace)
-					{
-						noteMiss(data, null);
-					}
-		}*/
-
-
+			normalInputSystem(data, playernum);
 		else
-		{
-			if (closestNotes.length > 0) //basic ass input system, it doesnt need to be complicated
-				{
-					//var daNote = closestNotes[0];
-
-					/*for (daNote in closestNotes)
-					{
-						if (daNote.noteData == data)
-							goodNoteHit(daNote, playernum); //ok its just gonna be this lol, it makes spamming way too easy, so i reduced the hit timings for balancing
-					}*/
-		
-						
-		
-						/*if (closestNotes.length > 1) // gets rid of silly stacked notes
-						{							 
-							for (i in 0...closestNotes.length)
-							{
-								if (i == 0)
-									continue;
-								var sillyNote = closestNotes[i]; 
-								if ((!sillyNote.isSustainNote && (sillyNote.strumTime - daNote.strumTime) < 20) && sillyNote.noteData == daNote.noteData)
-								{
-									removeNote(sillyNote);
-								}
-							}
-						}*/
-
-					//time to redo this lol
-					var daNote = closestNotes[0];
-
-					if (daNote.noteData == data)
-						goodNoteHit(daNote);
-
-					if (closestNotes.length > 1)
-					{
-						var nextNote = closestNotes[1];
-
-						if (nextNote.noteData == daNote.noteData)
-							goodNoteHit(nextNote);
-
-						else
-						{
-							for (shitNote in closestNotes)
-							{
-								if (shitNote.strumTime == daNote.strumTime)
-								{
-									if (shitNote.noteData == data)
-										goodNoteHit(shitNote);
-								}
-								else if ((!shitNote.isSustainNote && (shitNote.strumTime - daNote.strumTime) < 35) && shitNote.noteData == daNote.noteData)
-								{
-									goodNoteHit(shitNote);
-								}
-								else
-								{
-									if (shitNote.noteData == data)
-										goodNoteHit(shitNote);
-								}
-							}
-		
-						}
-
-
-					}
-				}
-				else if (!SaveData.ghost && songStarted && !grace)
-				{
-					trace("you mispressed you dumbass");
-					missPress(data, playernum);
-				}
-		}
+			casualInputSystem(data, playernum);
 
 
 		
@@ -1496,6 +1369,111 @@ class PlayState extends MusicBeatState
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////
 
+	function normalInputSystem(data:Int, playernum:Int)
+	{
+		var hittableNotes = [];
+		switch(playernum)
+		{
+			case 0: 
+				for(i in P2closestNotes)
+					if (i.noteData == data)
+						hittableNotes.push(i);
+			case 1: 
+				for(i in closestNotes)
+					if (i.noteData == data)
+						hittableNotes.push(i);
+		}
+
+		if (hittableNotes.length != 0)
+		{
+			var daNote = null;
+
+			for (i in hittableNotes)
+				if (!i.isSustainNote)
+				{
+					daNote = i;
+					break;
+				}
+
+			if (daNote == null)
+				return;
+
+			if (hittableNotes.length > 1) // gets rid of stacked notes
+			{
+				for (i in 0...hittableNotes.length)
+				{
+					if (i == 0)
+						continue;
+					var note = hittableNotes[i];
+					if (!note.isSustainNote && (note.strumTime - daNote.strumTime) < 10)
+					{
+						removeNote(note);
+					}
+				}
+			}
+
+			goodNoteHit(daNote, playernum);
+		}
+		else if (!SaveData.ghost && songStarted && !grace)
+		{
+			trace("you mispressed you dumbass");
+			missPress(data, playernum);
+		}
+	}
+	function casualInputSystem(data:Int, playernum:Int)
+	{
+		if (closestNotes.length > 0) //basic ass input system, it doesnt need to be complicated
+			{
+
+				//time to redo this lol
+				var daNote = closestNotes[0];
+
+				if (daNote.noteData == data)
+					goodNoteHit(daNote, playernum);
+
+				if (closestNotes.length > 1)
+				{
+					var nextNote = closestNotes[1];
+
+					if (nextNote.noteData != daNote.noteData)
+					{
+						for (shitNote in closestNotes)
+						{
+							if (shitNote.strumTime == daNote.strumTime)
+							{
+								if (shitNote.noteData == data)
+									goodNoteHit(shitNote, playernum);
+							}
+							else if ((!shitNote.isSustainNote && (shitNote.strumTime - daNote.strumTime) < 35) && shitNote.noteData == daNote.noteData)
+							{
+								goodNoteHit(shitNote, playernum);
+							}
+							else
+							{
+								if (shitNote.noteData == data)
+									goodNoteHit(shitNote, playernum);
+							}
+						}
+	
+					}
+					else if (nextNote.noteData == daNote.noteData)
+					{
+						if (!nextNote.isSustainNote && ((nextNote.strumTime - daNote.strumTime) < 35))
+						{
+							goodNoteHit(nextNote, playernum);
+						}
+					}
+					
+
+
+				}
+			}
+			else if (!SaveData.ghost && songStarted && !grace)
+			{
+				trace("you mispressed you dumbass");
+				missPress(data, playernum);
+			}
+	}
 	var songStarted = false;
 	function startSong():Void
 	{
@@ -1962,11 +1940,9 @@ class PlayState extends MusicBeatState
 			removeNote(daNote, strums);
 		else if (MustPress && (TooLate && !WasGoodHit))
 		{
-			switch (daNote.noteType)
+			if (daNote.normalNote)
 			{
-				case 0 | 5: //normal and alt anim note
-				{
-					if (IsSustainNote && WasGoodHit) //to 100% make sure the sustain is gone
+				if (IsSustainNote && WasGoodHit) //to 100% make sure the sustain is gone
 					{
 						daNote.kill();
 						removeNote(daNote, strums);
@@ -1976,38 +1952,24 @@ class PlayState extends MusicBeatState
 						vocals.volume = 0;
 						noteMiss(NoteData, daNote, playernum);								
 					}
-
-					removeNote(daNote, strums);
-				}
-				case 1: //fire notes - makes missing them not count as one
+				removeNote(daNote, strums);
+			}
+			else if (daNote.badNoteType)
+			{
+				removeNote(daNote, strums);
+			}
+			else if (daNote.warningNoteType)
+			{
+				misses++;
+				badNoteHit();
+				removeNote(daNote, strums);
+				switch (daNote.noteType)
 				{
-					removeNote(daNote, strums);
-				}
-				case 2: //halo notes, same as fire
-				{
-					removeNote(daNote, strums);
-				}
-				case 3:  //warning notes, removes half health and then removed so it doesn't repeatedly deal damage
-				{
-					health -= 1;
-					vocals.volume = 0;
-					misses++;
-					badNoteHit();
-					removeNote(daNote, strums);
-				}
-				case 4: //angel notes
-				{
-					removeNote(daNote, strums);
-				}
-				case 6:  //bob notes
-				{
-					removeNote(daNote, strums);
-				}
-				case 7: //gltich notes
-				{
-					HealthDrain();
-					misses++;
-					removeNote(daNote, strums);
+					case 3: //regular warning note
+						health -= 1;
+						vocals.volume = 0;
+					case 7: //glitch note
+						HealthDrain();
 				}
 			}
 		}
@@ -2034,7 +1996,8 @@ class PlayState extends MusicBeatState
 			if (daNote.alt)
 				altAnim = '-alt';
 
-			cpu.playAnim('sing' + sDir[NoteData] + altAnim, true);
+			if (!daNote.badNoteType)
+				cpu.playAnim('sing' + sDir[NoteData] + altAnim, true);
 
 			if (flipped)
 			{
@@ -2042,7 +2005,8 @@ class PlayState extends MusicBeatState
 				{
 					if (Math.abs(NoteData) == spr.ID)
 					{
-						spr.playAnim('confirm', true, spr.ID);
+						if (!daNote.badNoteType)
+							spr.playAnim('confirm', true, spr.ID);
 					}
 				});
 			}
@@ -2052,18 +2016,18 @@ class PlayState extends MusicBeatState
 				{
 					if (Math.abs(NoteData) == spr.ID)
 					{
-						spr.playAnim('confirm', true, spr.ID);
+						if (!daNote.badNoteType)
+							spr.playAnim('confirm', true, spr.ID);
 					}
 				});
 			}
-
-			cpu.holdTimer = 0;
+			if (!daNote.badNoteType)
+				cpu.holdTimer = 0;
 
 			if (SONG.needsVoices)
 				vocals.volume = 1;
 
 			daNote.active = false;
-
 
 			removeNote(daNote, strums);
 		}

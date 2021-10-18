@@ -16,10 +16,15 @@ import haxe.format.JsonParser;
 
 using StringTools;
 
-typedef OffsetFile =  //just doing some basic shit rn
+typedef OffsetFile =
 {
 	var anims:Array<AnimOffsetShit>;
 	var otherOffsets:Array<OtherOffsetShit>;
+	var flip:Bool;
+	var scale:Float;
+	var aa:Bool;
+	var arrowColorShit:ArrowColors;
+	var healthBar:RGB;
 }
 typedef OtherOffsetShit = 
 {
@@ -36,6 +41,27 @@ typedef AnimOffsetShit =
 	var loop:Bool;
 }
 
+typedef ArrowColors = 
+{
+    var purple:Array<Float>;
+    var blue:Array<Float>;
+    var green:Array<Float>;
+    var red:Array<Float>;
+    var white:Array<Float>;
+    var yellow:Array<Float>;
+    var violet:Array<Float>;
+    var darkred:Array<Float>;
+    var dark:Array<Float>;
+}
+
+typedef RGB = 
+{
+	var red:Int;
+	var green:Int;
+	var blue:Int;
+}
+
+
 class Character extends FlxSprite
 {
 	public var animOffsets:Map<String, Array<Dynamic>>;
@@ -50,7 +76,17 @@ class Character extends FlxSprite
 
 	public var flip:Bool = false;
 
+	public var purple:Array<Float> = [0, 0, 0, 0]; //all 0 means no hsv change + default assets
+    public var blue:Array<Float> = [0, 0, 0, 0];
+    public var green:Array<Float> = [0, 0, 0, 0];
+    public var red:Array<Float> = [0, 0, 0, 0];
+    public var white:Array<Float> = [0, 0, 0, 0];
+    public var yellow:Array<Float> = [0, 0, 0, 0];
+    public var violet:Array<Float> = [0, 0, 0, 0];
+    public var darkred:Array<Float> = [0, 0, 0, 0];
+    public var dark:Array<Float> = [0, 0, 0, 0];
 
+	public var healthColors:Array<Int> = [255, 0, 0]; //rgb, so default is set to red
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false, ?flip:Bool = false)
 	{
@@ -564,13 +600,34 @@ class Character extends FlxSprite
 				addPosOffset('pos', -500, 0);
 
 			default:  	///custom character shit
-				//trying this shitty method cuz i cant get it to work lol
-				var imageGraphic = BitmapData.fromFile("assets/images/characters/" + curCharacter + "/" + curCharacter + ".png");
-				var xml = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".xml";
-				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, File.getContent(xml));
+				var imagePath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".png";
+				var imageGraphic:FlxGraphic;
+
+				if (CacheShit.images[imagePath] != null)	//check if image is stored in cache
+					imageGraphic = CacheShit.images[imagePath];
+				else
+				{
+					imageGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(imagePath));
+					imageGraphic.persist = true;
+					CacheShit.SaveImage(imagePath, imageGraphic);
+				}
+
+				var xmlPath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".xml";
+				var xml:String;
+
+				if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
+					xml = CacheShit.xmls[xmlPath];
+				else
+				{
+					xml = File.getContent(xmlPath);
+					CacheShit.SaveXml(xmlPath, xml);
+				}
+					
+
+				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml);
 				frames = tex;
 
-				var rawJson = File.getContent(Paths.characterJson("characters/" + curCharacter + "/offsets"));
+				var rawJson = File.getContent(Paths.imageJson("characters/" + curCharacter + "/offsets"));
 				if (rawJson != null)
 					trace("got raw json");
 				var json:OffsetFile = cast Json.parse(rawJson);
@@ -610,6 +667,26 @@ class Character extends FlxSprite
 						addOffset(animname, offsets[0], offsets[1]);
 					}
 				}
+				flip = json.flip;
+				scale.set(json.scale, json.scale);
+				antialiasing = json.aa;
+
+				var colors = json.arrowColorShit;
+
+				purple = colors.purple;
+				blue = colors.blue;
+				green = colors.green;
+				red = colors.red;
+				white = colors.white;
+				yellow = colors.yellow;
+				violet = colors.violet;
+				darkred = colors.darkred;
+				dark = colors.dark;
+
+				var color = json.healthBar;
+				healthColors = [color.red, color.green, color.blue];
+					
+
 				trace("hopefully loaded the character"); //why is it still crashing????? AAAAAAAAAAAAAAAAAA
 		}
 

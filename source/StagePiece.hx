@@ -12,7 +12,70 @@ import lime.utils.Assets;
 import flixel.util.FlxTimer;
 import flixel.system.FlxSound;
 
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+import flixel.graphics.FlxGraphic;
+import openfl.display.BitmapData;
+#end
+import haxe.Json;
+import haxe.format.JsonParser;
+
 using StringTools;
+
+typedef PieceFile = 
+{
+	var position:Array<Float>; //regular stuff
+	var scale:Float;
+	var flip:Bool;
+    var scrollFactor:Array<Float>;
+    var aa:Bool;
+
+    var isAnimated:Bool; //animated shit
+    var anims:Array<PieceAnims>;
+    var animToPlay:String;
+
+    var isDanceable:Bool; //mainly for background bopping sprites
+    var animToPlayOnDance:String;
+
+    //var animChangeEvents:Array<AnimChanges>; //extra stuff you can do
+    //var posChangeEvents:Array<PosChanges>;  //will add these later
+}
+
+typedef PieceAnims = 
+{
+	var anim:String; 
+	var xmlname:String;
+	var frameRate:Int;
+	var loop:Bool;
+}
+
+typedef AnimChanges = 
+{
+    var step:Int;
+    var animToPlay:String;
+}
+typedef PosChanges = 
+{
+    var step:Int;
+    var pos:Array<Float>;
+    var angle:Float;
+
+    var songSpecific:Bool;
+    var songsToPlayEvent:Array<String>;
+
+    var useTween:Bool;
+    var tweenData:Array<TweenShit>;
+}
+
+typedef TweenShit = 
+{
+    var time:Float;
+    var ease:FlxEase;
+}
 
 class StagePiece extends FlxSprite
 {
@@ -36,6 +99,10 @@ class StagePiece extends FlxSprite
 	var trainCooldown:Int = 0;
     var startedMoving:Bool = false;
     var trainSound:FlxSound;
+
+    public var hasEvents:Bool = false;
+
+    var danceAnim:String = "Bop";
 
 	public function new(x:Float = 0, y:Float = 0, ?piece:String = "stageFront")
         {
@@ -332,7 +399,7 @@ class StagePiece extends FlxSprite
                     scrollFactor.set(0.8, 0.9);
                     scale.set(6, 6);
                     antialiasing = false;
-                ////////////////////////////////////////////////////////////// your own stage pieces go here
+                ////////////////////////////////////////////////////////////// your own HARDCODED stage pieces go here
 
                 case "non-animated example": //please use these examples to copy paste for your own
                     loadGraphic(Paths.image('file path here'));
@@ -355,6 +422,70 @@ class StagePiece extends FlxSprite
 
                 ///////REMINDER TO MAKE SURE SOMETHING IS DANCEABLE BEFORE COMPLAINING ABOUT IT NOT WORKING
                 //////I FORGOT ABOUT IT BEFORE AS WELL
+
+
+
+                default: 
+                    var rawJson = File.getContent(Paths.imageJson("customStagePieces/" + part + "/data"));
+
+				    var json:PieceFile = cast Json.parse(rawJson);
+
+                    var imagePath = "assets/images/customStagePieces/" + part + "/" + part + ".png";
+                    var imageGraphic:FlxGraphic;
+
+                    if (CacheShit.images[imagePath] != null)	//check if image is stored in cache
+                        imageGraphic = CacheShit.images[imagePath];
+                    else
+                    {
+                        imageGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(imagePath));
+                        imageGraphic.persist = true;
+                        CacheShit.SaveImage(imagePath, imageGraphic);
+                    }
+
+                    if (json.isAnimated)
+                    {
+                        var xmlPath = "assets/images/customStagePieces/" + part + "/" + part + ".xml";
+                        var xml:String;
+    
+                        if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
+                            xml = CacheShit.xmls[xmlPath];
+                        else
+                        {
+                            xml = File.getContent(xmlPath);
+                            CacheShit.SaveXml(xmlPath, xml);
+                        }
+                        var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml);
+                        frames = tex;
+
+                        if (json.anims.length != 0 && frames != null)
+                        {
+                            for (i in json.anims)
+                            {
+                                var animname:String = i.anim;
+                                var xmlname:String = i.xmlname;
+                                var fps:Int = i.frameRate;
+                                var loop:Bool = i.loop;
+        
+                                animation.addByPrefix(animname, xmlname, fps, loop);
+                            }
+                            animation.play(json.animToPlay); 
+                        }
+                    }
+                    else
+                    {
+                        loadGraphic(imageGraphic);
+                    }
+                    flipX = json.flip;
+                    antialiasing = json.aa;
+                    newx = json.position[0];
+                    newy = json.position[1];
+                    scale.set(json.scale, json.scale);
+                    scrollFactor.set(json.scrollFactor[0], json.scrollFactor[1]);
+                    danceable = json.isDanceable;
+                    danceAnim = json.animToPlayOnDance;
+
+
+
             }
             
         }
@@ -402,6 +533,8 @@ class StagePiece extends FlxSprite
                                 trainCooldown = FlxG.random.int(-4, 0);
                                 trainStart();
                             }
+                    default: 
+                        animation.play(danceAnim, true);
 
 
                 }

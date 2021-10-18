@@ -30,5 +30,10 @@ class CacheShit
         xmls[name] = xmlString;
     }
 
+    public static function SaveImage(name:String, image:FlxGraphic)
+    {
+        images[name] = image;
+    }
+
 
 }

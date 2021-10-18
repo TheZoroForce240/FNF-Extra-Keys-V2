@@ -57,9 +57,9 @@ class ColorPresets
                 ccolorArray = [purple, white, red];
         }
     }
-    public static function setColors(character:String, mania:Int)
+    public static function setColors(character:Character, mania:Int)
     {
-        switch (character)
+        switch (character.curCharacter)
         {
             case 'senpai' | 'senpai-angry' | 'spirit':
                 purple = [0,0,0,5];
@@ -72,15 +72,15 @@ class ColorPresets
                 darkred = [0,0,0,5];
                 dark = [0,0,0,5];
             default: 
-                purple = [0,0,0,0];
-                blue = [0,0,0,0];
-                green = [0,0,0,0];
-                red = [0,0,0,0];
-                white = [0,0,0,0];
-                yellow = [0,0,0,0];
-                violet = [0,0,0,0];
-                darkred = [0,0,0,0];
-                dark = [0,0,0,0];
+                purple = character.purple;
+                blue = character.blue;
+                green = character.green;
+                red = character.red;
+                white = character.white;
+                yellow = character.yellow;
+                violet = character.violet;
+                darkred = character.darkred;
+                dark = character.dark;
         }
         ColorPresets.fixColorArray(mania);
     }

@@ -449,12 +449,12 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                 }
             if (!waitingForInput)
             {
-                if (FlxG.keys.justPressed.ONE) //switching the mania
+                /*if (FlxG.keys.justPressed.ONE) //switching the mania
                     changeMania(6);
                 if (FlxG.keys.justPressed.TWO)
                     changeMania(7);
                 if (FlxG.keys.justPressed.THREE)
-                    changeMania(8);
+                    changeMania(8);*/ //temp disable due to crash
                 if (FlxG.keys.justPressed.FOUR)
                     changeMania(0);
                 if (FlxG.keys.justPressed.FIVE)

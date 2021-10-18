@@ -747,12 +747,15 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 		{
 			canBeHit = false;
 
-			if (strumTime <= Conductor.songPosition)
+			if (strumTime <= Conductor.songPosition && !badNoteType)
 				wasGoodHit = true;
 		}
 
 		if (isGFNote)
 			if (strumTime <= Conductor.songPosition)
+				wasGoodHit = true;
+		else if (badNoteType)
+			if (strumTime - Conductor.songPosition < -300) //so note types go past the strumline before removed
 				wasGoodHit = true;
 
 		if (!changedVelocityScale)

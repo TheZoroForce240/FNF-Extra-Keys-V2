@@ -123,12 +123,12 @@ class Paths
 		return getPath('images/$key.png', IMAGE, library);
 	}
 
-	inline static public function characterJson(key:String, ?library:String)
+	inline static public function imageJson(key:String, ?library:String)
 	{
 		return getPath('images/$key.json', TEXT, library);
 	}
 
-	inline static public function characterXml(key:String, ?library:String)
+	inline static public function imageXml(key:String, ?library:String)
 	{
 		return getPath('images/$key.xml', TEXT, library);
 	}
