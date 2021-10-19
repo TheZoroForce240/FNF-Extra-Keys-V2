@@ -1398,17 +1398,14 @@ class PlayState extends MusicBeatState
 			if (daNote == null)
 				return;
 
-			if (hittableNotes.length > 1) // gets rid of stacked notes
+			if (hittableNotes.length > 1)
 			{
-				for (i in 0...hittableNotes.length)
+				for (shitNote in hittableNotes)
 				{
-					if (i == 0)
-						continue;
-					var note = hittableNotes[i];
-					if (!note.isSustainNote && (note.strumTime - daNote.strumTime) < 10)
-					{
-						removeNote(note);
-					}
+					if (shitNote.strumTime == daNote.strumTime)
+						goodNoteHit(shitNote, playernum);
+					else if ((!shitNote.isSustainNote && (shitNote.strumTime - daNote.strumTime) < 35))
+						goodNoteHit(shitNote, playernum);
 				}
 			}
 
@@ -1422,20 +1419,21 @@ class PlayState extends MusicBeatState
 	}
 	function casualInputSystem(data:Int, playernum:Int)
 	{
-		if (closestNotes.length > 0) //basic ass input system, it doesnt need to be complicated
-			{
+		var daClosest = [];
+		var notesBeingHit = [];
+		var hittableNotes = [];
+		switch(playernum)
+		{
+			case 0: 
+				daClosest = P2closestNotes;
+			case 1: 
+				daClosest = closestNotes;
+		}
+		if (daClosest.length > 0) //damn makin a new input system is hard
+		{
 
-				//time to redo this lol
-				var daNote = closestNotes[0];
-
-				if (daNote.noteData == data)
-					goodNoteHit(daNote, playernum);
-
-				if (closestNotes.length > 1)
-				{
-					var nextNote = closestNotes[1];
-
-					if (nextNote.noteData != daNote.noteData)
+				//time to redo this again and again and again
+					/*if (nextNote.noteData != daNote.noteData)
 					{
 						for (shitNote in closestNotes)
 						{
@@ -1462,17 +1460,44 @@ class PlayState extends MusicBeatState
 						{
 							goodNoteHit(nextNote, playernum);
 						}
+					}*/
+
+			for (shitNote in daClosest)
+			{					
+				if (shitNote.noteData == data)
+					hittableNotes.push(shitNote);
+
+				var pushNormalNote = false;
+				for (daNote in hittableNotes)
+				{
+					for (stackedNote in hittableNotes)
+					{
+						if (!stackedNote.isSustainNote && ((stackedNote.strumTime - daNote.strumTime) < 35) && stackedNote.strumTime >= daNote.strumTime && daNote != stackedNote)
+						{
+							notesBeingHit.push(stackedNote);
+							trace("pushed stacked note");
+						}
+						else
+						{
+							pushNormalNote = true;
+							trace("pushed normal notes");
+						}
 					}
+				}
+				if (pushNormalNote)
+					notesBeingHit.push(shitNote);
+			}
+			for (daNote in notesBeingHit)
+				goodNoteHit(daNote, playernum);
 					
 
 
-				}
-			}
-			else if (!SaveData.ghost && songStarted && !grace)
-			{
-				trace("you mispressed you dumbass");
-				missPress(data, playernum);
-			}
+		}
+		else if (!SaveData.ghost && songStarted && !grace)
+		{
+			trace("you mispressed you dumbass");
+			missPress(data, playernum);
+		}
 	}
 	var songStarted = false;
 	function startSong():Void
@@ -2352,6 +2377,7 @@ class PlayState extends MusicBeatState
 			
 
 			closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+			P2closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 
 			if (curBeat % 4 == 0)
 			{
