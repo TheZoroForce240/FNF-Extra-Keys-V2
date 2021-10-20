@@ -45,7 +45,7 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
         BG.alpha = 0.5;
         BG.scrollFactor.set();
 
-        daLARGEText = new FlxText(-300, 0, 1000, "", 32);
+        daLARGEText = new FlxText(-260, 0, 1000, "", 32);
 		daLARGEText.scrollFactor.set(0, 0);
 		daLARGEText.setFormat("VCR OSD Mono", 28, FlxColor.WHITE, RIGHT, OUTLINE, FlxColor.BLACK);
         add(daLARGEText);
@@ -69,7 +69,11 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
     {
         if(FlxG.keys.justPressed.ESCAPE)
         {
-            if (inCat)
+            if (waitingForInput)
+            {
+                waitingForInput = false;
+            }
+            else if (inCat)
             {
                 reloadOptions();
                 daCat = "";
@@ -83,61 +87,82 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
         }
             
 
-        if (FlxG.keys.justPressed.UP)
-            changeSelected(-1);
-        if (FlxG.keys.justPressed.DOWN)
-            changeSelected(1);
-
-        if (FlxG.keys.justPressed.LEFT)
-            changeOptionSetting(-1);
-        if (FlxG.keys.justPressed.RIGHT)
-            changeOptionSetting(1);   
-
-        if (FlxG.keys.justPressed.ENTER)
+        if (!waitingForInput)
         {
-            if (curCategory[curSelected][2] == "toggle")
+            if (FlxG.keys.justPressed.UP)
+                changeSelected(-1);
+            if (FlxG.keys.justPressed.DOWN)
+                changeSelected(1);
+    
+            if (FlxG.keys.justPressed.LEFT)
+                changeOptionSetting(-1);
+            if (FlxG.keys.justPressed.RIGHT)
+                changeOptionSetting(1);   
+    
+            if (FlxG.keys.justPressed.ENTER)
             {
-                curCategory[curSelected][1] = !curCategory[curSelected][1];
-                turnOptionsIntoSaveData();
-                SaveData.saveDataCheck();
-                reloadOptions();
-                createText();
-            }
-            else if (curCategory[curSelected][2] == "cat")
-            {
-                //curCat 0 = catergory menu, might be a little confusing lol
-                
-                reloadOptions();
-                switch (curCategory[curSelected][0])
+                if (curCategory[curSelected][2] == "toggle")
                 {
-                    case "Gameplay": 
-                        curCategory = gameplay;
-                        daCat = "Gameplay";
-                    case "Misc": 
-                        curCategory = misc;
-                        daCat = "Misc";
-                    case "Keybinds": 
-                        curCategory = keybinds;
-                        daCat = "Keybinds";
-                    case "P2 Keybinds": 
-                        curCategory = P2keybinds;
-                        daCat = "P2 Keybinds";
-                    case "Randomization": 
-                        curCategory = randomization;
-                        daCat = "Randomization";
-                    default: 
-                        curCategory = categories; //backup
-                        daCat = "";
+                    curCategory[curSelected][1] = !curCategory[curSelected][1];
+                    turnOptionsIntoSaveData();
+                    SaveData.saveDataCheck();
+                    reloadOptions();
+                    createText();
                 }
-                curSelected = 0;
-                inCat = true;
-                createText();
-            }
-            else if (curCategory[curSelected][2] == "keybind")
+                else if (curCategory[curSelected][2] == "cat")
+                {
+                    //curCat 0 = catergory menu, might be a little confusing lol
+                    
+                    reloadOptions();
+                    switch (curCategory[curSelected][0])
+                    {
+                        case "Gameplay": 
+                            curCategory = gameplay;
+                            daCat = "Gameplay";
+                        case "Misc": 
+                            curCategory = misc;
+                            daCat = "Misc";
+                        case "Keybinds": 
+                            curCategory = keybinds;
+                            daCat = "Keybinds";
+                        case "P2 Keybinds": 
+                            curCategory = P2keybinds;
+                            daCat = "P2 Keybinds";
+                        case "Randomization": 
+                            curCategory = randomization;
+                            daCat = "Randomization";
+                        default: 
+                            curCategory = categories; //backup
+                            daCat = "";
+                    }
+                    curSelected = 0;
+                    inCat = true;
+                    createText();
+                }
+                else if (curCategory[curSelected][2] == "keybind")
+                {
+                    waitingForInput = true;
+                    createText();
+                }
+            }   
+        }
+        else
+        {
+            if (FlxG.keys.justPressed.ANY)
             {
-
+                var key:String = FlxG.keys.getIsDown()[0].ID.toString(); //dont wanna add keyboard events to make this substate larger, but should work for most keys, it might break numpad though idk
+                if (key != "BACKSPACE" || key != "ESCAPE" || key != "ENTER")
+                {
+                    curCategory[curSelected][1] = key;
+                    turnOptionsIntoSaveData();
+                    SaveData.saveDataCheck();
+                    reloadOptions();
+                    createText();
+                }
+                waitingForInput = false;
             }
-        }   
+        }
+        
 
         if (curCategory[curSelected][1] < 1 && curCategory[curSelected][0] == "Scroll Speed") //checks
             curCategory[curSelected][1] = 1;
@@ -199,8 +224,8 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
         for (i in 0...curCategory.length)
         {
             /////////////////////////////
-            var isToggle = curCategory[i][2] == "toggle";
-            var ToggleText:String = "On";
+            var isToggle = curCategory[i][2] == "toggle"; 
+            var ToggleText:String = "On"; //idk why tf i called it this lol
             if (curCategory[i][1])
                 ToggleText = "On";
             else
@@ -218,6 +243,9 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
             }
             if (curCategory[i][2] == "cat")
                 middleThing = "";
+
+            if (i == curSelected && waitingForInput)
+                ToggleText = "?";
                 
 
             var text = (curCategory[i][0] + middleThing + ToggleText + extraThing);
@@ -264,7 +292,8 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
         misc = [ 
             ["Note Splash", SaveData.noteSplash, "toggle", "Turn on the funni effect when hitting sicks"],
             ["FPS Cap", SaveData.fps, "slider", "Turn up for more frames"],
-            ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"]
+            ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"],
+            ["Camera Movements on Note Hits", SaveData.noteMovements, "toggle", "the thing that every mod does now"]
         ];
     
         keybinds = [
@@ -478,6 +507,8 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
                     SaveData.Hellchart = curCategory[i][1];
                 case "Play As Oppenent": 
                     SaveData.flip = curCategory[i][1];
+                case "Camera Movements on Note Hits": 
+                    SaveData.noteMovements = curCategory[i][1];
 ////////////////////////////////////////////////////////////////////////////////////// stick ur custom options here
                 case "your option": 
                     //stick da shit here

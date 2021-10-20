@@ -2,6 +2,7 @@ package;
 
 import lime.utils.Assets;
 import flixel.FlxG;
+import haxe.Json;
 
 #if sys
 import sys.io.File;
@@ -114,6 +115,8 @@ class CoolUtil
 					textDiffs.push(fixedShit.toUpperCase()); //upper cases the difficulty to use them in the array
 				}
 			CurSongDiffs = textDiffs;
+			if (diff > outputDiffs.length)
+				diff = outputDiffs.length;
 			return song + outputDiffs[diff];
 		}
 		else 

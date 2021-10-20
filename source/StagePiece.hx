@@ -340,20 +340,31 @@ class StagePiece extends FlxSprite
                     loadGraphic(Paths.image('weeb/weebSky', 'week6'));
                     scrollFactor.set(0.1, 0.1);
                     antialiasing = false;
+                    setGraphicSize(Std.int(1866));
+				    updateHitbox();
                 case 'school-bgSchool': 
                     loadGraphic(Paths.image('weeb/weebSchool', 'week6'));
                     scrollFactor.set(0.6, 0.90);
                     antialiasing = false;
+                    newx += -200;
+                    setGraphicSize(1866);
+                    updateHitbox();
                 case 'school-bgStreet': 
                     loadGraphic(Paths.image('weeb/weebStreet', 'week6'));
                     scrollFactor.set(0.95, 0.95);
                     antialiasing = false;
+                    newx += -200;
+                    setGraphicSize(1866);
+                    updateHitbox();
                 case 'school-fgTrees': 
                     loadGraphic(Paths.image('weeb/weebTreesBack', 'week6'));
                     scrollFactor.set(0.9, 0.9);
                     newx = 170;
                     newy = 130;
                     antialiasing = false;
+                    newx += -200;
+                    setGraphicSize(Std.int(1866 * 0.8));
+                    updateHitbox();
                 case 'school-bgTrees': 
                     tex = Paths.getPackerAtlas('weeb/weebTrees', 'week6');
                     frames = tex;
@@ -363,6 +374,9 @@ class StagePiece extends FlxSprite
                     newx = -380;
                     newy = -800;
                     antialiasing = false;
+                    newx += -200;
+                    setGraphicSize(Std.int(1866 * 1.4));
+                    updateHitbox();
                 case 'school-treeLeaves': 
                     tex = Paths.getSparrowAtlas('weeb/petals', 'week6');
                     frames = tex;
@@ -371,6 +385,9 @@ class StagePiece extends FlxSprite
 		            scrollFactor.set(0.85, 0.85);
                     newy = -40;
                     antialiasing = false;
+                    newx += -200;
+                    setGraphicSize(1866);
+                    updateHitbox();
                 case 'bgGirls': 
                     tex = Paths.getSparrowAtlas('weeb/bgFreaks', 'week6');
                     frames = tex;
@@ -634,4 +651,92 @@ class StagePiece extends FlxSprite
         startedMoving = false;
     }
         
+    public static function StageCheck(stage:String)
+        {
+            var pieces:Array<String> = [];
+            var daStage:String = "";
+            var zoom:Float = 1.05;
+            var offsetMap:Map<String, Array<Dynamic>>;
+            offsetMap = new Map<String, Array<Dynamic>>();
+            switch (stage)
+            {
+                case 'halloween':
+                    daStage = 'spooky';
+                    pieces = ['halloweenBG'];
+                ////////////////////////////////////////////////////////////////////////
+                case 'philly': 
+                    daStage = 'philly';
+                    pieces = ['phillyBG', "phillyCity", "phillyCityLight0", "phillyCityLight1", "phillyCityLight2", "phillyCityLight3", "phillyCityLight4", "phillySteetBehind", "phillyTrain", "phillyStreet"];
+                ////////////////////////////////////////////////////////////////////////
+                case 'limo':
+                    daStage = 'limo';
+                    zoom = 0.90;
+                    offsetMap['bf'] = [260, -220];
+                    pieces = ['limoSkyBG', 'limoBG', 'bgDancer', 'bgDancer', 'bgDancer', 'bgDancer', 'bgDancer', 'fastCar'];
+                /////////////////////////////////////////////////////////////////////
+                case 'mall':
+                    daStage = 'mall';
+                    zoom = 0.80;
+                    offsetMap['bf'] = [200, 0];
+                    pieces = ['mallBG', 'mallUpperBoppers', 'mallEscalator', 'mallTree', 'mallBottomBoppers', 'mallSnow', 'mallSanta'];
+                ///////////////////////////////////////////////////////////////////
+                case 'mallEvil':
+                    daStage = 'mallEvil';
+                    offsetMap['bf'] = [320, 0];
+                    offsetMap['dad'] = [0, -80];
+                    pieces = ['mallEvilBG', 'mallEvilTree', 'mallEvilSnow'];
+                /////////////////////////////////////////////////////////////////
+                case 'school':
+                    daStage = 'school';
+                    
+                    pieces = ['school-bgSky', 'school-bgSchool', 'school-bgStreet', 'school-fgTrees', 'school-bgTrees', 'school-treeLeaves', 'bgGirls'];
+                    offsetMap['bf'] = [200, 220];
+                    offsetMap['gf'] = [180, 300];
+    
+                //////////////////////////////////////////////////////////////////////
+                case 'schoolEvil':
+                    daStage = 'schoolEvil';
+                    offsetMap['bf'] = [200, 220];
+                    offsetMap['gf'] = [180, 300];
+    
+                    pieces = ['schoolEvilBG'];
+                ////////////////////////////////////////////////////////////////////	
+                case "stage": 
+                    zoom = 0.9;
+                    daStage = "stage";
+                    pieces = ['stageBG', 'stageFront', 'stageCurtains'];
+                default: 
+                    var stageList:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
+                    if (!stageList.contains(stage))
+                        return;
+    
+                    daStage = stage;
+                    var rawJson = File.getContent("assets/data/customStages.json");
+                    var json:PlayState.Stages = cast Json.parse(rawJson);
+    
+                    if (json.stageList.length != 0)
+                        for (i in json.stageList)
+                            if (i.name == stage)
+                            {
+                                pieces = i.pieceArray;
+                                zoom = i.camZoom;
+    
+                                if (i.offsets.length != 0)
+                                    for (ii in i.offsets)
+                                    {
+                                        var type:String = ii.type;
+                                        var offsets:Array<Int> = ii.offsets; 
+                                        addStageOffset(type, offsets[0], offsets[1], offsetMap);
+                                    }
+                                break;
+                            }
+    
+            }
+            PlayState.stageData = [pieces, daStage, zoom, offsetMap];
+            /////////////////////////////////////////////////////////////////////////////
+        }
+        public static function addStageOffset(name:String, x:Float = 0, y:Float = 0, map:Map<String, Array<Dynamic>>)
+        {
+            map[name] = [x, y];
+        }
 }

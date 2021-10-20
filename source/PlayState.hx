@@ -180,7 +180,6 @@ class PlayState extends MusicBeatState
 
 	//camera shit
 	public var camHUD:FlxCamera;
-	public var camSustains:FlxCamera;
 	public var camP1Notes:FlxCamera;
 	public var camP2Notes:FlxCamera;
 	public var camOnTop:FlxCamera;
@@ -202,6 +201,7 @@ class PlayState extends MusicBeatState
 	var stageOffsets:Map<String, Array<Dynamic>>;
 	var limo:StagePiece; //for the shitty layering
 	var pieceArray = [];
+	public static var stageData:Array<Dynamic>;
 
 	//some extra random stuff i didnt know where to put
 	var wiggleShit:WiggleEffect = new WiggleEffect();
@@ -262,8 +262,6 @@ class PlayState extends MusicBeatState
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
-		camSustains = new FlxCamera();
-		camSustains.bgColor.alpha = 0;
 		camP1Notes = new FlxCamera();
 		camP1Notes.bgColor.alpha = 0;
 		camP2Notes = new FlxCamera();
@@ -273,7 +271,6 @@ class PlayState extends MusicBeatState
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD);
-		FlxG.cameras.add(camSustains);
 		FlxG.cameras.add(camP1Notes);
 		FlxG.cameras.add(camP2Notes);
 		FlxG.cameras.add(camOnTop);
@@ -411,7 +408,7 @@ class PlayState extends MusicBeatState
 
 		stageOffsets = new Map<String, Array<Dynamic>>();
 
-		var stageCheck:String = 'stage';
+		var stageCheck:String = "";
 
 			
 		trace(stageCheck); //fuck you stage check not working, i can see in the trace that its picking up the song.stage correctly but you dont fucking change aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -420,7 +417,9 @@ class PlayState extends MusicBeatState
 		curStage = null;
 		pieceArray = [];
 
-		StageCheck(PlayState.SONG.stage);
+		
+		StagePiece.StageCheck(PlayState.SONG.stage);
+		stageExpectionCheck(PlayState.SONG.stage);
 		trace("trying to make stage");
 
 		if (curStage == null || pieceArray == [] || curStage == "")
@@ -445,8 +444,14 @@ class PlayState extends MusicBeatState
 					stageCheck = "stage";
 			}
 			trace("trying to make stage again");
-			StageCheck(stageCheck);
+			StagePiece.StageCheck(stageCheck);
+			stageExpectionCheck(stageCheck);
 		}
+
+		pieceArray = stageData[0];
+		curStage = stageData[1];
+		defaultCamZoom = stageData[2];
+		stageOffsets = stageData[3];
 
 		if (!stageException)
 		{
@@ -659,7 +664,8 @@ class PlayState extends MusicBeatState
 
 		add(camFollow);
 
-		FlxG.camera.follow(camFollow, LOCKON, 0.04);
+		var frameRateShit = 0.04 * (60 / (cast(Lib.current.getChildAt(0), Main)).getFPS());
+		FlxG.camera.follow(camFollow, LOCKON, frameRateShit);
 		// FlxG.camera.setScrollBounds(0, FlxG.width, 0, FlxG.height);
 		FlxG.camera.zoom = defaultCamZoom;
 		FlxG.camera.focusOn(camFollow.getPosition());
@@ -812,124 +818,21 @@ class PlayState extends MusicBeatState
 		super.create();
 	}
 
-	function StageCheck(stage:String)
+
+	
+	function stageExpectionCheck(stage:String) //only did this so you can access stages in the stage debug menu, just week 4/6 will be weird, but idk tbh theyre vanilla stages
+	{
+		switch(stage)
 		{
-			switch (stage)
-			{
-				case 'halloween':
-					curStage = 'spooky';
-					pieceArray = ['halloweenBG'];
-				////////////////////////////////////////////////////////////////////////
-				case 'philly': 
-					curStage = 'philly';
-					pieceArray = ['phillyBG', "phillyCity", "phillyCityLight0", "phillyCityLight1", "phillyCityLight2", "phillyCityLight3", "phillyCityLight4", "phillySteetBehind", "phillyTrain", "phillyStreet"];
-				////////////////////////////////////////////////////////////////////////
-				case 'limo':
-					curStage = 'limo';
-					defaultCamZoom = 0.90;
-					stageOffsets['bf'] = [260, -220];
-					pieceArray = ['limoSkyBG', 'limoBG', 'bgDancer', 'bgDancer', 'bgDancer', 'bgDancer', 'bgDancer', 'fastCar'];
-	
-					limo = new StagePiece(0, 0, 'limo'); //for the shitty layering
-					limo.x += limo.newx;
-					limo.y += limo.newy;
-				/////////////////////////////////////////////////////////////////////
-				case 'mall':
-					curStage = 'mall';
-					defaultCamZoom = 0.80;
-					stageOffsets['bf'] = [200, 0];
-					pieceArray = ['mallBG', 'mallUpperBoppers', 'mallEscalator', 'mallTree', 'mallBottomBoppers', 'mallSnow', 'mallSanta'];
-				///////////////////////////////////////////////////////////////////
-				case 'mallEvil':
-					curStage = 'mallEvil';
-					stageOffsets['bf'] = [320, 0];
-					stageOffsets['dad'] = [0, -80];
-					pieceArray = ['mallEvilBG', 'mallEvilTree', 'mallEvilSnow'];
-				/////////////////////////////////////////////////////////////////
-				case 'school':
-					curStage = 'school';
-					stageException = true; //week 6 has some weird shit goin on with its stage
-	
-					var bgSky:StagePiece = new StagePiece(0, 0, 'school-bgSky');
-					add(bgSky);
-	
-					stageOffsets['bf'] = [200, 220];
-					stageOffsets['gf'] = [180, 300];
-	
-					var repositionShit = -200;
-	
-					pieceArray = ['school-bgSchool', 'school-bgStreet', 'school-fgTrees', 'school-bgTrees', 'school-treeLeaves', 'bgGirls'];
-					for (i in 0...pieceArray.length)
-					{
-						var piece:StagePiece = new StagePiece(repositionShit, 0, pieceArray[i]);
-						piece.x += piece.newx;
-						piece.y += piece.newy;
-						var modif:Float = 1;
-						var widShit = Std.int(bgSky.width * 6);
-						add(piece);
-						if (piece.danceable)
-							dancingStagePieces.add(piece);
-	
-						if (pieceArray[i] != 'bgGirls')
-						{
-							if (pieceArray[i] == 'school-bgTrees')
-								piece.setGraphicSize(Std.int(widShit * 1.4));
-							else if (pieceArray[i] == 'school-fgTrees')
-								piece.setGraphicSize(Std.int(widShit * 0.8));
-							else
-								piece.setGraphicSize(widShit);
-							
-							piece.updateHitbox();
-						}
-					}
-					bgSky.setGraphicSize(Std.int(bgSky.width * 6));
-					bgSky.updateHitbox();
-				//////////////////////////////////////////////////////////////////////
-				case 'schoolEvil':
-					curStage = 'schoolEvil';
-					stageOffsets['bf'] = [200, 220];
-					stageOffsets['gf'] = [180, 300];
-					var waveEffectBG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 3, 2);
-					var waveEffectFG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 5, 2);
-					pieceArray = ['schoolEvilBG'];
-				////////////////////////////////////////////////////////////////////	
-				case "stage": 
-					defaultCamZoom = 0.9;
-					curStage = "stage";
-					pieceArray = ['stageBG', 'stageFront', 'stageCurtains'];
-				default: 
-					var stageList:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
-					if (!stageList.contains(stage))
-						return;
-
-					curStage = stage;
-					var rawJson = File.getContent("assets/data/customStages.json");
-					var json:Stages = cast Json.parse(rawJson);
-
-					if (json.stageList.length != 0)
-						for (i in json.stageList)
-							if (i.name == stage)
-							{
-								pieceArray = i.pieceArray;
-								defaultCamZoom = i.camZoom;
-
-								if (i.offsets.length != 0)
-									for (ii in i.offsets)
-									{
-										var type:String = ii.type;
-										var offsets:Array<Int> = ii.offsets; 
-										addStageOffset(type, offsets[0], offsets[1]);
-									}
-								break;
-							}
-
-			}
-			/////////////////////////////////////////////////////////////////////////////
+			case "limo": 
+				limo = new StagePiece(0, 0, 'limo'); //for the shitty layering
+				limo.x += limo.newx;
+				limo.y += limo.newy;
+			case "schoolEvil": 
+				var waveEffectBG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 3, 2);
+				var waveEffectFG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 5, 2);
 		}
-	public function addStageOffset(name:String, x:Float = 0, y:Float = 0)
-		{
-			stageOffsets[name] = [x, y];
-		}
+	}
 
 	function schoolIntro(?dialogueBox:DialogueBox):Void
 	{
@@ -1641,8 +1544,8 @@ class PlayState extends MusicBeatState
 					susLength = susLength / Conductor.stepCrochet;
 					unspawnNotes.push(swagNote);
 
-					if (susLength <= 2 && susLength != 0)
-						susLength++; //make small sussy bois longer so you can see them
+					if (susLength != 0)
+						susLength++; //increase length of all sustains, so they dont look off in game
 	
 	
 	
@@ -1944,8 +1847,14 @@ class PlayState extends MusicBeatState
 			daNote.alpha = NoteAlpha;
 			daNote.angle = NoteAngle;
 		}
+		
 		if (SaveData.downscroll && (daNote.burning || daNote.death || daNote.warning || daNote.angel || daNote.bob || daNote.glitch))
-			daNote.y += 75; //y offset of notetypes  (only downscroll for some reason, weird shit with the graphic flip)
+		{
+			daNote.y += 50; //y offset of notetypes  (only downscroll for some reason, weird shit with the graphic flip)
+			//bruh i made a whole menu just to help fix and it doesnt even match up wtf
+			//ok so i halfed what it said on the offset menu and it worked correctly, this games confuses me so much
+		}
+			
 
 	}
 
@@ -2046,6 +1955,9 @@ class PlayState extends MusicBeatState
 					}
 				});
 			}
+
+			cpu.noteCamMovement = noteCamMovementShit(daNote.noteData, 0);
+
 			if (!daNote.badNoteType)
 				cpu.holdTimer = 0;
 
@@ -2379,75 +2291,19 @@ class PlayState extends MusicBeatState
 			closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 			P2closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 
-			if (curBeat % 4 == 0)
+
+
+			if (!currentSection.mustHitSection)
 			{
-				// trace(PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection);
+				moveCamera(0);
 			}
-
-			if (camFollow.x != dad.getMidpoint().x + 150 && !currentSection.mustHitSection)
+			if (currentSection.mustHitSection)
 			{
-
-				var camOffset = dad.posOffsets.get('cam'); //offset in character.hx
-				if (dad.posOffsets.exists('cam'))
-				{
-					camFollow.setPosition(dad.getMidpoint().x + camOffset[0], dad.getMidpoint().y + camOffset[1]);
-				}
-				else
-					camFollow.setPosition(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
-
-				
-
-				if (dad.curCharacter == 'mom')
-					vocals.volume = 1;
-
-				if (SONG.song.toLowerCase() == 'tutorial')
-				{
-					tweenCamIn();
-				}
-			}
-
-			if (currentSection.mustHitSection && camFollow.x != boyfriend.getMidpoint().x - 100)
-			{
-				var yoffset:Float = -100;
-				var xoffset:Float = -100;
-				switch (curStage) //offset is where stages are
-				{
-					case 'limo':
-						xoffset = -300;
-					case 'mall':
-						yoffset = -200;
-					case 'school' | 'schoolEvil':
-						xoffset = -200;
-						yoffset = -200;
-				}
-
-				camFollow.setPosition(boyfriend.getMidpoint().x + xoffset, boyfriend.getMidpoint().y + yoffset);
-
-				if (SONG.song.toLowerCase() == 'tutorial')
-				{
-					FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
-				}
+				moveCamera(1);
 			}
 		}
-
-		if (camZooming)
-		{
-			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, 0.95);
-			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, 0.95);
-
-			camP1Notes.zoom = camHUD.zoom;
-			camP2Notes.zoom = camHUD.zoom;
-			camSustains.zoom = camHUD.zoom;
-		}
-		camP1Notes.x = camHUD.x; //so they match up when it moves, pretty much will just be for modcharts and shit
-		camP1Notes.y = camHUD.y;
-		camP1Notes.angle = camHUD.angle;
-		camP2Notes.x = camHUD.x;
-		camP2Notes.y = camHUD.y;
-		camP2Notes.angle = camHUD.angle;
-		camOnTop.x = camHUD.x;
-		camOnTop.y = camHUD.y;
-		camOnTop.angle = camHUD.angle;
+		cameraZooming();
+		
 
 		FlxG.watch.addQuick("beatShit", curBeat);
 		FlxG.watch.addQuick("stepShit", curStep);
@@ -2465,9 +2321,6 @@ class PlayState extends MusicBeatState
 					gfSpeed = 2;
 				case 112:
 					gfSpeed = 1;
-				case 163:
-					// FlxG.sound.music.stop();
-					// FlxG.switchState(new TitleState());
 			}
 		}
 
@@ -2477,8 +2330,6 @@ class PlayState extends MusicBeatState
 			{
 				case 128, 129, 130:
 					vocals.volume = 0;
-					// FlxG.sound.music.stop();
-					// FlxG.switchState(new PlayState());
 			}
 		}
 
@@ -2679,6 +2530,7 @@ class PlayState extends MusicBeatState
 		{
 			trace('WENT BACK TO FREEPLAY??');
 			FlxG.switchState(new FreeplayState());
+			MainMenuState.musicShit();
 		}
 	}
 
@@ -3245,11 +3097,13 @@ class PlayState extends MusicBeatState
 			{
 				player.playAnim('sing' + sDir[note.noteData] + altAnim, true);
 				player.holdTimer = 0;
+				player.noteCamMovement = noteCamMovementShit(note.noteData, 1);
 			}
 			else
 			{
 				player2.playAnim('sing' + sDir[note.noteData] + altAnim, true);
 				player2.holdTimer = 0;
+				player2.noteCamMovement = noteCamMovementShit(note.noteData, 0);
 			}
 
 
@@ -3489,6 +3343,115 @@ class PlayState extends MusicBeatState
 	}
 
 
+	function moveCamera(playernum:Int = 0)
+	{
+		if (playernum == 0)
+		{
+			var camOffset = dad.posOffsets.get('cam'); //offset in character.hx
+			if (dad.posOffsets.exists('cam'))
+			{
+				camFollow.setPosition(dad.getMidpoint().x + camOffset[0] + dad.noteCamMovement[0], 
+				dad.getMidpoint().y + camOffset[1] + dad.noteCamMovement[1]);
+			}
+			else
+				camFollow.setPosition(dad.getMidpoint().x + 150 + dad.noteCamMovement[0], dad.getMidpoint().y - 100 + dad.noteCamMovement[1]);
+
+			if (dad.curCharacter == 'mom')
+				vocals.volume = 1;
+
+			if (SONG.song.toLowerCase() == 'tutorial')
+			{
+				tweenCamIn();
+			}
+		}
+		else
+		{
+			var yoffset:Float = -100;
+			var xoffset:Float = -100;
+			switch (curStage)
+			{
+				case 'limo':
+					xoffset = -300;
+				case 'mall':
+					yoffset = -200;
+				case 'school' | 'schoolEvil':
+					xoffset = -200;
+					yoffset = -200;
+			}
+
+			camFollow.setPosition(boyfriend.getMidpoint().x + xoffset + boyfriend.noteCamMovement[0], 
+			boyfriend.getMidpoint().y + yoffset + boyfriend.noteCamMovement[1]);
+
+			if (SONG.song.toLowerCase() == 'tutorial')
+			{
+				FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
+			}
+		}
+
+		if (!boyfriend.animation.curAnim.name.startsWith("sing"))
+			boyfriend.noteCamMovement = [0, 0];
+		if (!dad.animation.curAnim.name.startsWith("sing"))
+			dad.noteCamMovement = [0, 0];
+	}
+
+	function cameraZooming()
+	{
+		if (camZooming)
+		{
+			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, 0.95);
+			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, 0.95);
+
+			camP1Notes.zoom = camHUD.zoom;
+			camP2Notes.zoom = camHUD.zoom;
+			camOnTop.zoom = camHUD.zoom;
+		}
+		camP1Notes.x = camHUD.x; //so they match up when it moves, pretty much will just be for modcharts and shit
+		camP1Notes.y = camHUD.y;
+		camP1Notes.angle = camHUD.angle;
+		camP2Notes.x = camHUD.x;
+		camP2Notes.y = camHUD.y;
+		camP2Notes.angle = camHUD.angle;
+		camOnTop.x = camHUD.x;
+		camOnTop.y = camHUD.y;
+		camOnTop.angle = camHUD.angle;
+	}
+
+	function noteCamMovementShit(data:Int, playernum:Int = 0) //literally everyone does this now, so imma do it anyway
+	{
+		
+		var movement:Array<Float> = [0, 0];
+		var thing:Array<Float> = [0, 0];
+		if (playernum == 1)
+			thing = player.noteCamMovement;
+		else
+		{
+			if (multiplayer)
+				thing = player2.noteCamMovement;
+			else
+				thing = cpu.noteCamMovement;
+		}
+		if (SaveData.noteMovements)
+		{
+			switch(sDir[data])
+			{
+				case "LEFT": 
+					if (thing[0] > -100)
+						movement[0] += -25;
+				case "UP": 
+					if (thing[1] > -100)
+						movement[1] += -25;
+				case "RIGHT": 
+					if (thing[0] < 100)
+						movement[0] += 25;
+				case "DOWN":
+					if (thing[1] < 100)
+						movement[1] += 25;
+			}
+		}
+		return movement;
+	}
+
+
 
 	
 
@@ -3498,8 +3461,6 @@ class PlayState extends MusicBeatState
 		if (FlxG.sound.music.time > Conductor.songPosition + 20 || FlxG.sound.music.time < Conductor.songPosition - 20)
 			resyncVocals();
 	}
-
-
 
 	override function beatHit()
 	{
@@ -3557,7 +3518,7 @@ class PlayState extends MusicBeatState
 
 		if (multiplayer)
 			if (!player2.animation.curAnim.name.startsWith("sing"))
-					player2.dance();
+				player2.dance();
 
 
 		if (curBeat % 8 == 7 && curSong == 'Bopeebo')

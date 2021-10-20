@@ -259,8 +259,8 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 		if (pathToUse == 5)
 			style = 'pixel';
 
-		if (SaveData.middlescroll && !_mustPress)
-			scaleMulti = 0.6;
+		if (SaveData.middlescroll && !_mustPress && !inCharter)
+			scaleMulti = 0.55;
 
 
 		switch (style)
@@ -489,8 +489,13 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 
 		}
 
-		if ((SaveData.downscroll && _mustPress && !isSustainNote) || (SaveData.P2downscroll && !_mustPress && !isSustainNote))
+		if (((SaveData.downscroll && _mustPress && !isSustainNote) || 
+			(SaveData.P2downscroll && !_mustPress && !isSustainNote)) && 
+			!inCharter)
+		{
 			scale.y *= -1;
+		}
+			
 	}
 
 	override function update(elapsed:Float)

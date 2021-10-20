@@ -58,7 +58,7 @@ class BabyArrow extends FlxSprite
 
         stylelol = style;
         if (SaveData.middlescroll && player == 0)
-            scaleMulti = 0.6;
+            scaleMulti = 0.55;
 
         switch (style)
         {
@@ -205,7 +205,7 @@ class BabyArrow extends FlxSprite
 			animation.play('static');
 			x += 50;
             if (SaveData.middlescroll && player == 1 && isPlayState)
-			    x += ((FlxG.width / 2) * 0.5);
+			    x += ((FlxG.width / 2) * 0.5) + (Note.noteWidths[maniaToUse] / 2);
             else 
                 x += ((FlxG.width / 2) * player);
 

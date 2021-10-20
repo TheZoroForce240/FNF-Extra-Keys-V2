@@ -142,6 +142,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     var selectedNote:FlxSprite; //the note on the side
     var selectedColor:String; //is this even used??? why tf is this here
     var noteTracker:FlxSprite; //for moving the note next to the alphabet text
+    var waitingForSettings:Bool = false;
 
     public override function create()
     {
@@ -345,6 +346,8 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                         case 2: 
                             openSubState(new QuickOptions());
                             inMain = true;
+                            waitingForSettings = true;
+                            
                     }
                     if (i != 2)
                         for (ii in grpMenuList.members)
@@ -419,6 +422,8 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
             else if (FlxG.keys.justPressed.BACKSPACE || FlxG.keys.justPressed.ESCAPE)
             {
                 FlxG.sound.play(Paths.sound('cancelMenu'));
+                if (waitingForSettings)
+                    FlxG.resetState();
                 if (inMain) //exitint
                 {
                     FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN,handleInput);

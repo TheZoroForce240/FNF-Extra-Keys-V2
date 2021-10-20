@@ -27,6 +27,7 @@ import flixel.util.FlxTimer;
 import io.newgrounds.NG;
 import lime.app.Application;
 import openfl.Assets;
+import flixel.FlxSubState;
 
 using StringTools;
 
@@ -135,6 +136,8 @@ class TitleState extends MusicBeatState
 			// FlxG.sound.list.add(music);
 			// music.play();
 			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+			FlxG.sound.music.onComplete = MainMenuState.musicShit;
+
 
 			FlxG.sound.music.fadeIn(4, 0, 0.7);
 		}

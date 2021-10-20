@@ -477,7 +477,7 @@ class ChartingState extends MusicBeatState
 			}
 		};
 
-		var noteCleanup:FlxButton = new FlxButton(10, 170, "Note Cleanup (get rid of stacked Notes)", function()
+		var noteCleanup:FlxButton = new FlxButton(10, 160, "Note Cleanup", function()
 			{
 				for(sec in _song.notes)
 					{
@@ -996,7 +996,7 @@ class ChartingState extends MusicBeatState
 
 		leftIcon.setPosition(gridBG.x - 75, gridBlackLineTop.y);
 		rightIcon.setPosition((gridBG.x + 50) + gridBG.width, gridBlackLineTop.y);
-		UI_box.x = bpmTxt.x - 150;
+		UI_box.x = bpmTxt.x - 20;
 		UI_box.y = 100;
 
 		gridBGAbove.y = gridBG.y - gridBG.height;
@@ -1012,6 +1012,9 @@ class ChartingState extends MusicBeatState
 			{
 				if (note.alpha != 0.5)
 				{
+					if (note.badNoteType)
+						note.playedSound = true;
+
 					if (!note.playedSound)
 					{
 						note.playedSound = true;
@@ -1020,17 +1023,12 @@ class ChartingState extends MusicBeatState
 							gf.playAnim('sing' + GFsDir[note.noteData], true);
 							gf.holdTimer = 0;	
 						}
-						else if ((note.rawNoteData - 4) < keyAmmo[_song.mania] && !middleSection.mustHitSection)
+						else if (!note.mustPress)
 						{
 							player2.playAnim('sing' + sDir[note.noteData], true);
 							player2.holdTimer = 0;
 						}
-						else if ((note.rawNoteData - 4) >= keyAmmo[_song.mania] && middleSection.mustHitSection)
-						{
-							player2.playAnim('sing' + sDir[note.noteData], true);
-							player2.holdTimer = 0;
-						}
-						else if (note.rawNoteData >= 4)
+						else if (note.mustPress)
 						{
 							player1.playAnim('sing' + sDir[note.noteData], true);
 							player1.holdTimer = 0;
@@ -1068,7 +1066,7 @@ class ChartingState extends MusicBeatState
 
 		strumLine.y = getYfromStrum((Conductor.songPosition - sectionStartTime(curSection)) % (Conductor.stepCrochet * middleSection.lengthInSteps));
 
-	 	strumLine.x = -30;
+	 	strumLine.x = -80;
 
 		if (curBeat % 4 == 0 && curStep >= 16 * (curSection + 1))
 		{
@@ -1246,6 +1244,8 @@ class ChartingState extends MusicBeatState
 				FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet * 0.4);
 				vocals.time = FlxG.sound.music.time;
 			}
+			if (FlxG.keys.justPressed.ESCAPE)
+				FlxG.switchState(new DebugState());
 
 			if (!FlxG.keys.pressed.SHIFT)
 			{
@@ -1552,6 +1552,9 @@ class ChartingState extends MusicBeatState
 		var fixedShit = daNoteInfo % 4;
 		if (!daGFNote)
 			fixedShit = ((daNoteInfo - 4) + keyAmmo[_song.mania]) % keyAmmo[_song.mania];
+
+		var mustPress:Bool = false;
+
 		var note:Note = new Note(daStrumTime, fixedShit, daType, false, daSpeed, daVelocity, true, daGFNote);
 		note.inCharter = true;
 		note.sustainLength = daSus;
@@ -1562,6 +1565,24 @@ class ChartingState extends MusicBeatState
 		note.updateHitbox();
 		note.rawNoteData = daNoteInfo;
 		note.playedSound = true;
+
+		switch (sectionType)
+		{
+			case "normal": 
+				mustPress = _song.notes[curSection].mustHitSection;
+				if ((note.rawNoteData - 4) >= keyAmmo[_song.mania])
+					mustPress = !mustPress;
+			case "above": 
+				mustPress = _song.notes[curSection - 1].mustHitSection;
+				if ((note.rawNoteData - 4) >= keyAmmo[_song.mania])
+					mustPress = !mustPress;
+			case "below": 
+				mustPress = _song.notes[curSection + 1].mustHitSection;
+				if ((note.rawNoteData - 4) >= keyAmmo[_song.mania])
+					mustPress = !mustPress;
+		}
+		note.mustPress = mustPress;
+
 		
 		note.canPlaySound = true;
 		

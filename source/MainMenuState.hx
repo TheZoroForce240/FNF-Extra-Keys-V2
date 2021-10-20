@@ -6,6 +6,7 @@ import Discord.DiscordClient;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.FlxBasic;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.effects.FlxFlicker;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -16,6 +17,14 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import io.newgrounds.NG;
 import lime.app.Application;
+import flixel.util.FlxTimer;
+import flixel.FlxSubState;
+
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+import flash.media.Sound;
+#end
 
 using StringTools;
 
@@ -24,6 +33,8 @@ class MainMenuState extends MusicBeatState
 	var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
+
+	public static var songText:FlxText;
 
 	#if !switch
 	var optionShit:Array<String> = ['story mode', 'freeplay', 'donate', 'options'];
@@ -35,6 +46,8 @@ class MainMenuState extends MusicBeatState
 	var camFollow:FlxObject;
 
 	var XOffset:Float = 0;
+
+	public static var curSong:String = "Freaky Menu";
 
 	override function create()
 	{
@@ -48,7 +61,8 @@ class MainMenuState extends MusicBeatState
 
 		if (!FlxG.sound.music.playing)
 		{
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
+			FlxG.sound.music.onComplete = MainMenuState.musicShit;
 		}
 
 		persistentUpdate = persistentDraw = true;
@@ -124,6 +138,11 @@ class MainMenuState extends MusicBeatState
 			SaveData.ResetData();
 		}
 
+		if (FlxG.keys.justPressed.SEVEN)
+		{
+			FlxG.switchState(new DebugState());
+		}
+
 
 
 
@@ -133,6 +152,11 @@ class MainMenuState extends MusicBeatState
 			{
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changeItem(-1);
+			}
+
+			if (FlxG.keys.justPressed.FIVE)
+			{
+				musicShit();
 			}
 
 			if (FlxG.keys.justPressed.DOWN)
@@ -192,8 +216,6 @@ class MainMenuState extends MusicBeatState
 										trace("Freeplay Menu Selected");
 
 									case 'options':
-										FlxTransitionableState.skipNextTransIn = true;
-										FlxTransitionableState.skipNextTransOut = true;
 										LoadingState.loadAndSwitchState(new CustomizationState());
 								}
 							});
@@ -233,4 +255,41 @@ class MainMenuState extends MusicBeatState
 			spr.updateHitbox();
 		});
 	}
+
+	public static function musicShit():Void
+	{
+		
+		var initSonglist = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
+		var randomSong = FlxG.random.int(0, initSonglist.length - 1);
+
+		var data:Array<String> = initSonglist[randomSong].split(':');
+		var song = data[0].toLowerCase();
+
+		FlxG.sound.playMusic(Sound.fromFile(Paths.inst(song)), 0.6, true);
+
+		FlxG.sound.music.onComplete = MainMenuState.musicShit;
+
+		curSong = data[0];
+
+		/*songText = new FlxText(FlxG.width * 0.7, -1000, 0, "Now Playing: " + curSong, 20);
+        songText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+        songText.scrollFactor.set();
+        add(songText);
+        FlxTween.tween(songText, {x: 100}, 1, {ease: FlxEase.quadInOut, 
+            onComplete: function(twn:FlxTween)
+            {
+                new FlxTimer().start(4, function(tmr:FlxTimer)
+                {
+                    FlxTween.tween(songText, {x: -1000}, 1, {ease: FlxEase.quadInOut, 
+                        onComplete: function(twn:FlxTween)
+                        {
+                            remove(songText);
+                            songText.destroy();
+                        }});
+                });
+
+            }});*/
+		//apparently you literaly cant add sprites inside a static function bruh
+	}
+
 }

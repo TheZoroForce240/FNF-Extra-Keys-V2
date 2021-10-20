@@ -22,6 +22,7 @@ class SaveData
     public static var randomNoteVelocity:Bool = false;
     public static var flip:Bool = false;
     public static var Hellchart:Bool = false;
+    public static var noteMovements:Bool = false;
 
 
     //hue, saturation, brightness, asset
@@ -69,6 +70,9 @@ class SaveData
 
         if (FlxG.save.data.casual == null)
 			FlxG.save.data.casual = false;
+
+        if (FlxG.save.data.noteMovements == null)
+			FlxG.save.data.noteMovements = false;
 
         /////////////////////////////////////////////////////////////////
 
@@ -126,6 +130,7 @@ class SaveData
         FlxG.save.data.ScrollSpeed = ScrollSpeed;
         FlxG.save.data.fps = fps;
         FlxG.save.data.casual = casual;
+        FlxG.save.data.noteMovements = noteMovements;
 
         FlxG.save.data.randomNotes = randomNotes;
         FlxG.save.data.randomSection = randomSection;
@@ -158,6 +163,7 @@ class SaveData
         noteSplash = FlxG.save.data.noteSplash;
         middlescroll = FlxG.save.data.middlescroll;
         multiplayer = FlxG.save.data.multiplayer;
+        noteMovements = FlxG.save.data.noteMovements;
 
         ScrollSpeed = FlxG.save.data.ScrollSpeed;
         fps = FlxG.save.data.fps;
@@ -197,6 +203,7 @@ class SaveData
         FlxG.save.data.bothSide = false;
         FlxG.save.data.randomNoteTypes = 0;
         FlxG.save.data.multiplayer = false;
+        FlxG.save.data.noteMovements = false;
         FlxG.save.data.purple = [0, 0, 0, 0];
         FlxG.save.data.blue = [0, 0, 0, 0];
         FlxG.save.data.green = [0, 0, 0, 0];
