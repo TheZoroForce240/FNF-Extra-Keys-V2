@@ -36,7 +36,7 @@ class LoadingState extends MusicBeatState
 	
 	override function create()
 	{
-		//CacheShit.clearCache();
+		CacheShit.clearCache();
 		logo = new FlxSprite(-150, -100);
 		logo.frames = Paths.getSparrowAtlas('logoBumpin');
 		logo.antialiasing = true;

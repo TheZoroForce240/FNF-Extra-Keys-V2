@@ -50,6 +50,8 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 	public var alt:Bool = false; //alt animation note
 	public var bob:Bool = false; //bob arrow
 	public var glitch:Bool = false; //glitch
+	public var poison:Bool = false; //poison notes
+	public var drain:Bool = false; //health drain notes
 
 	public var normalNote:Bool = true; //just to make checking easier i guess
 	public var warningNoteType:Bool = false;
@@ -206,6 +208,8 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 		alt = noteType == 5;
 		bob = noteType == 6;
 		glitch = noteType == 7;
+		poison = noteType == 8;
+		drain = noteType == 9;
 		isGFNote = _gfNote;
 
 		this.shader = HSV.shader;
@@ -213,9 +217,9 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 		if (!regular && !alt)
 			normalNote = false;
 
-		if (warning || glitch)
+		if (warning || glitch || angel)
 			warningNoteType = true;
-		else if (burning || death || bob)
+		else if (burning || death || bob || poison)
 			badNoteType = true;
 
 
@@ -407,6 +411,22 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 										animation.addByPrefix(noteColors[i] + 'Scroll', 'glitch ' + noteColors[i] + '0'); // Normal notes
 										animation.addByPrefix(noteColors[i] + 'hold', 'glitch hold piece'); // Hold
 										animation.addByPrefix(noteColors[i] + 'holdend', 'glitch hold end'); // Tails
+									}
+							case 8:
+								frames = Paths.getSparrowAtlas('noteassets/notetypes/poison');
+								for (i in 0...9)
+									{
+										animation.addByPrefix(noteColors[i] + 'Scroll', 'poison ' + noteColors[i] + '0'); // Normal notes
+										animation.addByPrefix(noteColors[i] + 'hold', 'poison hold piece'); // Hold
+										animation.addByPrefix(noteColors[i] + 'holdend', 'poison hold end'); // Tails
+									}
+							case 9:
+								frames = Paths.getSparrowAtlas('noteassets/notetypes/drain'); //i forgot to change xml for drain notes lol, thats why it says poison
+								for (i in 0...9)
+									{
+										animation.addByPrefix(noteColors[i] + 'Scroll', 'poison ' + noteColors[i] + '0'); // Normal notes
+										animation.addByPrefix(noteColors[i] + 'hold', 'poison hold piece'); // Hold
+										animation.addByPrefix(noteColors[i] + 'holdend', 'poison hold end'); // Tails
 									}
 						}
 					}

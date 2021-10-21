@@ -120,6 +120,16 @@ class ChartingState extends MusicBeatState
 	var curNoteVelocity:Float = 1;
 	var curNoteVelocityTime:Float = 0;
 
+	var curEventData:Array<String> = ["none", ""];
+
+	var eventList:Array<Dynamic> = [
+		["none", ""],
+		["Custom Arrow Movement (Player Side)", "Input some complex calculation into da box"],
+		["Custom Arrow Movement (CPU Side)", "Input some complex calculation into da box"],
+		["Custom Arrow Movement (Both sides)", "Input some complex calculation into da box"],
+		["Reset All Arrows"]
+	];
+
 	var leftHitsounds:Bool = true;
 	var rightHitsounds:Bool = true;
 	var showCharacters:Bool = true;
@@ -593,7 +603,7 @@ class ChartingState extends MusicBeatState
 	var stepperNoteVelocity:FlxUINumericStepper;
 	var stepperNoteVelocityTime:FlxUINumericStepper;
 
-	var noteTypes:Array<String> = ['Normal', 'Fire', 'Death', 'Warning', 'Angel', 'Alt Anim', 'Bob', 'Glitch'];
+	var noteTypes:Array<String> = ['Normal', 'Fire', 'Death', 'Warning', 'Angel', 'Alt Anim', 'Bob', 'Glitch', 'Poison', 'Health Drain'];
 	var typeChangeLabel:FlxText;
 	var speedLabel:FlxText;
 

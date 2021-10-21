@@ -316,4 +316,33 @@ class CoolUtil
 		}
 		return dumbArray;
 	}
+
+
+	public static function songCompatCheck(noteType:Int)
+	{
+		switch (PlayState.SONG.song.toLowerCase())
+		{
+			case "ectospasm" | "spectral":
+				if (noteType == 1)
+					noteType = 8;
+				else if (noteType == 2)
+					noteType = 4;
+			case "godspeed" | "where-are-you": //my own mod lol
+				if (noteType <= 4)
+					noteType = 0;
+				else if (noteType == 5)
+					noteType = 1;
+				else if (noteType == 6)
+					noteType = 2;
+				else if (noteType == 7)
+					noteType = 3;
+				else if (noteType == 8)
+					noteType = 6;
+				else if (noteType == 9)
+					noteType = 7;
+		}
+
+
+		return noteType;
+	}
 }
