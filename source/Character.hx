@@ -8,18 +8,26 @@ import flixel.graphics.frames.FlxAtlasFrames;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
+#end
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
-#end
 import haxe.Json;
 import haxe.format.JsonParser;
+import openfl.utils.Assets as OpenFlAssets;
+import lime.utils.Assets;
+
 
 using StringTools;
 
-typedef OffsetFile =  //just doing some basic shit rn
+typedef OffsetFile =
 {
 	var anims:Array<AnimOffsetShit>;
 	var otherOffsets:Array<OtherOffsetShit>;
+	var flip:Bool;
+	var scale:Float;
+	var aa:Bool;
+	var arrowColorShit:ArrowColors;
+	var healthBar:RGB;
 }
 typedef OtherOffsetShit = 
 {
@@ -36,6 +44,27 @@ typedef AnimOffsetShit =
 	var loop:Bool;
 }
 
+typedef ArrowColors = 
+{
+    var purple:Array<Float>;
+    var blue:Array<Float>;
+    var green:Array<Float>;
+    var red:Array<Float>;
+    var white:Array<Float>;
+    var yellow:Array<Float>;
+    var violet:Array<Float>;
+    var darkred:Array<Float>;
+    var dark:Array<Float>;
+}
+
+typedef RGB = 
+{
+	var red:Int;
+	var green:Int;
+	var blue:Int;
+}
+
+
 class Character extends FlxSprite
 {
 	public var animOffsets:Map<String, Array<Dynamic>>;
@@ -50,6 +79,20 @@ class Character extends FlxSprite
 
 	public var flip:Bool = false;
 
+	public var purple:Array<Float> = [0, 0, 0, 0]; //all 0 means no hsv change + default assets
+    public var blue:Array<Float> = [0, 0, 0, 0];
+    public var green:Array<Float> = [0, 0, 0, 0];
+    public var red:Array<Float> = [0, 0, 0, 0];
+    public var white:Array<Float> = [0, 0, 0, 0];
+    public var yellow:Array<Float> = [0, 0, 0, 0];
+    public var violet:Array<Float> = [0, 0, 0, 0];
+    public var darkred:Array<Float> = [0, 0, 0, 0];
+    public var dark:Array<Float> = [0, 0, 0, 0];
+
+	public var healthColors:Array<Int> = [255, 0, 0]; //rgb, so default is set to red
+
+	public var animTime:Float = 4;
+	public var noteCamMovement:Array<Float> = [0, 0];
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false, ?flip:Bool = false)
 	{
@@ -99,7 +142,7 @@ class Character extends FlxSprite
 				playAnim('danceRight');
 
 			case 'gf-christmas':
-				tex = Paths.getSparrowAtlas('christmas/gfChristmas');
+				tex = Paths.getSparrowAtlas('christmas/gfChristmas', 'week5');
 				frames = tex;
 				animation.addByPrefix('cheer', 'GF Cheer', 24, false);
 				animation.addByPrefix('singLEFT', 'GF left note', 24, false);
@@ -130,7 +173,7 @@ class Character extends FlxSprite
 				playAnim('danceRight');
 
 			case 'gf-car':
-				tex = Paths.getSparrowAtlas('gfCar');
+				tex = Paths.getSparrowAtlas('gfCar', 'week4');
 				frames = tex;
 				animation.addByIndices('singUP', 'GF Dancing Beat Hair blowing CAR', [0], "", 24, false);
 				animation.addByIndices('danceLeft', 'GF Dancing Beat Hair blowing CAR', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
@@ -143,7 +186,7 @@ class Character extends FlxSprite
 				playAnim('danceRight');
 
 			case 'gf-pixel':
-				tex = Paths.getSparrowAtlas('weeb/gfPixel');
+				tex = Paths.getSparrowAtlas('weeb/gfPixel', 'week6');
 				frames = tex;
 				animation.addByIndices('singUP', 'GF IDLE', [2], "", 24, false);
 				animation.addByIndices('danceLeft', 'GF IDLE', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
@@ -177,8 +220,10 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 				addPosOffset('startCam', 400, 0);
+
+				animTime = 6.1;
 			case 'spooky':
-				tex = Paths.getSparrowAtlas('spooky_kids_assets');
+				tex = Paths.getSparrowAtlas('spooky_kids_assets', 'week2');
 				frames = tex;
 				animation.addByPrefix('singUP', 'spooky UP NOTE', 24, false);
 				animation.addByPrefix('singDOWN', 'spooky DOWN note', 24, false);
@@ -199,7 +244,7 @@ class Character extends FlxSprite
 
 				addPosOffset('pos', 0, 200);
 			case 'mom':
-				tex = Paths.getSparrowAtlas('Mom_Assets');
+				tex = Paths.getSparrowAtlas('Mom_Assets', 'week4');
 				frames = tex;
 
 				animation.addByPrefix('idle', "Mom Idle", 24, false);
@@ -221,7 +266,7 @@ class Character extends FlxSprite
 				addPosOffset('cam', 0, 100);
 
 			case 'mom-car':
-				tex = Paths.getSparrowAtlas('momCar');
+				tex = Paths.getSparrowAtlas('momCar', 'week4');
 				frames = tex;
 
 				animation.addByPrefix('idle', "Mom Idle", 24, false);
@@ -240,7 +285,7 @@ class Character extends FlxSprite
 
 				playAnim('idle');
 			case 'monster':
-				tex = Paths.getSparrowAtlas('Monster_Assets');
+				tex = Paths.getSparrowAtlas('Monster_Assets', 'week2');
 				frames = tex;
 				animation.addByPrefix('idle', 'monster idle', 24, false);
 				animation.addByPrefix('singUP', 'monster up note', 24, false);
@@ -257,7 +302,7 @@ class Character extends FlxSprite
 
 				addPosOffset('pos', 0, 100);
 			case 'monster-christmas':
-				tex = Paths.getSparrowAtlas('christmas/monsterChristmas');
+				tex = Paths.getSparrowAtlas('christmas/monsterChristmas', 'week5');
 				frames = tex;
 				animation.addByPrefix('idle', 'monster idle', 24, false);
 				animation.addByPrefix('singUP', 'monster up note', 24, false);
@@ -274,7 +319,7 @@ class Character extends FlxSprite
 
 				addPosOffset('pos', 0, 130);
 			case 'pico':
-				tex = Paths.getSparrowAtlas('Pico_FNF_assetss');
+				tex = Paths.getSparrowAtlas('Pico_FNF_assetss', 'week3');
 				frames = tex;
 				animation.addByPrefix('idle', "Pico Idle Dance", 24);
 				animation.addByPrefix('singUP', 'pico Up note0', 24, false);
@@ -356,7 +401,7 @@ class Character extends FlxSprite
 				flipX = true;
 
 			case 'bf-christmas':
-				var tex = Paths.getSparrowAtlas('christmas/bfChristmas');
+				var tex = Paths.getSparrowAtlas('christmas/bfChristmas', 'week5');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
 				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -384,7 +429,7 @@ class Character extends FlxSprite
 
 				flipX = true;
 			case 'bf-car':
-				var tex = Paths.getSparrowAtlas('bfCar');
+				var tex = Paths.getSparrowAtlas('bfCar', 'week4');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
 				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -409,7 +454,7 @@ class Character extends FlxSprite
 
 				flipX = true;
 			case 'bf-pixel':
-				frames = Paths.getSparrowAtlas('weeb/bfPixel');
+				frames = Paths.getSparrowAtlas('weeb/bfPixel', 'week6');
 				animation.addByPrefix('idle', 'BF IDLE', 24, false);
 				animation.addByPrefix('singUP', 'BF UP NOTE', 24, false);
 				animation.addByPrefix('singLEFT', 'BF LEFT NOTE', 24, false);
@@ -442,7 +487,7 @@ class Character extends FlxSprite
 
 				flipX = true;
 			case 'bf-pixel-dead':
-				frames = Paths.getSparrowAtlas('weeb/bfPixelsDEAD');
+				frames = Paths.getSparrowAtlas('weeb/bfPixelsDEAD', 'week6');
 				animation.addByPrefix('singUP', "BF Dies pixel", 24, false);
 				animation.addByPrefix('firstDeath', "BF Dies pixel", 24, false);
 				animation.addByPrefix('deathLoop', "Retry Loop", 24, true);
@@ -460,7 +505,7 @@ class Character extends FlxSprite
 				flipX = true;
 
 			case 'senpai':
-				frames = Paths.getSparrowAtlas('weeb/senpai');
+				frames = Paths.getSparrowAtlas('weeb/senpai', 'week6');
 				animation.addByPrefix('idle', 'Senpai Idle', 24, false);
 				animation.addByPrefix('singUP', 'SENPAI UP NOTE', 24, false);
 				animation.addByPrefix('singLEFT', 'SENPAI LEFT NOTE', 24, false);
@@ -486,7 +531,7 @@ class Character extends FlxSprite
 
 
 			case 'senpai-angry':
-				frames = Paths.getSparrowAtlas('weeb/senpai');
+				frames = Paths.getSparrowAtlas('weeb/senpai', 'week6');
 				animation.addByPrefix('idle', 'Angry Senpai Idle', 24, false);
 				animation.addByPrefix('singUP', 'Angry Senpai UP NOTE', 24, false);
 				animation.addByPrefix('singLEFT', 'Angry Senpai LEFT NOTE', 24, false);
@@ -511,7 +556,7 @@ class Character extends FlxSprite
 
 
 			case 'spirit':
-				frames = Paths.getPackerAtlas('weeb/spirit');
+				frames = Paths.getPackerAtlas('weeb/spirit', 'week6');
 				animation.addByPrefix('idle', "idle spirit_", 24, false);
 				animation.addByPrefix('singUP', "up_", 24, false);
 				animation.addByPrefix('singRIGHT', "right_", 24, false);
@@ -536,7 +581,7 @@ class Character extends FlxSprite
 
 
 			case 'parents-christmas':
-				frames = Paths.getSparrowAtlas('christmas/mom_dad_christmas_assets');
+				frames = Paths.getSparrowAtlas('christmas/mom_dad_christmas_assets', 'week5');
 				animation.addByPrefix('idle', 'Parent Christmas Idle', 24, false);
 				animation.addByPrefix('singUP', 'Parent Up Note Dad', 24, false);
 				animation.addByPrefix('singDOWN', 'Parent Down Note Dad', 24, false);
@@ -563,13 +608,42 @@ class Character extends FlxSprite
 				addPosOffset('pos', -500, 0);
 
 			default:  	///custom character shit
-				//trying this shitty method cuz i cant get it to work lol
-				var imageGraphic = BitmapData.fromFile("assets/images/characters/" + curCharacter + "/" + curCharacter + ".png");
-				var xml = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".xml";
-				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, File.getContent(xml));
+				var imagePath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".png";
+				var imageGraphic:FlxGraphic;
+
+				if (CacheShit.images[imagePath] != null)	//check if image is stored in cache
+					imageGraphic = CacheShit.images[imagePath];
+				else
+				{
+					imageGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(imagePath));
+					imageGraphic.persist = true;
+					CacheShit.SaveImage(imagePath, imageGraphic);
+				}
+
+				var xmlPath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".xml";
+				var xml:String;
+
+				if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
+					xml = CacheShit.xmls[xmlPath];
+				else
+				{
+					#if sys
+					xml = File.getContent(xmlPath);
+					#else
+					xml = Assets.getText(xmlPath);
+					#end
+					CacheShit.SaveXml(xmlPath, xml);
+				}
+					
+
+				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml);
 				frames = tex;
 
-				var rawJson = File.getContent(Paths.characterJson("characters/" + curCharacter + "/offsets"));
+				#if sys
+				var rawJson = File.getContent(Paths.imageJson("characters/" + curCharacter + "/offsets"));
+				#else
+				var rawJson = Assets.getText(Paths.imageJson("characters/" + curCharacter + "/offsets"));
+				#end
 				if (rawJson != null)
 					trace("got raw json");
 				var json:OffsetFile = cast Json.parse(rawJson);
@@ -609,6 +683,26 @@ class Character extends FlxSprite
 						addOffset(animname, offsets[0], offsets[1]);
 					}
 				}
+				flip = json.flip;
+				scale.set(json.scale, json.scale);
+				antialiasing = json.aa;
+
+				var colors = json.arrowColorShit;
+
+				purple = colors.purple;
+				blue = colors.blue;
+				green = colors.green;
+				red = colors.red;
+				white = colors.white;
+				yellow = colors.yellow;
+				violet = colors.violet;
+				darkred = colors.darkred;
+				dark = colors.dark;
+
+				var color = json.healthBar;
+				healthColors = [color.red, color.green, color.blue];
+					
+
 				trace("hopefully loaded the character"); //why is it still crashing????? AAAAAAAAAAAAAAAAAA
 		}
 
@@ -640,23 +734,22 @@ class Character extends FlxSprite
 	override function update(elapsed:Float)
 	{
 		if (!isPlayer)
-		{
-			if (animation.curAnim.name.startsWith('sing'))
 			{
-				holdTimer += elapsed;
+				if (animation.curAnim.name.startsWith('sing'))
+				{
+					holdTimer += elapsed;
+				}
+	
+				var dadVar:Float = 4;
+	
+				if (curCharacter == 'dad')
+					dadVar = 6.1;
+				if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
+				{
+					dance();
+					holdTimer = 0;
+				}
 			}
-
-			var dadVar:Float = 4;
-
-			if (curCharacter == 'dad')
-				dadVar = 6.1;
-			if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
-			{
-				dance();
-				holdTimer = 0;
-			}
-		}
-
 		switch (curCharacter)
 		{
 			case 'gf':

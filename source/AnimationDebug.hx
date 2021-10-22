@@ -12,7 +12,7 @@ import flixel.util.FlxColor;
 /**
 	*DEBUG MODE
  */
-class AnimationDebug extends FlxState
+class AnimationDebug extends MusicBeatState
 {
 	var bf:Boyfriend;
 	var dad:Character;
@@ -33,7 +33,7 @@ class AnimationDebug extends FlxState
 
 	override function create()
 	{
-		FlxG.sound.music.stop();
+		//FlxG.sound.music.stop();
 
 		var gridBG:FlxSprite = FlxGridOverlay.create(10, 10);
 		gridBG.scrollFactor.set(0.5, 0.5);
@@ -74,7 +74,6 @@ class AnimationDebug extends FlxState
 		genBoyOffsets();
 
 		camFollow = new FlxObject(0, 0, 2, 2);
-		camFollow.screenCenter();
 		add(camFollow);
 
 		FlxG.camera.follow(camFollow);
@@ -121,16 +120,16 @@ class AnimationDebug extends FlxState
 		if (FlxG.keys.pressed.I || FlxG.keys.pressed.J || FlxG.keys.pressed.K || FlxG.keys.pressed.L)
 		{
 			if (FlxG.keys.pressed.I)
-				camFollow.velocity.y = -90;
+				camFollow.velocity.y = -350;
 			else if (FlxG.keys.pressed.K)
-				camFollow.velocity.y = 90;
+				camFollow.velocity.y = 350;
 			else
 				camFollow.velocity.y = 0;
 
 			if (FlxG.keys.pressed.J)
-				camFollow.velocity.x = -90;
+				camFollow.velocity.x = -350;
 			else if (FlxG.keys.pressed.L)
-				camFollow.velocity.x = 90;
+				camFollow.velocity.x = 350;
 			else
 				camFollow.velocity.x = 0;
 		}
@@ -189,6 +188,9 @@ class AnimationDebug extends FlxState
 			genBoyOffsets(false);
 			char.playAnim(animList[curAnim]);
 		}
+
+		if (FlxG.keys.justPressed.ESCAPE)
+			FlxG.switchState(new DebugState());
 
 		super.update(elapsed);
 	}

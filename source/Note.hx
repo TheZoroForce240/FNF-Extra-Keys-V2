@@ -13,14 +13,13 @@ import Shaders;
 
 using StringTools;
 
-class Note extends FlxSprite
+class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 {
+	////////////////////////////////////////////////////////////
+
+	//important note shit
 	public var strumTime:Float = 0;
 	public var baseStrum:Float = 0;
-	
-	public var charterSelected:Bool = false;
-
-	public var rStrumTime:Float = 0;
 
 	public var mustPress:Bool = false;
 	public var noteData:Int = 0;
@@ -28,29 +27,50 @@ class Note extends FlxSprite
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
 	public var prevNote:Note;
-	public var noteType:Int = 0;
-
-	public var rawNoteData:Int = 0; //for charter
-
+	
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
+	public var isSustainEnd:Bool = false;
+
 	public var noteColor:Int;
+	public static var MaxNoteData:Int = 9; // :troll:
 
 	var HSV:HSVEffect = new HSVEffect();
 
+	////////////////////////////////////////////////////////////
+
+	//note type shit
+	public var noteType:Int = 0;
 
 	public var regular:Bool = false; //just a regular note
 	public var burning:Bool = false; //fire
-	public var death:Bool = false;    //halo/death
+	public var death:Bool = false; //halo/death
 	public var warning:Bool = false; //warning
 	public var angel:Bool = false; //angel
 	public var alt:Bool = false; //alt animation note
 	public var bob:Bool = false; //bob arrow
 	public var glitch:Bool = false; //glitch
+	public var poison:Bool = false; //poison notes
+	public var drain:Bool = false; //health drain notes
 
+	public var normalNote:Bool = true; //just to make checking easier i guess
+	public var warningNoteType:Bool = false;
+	public var badNoteType:Bool = false;
+
+	////////////////////////////////////////////////////////////
+
+	//extra shit idk where to put
 	public var noteScore:Float = 1;
-	public static var mania:Int = 0;
+	public var rating:String = "shit";
+	public var scaleMulti:Float = 1; //for middlescroll
+	public var daShit:Int = 0; //this is just for note data and anim shit that was annoying me
+	public var earlyHitTiming = 145;
+	public var lateHitTiming = -145;
 
+	////////////////////////////////////////////////////////////
+
+	//mania shit
+	public static var mania:Int = 0; 
 	public static var swagWidth:Float = 160 * 0.7;
 	public static var noteScale:Float;
 	public static var newNoteScale:Float = 0;
@@ -58,13 +78,31 @@ class Note extends FlxSprite
 	public static var pixelnoteScale:Float;
 	public static var scaleSwitch:Bool = true;
 	public static var tooMuch:Float = 30;
-	public var rating:String = "shit";
-	public var modAngle:Float = 0;
-	public var localAngle:Float = 0; 
-	public static var frameN:Array<String> = ['purple', 'blue', 'green', 'red'];
 
-	public var playedSound:Bool = true; //for charter
+	public static var noteScales:Array<Float> = [0.7, 0.6, 0.5, 0.65, 0.58, 0.55, 0.7, 0.7, 0.7];
+	public static var pixelNoteScales:Array<Float> = [1, 0.83, 0.7, 0.9, 0.8, 0.74, 1, 1, 1];
+	public static var noteWidths:Array<Float> = [112, 84, 66.5, 91, 77, 70, 140, 126, 119];
+	public static var sustainXOffsets:Array<Float> = [97, 84, 70, 91, 77, 78, 97, 97, 97];
 
+	////////////////////////////////////////////////////////////
+
+	//note anim stuff
+	public static var frameN:Array<Dynamic> = [ //changed so i dont have to have a ton of case statements
+		['purple', 'blue', 'green', 'red'],
+		['purple', 'green', 'red', 'yellow', 'blue', 'dark'],
+		['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'],
+		['purple', 'blue', 'white', 'green', 'red'],
+		['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'],
+		['purple', 'blue', 'green', 'red', 'yellow', 'violet', 'darkred', 'dark'],
+		['white'],
+		['purple', 'red'],
+		['purple', 'white', 'red']
+	];
+	var GFframeN:Array<String> = ['purple', 'blue', 'green', 'red']; //gf cant have more than 4k
+
+	////////////////////////////////////////////////////////////
+
+	//note asset shit
 	var pathList:Array<String> = [
         'noteassets/NOTE_assets',
         'noteassets/PURPLE_NOTE_assets',
@@ -73,34 +111,38 @@ class Note extends FlxSprite
         'noteassets/RED_NOTE_assets'
     ];
 	public var style:String = "";
-	public var sustainActive:Bool = true;
 	public var noteColors:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
-	//var pixelnoteColors:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'black', 'dark'];
-
-	public static var noteScales:Array<Float> = [0.7, 0.6, 0.5, 0.65, 0.58, 0.55, 0.7, 0.7, 0.7];
-	public static var pixelNoteScales:Array<Float> = [1, 0.83, 0.7, 0.9, 0.8, 0.74, 1, 1, 1];
-	public static var noteWidths:Array<Float> = [112, 84, 66.5, 91, 77, 70, 140, 126, 119];
-	public var sustainOffset:Float = 0;
-	public var sustainEndOffset:Float = 0;
-	public var isSustainEnd:Bool = false;
-
 	var colorShit:Array<Float>;
 	var pathToUse:Int = 0;
-	public var scaleMulti:Float = 1;
 
+	////////////////////////////////////////////////////////////
+
+	public var speed:Float = 1; //note speed and velocity shit
 	public var changedSpeed:Bool = false;
 	public var velocityData:Array<Float>;
 	public var speedMulti:Float = 1;
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
+	var changedVelocityScale:Bool = false;
 
-	public static var MaxNoteData:Int = 9;
+	////////////////////////////////////////////////////////////
 
-	public var speed:Float = 1; //yes this is happening, per note speed
+	//event note shit (well it will go here when i add it)
+	public var isGFNote:Bool = false;
 
-	public function new(strumTime:Float, noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Float>, ?_mustPress:Bool = false, ?prevNote:Note)
+	////////////////////////////////////////////////////////////
+
+	public var rawNoteData:Int = 0; //for charter
+	public var playedSound:Bool = true;
+	public var canPlaySound:Bool = true;
+	public var inCharter:Bool = false;
+	var charterMulti:Int = 0; //wtf was this used for again???
+
+	////////////////////////////////////////////////////////////
+
+	public function new(strumTime:Float, _noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Float>, ?charter = false, ?_gfNote, ?_mustPress:Bool = false, ?prevNote:Note)
 	{
-		swagWidth = 160 * 0.7; //factor not the same as noteScale
+		swagWidth = 160 * 0.7;
 		noteScale = 0.7;
 		pixelnoteScale = 1;
 		mania = 0;
@@ -112,6 +154,7 @@ class Note extends FlxSprite
 			pixelnoteScale = pixelNoteScales[mania];
 			
 		}
+
 		if (_speed <= 1) //sets speed to song speed if the speed value of a note is 1 or less, just as a backup in case it becomes 0
 			speed = PlayState.SongSpeed;
 		else
@@ -127,16 +170,18 @@ class Note extends FlxSprite
 
 		velocityData = _velocityData;
 		mustPress = _mustPress;
+		inCharter = charter;
 
 		if (SaveData.randomNoteSpeed)
 			speed = FlxMath.roundDecimal(FlxG.random.float(2.2, 3.8), 2);
-		speed = FlxMath.roundDecimal((speed / 0.7) * (noteScale * scaleMulti), 2); //adjusts speed based on note size
+
+		if (SaveData.speedScaling)
+			speed = FlxMath.roundDecimal((speed / 0.7) * (noteScale * scaleMulti), 2); //adjusts speed based on note size, i should make this an option at some point
 
 		x += 50;
-
 		if (PlayState.SONG.mania == 2)
 		{
-			x -= tooMuch;
+			x -= tooMuch; //moves notes a little to the left on 9k
 		}
 
 
@@ -162,9 +207,10 @@ class Note extends FlxSprite
 			velocityChangeTime = FlxMath.roundDecimal(FlxG.random.float(0, 800), 2);
 		}
 
+		this.noteData = _noteData % MaxNoteData;
+		daShit = noteData;
 
-		this.noteData = noteData % MaxNoteData;
-
+		//note types shit
 		regular = noteType == 0;
 		burning = noteType == 1;
 		death = noteType == 2;
@@ -173,32 +219,19 @@ class Note extends FlxSprite
 		alt = noteType == 5;
 		bob = noteType == 6;
 		glitch = noteType == 7;
+		poison = noteType == 8;
+		drain = noteType == 9;
+		isGFNote = _gfNote;
 
 		this.shader = HSV.shader;
 
+		if (!regular && !alt)
+			normalNote = false;
 
-		switch (mania)
-		{
-			case 0: 
-				frameN = ['purple', 'blue', 'green', 'red'];
-			case 1: 
-				frameN = ['purple', 'green', 'red', 'yellow', 'blue', 'dark'];
-			case 2: 
-				frameN = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
-			case 3: 
-				frameN = ['purple', 'blue', 'white', 'green', 'red'];
-			case 4: 
-				frameN = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'];
-			case 5: 
-				frameN = ['purple', 'blue', 'green', 'red', 'yellow', 'violet', 'darkred', 'dark'];
-			case 6: 
-				frameN = ['white'];
-			case 7: 
-				frameN = ['purple', 'red'];
-			case 8: 
-				frameN = ['purple', 'white', 'red'];
-
-		}
+		if (warning || glitch || angel)
+			warningNoteType = true;
+		else if (burning || death || bob || poison)
+			badNoteType = true;
 
 		if (!_mustPress)
 		{
@@ -211,13 +244,14 @@ class Note extends FlxSprite
 			colorShit = SaveData.colorArray[noteData];
 		}
 
-		pathToUse = Std.int(colorShit[3]);
+		if (!isGFNote)
+			pathToUse = Std.int(colorShit[3]);
 
 		if (pathToUse == 5)
 			style = 'pixel';
 
-		if (SaveData.middlescroll && !_mustPress)
-			scaleMulti = 0.6;
+		if (SaveData.middlescroll && !_mustPress && !inCharter)
+			scaleMulti = 0.55;
 
 
 		switch (style)
@@ -311,8 +345,6 @@ class Note extends FlxSprite
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom * pixelnoteScale * scaleMulti));
 				updateHitbox();
 			default:
-				var color:String = frameN[noteData];
-                
 				frames = Paths.getSparrowAtlas(pathList[pathToUse]);
 				for (i in 0...9)
 					{
@@ -320,7 +352,7 @@ class Note extends FlxSprite
 						animation.addByPrefix(noteColors[i] + 'hold', noteColors[i] + ' hold piece'); // Hold
 						animation.addByPrefix(noteColors[i] + 'holdend', noteColors[i] + ' hold end'); // Tails
 					}
-				if (burning || death || warning || angel || bob || glitch)
+				if (!normalNote)
 					{
 						frames = Paths.getSparrowAtlas('noteassets/notetypes/NOTE_types');
 						switch(noteType)
@@ -367,6 +399,22 @@ class Note extends FlxSprite
 										animation.addByPrefix(noteColors[i] + 'hold', 'glitch hold piece'); // Hold
 										animation.addByPrefix(noteColors[i] + 'holdend', 'glitch hold end'); // Tails
 									}
+							case 8:
+								frames = Paths.getSparrowAtlas('noteassets/notetypes/poison');
+								for (i in 0...9)
+									{
+										animation.addByPrefix(noteColors[i] + 'Scroll', 'poison ' + noteColors[i] + '0'); // Normal notes
+										animation.addByPrefix(noteColors[i] + 'hold', 'poison hold piece'); // Hold
+										animation.addByPrefix(noteColors[i] + 'holdend', 'poison hold end'); // Tails
+									}
+							case 9:
+								frames = Paths.getSparrowAtlas('noteassets/notetypes/drain'); //i forgot to change xml for drain notes lol, thats why it says poison
+								for (i in 0...9)
+									{
+										animation.addByPrefix(noteColors[i] + 'Scroll', 'poison ' + noteColors[i] + '0'); // Normal notes
+										animation.addByPrefix(noteColors[i] + 'hold', 'poison hold piece'); // Hold
+										animation.addByPrefix(noteColors[i] + 'holdend', 'poison hold end'); // Tails
+									}
 						}
 					}
 
@@ -375,7 +423,7 @@ class Note extends FlxSprite
 				updateHitbox();
 				antialiasing = true;
 		}
-		if (regular || alt)
+		if (normalNote && !isGFNote)
 		{
 			HSV.hue = colorShit[0];
 			HSV.saturation = colorShit[1];
@@ -386,7 +434,24 @@ class Note extends FlxSprite
 
 
 		x += swagWidth * noteData;
-		animation.play(frameN[noteData] + 'Scroll');
+		if (inCharter) //this shit took so long to figure out, most of it is in charting state
+		{
+			if (isGFNote)
+				animation.play(GFframeN[daShit] + 'Scroll');
+			else
+			{
+				animation.play(frameN[mania][daShit] + 'Scroll');
+			}
+		}
+		/*if (isGFNote)
+			animation.play(GFframeN[daShit + 4] + 'Scroll'); //just for chart editor
+		else if (inCharter)
+			animation.play(frameN[(daShit - 4) + PlayState.keyAmmo[mania] % 9] + 'Scroll'); //just for chart editor*/
+		else
+		{
+			animation.play(frameN[mania][daShit] + 'Scroll');
+		}	
+			
 		noteColor = noteData;
 
 		if (isSustainNote && prevNote != null)
@@ -397,9 +462,14 @@ class Note extends FlxSprite
 			noteScore * 0.2;
 			alpha = 0.6;
 
+			earlyHitTiming = 75;
+
 			x += width / 2;
 
-			animation.play(frameN[noteData] + 'holdend');
+			//setGraphicSize(Std.int(width * 2));
+
+			
+			animation.play(frameN[mania][daShit] + 'holdend');
 
 			updateHitbox();
 
@@ -410,28 +480,36 @@ class Note extends FlxSprite
 
 			if (prevNote.isSustainNote)
 			{
-				prevNote.animation.play(frameN[prevNote.noteData] + 'hold');
+				prevNote.animation.play(frameN[mania][prevNote.daShit] + 'hold');
 				prevNote.updateHitbox();
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * speedMulti * (0.7 / (noteScale * scaleMulti));
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (noteScale * scaleMulti));
 				prevNote.updateHitbox();
 
-				prevNote.sustainOffset = Math.round(-prevNote.offset.y);
-				sustainOffset = Math.round(-offset.y);
+				//prevNote.sustainOffset = Math.round(-prevNote.offset.y);
+				//sustainOffset = Math.round(-offset.y);
 
 			}
+
+			//scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * speedMulti * (0.7 / (noteScale * scaleMulti));
+			//updateHitbox(); //just testin stuff
 
 
 		}
 
-		if ((SaveData.downscroll && _mustPress && !isSustainNote) || (SaveData.P2downscroll && !_mustPress && !isSustainNote))
+		if (((SaveData.downscroll && _mustPress && !isSustainNote) || 
+			(SaveData.P2downscroll && !_mustPress && !isSustainNote)) && 
+			!inCharter)
+		{
 			scale.y *= -1;
+		}
+			
 	}
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
-		if (animation.curAnim.name.endsWith('holdend') && prevNote.isSustainNote)
+		if ((animation.curAnim.name.endsWith('holdend') && prevNote.isSustainNote) && !isGFNote)
 		{
 			isSustainEnd = true;
 		}
@@ -658,7 +736,7 @@ class Note extends FlxSprite
 
 		if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped) || (PlayState.multiplayer))
 		{
-			if (burning || death)
+			if (badNoteType)
 			{
 				if (strumTime - Conductor.songPosition <= (100 * Conductor.timeScale)
 					&& strumTime - Conductor.songPosition >= (-50 * Conductor.timeScale))
@@ -668,22 +746,35 @@ class Note extends FlxSprite
 			}
 			else
 			{
-				if (strumTime - Conductor.songPosition <= (145 * Conductor.timeScale)
-					&& strumTime - Conductor.songPosition >= (-145 * Conductor.timeScale))
+				if (strumTime - Conductor.songPosition <= (earlyHitTiming * Conductor.timeScale)
+					&& strumTime - Conductor.songPosition >= (lateHitTiming * Conductor.timeScale))
 					canBeHit = true;
 				else
 					canBeHit = false;
 			}
-			if (strumTime - Conductor.songPosition < -145 && !wasGoodHit)
+			if (strumTime - Conductor.songPosition < lateHitTiming && !wasGoodHit)
 				tooLate = true;
 		}
 		else
 		{
 			canBeHit = false;
 
-			if (strumTime <= Conductor.songPosition)
+			if (strumTime <= Conductor.songPosition && !badNoteType)
 				wasGoodHit = true;
 		}
+
+		if (isGFNote)
+			if (strumTime <= Conductor.songPosition)
+				wasGoodHit = true;
+		else if (badNoteType)
+			if (strumTime - Conductor.songPosition < -300) //so note types go past the strumline before removed
+				wasGoodHit = true;
+
+		if (!changedVelocityScale)
+			if (speedMulti != 0 || speedMulti != 1)
+				if ((strumTime - velocityChangeTime) <= Conductor.songPosition)
+						fixSustains();
+				
 
 		if (tooLate && !wasGoodHit)
 		{
@@ -694,13 +785,17 @@ class Note extends FlxSprite
 
 
 
-	public function fixSustains():Void
+	function fixSustains():Void
 	{
-		if (animation.curAnim.name.endsWith('hold') && isSustainNote)
+		if (!changedVelocityScale)
 		{
-			scale.y = 1;
-			scale.y *= Conductor.stepCrochet / 100 * 1.5 * FlxMath.roundDecimal(speed * speedMulti, 2) * (0.7 / (noteScale * scaleMulti));
-			updateHitbox();
+			changedVelocityScale = true;
+			if (animation.curAnim.name.endsWith('hold') && isSustainNote)
+				{
+					scale.y *= speedMulti;
+					updateHitbox();
+				}
 		}
+
 	} 
 }

@@ -1,0 +1,24 @@
+{
+    "stageList": [
+
+        {
+            "name": "test",
+            "camZoom": 0.9,
+            "pieceArray": ["testBG", "testFront", "dumbShit"],
+            "offsets": [
+                {
+                    "type":  "bf",
+                    "offsets": [0, 0]
+                },
+                {
+                    "type":  "gf",
+                    "offsets": [0, 0]
+                },
+                {
+                    "type":  "dad",
+                    "offsets": [0, 0]
+                }
+            ]
+        }
+    ]
+}

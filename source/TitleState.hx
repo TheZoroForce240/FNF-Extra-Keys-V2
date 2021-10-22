@@ -27,6 +27,7 @@ import flixel.util.FlxTimer;
 import io.newgrounds.NG;
 import lime.app.Application;
 import openfl.Assets;
+import flixel.FlxSubState;
 
 using StringTools;
 
@@ -46,9 +47,6 @@ class TitleState extends MusicBeatState
 
 	override public function create():Void
 	{
-		#if polymod
-		polymod.Polymod.init({modRoot: "mods", dirs: ['introMod']});
-		#end
 
 		PlayerSettings.init();
 		PlayerSettings.player1.controls.loadKeyBinds();
@@ -63,10 +61,6 @@ class TitleState extends MusicBeatState
 
 		//NGio.noLogin(APIStuff.API);
 
-		#if ng
-		var ng:NGio = new NGio(APIStuff.API, APIStuff.EncKey);
-		trace('NEWGROUNDS LOL');
-		#end
 
 		FlxG.save.bind('funkin', 'ninjamuffin99');
 
@@ -138,6 +132,8 @@ class TitleState extends MusicBeatState
 			// FlxG.sound.list.add(music);
 			// music.play();
 			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
+			FlxG.sound.music.onComplete = MainMenuState.musicShit;
+
 
 			FlxG.sound.music.fadeIn(4, 0, 0.7);
 		}
@@ -275,13 +271,6 @@ class TitleState extends MusicBeatState
 
 		if (pressedEnter && !transitioning && skippedIntro)
 		{
-			#if !switch
-			NGio.unlockMedal(60960);
-
-			// If it's Friday according to da clock
-			if (Date.now().getDay() == 5)
-				NGio.unlockMedal(61034);
-			#end
 
 			titleText.animation.play('press');
 

@@ -22,8 +22,10 @@ class Paths
 
 	static var currentLevel:String;
 
+	#if sys
 	public static var loadedImages:Array<FlxGraphic> = [];
 	public static var loadedImagePath:Array<String> = [];
+	#end
 
 	static public function setCurrentLevel(name:String)
 	{
@@ -123,12 +125,12 @@ class Paths
 		return getPath('images/$key.png', IMAGE, library);
 	}
 
-	inline static public function characterJson(key:String, ?library:String)
+	inline static public function imageJson(key:String, ?library:String)
 	{
 		return getPath('images/$key.json', TEXT, library);
 	}
 
-	inline static public function characterXml(key:String, ?library:String)
+	inline static public function imageXml(key:String, ?library:String)
 	{
 		return getPath('images/$key.xml', TEXT, library);
 	}
@@ -145,15 +147,40 @@ class Paths
 		if (daImage == null)
 			isCustom = false;
 
-		if (isCustom)
+		#if !sys
+		isCustom = false;
+		#end
+
+		var xml:String;
+
+		if (CacheShit.xmls[key] != null)
 		{
-			trace("loaded custom image pog but loading custom xml");
-			return FlxAtlasFrames.fromSparrow(daImage, File.getContent('assets/images/$key.xml'));
+			xml = CacheShit.xmls[key];
+			trace("loaded xml from cache");
 		}
 		else
 		{
-			trace("not a custom image lol");
-			return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
+			if (isCustom)
+				#if sys
+				xml = File.getContent('assets/images/$key.xml');
+				#else
+				xml = file('images/$key.xml', library);
+				#end
+			else
+				xml = file('images/$key.xml', library);
+
+			CacheShit.SaveXml(key, xml);
+		}
+
+		if (isCustom)
+		{
+			//trace("loaded custom image pog");
+			return FlxAtlasFrames.fromSparrow(daImage, xml);
+		}
+		else
+		{
+			//trace("not a custom image lol");
+			return FlxAtlasFrames.fromSparrow(image(key, library), xml);
 		}
 
 	}
@@ -165,22 +192,22 @@ class Paths
 
 	static private function checkForImage(path:String)
 	{
+		#if sys
 		if(FileSystem.exists(image(path)))
 		{
-			if (!loadedImagePath.contains(path))
+			if (CacheShit.images[path] == null)
 			{
 				var imageGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(image(path)));
 				imageGraphic.persist = true;
-				loadedImagePath.push(path);
-				loadedImages.push(imageGraphic);
+				CacheShit.images[path] = imageGraphic;
 				trace("added custom image");
 			}
-			var i = loadedImagePath.indexOf(path);
 			trace("got dat image");
-			return loadedImages[i];
+			return CacheShit.images[path];
 			
 
 		}
+		#end
 		return null;
 	}
 

@@ -20,11 +20,14 @@ class Alphabet extends FlxSpriteGroup
 	// for menu shit
 	public var targetY:Float = 0;
 	public var isMenuItem:Bool = false;
+	var menuItemOffset:Float = 90; //extra thing i added
 
 	public var text:String = "";
 
 	var _finalText:String = "";
 	var _curText:String = "";
+
+	
 
 	public var widthOfWords:Float = FlxG.width;
 
@@ -40,13 +43,14 @@ class Alphabet extends FlxSpriteGroup
 
 	var isBold:Bool = false;
 
-	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false)
+	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false, menuOffset:Float = 90)
 	{
 		super(x, y);
 
 		_finalText = text;
 		this.text = text;
 		isBold = bold;
+		menuItemOffset = menuOffset;
 
 		if (text != "")
 		{
@@ -225,7 +229,7 @@ class Alphabet extends FlxSpriteGroup
 			var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
 
 			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), 0.16);
-			x = FlxMath.lerp(x, (targetY * 20) + 90, 0.16);
+			x = FlxMath.lerp(x, (targetY * 20) + menuItemOffset, 0.16);
 		}
 
 		super.update(elapsed);

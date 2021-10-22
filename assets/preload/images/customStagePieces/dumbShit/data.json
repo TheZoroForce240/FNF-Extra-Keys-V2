@@ -1,0 +1,21 @@
+{
+    "position": [100, 100], 
+    "scale": 1,
+    "flip": false,
+    "scrollFactor": [1, 1],
+    "aa": true,
+
+    "isAnimated": true,
+    "anims": [
+        {
+            "anim": "bop",
+            "xmlname": "santa idle in fear",
+            "frameRate": 24,
+            "loop": true
+        }
+    ],
+    "animToPlay": "bop",
+
+    "isDanceable": true,
+    "animToPlayOnDance": "bop"
+}

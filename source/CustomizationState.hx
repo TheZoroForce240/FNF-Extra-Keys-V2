@@ -109,7 +109,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     public static var maniaToChange = 0; //the mania
 
     var keys = [false, false, false, false, false, false, false, false, false]; //tracks inputs
-    var frameN:Array<String> = ['purple', 'blue', 'green', 'red']; //used for note anims
+    //var frameN:Array<String> = ['purple', 'blue', 'green', 'red']; //used for note anims
 
     var keyAmmo:Array<Int> = [4, 6, 9, 5, 7, 8, 1, 2, 3]; //turns mania value into amount of keys, thats why its called key Ammo(unt), duh
 
@@ -142,6 +142,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     var selectedNote:FlxSprite; //the note on the side
     var selectedColor:String; //is this even used??? why tf is this here
     var noteTracker:FlxSprite; //for moving the note next to the alphabet text
+    var waitingForSettings:Bool = false;
 
     public override function create()
     {
@@ -265,28 +266,6 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
             hue = FlxMath.roundDecimal(sliderThing.x, 2);           //converts shit sprite transfer system for sliders into the hsv values
             saturation = FlxMath.roundDecimal(sliderThing.y, 2);
             brightness = FlxMath.roundDecimal(sliderThing.angle, 2);
-
-            switch (maniaToChange) //put in update because it kept fucking breaking
-                {
-                    case 0: 
-                        frameN = ['purple', 'blue', 'green', 'red'];
-                    case 1: 
-                        frameN = ['purple', 'green', 'red', 'yellow', 'blue', 'dark'];
-                    case 2: 
-                        frameN = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
-                    case 3: 
-                        frameN = ['purple', 'blue', 'white', 'green', 'red'];
-                    case 4: 
-                        frameN = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'];
-                    case 5: 
-                        frameN = ['purple', 'blue', 'green', 'red', 'yellow', 'violet', 'darkred', 'dark'];
-                    case 6: 
-                        frameN = ['white'];
-                    case 7: 
-                        frameN = ['purple', 'red'];
-                    case 8: 
-                        frameN = ['purple', 'white', 'red'];
-                }
             updateColors(); //is this even used anymore lol
 
             SaveData.fixColorArray(maniaToChange); //this changes the array based on mania
@@ -345,6 +324,8 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                         case 2: 
                             openSubState(new QuickOptions());
                             inMain = true;
+                            waitingForSettings = true;
+                            
                     }
                     if (i != 2)
                         for (ii in grpMenuList.members)
@@ -419,6 +400,8 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
             else if (FlxG.keys.justPressed.BACKSPACE || FlxG.keys.justPressed.ESCAPE)
             {
                 FlxG.sound.play(Paths.sound('cancelMenu'));
+                if (waitingForSettings)
+                    FlxG.resetState();
                 if (inMain) //exitint
                 {
                     FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN,handleInput);
@@ -449,12 +432,12 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                 }
             if (!waitingForInput)
             {
-                if (FlxG.keys.justPressed.ONE) //switching the mania
+                /*if (FlxG.keys.justPressed.ONE) //switching the mania
                     changeMania(6);
                 if (FlxG.keys.justPressed.TWO)
                     changeMania(7);
                 if (FlxG.keys.justPressed.THREE)
-                    changeMania(8);
+                    changeMania(8);*/ //temp disable due to crash
                 if (FlxG.keys.justPressed.FOUR)
                     changeMania(0);
                 if (FlxG.keys.justPressed.FIVE)
@@ -550,7 +533,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         }
         updateColors();
         FlxTween.tween(notes.members[curSelectedNote], {y: 320}, 0.2, {ease: FlxEase.expoInOut});
-        selectedNote.animation.play(frameN[curSelectedNote] + 'Scroll');
+        selectedNote.animation.play(Note.frameN[maniaToChange][curSelectedNote] + 'Scroll');
 
         SaveData.fixColorArray(maniaToChange);
         hue = SaveData.colorArray[curSelectedNote][0];
@@ -608,7 +591,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     {
         remove(selectedNote);
         selectedNote = new FlxSprite(2000, 200);
-        var color:String = frameN[curSelectedNote];
+        var color:String = Note.frameN[maniaToChange][curSelectedNote];
         var pathToUse:Int = 0;
         SaveData.fixColorArray(maniaToChange);
         pathToUse = Std.int(SaveData.colorArray[curSelectedNote][3]);
@@ -640,7 +623,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
             selectedNote.updateHitbox();
             selectedNote.antialiasing = true;
         }
-        selectedNote.animation.play(frameN[curSelectedNote] + 'Scroll');
+        selectedNote.animation.play(Note.frameN[maniaToChange][curSelectedNote] + 'Scroll');
         selectedNote.shader = HSV.shader;
         add(selectedNote);
     }
@@ -752,7 +735,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         for (i in 0...keyAmmo[maniaToChange])
             {
                 var note:FlxSprite = new FlxSprite(0, 350);
-                var color:String = frameN[i];
+                var color:String = Note.frameN[maniaToChange][i];
                 var pathToUse:Int = 0;
                 SaveData.fixColorArray(maniaToChange);
                 pathToUse = Std.int(SaveData.colorArray[i][3]);
@@ -793,7 +776,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                 noteHSV.brightness = SaveData.colorArray[i][2];
 
                 noteHSV.update();
-                note.animation.play(frameN[i] + 'Scroll');
+                note.animation.play(Note.frameN[maniaToChange][i] + 'Scroll');
                 note.x = strumLineNotes.members[Math.floor(Math.abs(i))].x + 98;
                 notes.add(note);
             }   
@@ -914,27 +897,6 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         Note.pixelnoteScale = Note.pixelNoteScales[mania];
         Note.swagWidth = Note.noteWidths[mania];
         maniaToChange = mania;
-        switch (maniaToChange)
-        {
-            case 0: 
-                frameN = ['purple', 'blue', 'green', 'red'];
-            case 1: 
-                frameN = ['purple', 'green', 'red', 'yellow', 'blue', 'dark'];
-            case 2: 
-                frameN = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
-            case 3: 
-                frameN = ['purple', 'blue', 'white', 'green', 'red'];
-            case 4: 
-                frameN = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'];
-            case 5: 
-                frameN = ['purple', 'blue', 'green', 'red', 'yellow', 'violet', 'darkred', 'dark'];
-            case 6: 
-                frameN = ['white'];
-            case 7: 
-                frameN = ['purple', 'red'];
-            case 8: 
-                frameN = ['purple', 'white', 'red'];
-        }
         generateStaticArrows(1);
         updateKeybinds();
         createActualNotes();
