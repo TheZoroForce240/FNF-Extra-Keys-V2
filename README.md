@@ -27,7 +27,6 @@ WARNING: this mod is still pretty early in development, so expect bugs and missi
  - Android Support (not guaranteed, might not happen)
  - Editors for most things
  - Modchart creator??
- - Note offset menu (for note types)
  - Changing Mania Mid Song (want to remake the system i used for it)
  - probably some other stuff as well i forgot
 
