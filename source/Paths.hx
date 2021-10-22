@@ -147,6 +147,10 @@ class Paths
 		if (daImage == null)
 			isCustom = false;
 
+		#if !sys
+		isCustom = false;
+		#end
+
 		var xml:String;
 
 		if (CacheShit.xmls[key] != null)

@@ -265,7 +265,9 @@ class MainMenuState extends MusicBeatState
 		var data:Array<String> = initSonglist[randomSong].split(':');
 		var song = data[0].toLowerCase();
 
+		#if sys
 		FlxG.sound.playMusic(Sound.fromFile(Paths.inst(song)), 0.6, true);
+		#end
 
 		FlxG.sound.music.onComplete = MainMenuState.musicShit;
 
