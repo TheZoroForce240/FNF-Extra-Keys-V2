@@ -83,7 +83,9 @@ class DebugState extends MusicBeatState
         {
             curSong = songs[Std.parseInt(song)];
             curDiffNum = CoolUtil.CurSongDiffs.indexOf(curDiff);
+            #if sys
             poop = CoolUtil.getSongFromJsons(curSong.toLowerCase(), curDiffNum);
+            #end
         });
         songDropDown.selectedLabel = curSong;
         
@@ -93,7 +95,9 @@ class DebugState extends MusicBeatState
             diffDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(CoolUtil.CurSongDiffs, true));
             curDiff = CoolUtil.CurSongDiffs[Std.parseInt(diff)];
             curDiffNum = CoolUtil.CurSongDiffs.indexOf(curDiff);
-            poop = CoolUtil.getSongFromJsons(curSong.toLowerCase(), curDiffNum);    
+            #if sys
+            poop = CoolUtil.getSongFromJsons(curSong.toLowerCase(), curDiffNum);   
+            #end 
         });
         diffDropDown.selectedLabel = curDiff;
 
@@ -140,12 +144,14 @@ class DebugState extends MusicBeatState
                 case "Stage Debug": 
                     LoadingState.loadAndSwitchState(new StageDebug(curStage));
                 case "Chart Editor": 
+                    #if sys
                     Main.editor = true;
                     PlayState.SONG = Song.loadFromJson(poop, curSong.toLowerCase());
                     PlayState.isStoryMode = false;
                     PlayState.storyDifficulty = curDiffNum;
                     trace('CUR WEEK' + PlayState.storyWeek);
                     LoadingState.loadAndSwitchState(new ChartingState());
+                    #end
                 case "Note Type Debug": 
                     LoadingState.loadAndSwitchState(new NoteTypeOffsetState());
 				    

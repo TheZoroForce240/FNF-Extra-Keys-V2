@@ -1,5 +1,7 @@
 package;
 
+import flixel.input.gamepad.FlxGamepad;
+import flixel.input.gamepad.FlxGamepadInputID;
 #if desktop
 import Discord.DiscordClient;
 #end
@@ -9,7 +11,9 @@ import openfl.events.Event;
 import haxe.EnumTools;
 import openfl.ui.Keyboard;
 import openfl.events.KeyboardEvent;
+//import openfl.events.JoystickEvent;
 import flixel.input.keyboard.FlxKey;
+import flixel.input.gamepad.FlxGamepadManager;
 import haxe.Exception;
 import openfl.geom.Matrix;
 import openfl.display.BitmapData;
@@ -52,7 +56,7 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxBar;
-import flixel.util.FlxCollision;
+//import flixel.util.FlxCollision;
 import flixel.util.FlxColor;
 import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
@@ -68,8 +72,8 @@ import ModchartUtil;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
-import flash.media.Sound;
 #end
+import flash.media.Sound;
 
 using StringTools;
 
@@ -137,7 +141,18 @@ class PlayState extends MusicBeatState
 	var drainNoteAmount:Float = 0.025;
 
 	//sing animation arrays
-	private var sDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT']; //regular singing animations
+	public static var sDir:Array<Dynamic> = [
+		['LEFT', 'DOWN', 'UP', 'RIGHT'],
+		['LEFT', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'RIGHT'],
+		['LEFT', 'DOWN', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'UP', 'RIGHT'],
+		['LEFT', 'DOWN', 'UP', 'UP', 'RIGHT'],
+		['LEFT', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'RIGHT'],
+		['LEFT', 'DOWN', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'UP', 'RIGHT'],
+		['UP'],
+		['LEFT', 'RIGHT'],
+		['LEFT', 'UP', 'RIGHT'],
+	]; 
+	//regular singing animations
 	//private var bfsDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT']; //just for playing hey animation as bf
 	private var GFsDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT']; //for gf
 
@@ -927,6 +942,9 @@ class PlayState extends MusicBeatState
 		Conductor.songPosition = 0;
 		Conductor.songPosition -= Conductor.crochet * 5;
 
+		if (unspawnNotes[0] != null)
+			spawnNote();
+
 		var swagCounter:Int = 0;
 
 		var P1binds:Array<String> = CoolUtil.bindCheck(maniaToChange);
@@ -1040,16 +1058,6 @@ class PlayState extends MusicBeatState
 	var lastReportedPlayheadPosition:Int = 0;
 	var songTime:Float = 0;
 
-	private function getKey(charCode:Int):String
-		{
-			for (key => value in FlxKey.fromStringMap)
-			{
-				if (charCode == value)
-					return key;
-			}
-			return null;
-		}
-
 	public var closestNotes:Array<Note> = [];
 	public var P2closestNotes:Array<Note> = [];
 
@@ -1157,14 +1165,14 @@ class PlayState extends MusicBeatState
 					}
 				keys[data] = true;
 		}
-		normalInputSystem(data, playernum);
-
-
-		
-				
-		
+		normalInputSystem(data, playernum);		
 	}
-	/////////////////////////////////////////////////////////////////////////////////////////
+
+
+	//////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 	function normalInputSystem(data:Int, playernum:Int)
 	{
@@ -1204,7 +1212,7 @@ class PlayState extends MusicBeatState
 					else if ((!shitNote.isSustainNote && (shitNote.strumTime - daNote.strumTime) < 35))
 						goodNoteHit(shitNote, playernum);
 
-					if (hittableNotes.length > 2 && SaveData.casual)
+					if (hittableNotes.length > 2 && SaveData.casual) //literally all you need to allow you to spam though impossiblely hard jacks
 						goodNoteHit(shitNote, playernum);
 				}
 
@@ -1218,7 +1226,7 @@ class PlayState extends MusicBeatState
 			missPress(data, playernum);
 		}
 	}
-	function casualInputSystem(data:Int, playernum:Int)
+	function casualInputSystem(data:Int, playernum:Int) //casual input was originally gonna use a completely different input system, but one change to the regular input made it more spammable, which is what i wanted from this
 	{
 		var daClosest = [];
 		var notesBeingHit = [];
@@ -1316,32 +1324,39 @@ class PlayState extends MusicBeatState
 		lastReportedPlayheadPosition = 0;
 
 		if (!paused)
+		{
+			#if sys
 			FlxG.sound.playMusic(Sound.fromFile(Paths.inst(PlayState.SONG.song)), 1, false);
+			#else
+			FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 1, false);
+			#end
+		}
+			
 
 		if (SaveData.noteSplash)
+		{
+			switch (maniaToChange)
 			{
-				switch (maniaToChange)
-				{
-					case 0: 
-						NoteSplash.colors = ['purple', 'blue', 'green', 'red'];
-					case 1: 
-						NoteSplash.colors = ['purple', 'green', 'red', 'yellow', 'blue', 'darkblue'];	
-					case 2: 
-						NoteSplash.colors = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'darkblue'];
-					case 3: 
-						NoteSplash.colors = ['purple', 'blue', 'white', 'green', 'red'];
-					case 4: 
-						NoteSplash.colors = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'darkblue'];
-					case 5: 
-						NoteSplash.colors = ['purple', 'blue', 'green', 'red', 'yellow', 'violet', 'darkred', 'darkblue'];
-					case 6: 
-						NoteSplash.colors = ['white'];
-					case 7: 
-						NoteSplash.colors = ['purple', 'red'];
-					case 8: 
-						NoteSplash.colors = ['purple', 'white', 'red'];
-				}
+				case 0: 
+					NoteSplash.colors = ['purple', 'blue', 'green', 'red'];
+				case 1: 
+					NoteSplash.colors = ['purple', 'green', 'red', 'yellow', 'blue', 'darkblue'];	
+				case 2: 
+					NoteSplash.colors = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'darkblue'];
+				case 3: 
+					NoteSplash.colors = ['purple', 'blue', 'white', 'green', 'red'];
+				case 4: 
+					NoteSplash.colors = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'darkblue'];
+				case 5: 
+					NoteSplash.colors = ['purple', 'blue', 'green', 'red', 'yellow', 'violet', 'darkred', 'darkblue'];
+				case 6: 
+					NoteSplash.colors = ['white'];
+				case 7: 
+					NoteSplash.colors = ['purple', 'red'];
+				case 8: 
+					NoteSplash.colors = ['purple', 'white', 'red'];
 			}
+		}
 		
 		SaveData.fixColorArray(maniaToChange);
 
@@ -1368,7 +1383,14 @@ class PlayState extends MusicBeatState
 		curSong = songData.song;
 
 		if (SONG.needsVoices)
+		{
+			#if sys
 			vocals = new FlxSound().loadEmbedded(Sound.fromFile(Paths.voices(PlayState.SONG.song)));
+			#else
+			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
+			#end
+		}
+			
 		else
 			vocals = new FlxSound();
 
@@ -1505,6 +1527,9 @@ class PlayState extends MusicBeatState
 		unspawnNotes.sort(sortByShit);
 
 		generatedMusic = true;
+
+		if (unspawnNotes[0] != null)
+			spawnNote();
 	}
 
 	function sortByShit(Obj1:Note, Obj2:Note):Int
@@ -1734,6 +1759,7 @@ class PlayState extends MusicBeatState
 					var fuckYouRect = new FlxRect(0, middleOfNote - daNote.y, daNote.width / daNote.scale.x, daNote.height / daNote.scale.y);
 					fuckYouRect.y /= daNote.scale.y;
 					fuckYouRect.height -= fuckYouRect.y; 
+					//fuckYouRect.y = daNote.frameHeight - fuckYouRect.height;
 														//fuck you clipping
 					daNote.clipRect = fuckYouRect;
 				}
@@ -1839,7 +1865,7 @@ class PlayState extends MusicBeatState
 				altAnim = '-alt';
 
 			if (!daNote.badNoteType)
-				cpu.playAnim('sing' + sDir[noteData] + altAnim, true);
+				cpu.playAnim('sing' + sDir[maniaToChange][noteData] + altAnim, true);
 
 			if (flipped)
 			{
@@ -1902,7 +1928,7 @@ class PlayState extends MusicBeatState
 			if (daNote.alt)
 				altAnim = '-alt';
 
-			gf.playAnim('sing' + sDir[noteData] + altAnim, true);
+			gf.playAnim('sing' + sDir[maniaToChange][noteData] + altAnim, true);
 			gf.holdTimer = 0;
 
 			if (SONG.needsVoices)
@@ -2044,7 +2070,7 @@ class PlayState extends MusicBeatState
 
 
 
-		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause)
+		if (controls.PAUSE && startedCountdown && canPause)
 		{
 
 			persistentUpdate = false;
@@ -2139,6 +2165,8 @@ class PlayState extends MusicBeatState
 
 		if (startingSong)
 		{
+			if (unspawnNotes[0] != null)
+				spawnNote();
 			if (startedCountdown)
 			{
 				Conductor.songPosition += FlxG.elapsed * 1000;
@@ -2250,7 +2278,7 @@ class PlayState extends MusicBeatState
 			#end
 		}
 
-		if (unspawnNotes[0] != null) //TODO fix unspawned notes to prevent overflows
+		/*if (unspawnNotes[0] != null) //TODO fix unspawned notes to prevent overflows
 		{
 			if (unspawnNotes[0].strumTime - Conductor.songPosition < 3500)
 			{
@@ -2266,29 +2294,7 @@ class PlayState extends MusicBeatState
 				var index:Int = unspawnNotes.indexOf(dunceNote);
 				unspawnNotes.splice(index, 1);
 			}
-		}
-
-		switch(maniaToChange)
-		{
-			case 0: 
-				sDir = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
-			case 1: 
-				sDir = ['LEFT', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'RIGHT'];
-			case 2: 
-				sDir = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
-			case 3: 
-				sDir = ['LEFT', 'DOWN', 'UP', 'UP', 'RIGHT'];
-			case 4: 
-				sDir = ['LEFT', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'RIGHT'];
-			case 5: 
-				sDir = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
-			case 6: 
-				sDir = ['UP'];
-			case 7: 
-				sDir = ['LEFT', 'RIGHT'];
-			case 8:
-				sDir = ['LEFT', 'UP', 'RIGHT'];
-		}
+		}*/
 
 
 		if (generatedMusic)
@@ -2323,8 +2329,15 @@ class PlayState extends MusicBeatState
 			resetBabyArrowAnim(cpuStrums);
 
 
+		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
+
 		if (!inCutscene)
+		{
+			if (gamepad != null)
+				gamepadCheck(gamepad);
 			keyShit();
+		}
+			
 
 		#if debug
 		if (FlxG.keys.justPressed.ONE)
@@ -2379,7 +2392,11 @@ class PlayState extends MusicBeatState
 			{
 				var difficulty:String = "";
 
+				#if sys
 				var formmatedShit = CoolUtil.getSongFromJsons(PlayState.storyPlaylist[0].toLowerCase(), storyDifficulty);
+				#else
+				var formmatedShit = Highscore.formatSong(PlayState.storyPlaylist[0].toLowerCase(), storyDifficulty);
+				#end
 
 				trace('LOADING NEXT SONG');
 				trace(PlayState.storyPlaylist[0].toLowerCase() + difficulty);
@@ -2606,7 +2623,6 @@ class PlayState extends MusicBeatState
 
 	private function keyShit():Void
 	{
-
 		// HOLDS, check for sustain notes
 		if ((keys.contains(true) || P2keys.contains(true))&& /*!boyfriend.stunned && */ generatedMusic)
 		{
@@ -2634,8 +2650,6 @@ class PlayState extends MusicBeatState
 						player2.dance();
 				}
 		}
-
-
 		if (multiplayer)
 		{
 			strumPressCheck(playerStrums, keys);
@@ -2646,6 +2660,49 @@ class PlayState extends MusicBeatState
 		else
 			strumPressCheck(playerStrums, keys);
 
+	}
+
+	private function gamepadCheck(gamepad:FlxGamepad):Void
+	{
+		var binds:Array<String> = CoolUtil.gamepadBindCheck(maniaToChange);
+		for (i in 0...binds.length) //im suprised this worked first try without any issues
+		{
+			var data = -1;
+			var input = FlxGamepadInputID.fromString(binds[i]);
+			if (gamepad.checkStatus(input, JUST_PRESSED))
+			{
+				data = i;
+				if (data != -1)
+					keys[data] = true;
+				normalInputSystem(data, 1);
+			}
+			else if (gamepad.checkStatus(input, JUST_RELEASED))
+			{
+				data = i;
+				if (data != -1)
+					keys[data] = false;
+			}
+
+
+		}
+		/*if (gamepad.anyJustReleased)
+		{
+			for (i in 0...binds.length)
+			{
+				var data = -1;
+				var input = FlxGamepadInputID.fromString(binds[i]);
+				if (gamepad.checkStatus(input, JUST_RELEASED))
+				{
+					data = i;
+				}
+				if (data != -1)
+					keys[data] = false;
+			}
+		}
+		if (gamepad.anyJustPressed)
+		{
+
+		}*/
 	}
 
 	function noteMiss(direction:Int = 1, daNote:Note, playernum:Int = 1):Void
@@ -2679,18 +2736,18 @@ class PlayState extends MusicBeatState
 							// FlxG.sound.play(Paths.sound('missnote1'), 1, false);
 							// FlxG.log.add('played imss note');
 							if (daNote.mustPress)
-								player.playAnim('sing' + sDir[direction] + 'miss', true);
+								player.playAnim('sing' + sDir[maniaToChange][direction] + 'miss', true);
 							else
 							{
 								if (multiplayer)
 								{
 									player2.color = 0x00303f97;
-									player2.playAnim('sing' + sDir[direction], true);
+									player2.playAnim('sing' + sDir[maniaToChange][direction], true);
 								}
 								else
 								{
 									player.color = 0x00303f97;
-									player.playAnim('sing' + sDir[direction], true);
+									player.playAnim('sing' + sDir[maniaToChange][direction], true);
 								}
 							}
 				
@@ -2741,18 +2798,18 @@ class PlayState extends MusicBeatState
 							// FlxG.sound.play(Paths.sound('missnote1'), 1, false);
 							// FlxG.log.add('played imss note');
 							if (daNote.mustPress)
-								player.playAnim('sing' + sDir[direction] + 'miss', true);
+								player.playAnim('sing' + sDir[maniaToChange][direction] + 'miss', true);
 							else
 							{
 								if (multiplayer)
 								{
 									player2.color = 0x00303f97;
-									player2.playAnim('sing' + sDir[direction], true);
+									player2.playAnim('sing' + sDir[maniaToChange][direction], true);
 								}
 								else
 								{
 									player.color = 0x00303f97;
-									player.playAnim('sing' + sDir[direction], true);
+									player.playAnim('sing' + sDir[maniaToChange][direction], true);
 								}
 							}
 				
@@ -2804,18 +2861,18 @@ class PlayState extends MusicBeatState
 			
 						FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 						if (playernum == 1 && !flipped)
-							player.playAnim('sing' + sDir[direction] + 'miss', true);
+							player.playAnim('sing' + sDir[maniaToChange][direction] + 'miss', true);
 						else
 						{
 							if (multiplayer)
 							{
 								player2.color = 0x00303f97;
-								player2.playAnim('sing' + sDir[direction], true);
+								player2.playAnim('sing' + sDir[maniaToChange][direction], true);
 							}
 							else
 							{
 								player.color = 0x00303f97;
-								player.playAnim('sing' + sDir[direction], true);	
+								player.playAnim('sing' + sDir[maniaToChange][direction], true);	
 							}
 						}
 						scoreTxt.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.RED, LEFT, OUTLINE, FlxColor.BLACK);
@@ -2858,18 +2915,18 @@ class PlayState extends MusicBeatState
 				
 							FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 							if (playernum == 1 && !flipped)
-								player.playAnim('sing' + sDir[direction] + 'miss', true);
+								player.playAnim('sing' + sDir[maniaToChange][direction] + 'miss', true);
 							else
 							{
 								if (multiplayer)
 								{
 									player2.color = 0x00303f97;
-									player2.playAnim('sing' + sDir[direction], true);
+									player2.playAnim('sing' + sDir[maniaToChange][direction], true);
 								}
 								else
 								{
 									player.color = 0x00303f97;
-									player.playAnim('sing' + sDir[direction], true);	
+									player.playAnim('sing' + sDir[maniaToChange][direction], true);	
 								}
 							}
 							scoreTxt.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.RED, LEFT, OUTLINE, FlxColor.BLACK);
@@ -2931,7 +2988,7 @@ class PlayState extends MusicBeatState
 
 			if (playernum == 1)
 			{
-				player.playAnim('sing' + sDir[note.noteData] + altAnim, true);
+				player.playAnim('sing' + sDir[maniaToChange][note.noteData] + altAnim, true);
 				player.holdTimer = 0;
 				player.noteCamMovement = noteCamMovementShit(note.noteData, 1);
 				if (note.drain && multiplayer)
@@ -2944,7 +3001,7 @@ class PlayState extends MusicBeatState
 			}
 			else
 			{
-				player2.playAnim('sing' + sDir[note.noteData] + altAnim, true);
+				player2.playAnim('sing' + sDir[maniaToChange][note.noteData] + altAnim, true);
 				player2.holdTimer = 0;
 				player2.noteCamMovement = noteCamMovementShit(note.noteData, 0);
 				if (note.drain)
@@ -3290,7 +3347,7 @@ class PlayState extends MusicBeatState
 		}
 		if (SaveData.noteMovements)
 		{
-			switch(sDir[data])
+			switch(sDir[maniaToChange][data])
 			{
 				case "LEFT": 
 					if (thing[0] > -100)
@@ -3423,6 +3480,26 @@ class PlayState extends MusicBeatState
 		return healthToCheck;
 	}
 
+	function spawnNote()
+	{
+		if (unspawnNotes[0].strumTime - Conductor.songPosition < 3500)
+		{
+			var dunceNote:Note = unspawnNotes[0];
+			if (dunceNote.isGFNote)
+				P3notes.add(dunceNote);
+			else if (dunceNote.mustPress)
+				P1notes.add(dunceNote);
+			else if (!dunceNote.mustPress)
+				P2notes.add(dunceNote);
+			
+			var index:Int = unspawnNotes.indexOf(dunceNote);
+			unspawnNotes.splice(index, 1);
+		}
+		if (unspawnNotes[0] != null)
+			if (unspawnNotes[0].strumTime - Conductor.songPosition < 3500)
+				spawnNote(); //loop it lol
+	}
+
 
 
 	
@@ -3448,6 +3525,11 @@ class PlayState extends MusicBeatState
 		StagePiece.daBeat = curBeat;
 		for (piece in dancingStagePieces.members)
 			piece.dance();
+
+
+
+		if (unspawnNotes[0] != null)
+			spawnNote();
 
 		if (currentSection != null)
 		{

@@ -14,13 +14,14 @@ import flixel.system.FlxSound;
 
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import openfl.utils.Assets as OpenFlAssets;
 
 #if sys
 import sys.io.File;
 import sys.FileSystem;
+#end
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
-#end
 import haxe.Json;
 import haxe.format.JsonParser;
 
@@ -443,7 +444,11 @@ class StagePiece extends FlxSprite
 
 
                 default: 
+                    #if sys
                     var rawJson = File.getContent(Paths.imageJson("customStagePieces/" + part + "/data"));
+                    #else
+                    var rawJson = Assets.getText(Paths.imageJson("customStagePieces/" + part + "/data"));
+                    #end
 
 				    var json:PieceFile = cast Json.parse(rawJson);
 
@@ -468,7 +473,12 @@ class StagePiece extends FlxSprite
                             xml = CacheShit.xmls[xmlPath];
                         else
                         {
+                            
+                            #if sys
                             xml = File.getContent(xmlPath);
+                            #else
+                            xml = Assets.getText(xmlPath);
+                            #end
                             CacheShit.SaveXml(xmlPath, xml);
                         }
                         var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml);
@@ -711,7 +721,11 @@ class StagePiece extends FlxSprite
                         return;
     
                     daStage = stage;
+                    #if sys
                     var rawJson = File.getContent("assets/data/customStages.json");
+                    #else
+                    var rawJson = Assets.getText("assets/data/customStages.json");
+                    #end
                     var json:PlayState.Stages = cast Json.parse(rawJson);
     
                     if (json.stageList.length != 0)

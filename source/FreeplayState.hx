@@ -16,8 +16,9 @@ import flixel.FlxSubState;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
-import flash.media.Sound;
 #end
+import flash.media.Sound;
+
 using StringTools;
 
 class FreeplayState extends MusicBeatState
@@ -62,6 +63,7 @@ class FreeplayState extends MusicBeatState
 			var data:Array<String> = initSonglist[i].split(':');
 			songs.push(new SongMetadata(data[0], Std.parseInt(data[2]), data[1]));
 			//customSongCheck.push(false);
+			#if sys
 			var path = "assets/data/charts/" + data[0];
 			if (FileSystem.exists(path))
 			{
@@ -117,6 +119,10 @@ class FreeplayState extends MusicBeatState
 				trace(diffTexts);
 				
 			}
+			#else
+			var diffTexts = ["EASY", "NORMAL", "HARD", "ALT"];
+			diffTextArrays.push(diffTexts);
+			#end
 
 		}
 		
@@ -320,11 +326,11 @@ class FreeplayState extends MusicBeatState
 		var downP = controls.DOWN_P;
 		var accepted = controls.ACCEPT;
 
-		if (FlxG.keys.justPressed.UP)
+		if (upP)
 		{
 			changeSelection(-1);
 		}
-		if (FlxG.keys.justPressed.DOWN)
+		if (downP)
 		{
 			changeSelection(1);
 		}
@@ -335,9 +341,9 @@ class FreeplayState extends MusicBeatState
 			openSubState(new QuickOptions());
 		}
 
-		if (FlxG.keys.justPressed.LEFT)
+		if (controls.LEFT_P)
 			changeDiff(-1);
-		if (FlxG.keys.justPressed.RIGHT)
+		if (controls.RIGHT_P)
 			changeDiff(1);
 
 		if (controls.BACK)
@@ -353,7 +359,11 @@ class FreeplayState extends MusicBeatState
 			if (FlxG.keys.pressed.SHIFT)
 			{
 				Main.editor = true;
+				#if sys
 				var poop:String = CoolUtil.getSongFromJsons(songs[curSelected].songName.toLowerCase(), curDifficulty);
+				#else
+				var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
+				#end
 				trace(poop);
 	
 				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
@@ -365,7 +375,11 @@ class FreeplayState extends MusicBeatState
 			}
 			else
 			{
+				#if sys
 				var poop:String = CoolUtil.getSongFromJsons(songs[curSelected].songName.toLowerCase(), curDifficulty);
+				#else
+				var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
+				#end
 				trace(poop);
 	
 				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());

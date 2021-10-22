@@ -5,9 +5,10 @@ import flixel.FlxSprite;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
+#end
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
-#end
+import openfl.utils.Assets as OpenFlAssets;
 
 class HealthIcon extends FlxSprite
 {
@@ -23,6 +24,7 @@ class HealthIcon extends FlxSprite
 		super();
 
 		var path = "assets/images/characters/" + char + "/icon.png";
+		#if sys
 		if (FileSystem.exists(path))
 		{
 			var iconGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path));
@@ -30,6 +32,15 @@ class HealthIcon extends FlxSprite
 			loadGraphic(iconGraphic, true, 150, 150);
 			animation.add(char, [0, 1], 0, false, isPlayer);
 		}
+		#else 
+		if (OpenFlAssets.exists(path))
+			{
+				var iconGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path));
+				trace("loading da custom icon");
+				loadGraphic(iconGraphic, true, 150, 150);
+				animation.add(char, [0, 1], 0, false, isPlayer);
+			}
+		#end
 		else
 		{
 			trace("loading da regaulr icon");

@@ -36,9 +36,7 @@ import openfl.utils.ByteArray;
 
 import lime.media.openal.AL;
 
-#if sys
 import flash.media.Sound;
-#end
 
 using StringTools;
 
@@ -106,7 +104,7 @@ class ChartingState extends MusicBeatState
 	var player1:Boyfriend;
 	var gf:Character;
 	private var gfSpeed:Int = 1;
-	private var sDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+	//private var sDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 	private var GFsDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 
 	var leftIcon:HealthIcon;
@@ -969,28 +967,6 @@ class ChartingState extends MusicBeatState
 			add(gridBlackLineBottom);
 		}
 
-		switch(_song.mania)
-		{
-			case 0: 
-				sDir = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
-			case 1: 
-				sDir = ['LEFT', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'RIGHT'];
-			case 2: 
-				sDir = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
-			case 3: 
-				sDir = ['LEFT', 'DOWN', 'UP', 'UP', 'RIGHT'];
-			case 4: 
-				sDir = ['LEFT', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'RIGHT'];
-			case 5: 
-				sDir = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
-			case 6: 
-				sDir = ['UP'];
-			case 7: 
-				sDir = ['LEFT', 'RIGHT'];
-			case 8:
-				sDir = ['LEFT', 'UP', 'RIGHT'];
-		}
-
 		gridBlackLine.x = gridBG.x + GF_GRID + (gridBG.width - GF_GRID) / 2;
 		gridBlackLineLeft.x = gridBG.x + GF_GRID;
 		gridBlackLineRight.x = gridBG.x + gridBG.width;
@@ -1035,12 +1011,12 @@ class ChartingState extends MusicBeatState
 						}
 						else if (!note.mustPress)
 						{
-							player2.playAnim('sing' + sDir[note.noteData], true);
+							player2.playAnim('sing' + PlayState.sDir[_song.mania][note.noteData], true);
 							player2.holdTimer = 0;
 						}
 						else if (note.mustPress)
 						{
-							player1.playAnim('sing' + sDir[note.noteData], true);
+							player1.playAnim('sing' + PlayState.sDir[_song.mania][note.noteData], true);
 							player1.holdTimer = 0;
 						}
 

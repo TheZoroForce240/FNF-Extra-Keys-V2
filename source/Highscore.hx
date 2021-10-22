@@ -13,8 +13,12 @@ class Highscore
 
 	public static function saveScore(song:String, score:Int = 0, ?diff:Int = 0):Void
 	{
+		
+		#if sys
 		var daSong:String = CoolUtil.getSongFromJsons(song, diff);
-
+		#else
+		var daSong:String = formatSong(song, diff);
+		#end
 
 		#if !switch
 		NGio.postScore(score, song);
@@ -38,7 +42,11 @@ class Highscore
 		#end
 
 
+		#if sys
 		var daWeek:String = CoolUtil.getSongFromJsons('week' + week, diff);
+		#else
+		var daWeek:String = formatSong('week' + week, diff);
+		#end
 
 		if (songScores.exists(daWeek))
 		{
@@ -47,6 +55,20 @@ class Highscore
 		}
 		else
 			setScore(daWeek, score);
+	}
+
+	public static function formatSong(song:String, diff:Int):String
+	{
+		var daSong:String = song;
+
+		if (diff == 0)
+			daSong += '-easy';
+		else if (diff == 2)
+			daSong += '-hard';
+		else if (diff == 3)
+			daSong += '-alt';
+
+		return daSong;
 	}
 
 	/**
@@ -62,18 +84,33 @@ class Highscore
 
 	public static function getScore(song:String, diff:Int):Int
 	{
+		#if sys
 		if (!songScores.exists(CoolUtil.getSongFromJsons(song, diff)))
 			setScore(CoolUtil.getSongFromJsons(song, diff), 0);
 
 		return songScores.get(CoolUtil.getSongFromJsons(song, diff));
+		#else
+		if (!songScores.exists(formatSong(song, diff)))
+			setScore(formatSong(song, diff), 0);
+
+		return songScores.get(formatSong(song, diff));
+		#end
 	}
 
 	public static function getWeekScore(week:Int, diff:Int):Int
 	{
+		#if sys
 		if (!songScores.exists(CoolUtil.getSongFromJsons('week' + week, diff)))
 			setScore(CoolUtil.getSongFromJsons('week' + week, diff), 0);
 
 		return songScores.get(CoolUtil.getSongFromJsons('week' + week, diff));
+		#else
+		if (!songScores.exists(formatSong('week' + week, diff)))
+			setScore(formatSong('week' + week, diff), 0);
+
+		return songScores.get(formatSong('week' + week, diff));
+		#end
+
 	}
 
 	public static function load():Void

@@ -2,9 +2,8 @@ package;
 
 import flixel.FlxG;
 
-#if sys
 import flixel.graphics.FlxGraphic;
-#end
+
 
 
 //so i saw a tweet from kade dev about notes being shit and getting the xml for every note or something

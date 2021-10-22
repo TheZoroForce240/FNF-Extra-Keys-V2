@@ -17,12 +17,14 @@ class SaveData
     public static var casual:Bool = false;
 
     public static var randomNotes:Bool = false;
-    public static var randomSection:Bool = true;
+    //public static var randomSection:Bool = true;
     public static var randomNoteSpeed:Bool = false;
     public static var randomNoteVelocity:Bool = false;
     public static var flip:Bool = false;
     public static var Hellchart:Bool = false;
     public static var noteMovements:Bool = false;
+    public static var speedScaling:Bool = false;
+    public static var randomizationMode:String = "Normal";
 
 
     //hue, saturation, brightness, asset
@@ -74,13 +76,16 @@ class SaveData
         if (FlxG.save.data.noteMovements == null)
 			FlxG.save.data.noteMovements = false;
 
+        if (FlxG.save.data.speedScaling == null)
+			FlxG.save.data.speedScaling = false;
+
         /////////////////////////////////////////////////////////////////
 
         if (FlxG.save.data.randomNotes == null)
 			FlxG.save.data.randomNotes = false;
 
-		if (FlxG.save.data.randomSection == null)
-			FlxG.save.data.randomSection = true;
+        if (FlxG.save.data.randomizationMode == null)
+			FlxG.save.data.randomizationMode = "Normal";
 
         if (FlxG.save.data.flip == null)
 			FlxG.save.data.flip = false;
@@ -131,10 +136,13 @@ class SaveData
         FlxG.save.data.fps = fps;
         FlxG.save.data.casual = casual;
         FlxG.save.data.noteMovements = noteMovements;
+        FlxG.save.data.speedScaling = speedScaling;
+       
+
 
         FlxG.save.data.randomNotes = randomNotes;
-        FlxG.save.data.randomSection = randomSection;
         FlxG.save.data.flip = flip;
+        FlxG.save.data.randomizationMode = randomizationMode;
         FlxG.save.data.randomNoteSpeed = randomNoteSpeed;
         FlxG.save.data.randomNoteVelocity = randomNoteVelocity;
         FlxG.save.data.Hellchart = Hellchart;
@@ -164,13 +172,14 @@ class SaveData
         middlescroll = FlxG.save.data.middlescroll;
         multiplayer = FlxG.save.data.multiplayer;
         noteMovements = FlxG.save.data.noteMovements;
+        speedScaling = FlxG.save.data.speedScaling;
 
         ScrollSpeed = FlxG.save.data.ScrollSpeed;
         fps = FlxG.save.data.fps;
         casual = FlxG.save.data.casual;
 
         randomNotes = FlxG.save.data.randomNotes;
-        randomSection = FlxG.save.data.randomSection;
+        randomizationMode = FlxG.save.data.randomizationMode;
         flip = FlxG.save.data.flip;
         randomNoteSpeed = FlxG.save.data.randomNoteSpeed;
         randomNoteVelocity = FlxG.save.data.randomNoteVelocity;
@@ -196,14 +205,11 @@ class SaveData
         FlxG.save.data.noteSplash = true;
         FlxG.save.data.middlescroll = false;
         FlxG.save.data.randomNotes = false;
-        FlxG.save.data.randomSection = true;
         FlxG.save.data.mania = 0;
-        FlxG.save.data.randomMania = 0;
         FlxG.save.data.flip = false;
-        FlxG.save.data.bothSide = false;
-        FlxG.save.data.randomNoteTypes = 0;
         FlxG.save.data.multiplayer = false;
         FlxG.save.data.noteMovements = false;
+        FlxG.save.data.speedScaling = false;
         FlxG.save.data.purple = [0, 0, 0, 0];
         FlxG.save.data.blue = [0, 0, 0, 0];
         FlxG.save.data.green = [0, 0, 0, 0];
@@ -265,6 +271,29 @@ class SaveData
         FlxG.save.data.P2L2Bind = "U";
         FlxG.save.data.P2D1Bind = "I";
         FlxG.save.data.P2R2Bind = "O";
+
+
+        FlxG.save.data.GupBind = "DPAD_UP";
+        FlxG.save.data.GdownBind = "DPAD_DOWN";
+        FlxG.save.data.GleftBind = "DPAD_LEFT";
+        FlxG.save.data.GrightBind = "DPAD_RIGHT";
+
+        FlxG.save.data.GN0Bind = "DPAD_LEFT";
+        FlxG.save.data.GN1Bind = "DPAD_DOWN";
+        FlxG.save.data.GN2Bind = "DPAD_UP";
+        FlxG.save.data.GN3Bind = "DPAD_RIGHT";
+        FlxG.save.data.GN4Bind = "LEFT_TRIGGER";
+        FlxG.save.data.GN5Bind = "X";
+        FlxG.save.data.GN6Bind = "A";
+        FlxG.save.data.GN7Bind = "Y";
+        FlxG.save.data.GN8Bind = "B";
+
+        FlxG.save.data.GL1Bind = "DPAD_LEFT";
+        FlxG.save.data.GU1Bind = "DPAD_DOWN";
+        FlxG.save.data.GR1Bind = "DPAD_RIGHT";
+        FlxG.save.data.GL2Bind = "X";
+        FlxG.save.data.GD1Bind = "A";
+        FlxG.save.data.GR2Bind = "B";
 
         PlayerSettings.player1.controls.loadKeyBinds();
 
@@ -355,6 +384,49 @@ class SaveData
                 FlxG.save.data.P2D1Bind = "I";
             if(FlxG.save.data.P2R2Bind == null)
                 FlxG.save.data.P2R2Bind = "O";
+
+            //////////////////////////////////// P1 Gamepad, theres so many if statements ahhhhhhhhhh
+
+            if(FlxG.save.data.GupBind == null)
+                FlxG.save.data.GupBind = "DPAD_UP";
+            if(FlxG.save.data.GdownBind == null)
+                FlxG.save.data.GdownBind = "DPAD_DOWN";
+            if(FlxG.save.data.GleftBind == null)
+                FlxG.save.data.GleftBind = "DPAD_LEFT";
+            if(FlxG.save.data.GrightBind == null)
+                FlxG.save.data.GrightBind = "DPAD_RIGHT";
+            
+            if(FlxG.save.data.GN0Bind == null)
+                FlxG.save.data.GN0Bind = "DPAD_LEFT";
+            if(FlxG.save.data.GN1Bind == null)
+                FlxG.save.data.GN1Bind = "DPAD_DOWN";
+            if(FlxG.save.data.GN2Bind == null)
+                FlxG.save.data.GN2Bind = "DPAD_UP";
+            if(FlxG.save.data.GN3Bind == null)
+                FlxG.save.data.GN3Bind = "DPAD_RIGHT";
+            if(FlxG.save.data.GN4Bind == null)
+                FlxG.save.data.GN4Bind = "LEFT_TRIGGER";
+            if(FlxG.save.data.GN5Bind == null)
+                FlxG.save.data.GN5Bind = "X";
+            if(FlxG.save.data.GN6Bind == null)
+                FlxG.save.data.GN6Bind = "A";
+            if(FlxG.save.data.GN7Bind == null)
+                FlxG.save.data.GN7Bind = "Y";
+            if(FlxG.save.data.GN8Bind == null)
+                FlxG.save.data.GN8Bind = "B";
+            
+            if(FlxG.save.data.GL1Bind == null)
+                FlxG.save.data.GL1Bind = "DPAD_LEFT";
+            if(FlxG.save.data.GU1Bind == null)
+                FlxG.save.data.GU1Bind = "DPAD_DOWN";
+            if(FlxG.save.data.GR1Bind == null)
+                FlxG.save.data.GR1Bind = "DPAD_RIGHT";
+            if(FlxG.save.data.GL2Bind == null)
+                FlxG.save.data.GL2Bind = "X";
+            if(FlxG.save.data.GD1Bind == null)
+                FlxG.save.data.GD1Bind = "A";
+            if(FlxG.save.data.GR2Bind == null)
+                FlxG.save.data.GR2Bind = "B";
         }    
     public static function updateColorArray(mania:Int):Void //its better than having shit loads of case statements for every single thing
     {

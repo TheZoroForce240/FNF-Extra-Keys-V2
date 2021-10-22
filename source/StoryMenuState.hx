@@ -250,12 +250,12 @@ class StoryMenuState extends MusicBeatState
 		{
 			if (!selectedWeek)
 			{
-				if (FlxG.keys.justPressed.UP)
+				if (controls.UP_P)
 				{
 					changeWeek(-1);
 				}
 
-				if (FlxG.keys.justPressed.DOWN)
+				if (controls.DOWN_P)
 				{
 					changeWeek(1);
 				}
@@ -270,9 +270,9 @@ class StoryMenuState extends MusicBeatState
 				else
 					leftArrow.animation.play('idle');
 
-				if (FlxG.keys.justPressed.RIGHT)
+				if (controls.RIGHT_P)
 					changeDifficulty(1);
-				if (FlxG.keys.justPressed.LEFT)
+				if (controls.LEFT_P)
 					changeDifficulty(-1);
 			}
 
@@ -313,7 +313,11 @@ class StoryMenuState extends MusicBeatState
 			PlayState.isStoryMode = true;
 			selectedWeek = true;
 
+			#if sys
 			var poop:String = CoolUtil.getSongFromJsons(PlayState.storyPlaylist[0].toLowerCase(), curDifficulty);
+			#else
+			var poop:String = Highscore.formatSong(PlayState.storyPlaylist[0].toLowerCase(), curDifficulty);
+			#end
 
 			PlayState.storyDifficulty = curDifficulty;
 

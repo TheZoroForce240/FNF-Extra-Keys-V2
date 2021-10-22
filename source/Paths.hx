@@ -22,8 +22,10 @@ class Paths
 
 	static var currentLevel:String;
 
+	#if sys
 	public static var loadedImages:Array<FlxGraphic> = [];
 	public static var loadedImagePath:Array<String> = [];
+	#end
 
 	static public function setCurrentLevel(name:String)
 	{
@@ -155,7 +157,11 @@ class Paths
 		else
 		{
 			if (isCustom)
+				#if sys
 				xml = File.getContent('assets/images/$key.xml');
+				#else
+				xml = file('images/$key.xml', library);
+				#end
 			else
 				xml = file('images/$key.xml', library);
 
@@ -182,6 +188,7 @@ class Paths
 
 	static private function checkForImage(path:String)
 	{
+		#if sys
 		if(FileSystem.exists(image(path)))
 		{
 			if (CacheShit.images[path] == null)
@@ -196,6 +203,7 @@ class Paths
 			
 
 		}
+		#end
 		return null;
 	}
 

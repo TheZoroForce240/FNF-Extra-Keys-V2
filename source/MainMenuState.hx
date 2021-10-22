@@ -23,8 +23,8 @@ import flixel.FlxSubState;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
-import flash.media.Sound;
 #end
+import flash.media.Sound;
 
 using StringTools;
 
@@ -112,7 +112,7 @@ class MainMenuState extends MusicBeatState
 
 		FlxG.camera.follow(camFollow, null, 0.06);
 
-		var versionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, "v" + Application.current.meta.get('version'), 12);
+		var versionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, Application.current.meta.get('version'), 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
@@ -148,7 +148,7 @@ class MainMenuState extends MusicBeatState
 
 		if (!selectedSomethin)
 		{
-			if (FlxG.keys.justPressed.UP)
+			if (controls.UP_P)
 			{
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changeItem(-1);
@@ -159,7 +159,7 @@ class MainMenuState extends MusicBeatState
 				musicShit();
 			}
 
-			if (FlxG.keys.justPressed.DOWN)
+			if (controls.DOWN_P)
 			{
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changeItem(1);

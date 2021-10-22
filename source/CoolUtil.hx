@@ -3,6 +3,7 @@ package;
 import lime.utils.Assets;
 import flixel.FlxG;
 import haxe.Json;
+import openfl.utils.Assets as OpenFlAssets;
 
 #if sys
 import sys.io.File;
@@ -13,9 +14,9 @@ using StringTools;
 
 class CoolUtil
 {
-	public static var difficultyArray:Array<String> = ['EASY', "NORMAL", "HARD"]; //old stinky one
+	public static var difficultyArray:Array<String> = ['EASY', "NORMAL", "HARD", "ALT"]; //old stinky one
 
-	public static var CurSongDiffs:Array<String> = ['EASY', "NORMAL", "HARD"];
+	public static var CurSongDiffs:Array<String> = ['EASY', "NORMAL", "HARD", 'ALT'];
 
 	public static function difficultyString():String
 	{
@@ -24,7 +25,11 @@ class CoolUtil
 
 	public static function coolTextFile(path:String):Array<String>
 	{
+		#if sys
 		var daList:Array<String> = File.getContent(path).trim().split('\n');
+		#else
+		var daList:Array<String> = Assets.getText(path).trim().split('\n');
+		#end
 
 		for (i in 0...daList.length)
 		{
@@ -39,6 +44,7 @@ class CoolUtil
 		var path = "assets/data/charts/" + song;
 		if (customChart)
 			path = "assets/data/customChart/" + song;
+		#if sys
 		if (FileSystem.exists(path))
 		{
 			var diffs:Array<String> = [];
@@ -121,6 +127,9 @@ class CoolUtil
 		}
 		else 
 			return "tutorial"; //in case it dont work lol
+		#else
+			//do nothing lol
+		#end
 	}
 
 	public static function bindCheck(mania:Int)
@@ -175,6 +184,32 @@ class CoolUtil
 					P2binds = [FlxG.save.data.P2leftBind, FlxG.save.data.P2N4Bind, FlxG.save.data.P2rightBind];
 			}
 			return P2binds;
+		}
+	public static function gamepadBindCheck(mania:Int)
+		{
+			var binds:Array<String> = [FlxG.save.data.GleftBind,FlxG.save.data.GdownBind, FlxG.save.data.GupBind, FlxG.save.data.GrightBind];
+			switch(mania)
+			{
+				case 0: 
+					binds = [FlxG.save.data.GleftBind,FlxG.save.data.GdownBind, FlxG.save.data.GupBind, FlxG.save.data.GrightBind];
+				case 1: 
+					binds = [FlxG.save.data.GL1Bind, FlxG.save.data.GU1Bind, FlxG.save.data.GR1Bind, FlxG.save.data.GL2Bind, FlxG.save.data.GD1Bind, FlxG.save.data.GR2Bind];
+				case 2: 
+					binds = [FlxG.save.data.GN0Bind, FlxG.save.data.GN1Bind, FlxG.save.data.GN2Bind, FlxG.save.data.GN3Bind, FlxG.save.data.GN4Bind, FlxG.save.data.GN5Bind, FlxG.save.data.GN6Bind, FlxG.save.data.GN7Bind, FlxG.save.data.GN8Bind];
+				case 3: 
+					binds = [FlxG.save.data.GleftBind,FlxG.save.data.GdownBind, FlxG.save.data.GN4Bind, FlxG.save.data.GupBind, FlxG.save.data.GrightBind];
+				case 4: 
+					binds = [FlxG.save.data.GL1Bind, FlxG.save.data.GU1Bind, FlxG.save.data.GR1Bind,FlxG.save.data.GN4Bind, FlxG.save.data.GL2Bind, FlxG.save.data.GD1Bind, FlxG.save.data.GR2Bind];
+				case 5: 
+					binds = [FlxG.save.data.GN0Bind, FlxG.save.data.GN1Bind, FlxG.save.data.GN2Bind, FlxG.save.data.GN3Bind, FlxG.save.data.GN5Bind, FlxG.save.data.GN6Bind, FlxG.save.data.GN7Bind, FlxG.save.data.GN8Bind];
+				case 6: 
+					binds = [FlxG.save.data.GN4Bind];
+				case 7:
+					binds = [FlxG.save.data.GleftBind, FlxG.save.data.GrightBind];
+				case 8: 
+					binds = [FlxG.save.data.GleftBind, FlxG.save.data.GN4Bind, FlxG.save.data.rightBind];
+			}
+			return binds;
 		}
 
 	public static function complexAssKeybindSaving(maniaToChange:Int, key:String, curSelectedNote:Int, player:Int = 1) //wait shouldnt i put this in save data?? who cares lol

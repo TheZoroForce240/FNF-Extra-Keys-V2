@@ -87,7 +87,17 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 	////////////////////////////////////////////////////////////
 
 	//note anim stuff
-	public static var frameN:Array<String> = ['purple', 'blue', 'green', 'red'];
+	public static var frameN:Array<Dynamic> = [ //changed so i dont have to have a ton of case statements
+		['purple', 'blue', 'green', 'red'],
+		['purple', 'green', 'red', 'yellow', 'blue', 'dark'],
+		['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'],
+		['purple', 'blue', 'white', 'green', 'red'],
+		['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'],
+		['purple', 'blue', 'green', 'red', 'yellow', 'violet', 'darkred', 'dark'],
+		['white'],
+		['purple', 'red'],
+		['purple', 'white', 'red']
+	];
 	var GFframeN:Array<String> = ['purple', 'blue', 'green', 'red']; //gf cant have more than 4k
 
 	////////////////////////////////////////////////////////////
@@ -165,7 +175,8 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 		if (SaveData.randomNoteSpeed)
 			speed = FlxMath.roundDecimal(FlxG.random.float(2.2, 3.8), 2);
 
-		speed = FlxMath.roundDecimal((speed / 0.7) * (noteScale * scaleMulti), 2); //adjusts speed based on note size, i should make this an option at some point
+		if (SaveData.speedScaling)
+			speed = FlxMath.roundDecimal((speed / 0.7) * (noteScale * scaleMulti), 2); //adjusts speed based on note size, i should make this an option at some point
 
 		x += 50;
 		if (PlayState.SONG.mania == 2)
@@ -221,30 +232,6 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 			warningNoteType = true;
 		else if (burning || death || bob || poison)
 			badNoteType = true;
-
-
-		switch (mania)
-		{
-			case 0: 
-				frameN = ['purple', 'blue', 'green', 'red'];
-			case 1: 
-				frameN = ['purple', 'green', 'red', 'yellow', 'blue', 'dark'];
-			case 2: 
-				frameN = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
-			case 3: 
-				frameN = ['purple', 'blue', 'white', 'green', 'red'];
-			case 4: 
-				frameN = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'];
-			case 5: 
-				frameN = ['purple', 'blue', 'green', 'red', 'yellow', 'violet', 'darkred', 'dark'];
-			case 6: 
-				frameN = ['white'];
-			case 7: 
-				frameN = ['purple', 'red'];
-			case 8: 
-				frameN = ['purple', 'white', 'red'];
-
-		}
 
 		if (!_mustPress)
 		{
@@ -453,7 +440,7 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 				animation.play(GFframeN[daShit] + 'Scroll');
 			else
 			{
-				animation.play(frameN[daShit] + 'Scroll');
+				animation.play(frameN[mania][daShit] + 'Scroll');
 			}
 		}
 		/*if (isGFNote)
@@ -462,7 +449,7 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 			animation.play(frameN[(daShit - 4) + PlayState.keyAmmo[mania] % 9] + 'Scroll'); //just for chart editor*/
 		else
 		{
-			animation.play(frameN[daShit] + 'Scroll');
+			animation.play(frameN[mania][daShit] + 'Scroll');
 		}	
 			
 		noteColor = noteData;
@@ -482,7 +469,7 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 			//setGraphicSize(Std.int(width * 2));
 
 			
-			animation.play(frameN[daShit] + 'holdend');
+			animation.play(frameN[mania][daShit] + 'holdend');
 
 			updateHitbox();
 
@@ -493,7 +480,7 @@ class Note extends FlxSprite //so many vars ahhhhhhhhhhhhhhhhhh
 
 			if (prevNote.isSustainNote)
 			{
-				prevNote.animation.play(frameN[prevNote.daShit] + 'hold');
+				prevNote.animation.play(frameN[mania][prevNote.daShit] + 'hold');
 				prevNote.updateHitbox();
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (noteScale * scaleMulti));
 				prevNote.updateHitbox();

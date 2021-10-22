@@ -1,5 +1,6 @@
 package;
 
+import Controls.Control;
 import flixel.input.keyboard.FlxKey;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -11,13 +12,22 @@ import flixel.FlxSubState;
 import flixel.util.FlxColor;
 import openfl.display.FPS;
 import openfl.Lib;
+import flixel.input.gamepad.FlxGamepad;
+import flixel.input.gamepad.FlxGamepadInputID;
+import flixel.input.gamepad.FlxGamepadManager;
+import flixel.util.FlxTimer;
 
 
 
-class QuickOptions extends FlxSubState //kinda based on the keybind menu from kade engine, just wanted something simple, also a substate, so we got mid song options, kade engine is doing that now lol
+
+
+
+class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu from kade engine, just wanted something simple, also a substate, so we got mid song options, kade engine is doing that now lol
 {
     var curSelected:Int = 0;
     var waitingForInput:Bool = false;
+    var gamepadInput = false;
+    var justOpened = true; // for some reason it would open the first category when opening the menu, so i did this
 
     var daLARGEText:FlxText; 
     var infoText:FlxText;
@@ -29,6 +39,7 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
     var misc:Array<Dynamic>;
     var keybinds:Array<Dynamic>;
     var P2keybinds:Array<Dynamic>;
+    var gamepad:Array<Dynamic>;
     var randomization:Array<Dynamic>;
 
     var inCat:Bool = false;
@@ -63,11 +74,26 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
         trace(daLARGEText.x);
 
         cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+
+        new FlxTimer().start(0.1, function(tmr:FlxTimer)
+        {
+            justOpened = false;
+        });
     }
 
     override function update(elapsed:Float)
     {
-        if(FlxG.keys.justPressed.ESCAPE)
+
+        super.update(elapsed);
+
+        var upP = controls.UP_P;
+		var downP = controls.DOWN_P;
+		var accepted = controls.ACCEPT;
+        var back = controls.BACK;
+        var leftP = controls.LEFT_P;
+        var rightP = controls.RIGHT_P;
+
+        if(back)
         {
             if (waitingForInput)
             {
@@ -87,19 +113,19 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
         }
             
 
-        if (!waitingForInput)
+        if (!waitingForInput && !justOpened)
         {
-            if (FlxG.keys.justPressed.UP)
+            if (upP)
                 changeSelected(-1);
-            if (FlxG.keys.justPressed.DOWN)
+            if (downP)
                 changeSelected(1);
     
-            if (FlxG.keys.justPressed.LEFT)
+            if (leftP)
                 changeOptionSetting(-1);
-            if (FlxG.keys.justPressed.RIGHT)
+            if (rightP)
                 changeOptionSetting(1);   
     
-            if (FlxG.keys.justPressed.ENTER)
+            if (accepted)
             {
                 if (curCategory[curSelected][2] == "toggle")
                 {
@@ -128,6 +154,9 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
                         case "P2 Keybinds": 
                             curCategory = P2keybinds;
                             daCat = "P2 Keybinds";
+                        case "Gamepad Binds": 
+                            curCategory = gamepad;
+                            daCat = "Gamepad Binds";
                         case "Randomization": 
                             curCategory = randomization;
                             daCat = "Randomization";
@@ -139,18 +168,30 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
                     inCat = true;
                     createText();
                 }
-                else if (curCategory[curSelected][2] == "keybind")
+                else if (curCategory[curSelected][2] == "keybind" || curCategory[curSelected][2] == "gamepad")
                 {
                     waitingForInput = true;
+                    if (curCategory[curSelected][2] == "gamepad")
+                        gamepadInput = true;
                     createText();
                 }
             }   
         }
-        else
+        else if (waitingForInput)
         {
-            if (FlxG.keys.justPressed.ANY)
+            var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
+
+            if (FlxG.keys.justPressed.ANY || (gamepad.justPressed.ANY && gamepad != null))
             {
-                var key:String = FlxG.keys.getIsDown()[0].ID.toString(); //dont wanna add keyboard events to make this substate larger, but should work for most keys, it might break numpad though idk
+                var key:String = "F"; //press f to pay respects
+                if (!gamepadInput)
+                    key = FlxG.keys.getIsDown()[0].ID.toString(); //dont wanna add keyboard events to make this substate larger, but should work for most keys, it might break numpad though idk
+                else
+                {    
+                    if (gamepad != null)
+                        key = gamepad.firstJustPressedID().toString();
+                }
+                    
                 if (key != "BACKSPACE" || key != "ESCAPE" || key != "ENTER")
                 {
                     curCategory[curSelected][1] = key;
@@ -160,22 +201,27 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
                     createText();
                 }
                 waitingForInput = false;
+                gamepadInput = false;
+                turnOptionsIntoSaveData();
+                SaveData.saveDataCheck();
+                reloadOptions();
+                createText();
             }
         }
         
 
         if (curCategory[curSelected][1] < 1 && curCategory[curSelected][0] == "Scroll Speed") //checks
             curCategory[curSelected][1] = 1;
-        if (curCategory[curSelected][1] > 10 && curCategory[curSelected][0] == "Scroll Speed")
+        else if (curCategory[curSelected][1] > 10 && curCategory[curSelected][0] == "Scroll Speed")
             curCategory[curSelected][1] = 10;
-        if (curCategory[curSelected][1] < 60 && curCategory[curSelected][0] == "FPS Cap")
+        else if (curCategory[curSelected][1] < 60 && curCategory[curSelected][0] == "FPS Cap")
             curCategory[curSelected][1] = 60;
-        if (curCategory[curSelected][1] > 300 && curCategory[curSelected][0] == "FPS Cap")
+        else if (curCategory[curSelected][1] > 300 && curCategory[curSelected][0] == "FPS Cap")
             curCategory[curSelected][1] = 300;
             
 
 
-        super.update(elapsed);
+        
     }
 
     function exit()
@@ -195,6 +241,16 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
         }
         if (curCategory[curSelected][2] == "slider")
             curCategory[curSelected][1]+= change;
+        else if (curCategory[curSelected][2] == "mode")
+        {
+            if (curCategory[curSelected][0] == "Randomization Mode")
+            {
+                if (curCategory[curSelected][1] == "Normal")
+                    curCategory[curSelected][1] = "Section Based";
+                else
+                    curCategory[curSelected][1] = "Normal";
+            }
+        }
 
         turnOptionsIntoSaveData();
         SaveData.saveDataCheck();
@@ -236,7 +292,7 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
             //////////////////////////
             var middleThing:String = " : ";
             var extraThing:String = ""; 
-            if (curCategory[i][2] == "slider")
+            if (curCategory[i][2] == "slider" || curCategory[i][2] == "mode")
             {
                 middleThing = " <";
                 extraThing = ">";
@@ -265,7 +321,7 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
         
         //so first thing in the line is the name of the options, which shows on the menu, and is how its referenced in this code.
         //second thing is the actual save data
-        //third thing is the option type (toggle, for Booleans. slider, for numbers (you can set up limits in update).keybind, pretty self explainatory, and finally cat, which is just used for the categories menu)
+        //third thing is the option type (toggle, for Booleans. slider, for numbers (you can set up limits in update).keybind, pretty self explainatory, etc)
         //final thing in the array is the text at the bottom of the screen.
 
         //after you done this, you have to add a case inside turnOptionsIntoSaveData(), just copy paste one or something idk
@@ -276,6 +332,7 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
             ["Misc", "", "cat"],
             ["Keybinds", "", "cat"],
             ["P2 Keybinds", "", "cat"],
+            ["Gamepad Binds", "", "cat"],
             ["Randomization", "", "cat"]
         ];
         //name, savedata, type of option, info
@@ -293,7 +350,8 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
             ["Note Splash", SaveData.noteSplash, "toggle", "Turn on the funni effect when hitting sicks"],
             ["FPS Cap", SaveData.fps, "slider", "Turn up for more frames"],
             ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"],
-            ["Camera Movements on Note Hits", SaveData.noteMovements, "toggle", "the thing that every mod does now"]
+            ["Camera Movements on Note Hits", SaveData.noteMovements, "toggle", "the thing that every mod does now"],
+            ["Scale Speed with Mania", SaveData.speedScaling, "toggle", "Scales down the speed based on note scale \n(so the same scroll speed should feel mostly the same for every mania)"]
         ];
     
         keybinds = [
@@ -342,10 +400,34 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
             ["P2 6K/7K Down", FlxG.save.data.P2D1Bind, "keybind", ""],
             ["P2 6K/7K Right 2", FlxG.save.data.P2R2Bind, "keybind", ""]
         ];
+
+        gamepad = [
+            ["Gamepad 4K/5K Left", FlxG.save.data.GleftBind, "gamepad", ""],
+            ["Gamepad 4K/5K Down", FlxG.save.data.GdownBind, "gamepad", ""],
+            ["Gamepad 4K/5K Up", FlxG.save.data.GupBind, "gamepad", ""],
+            ["Gamepad 4K/5K Right", FlxG.save.data.GrightBind, "gamepad", ""],
+            ["", "", "cat", ""],
+            ["Gamepad 9K/8K Left 1", FlxG.save.data.GN0Bind, "gamepad", ""],
+            ["Gamepad 9K/8K Down 1", FlxG.save.data.GN1Bind, "gamepad", ""],
+            ["Gamepad 9K/8K Up 1", FlxG.save.data.GN2Bind, "gamepad", ""],
+            ["Gamepad 9K/8K Right 1", FlxG.save.data.GN3Bind, "gamepad", ""],
+            ["Gamepad 5K/7K/9K Middle", FlxG.save.data.GN4Bind, "gamepad", ""],
+            ["Gamepad 9K/8K Left 2", FlxG.save.data.GN5Bind, "gamepad", ""],
+            ["Gamepad 9K/8K Down 2", FlxG.save.data.GN6Bind, "gamepad", ""],
+            ["Gamepad 9K/8K Up 2", FlxG.save.data.GN7Bind, "gamepad", ""],
+            ["Gamepad 9K/8K Right 2", FlxG.save.data.GN8Bind, "gamepad", ""],
+            ["", "", "cat", ""],
+            ["Gamepad 6K/7K Left 1", FlxG.save.data.GL1Bind, "gamepad", ""],
+            ["Gamepad 6K/7K Up", FlxG.save.data.GU1Bind, "gamepad", ""],
+            ["Gamepad 6K/7K Right 1", FlxG.save.data.GR1Bind, "gamepad", ""],
+            ["Gamepad 6K/7K Left 2", FlxG.save.data.GL2Bind, "gamepad", ""],
+            ["Gamepad 6K/7K Down", FlxG.save.data.GD1Bind, "gamepad", ""],
+            ["Gamepad 6K/7K Right 2", FlxG.save.data.GR2Bind, "gamepad", ""]
+        ];
     
         randomization = [
             ["Randomize Notes", SaveData.randomNotes, "toggle", "what else do you think it does"],
-            ["Randomization Mode", SaveData.randomSection, "toggle", "change the mode, please just use section based it makes good charts"],
+            ["Randomization Mode", SaveData.randomizationMode, "mode", "change the mode, please just use section based it makes good charts"],
             ["Randomize Note Speed", SaveData.randomNoteSpeed, "toggle", "yes pain"],
             ["Randomize Note Velocity", SaveData.randomNoteVelocity, "toggle", "now its even worse"],
             ["Hellchart", SaveData.Hellchart, "toggle", "oh fuck it gets worse"],
@@ -362,6 +444,8 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
                 curCategory = keybinds;
             case "P2 Keybinds": 
                 curCategory = P2keybinds;
+            case "Gamepad Binds": 
+                curCategory = gamepad;
             case "Randomization": 
                 curCategory = randomization;
             default: 
@@ -495,10 +579,51 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
                 case "P2 6K/7K Right 2": 
                     FlxG.save.data.P2R2Bind = curCategory[i][1];
 //////////////////////////////////////////////////////////////////////////////////////////
+                case "Gamepad 4K/5K Left": 
+                    FlxG.save.data.GleftBind = curCategory[i][1];
+                case "Gamepad 4K/5K Down": 
+                    FlxG.save.data.GdownBind = curCategory[i][1];
+                case "Gamepad 4K/5K Up": 
+                    FlxG.save.data.GupBind = curCategory[i][1];
+                case "Gamepad 4K/5K Right": 
+                    FlxG.save.data.GrightBind = curCategory[i][1];
+
+                case "Gamepad 9K/8K Left 1": 
+                    FlxG.save.data.GN0Bind = curCategory[i][1];
+                case "Gamepad 9K/8K Down 1": 
+                    FlxG.save.data.GN1Bind = curCategory[i][1];
+                case "Gamepad 9K/8K Up 1": 
+                    FlxG.save.data.GN2Bind = curCategory[i][1];
+                case "Gamepad 9K/8K Right 1": 
+                    FlxG.save.data.GN3Bind = curCategory[i][1];
+                case "Gamepad 5K/7K/9K Middle": 
+                    FlxG.save.data.GN4Bind = curCategory[i][1];
+                case "Gamepad 9K/8K Left 2": 
+                    FlxG.save.data.GN5Bind = curCategory[i][1];
+                case "Gamepad 9K/8K Down 2": 
+                    FlxG.save.data.GN6Bind = curCategory[i][1];
+                case "Gamepad 9K/8K Up 2": 
+                    FlxG.save.data.GN7Bind = curCategory[i][1];
+                case "Gamepad 9K/8K Right 2": 
+                    FlxG.save.data.GN8Bind = curCategory[i][1];
+
+                case "Gamepad 6K/7K Left 1": 
+                    FlxG.save.data.GL1Bind = curCategory[i][1];
+                case "Gamepad 6K/7K Up": 
+                    FlxG.save.data.GU1Bind = curCategory[i][1];
+                case "Gamepad 6K/7K Right 1": 
+                    FlxG.save.data.GR1Bind = curCategory[i][1];
+                case "Gamepad 6K/7K Left 2": 
+                    FlxG.save.data.GL2Bind = curCategory[i][1];
+                case "Gamepad 6K/7K Down": 
+                    FlxG.save.data.GD1Bind = curCategory[i][1];
+                case "Gamepad 6K/7K Right 2": 
+                    FlxG.save.data.GR2Bind = curCategory[i][1];
+/////////////////////////////////////////////////////////////////////////////////////////
                 case "Randomize Notes": 
                     SaveData.randomNotes = curCategory[i][1];
                 case "Randomization Mode": 
-                    SaveData.randomSection = curCategory[i][1];
+                    SaveData.randomizationMode = curCategory[i][1];
                 case "Randomize Note Speed": 
                     SaveData.randomNoteSpeed = curCategory[i][1];
                 case "Randomize Note Velocity": 
@@ -509,6 +634,8 @@ class QuickOptions extends FlxSubState //kinda based on the keybind menu from ka
                     SaveData.flip = curCategory[i][1];
                 case "Camera Movements on Note Hits": 
                     SaveData.noteMovements = curCategory[i][1];
+                case "Scale Speed with Mania":
+                    SaveData.speedScaling = curCategory[i][1];
 ////////////////////////////////////////////////////////////////////////////////////// stick ur custom options here
                 case "your option": 
                     //stick da shit here

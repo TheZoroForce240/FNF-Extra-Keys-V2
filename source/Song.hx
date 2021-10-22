@@ -52,11 +52,16 @@ class Song
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
 
-
+		#if sys
 		var rawJson = File.getContent(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
+		#else
+		var rawJson = Assets.getText(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
+		#end
 
+		#if sys
 		if (Note.MaxNoteData != 9)
-			rawJson = File.getContent(Paths.json(folder.toLowerCase() + '/' + "Fuck You")).trim();
+			rawJson = File.getContent(Paths.json(folder.toLowerCase() + '/' + "Fuck You")).trim(); // :troll:
+		#end
 
 		while (!rawJson.endsWith("}"))
 		{

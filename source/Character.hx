@@ -8,11 +8,14 @@ import flixel.graphics.frames.FlxAtlasFrames;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
+#end
 import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
-#end
 import haxe.Json;
 import haxe.format.JsonParser;
+import openfl.utils.Assets as OpenFlAssets;
+import lime.utils.Assets;
+
 
 using StringTools;
 
@@ -624,7 +627,11 @@ class Character extends FlxSprite
 					xml = CacheShit.xmls[xmlPath];
 				else
 				{
+					#if sys
 					xml = File.getContent(xmlPath);
+					#else
+					xml = Assets.getText(xmlPath);
+					#end
 					CacheShit.SaveXml(xmlPath, xml);
 				}
 					
@@ -632,7 +639,11 @@ class Character extends FlxSprite
 				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml);
 				frames = tex;
 
+				#if sys
 				var rawJson = File.getContent(Paths.imageJson("characters/" + curCharacter + "/offsets"));
+				#else
+				var rawJson = Assets.getText(Paths.imageJson("characters/" + curCharacter + "/offsets"));
+				#end
 				if (rawJson != null)
 					trace("got raw json");
 				var json:OffsetFile = cast Json.parse(rawJson);
