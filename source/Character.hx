@@ -25,6 +25,7 @@ typedef OffsetFile =
 	var otherOffsets:Array<OtherOffsetShit>;
 	var flip:Bool;
 	var scale:Float;
+	var scrollFactor:Array<Float>;
 	var aa:Bool;
 	var arrowColorShit:ArrowColors;
 	var healthBar:RGB;
@@ -93,6 +94,8 @@ class Character extends FlxSprite
 
 	public var animTime:Float = 4;
 	public var noteCamMovement:Array<Float> = [0, 0];
+	public var defaultPos:Array<Float>;
+	public var floatInfo:Array<String> = ["", "", ""];
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false, ?flip:Bool = false)
 	{
@@ -611,14 +614,14 @@ class Character extends FlxSprite
 				var imagePath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".png";
 				var imageGraphic:FlxGraphic;
 
-				if (CacheShit.images[imagePath] != null)	//check if image is stored in cache
-					imageGraphic = CacheShit.images[imagePath];
-				else
+				if (CacheShit.images[imagePath] == null)
 				{
-					imageGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(imagePath));
-					imageGraphic.persist = true;
-					CacheShit.SaveImage(imagePath, imageGraphic);
+					var image:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(imagePath));
+					image.persist = true;
+					CacheShit.images[imagePath] = image;
+					trace("added custom stage piece");
 				}
+				imageGraphic = CacheShit.images[imagePath];
 
 				var xmlPath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".xml";
 				var xml:String;
@@ -684,7 +687,8 @@ class Character extends FlxSprite
 					}
 				}
 				flip = json.flip;
-				scale.set(json.scale, json.scale);
+				setGraphicSize(Std.int(this.width * json.scale));
+				scrollFactor.set(json.scrollFactor[0], json.scrollFactor[1]);
 				antialiasing = json.aa;
 
 				var colors = json.arrowColorShit;

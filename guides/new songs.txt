@@ -1,6 +1,0 @@
-go into the songs folder, add a new folder for your song name, stick in the inst and voices,
-now go to data folder, open freeplaySonglist.txt, add a new line and put Songname:charactername:weeknumber
-the song name is not case sensitve in this txt file, but please use lower case everywhere else besides here and the json file
-then go into the charts folder and make a folder for the song name, stick in your charts and you should be good to go
-
-also difficulties are automatic in freeplay, so you can literally add as many charts as you want and it will work

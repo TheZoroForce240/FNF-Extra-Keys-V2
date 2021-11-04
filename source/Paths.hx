@@ -22,11 +22,6 @@ class Paths
 
 	static var currentLevel:String;
 
-	#if sys
-	public static var loadedImages:Array<FlxGraphic> = [];
-	public static var loadedImagePath:Array<String> = [];
-	#end
-
 	static public function setCurrentLevel(name:String)
 	{
 		currentLevel = name.toLowerCase();
@@ -118,10 +113,6 @@ class Paths
 
 	inline static public function image(key:String, ?library:String)
 	{
-		/*var imageShit:FlxGraphic = checkForImage(key);
-		if (imageShit != null)
-			return imageShit;*/
-
 		return getPath('images/$key.png', IMAGE, library);
 	}
 
@@ -156,16 +147,17 @@ class Paths
 		if (CacheShit.xmls[key] != null)
 		{
 			xml = CacheShit.xmls[key];
-			trace("loaded xml from cache");
 		}
 		else
 		{
 			if (isCustom)
+			{
 				#if sys
 				xml = File.getContent('assets/images/$key.xml');
 				#else
 				xml = file('images/$key.xml', library);
 				#end
+			}
 			else
 				xml = file('images/$key.xml', library);
 
@@ -174,12 +166,10 @@ class Paths
 
 		if (isCustom)
 		{
-			//trace("loaded custom image pog");
 			return FlxAtlasFrames.fromSparrow(daImage, xml);
 		}
 		else
 		{
-			//trace("not a custom image lol");
 			return FlxAtlasFrames.fromSparrow(image(key, library), xml);
 		}
 

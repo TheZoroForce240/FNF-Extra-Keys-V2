@@ -134,6 +134,9 @@ class CoolUtil
 
 	public static function bindCheck(mania:Int)
 	{
+		var maniaToUse = PlayState.p1Mania;
+		if (PlayState.flipped)
+			maniaToUse = PlayState.p2Mania;
 		var binds:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
 		switch(mania)
 		{
@@ -142,7 +145,32 @@ class CoolUtil
 			case 1: 
 				binds = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
 			case 2: 
-				binds = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N4Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
+				if (maniaToUse != mania)
+				{
+					switch(maniaToUse) //for mania switches
+					{
+						case 0: 
+							binds = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind, null, null, null, null, null];
+						case 1: 
+							binds = [FlxG.save.data.L1Bind, FlxG.save.data.D1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind, null, FlxG.save.data.L2Bind, null, null, FlxG.save.data.R2Bind];
+						case 2: 
+							binds = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N4Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
+						case 3: 
+							binds = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind, FlxG.save.data.N4Bind, null, null, null, null];
+						case 4: 
+							binds = [FlxG.save.data.L1Bind, FlxG.save.data.D1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind, FlxG.save.data.N4Bind, FlxG.save.data.L2Bind, null, null, FlxG.save.data.R2Bind];
+						case 5: 
+							binds = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, null, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
+						case 6: 
+							binds = [null, null, null, null, FlxG.save.data.N4Bind, null, null, null, null];
+						case 7: 
+							binds = [FlxG.save.data.leftBind, null, null, FlxG.save.data.rightBind, null, null, null, null, null];
+						case 8: 
+							binds = [FlxG.save.data.leftBind, null, null, FlxG.save.data.rightBind, FlxG.save.data.N4Bind, null, null, null, null];
+					}
+				}
+				else 
+					binds = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N4Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
 			case 3: 
 				binds = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.N4Bind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
 			case 4: 
@@ -169,7 +197,32 @@ class CoolUtil
 				case 1: 
 					P2binds = [FlxG.save.data.P2L1Bind, FlxG.save.data.P2U1Bind, FlxG.save.data.P2R1Bind, FlxG.save.data.P2L2Bind, FlxG.save.data.P2D1Bind, FlxG.save.data.P2R2Bind];
 				case 2: 
-					P2binds = [FlxG.save.data.P2N0Bind, FlxG.save.data.P2N1Bind, FlxG.save.data.P2N2Bind, FlxG.save.data.P2N3Bind, FlxG.save.data.P2N4Bind, FlxG.save.data.P2N5Bind, FlxG.save.data.P2N6Bind, FlxG.save.data.P2N7Bind, FlxG.save.data.P2N8Bind];
+					if (PlayState.p2Mania != mania)
+					{
+						switch(PlayState.p2Mania) //for mania switches
+						{
+							case 0: 
+								P2binds = [FlxG.save.data.P2leftBind,FlxG.save.data.P2downBind, FlxG.save.data.P2upBind, FlxG.save.data.P2rightBind, null, null, null, null, null];
+							case 1: 
+								P2binds = [FlxG.save.data.P2L1Bind, FlxG.save.data.P2D1Bind, FlxG.save.data.P2U1Bind, FlxG.save.data.P2R1Bind, null, FlxG.save.data.P2L2Bind, null, null, FlxG.save.data.P2R2Bind];
+							case 2: 
+								P2binds = [FlxG.save.data.P2N0Bind, FlxG.save.data.P2N1Bind, FlxG.save.data.P2N2Bind, FlxG.save.data.P2N3Bind, FlxG.save.data.P2N4Bind, FlxG.save.data.P2N5Bind, FlxG.save.data.P2N6Bind, FlxG.save.data.P2N7Bind, FlxG.save.data.P2N8Bind];
+							case 3: 
+								P2binds = [FlxG.save.data.P2leftBind,FlxG.save.data.P2downBind, FlxG.save.data.P2upBind, FlxG.save.data.P2rightBind, FlxG.save.data.P2N4Bind, null, null, null, null];
+							case 4: 
+								P2binds = [FlxG.save.data.P2L1Bind, FlxG.save.data.P2D1Bind, FlxG.save.data.P2U1Bind, FlxG.save.data.P2R1Bind, FlxG.save.data.P2N4Bind, FlxG.save.data.P2L2Bind, null, null, FlxG.save.data.P2R2Bind];
+							case 5: 
+								P2binds = [FlxG.save.data.P2N0Bind, FlxG.save.data.P2N1Bind, FlxG.save.data.P2N2Bind, FlxG.save.data.P2N3Bind, null, FlxG.save.data.P2N5Bind, FlxG.save.data.P2N6Bind, FlxG.save.data.P2N7Bind, FlxG.save.data.P2N8Bind];
+							case 6: 
+								P2binds = [null, null, null, null, FlxG.save.data.P2N4Bind, null, null, null, null];
+							case 7: 
+								P2binds = [FlxG.save.data.P2leftBind, null, null, FlxG.save.data.P2rightBind, null, null, null, null, null];
+							case 8: 
+								P2binds = [FlxG.save.data.P2leftBind, null, null, FlxG.save.data.P2rightBind, FlxG.save.data.P2N4Bind, null, null, null, null];
+						}
+					}
+					else 
+						P2binds = [FlxG.save.data.P2N0Bind, FlxG.save.data.P2N1Bind, FlxG.save.data.P2N2Bind, FlxG.save.data.P2N3Bind, FlxG.save.data.P2N4Bind, FlxG.save.data.P2N5Bind, FlxG.save.data.P2N6Bind, FlxG.save.data.P2N7Bind, FlxG.save.data.P2N8Bind];
 				case 3: 
 					P2binds = [FlxG.save.data.P2leftBind,FlxG.save.data.P2downBind, FlxG.save.data.P2N4Bind, FlxG.save.data.P2upBind, FlxG.save.data.P2rightBind];
 				case 4: 

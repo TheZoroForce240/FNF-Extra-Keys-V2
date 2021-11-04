@@ -52,6 +52,7 @@
 	],
 	"flip": false,
 	"scale": 1,
+	"scrollFactor": [1, 1],
 	"aa": true,
 	"arrowColorShit": {
 		"purple": [0,0,0,0],

@@ -36,8 +36,11 @@ class NoteSplash extends FlxSprite
 	}
 	public function makeSplash(nX:Float, nY:Float, color:Int, playernum:Int = 1) 
 	{
+		var maniaToUse = PlayState.p1Mania;
+		if (playernum == 0)
+			maniaToUse = PlayState.p2Mania;
 
-        setPosition(nX - (102 * (Note.swagWidth / 66.5)), nY - (110 * (Note.swagWidth / 66.5)));
+        setPosition(nX - (102 * (Note.noteWidths[maniaToUse] / 66.5)), nY - (110 * (Note.noteWidths[maniaToUse] / 66.5)));
 		angle = FlxG.random.int(0, 360);
         alpha = 0.6;
         
@@ -59,9 +62,9 @@ class NoteSplash extends FlxSprite
 			var newColors:Array<String> = ['nonelol','purple', 'blue', 'green', 'red'];
 			animation.play(newColors[Std.int(colorShit[3])] + ' splash', true);
 		}
-		
+
 		animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
-		setGraphicSize(Std.int(Note.swagWidth * 4.5));
+		setGraphicSize(Std.int(Note.noteWidths[maniaToUse] * 4.5));
         updateHitbox();
 
     }

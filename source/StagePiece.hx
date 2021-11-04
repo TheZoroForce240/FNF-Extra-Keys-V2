@@ -455,14 +455,16 @@ class StagePiece extends FlxSprite
                     var imagePath = "assets/images/customStagePieces/" + part + "/" + part + ".png";
                     var imageGraphic:FlxGraphic;
 
-                    if (CacheShit.images[imagePath] != null)	//check if image is stored in cache
-                        imageGraphic = CacheShit.images[imagePath];
-                    else
+                    if (CacheShit.images[imagePath] == null)
                     {
-                        imageGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(imagePath));
-                        imageGraphic.persist = true;
-                        CacheShit.SaveImage(imagePath, imageGraphic);
+                        var image:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(imagePath));
+                        image.persist = true;
+                        CacheShit.images[imagePath] = image;
+                        trace("added custom stage piece");
                     }
+                    imageGraphic = CacheShit.images[imagePath];
+    
+                    //imageGraphic.persist = true;
 
                     if (json.isAnimated)
                     {
@@ -506,7 +508,7 @@ class StagePiece extends FlxSprite
                     antialiasing = json.aa;
                     newx = json.position[0];
                     newy = json.position[1];
-                    scale.set(json.scale, json.scale);
+                    setGraphicSize(Std.int(this.width * json.scale));
                     scrollFactor.set(json.scrollFactor[0], json.scrollFactor[1]);
                     danceable = json.isDanceable;
                     danceAnim = json.animToPlayOnDance;

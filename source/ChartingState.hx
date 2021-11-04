@@ -39,6 +39,7 @@ import lime.media.openal.AL;
 import flash.media.Sound;
 
 using StringTools;
+import ModchartUtil;
 
 class ChartingState extends MusicBeatState
 {
@@ -89,6 +90,7 @@ class ChartingState extends MusicBeatState
 	var newGridSize:Int = 8;
 
 	var typingShit:FlxInputText;
+	var eventTypingShit:FlxInputText;
 	/*
 	 * WILL BE THE CURRENT / LAST PLACED NOTE
 	**/
@@ -119,14 +121,7 @@ class ChartingState extends MusicBeatState
 	var curNoteVelocityTime:Float = 0;
 
 	var curEventData:Array<String> = ["none", ""];
-
-	var eventList:Array<Dynamic> = [
-		["none", ""],
-		["Custom Arrow Movement (Player Side)", "Input some complex calculation into da box"],
-		["Custom Arrow Movement (CPU Side)", "Input some complex calculation into da box"],
-		["Custom Arrow Movement (Both sides)", "Input some complex calculation into da box"],
-		["Reset All Arrows"]
-	];
+	var curEventInfo:String = "";
 
 	var leftHitsounds:Bool = true;
 	var rightHitsounds:Bool = true;
@@ -155,6 +150,8 @@ class ChartingState extends MusicBeatState
             add(piece);
 			piece.scrollFactor.set();
 		}
+
+		ColorPresets.resetColors();
 
 		curSection = 0;
 
@@ -296,6 +293,7 @@ class ChartingState extends MusicBeatState
 			{name: "Song", label: 'Song'},
 			{name: "Section", label: 'Section'},
 			{name: "Note", label: 'Note'},
+			{name: "Event", label: 'Event'},
 			{name: "Editor", label: 'Editor'}
 		];
 
@@ -310,6 +308,7 @@ class ChartingState extends MusicBeatState
 		addSectionUI();
 		addNoteUI();
 		addEditorUI();
+		addEventUI();
 
 		add(curRenderedNotes);
 		add(curRenderedSustains);
@@ -427,6 +426,52 @@ class ChartingState extends MusicBeatState
 
 		FlxG.camera.follow(strumLine);
 	}
+	var eventInfoLabel:FlxText;
+
+	function addEventUI()
+	{
+		var tab_group_event = new FlxUI(null, UI_box);
+		tab_group_event.name = 'Event';
+
+		var reminderLabel = new FlxText(10, 10, 200, "Reminder: Event notes only work in the gf Chart!", 10);
+		eventInfoLabel = new FlxText(150, 170, 150, "Current Event Info:\n" + curEventInfo, 10);
+
+		var eventList:Array<String> = [];
+		for (i in 0...EventList.Events.length)
+			eventList.push(EventList.Events[i][0]);
+
+		var eventDropDown = new FlxUIDropDownMenu(10, 100, FlxUIDropDownMenu.makeStrIdLabelArray(eventList, true), function(event:String)
+		{
+			curEventData[0] = eventList[Std.parseInt(event)];
+			curEventInfo = EventList.Events[Std.parseInt(event)][1];
+		});
+		eventDropDown.selectedLabel = curEventData[0];
+
+		var EventInputText = new FlxUIInputText(10, 150, 260, curEventData[1], 8);
+		eventTypingShit = EventInputText;
+
+		var presetsList:Array<String> = [];
+		for (i in 0...EventList.noteMovementsPresets.length)
+			presetsList.push(EventList.noteMovementsPresets[i][0]);
+		var presetData:Array<String> = [];
+		for (i in 0...EventList.noteMovementsPresets.length)
+			presetData.push(EventList.noteMovementsPresets[i][1]);
+		var PresetDropDown = new FlxUIDropDownMenu(10, 200, FlxUIDropDownMenu.makeStrIdLabelArray(presetsList, true), function(event:String)
+		{
+			eventTypingShit.text = presetData[Std.parseInt(event)];
+		});
+
+		var eventListLabel = new FlxText(10,80,64,'Event List', 8);
+		var presetListLabel = new FlxText(10,180,64,'Presets', 12);
+		tab_group_event.add(PresetDropDown);
+		tab_group_event.add(eventListLabel);
+		tab_group_event.add(EventInputText);
+		tab_group_event.add(presetListLabel);
+		tab_group_event.add(eventDropDown);
+		tab_group_event.add(eventInfoLabel);
+		tab_group_event.add(reminderLabel);
+		UI_box.addGroup(tab_group_event);
+	}
 
 	function addEditorUI()
 	{
@@ -444,6 +489,19 @@ class ChartingState extends MusicBeatState
 
 			FlxG.sound.music.volume = vol;
 		};
+
+		var check_mute_vocals = new FlxUICheckBox(120, 200, null, null, "Mute Vocals", 100);
+		check_mute_vocals.checked = false;
+		check_mute_vocals.callback = function()
+		{
+			var vol:Float = 1;
+
+			if (check_mute_vocals.checked)
+				vol = 0;
+
+			vocals.volume = vol;
+		};
+
 
 		var check_leftHitsounds = new FlxUICheckBox(10, 10, null, null, "Play Left Side Hitsounds", 100);
 		check_leftHitsounds.checked = true;
@@ -519,6 +577,7 @@ class ChartingState extends MusicBeatState
 		tab_group_editor.add(check_rightHitsounds);
 		tab_group_editor.add(check_characters);
 		tab_group_editor.add(check_mute_inst);
+		tab_group_editor.add(check_mute_vocals);
 		tab_group_editor.add(noteCleanup);
 
 
@@ -815,13 +874,6 @@ class ChartingState extends MusicBeatState
 		// general shit
 		var title:FlxText = new FlxText(UI_box.x + 20, UI_box.y + 20, 0);
 		bullshitUI.add(title);
-		/* 
-			var loopCheck = new FlxUICheckBox(UI_box.x + 10, UI_box.y + 50, null, null, "Loops", 100, ['loop check']);
-			loopCheck.checked = curNoteSelected.doesLoop;
-			tooltips.add(loopCheck, {title: 'Section looping', body: "Whether or not it's a simon says style section", style: tooltipType});
-			bullshitUI.add(loopCheck);
-
-		 */
 	}
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
@@ -991,6 +1043,8 @@ class ChartingState extends MusicBeatState
 
 		Conductor.songPosition = FlxG.sound.music.time;
 		_song.song = typingShit.text;
+		curEventData[1] = eventTypingShit.text;
+		eventInfoLabel.text = "Current Event Info:\n" + curEventInfo;
 
 		curRenderedNotes.forEach(function(note:Note)
 		{
@@ -1114,20 +1168,7 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}
-		if (FlxG.keys.pressed.Z)
-			if (!FlxG.mouse.overlaps(curRenderedNotes))
-				if (isDaMouseInGrid)
-					if (!FlxG.keys.pressed.CONTROL) //stop crashing
-						addNote(whichSectionYouIn); //allows you to draw notes by holding left click
 
-		if (FlxG.keys.pressed.X)
-			if (FlxG.mouse.overlaps(curRenderedNotes))
-				if (isDaMouseInGrid)
-					curRenderedNotes.forEach(function(note:Note)
-					{
-						if (FlxG.mouse.overlaps(note))
-							deleteNote(note, whichSectionYouIn); //mass deletion of notes
-					});
 			
 		if (FlxG.keys.pressed.C)
 			if (FlxG.sound.music.playing) //something i might try at some point
@@ -1164,6 +1205,7 @@ class ChartingState extends MusicBeatState
 
 		if (FlxG.keys.justPressed.ENTER)
 		{
+			autosaveSong();
 			lastSection = curSection;
 
 			PlayState.SONG = _song;
@@ -1173,14 +1215,7 @@ class ChartingState extends MusicBeatState
 			FlxG.switchState(new PlayState());
 		}
 
-		if (FlxG.keys.justPressed.E)
-		{
-			changeNoteSustain(Conductor.stepCrochet);
-		}
-		if (FlxG.keys.justPressed.Q)
-		{
-			changeNoteSustain(-Conductor.stepCrochet);
-		}
+
 
 		if (FlxG.keys.justPressed.TAB)
 		{
@@ -1198,8 +1233,40 @@ class ChartingState extends MusicBeatState
 			}
 		}
 
-		if (!typingShit.hasFocus)
+		var shiftThing:Int = 1;
+		if (FlxG.keys.pressed.SHIFT)
+			shiftThing = 4;
+
+		if (!typingShit.hasFocus && !eventTypingShit.hasFocus) //so you cant do shit on accident when typing
 		{
+			if (FlxG.keys.pressed.Z)
+				if (!FlxG.mouse.overlaps(curRenderedNotes))
+					if (isDaMouseInGrid)
+						if (!FlxG.keys.pressed.CONTROL) //stop crashing
+							addNote(whichSectionYouIn); //allows you to draw notes by holding left click
+	
+			if (FlxG.keys.pressed.X)
+				if (FlxG.mouse.overlaps(curRenderedNotes))
+					if (isDaMouseInGrid)
+						curRenderedNotes.forEach(function(note:Note)
+						{
+							if (FlxG.mouse.overlaps(note))
+								deleteNote(note, whichSectionYouIn); //mass deletion of notes
+						});
+
+			if (FlxG.keys.justPressed.RIGHT || FlxG.keys.justPressed.D)
+				changeSection(curSection + shiftThing);
+			if (FlxG.keys.justPressed.LEFT || FlxG.keys.justPressed.A)
+				changeSection(curSection - shiftThing);
+
+			if (FlxG.keys.justPressed.E)
+			{
+				changeNoteSustain(Conductor.stepCrochet);
+			}
+			if (FlxG.keys.justPressed.Q)
+			{
+				changeNoteSustain(-Conductor.stepCrochet);
+			}
 			if (FlxG.keys.justPressed.SPACE)
 			{
 				if (FlxG.sound.music.playing)
@@ -1231,7 +1298,11 @@ class ChartingState extends MusicBeatState
 				vocals.time = FlxG.sound.music.time;
 			}
 			if (FlxG.keys.justPressed.ESCAPE)
+			{
+				autosaveSong();
 				FlxG.switchState(new DebugState());
+			}
+				
 
 			if (!FlxG.keys.pressed.SHIFT)
 			{
@@ -1274,14 +1345,6 @@ class ChartingState extends MusicBeatState
 		}
 
 		_song.bpm = tempBpm;
-
-		var shiftThing:Int = 1;
-		if (FlxG.keys.pressed.SHIFT)
-			shiftThing = 4;
-		if (FlxG.keys.justPressed.RIGHT || FlxG.keys.justPressed.D)
-			changeSection(curSection + shiftThing);
-		if (FlxG.keys.justPressed.LEFT || FlxG.keys.justPressed.A)
-			changeSection(curSection - shiftThing);
 
 		bpmTxt.text = bpmTxt.text = Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2))
 			+ " / "
@@ -1353,6 +1416,7 @@ class ChartingState extends MusicBeatState
 	function changeSection(sec:Int = 0, ?updateMusic:Bool = true):Void
 	{
 		trace('changing section' + sec);
+		autosaveSong();
 
 		if (_song.notes[sec] != null && _song.notes[sec + 1] != null)
 		{
@@ -1385,7 +1449,7 @@ class ChartingState extends MusicBeatState
 			updateSectionUI();
 
 			if (newGridSize > 18)
-				FlxG.switchState(new StoryMenuState());
+				FlxG.switchState(new StoryMenuState()); //:troll:
 		}
 	}
 
@@ -1490,9 +1554,9 @@ class ChartingState extends MusicBeatState
 		if (_song.notes[curSection + 1] != null)
 			nextSectionInfo = _song.notes[curSection + 1].sectionNotes;
 
-		if (middleSection.changeBPM && middleSection.bpm > 0)
+		if (_song.notes[curSection].changeBPM && _song.notes[curSection].bpm > 0)
 		{
-			Conductor.changeBPM(middleSection.bpm);
+			Conductor.changeBPM(_song.notes[curSection].bpm);
 			FlxG.log.add('CHANGED BPM!');
 		}
 		else
@@ -1534,6 +1598,7 @@ class ChartingState extends MusicBeatState
 		var daType = i[3];
 		var daSpeed = i[4];
 		var daVelocity = i[5];
+		var daEventData = i[6];
 		var daGFNote = daNoteInfo <= 3;
 		var fixedShit = daNoteInfo % 4;
 		if (!daGFNote)
@@ -1541,7 +1606,7 @@ class ChartingState extends MusicBeatState
 
 		var mustPress:Bool = false;
 
-		var note:Note = new Note(daStrumTime, fixedShit, daType, false, daSpeed, daVelocity, true, daGFNote);
+		var note:Note = new Note(daStrumTime, fixedShit, daType, false, daSpeed, daVelocity, true, daGFNote, mustPress, daEventData);
 		note.inCharter = true;
 		note.sustainLength = daSus;
 		note.noteType = daType;
@@ -1716,6 +1781,9 @@ class ChartingState extends MusicBeatState
 		noteSpeed = stepperNoteSpeed.value;
 		var noteVelocity:Array<Float> = [1, 0];
 		noteVelocity = [stepperNoteVelocity.value, stepperNoteVelocityTime.value];
+		var eventData:Array<String> = ["none", ""];
+		eventData = [curEventData[0], curEventData[1]];
+		trace(eventData);
 
 		if (_song.mania == 2 || _song.mania == 5)
 			var noteData = Math.floor(FlxG.mouse.x / S_GRID_SIZE);
@@ -1723,23 +1791,21 @@ class ChartingState extends MusicBeatState
 		noteData -= 4; //takes away for gf chart negative note data, i am doing it this way so charts dont need to be completely remade lol
 
 		if (n != null)
-			daSection.sectionNotes.push([n.strumTime, n.noteData, n.sustainLength, n.noteType, n.speed, n.velocityData]);
+			daSection.sectionNotes.push([n.strumTime, n.noteData, n.sustainLength, n.noteType, n.speed, n.velocityData, n.eventData]);
 		else
-			daSection.sectionNotes.push([noteStrum, noteData, noteSus, noteType, noteSpeed, noteVelocity]);
+			daSection.sectionNotes.push([noteStrum, noteData, noteSus, noteType, noteSpeed, noteVelocity, eventData]);
 
 		var thingy = daSection.sectionNotes[daSection.sectionNotes.length - 1];
 		curSelectedNote = thingy;
 
 		if (FlxG.keys.pressed.CONTROL)
-			daSection.sectionNotes.push([noteStrum, (noteData -18), noteSus, noteType, noteSpeed, noteVelocity]);
+			daSection.sectionNotes.push([noteStrum, (noteData -18), noteSus, noteType, noteSpeed, noteVelocity, eventData]);
 
 		trace(noteStrum);
 		trace(curSection);
 
 		updateGrid();
 		updateNoteUI();
-
-		autosaveSong();
 	}
 
 	/*override function beatHit()

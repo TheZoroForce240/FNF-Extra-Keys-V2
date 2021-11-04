@@ -31,17 +31,9 @@ class FreeplayState extends MusicBeatState
 
 	var scoreText:FlxText;
 	var diffText:FlxText;
-	var randomText:FlxText;
-	var randomModeText:FlxText;
-	var maniaText:FlxText;
-	var flipModeText:FlxText;
-	var bothSideText:FlxText;
-	var randomManiaText:FlxText;
-	var noteTypesText:FlxText;
+	var ratingsText:FlxText;
+	var p2ratingsText:FlxText;
 
-	var keyAmmo:Array<Int> = [4, 6, 9, 5, 7, 8, 1, 2, 3];
-	var randMania:Array<String> = ["Off", "Low Chance", "Medium Chance", "High Chance"];
-	var randNoteTypes:Array<String> = ["Off", "Low Chance", "Medium Chance", "High Chance", 'Unfair'];
 	var lerpScore:Int = 0;
 	var intendedScore:Int = 0;
 
@@ -50,8 +42,8 @@ class FreeplayState extends MusicBeatState
 
 	private var iconArray:Array<HealthIcon> = [];
 
-	private var diffArrays:Array<Array<Int>> = [];
 	private var diffTextArrays:Array<Array<String>> = [];
+	private var ratingArray:Array<Dynamic> = [];
 	private var customSongCheck:Array<Bool> = [];
 
 	override function create()
@@ -70,6 +62,7 @@ class FreeplayState extends MusicBeatState
 				var diffs:Array<String> = [];
 				var sortedDiffs:Array<String> = [];
 				var diffTexts:Array<String> = []; //for display text
+				var ratingList:Array<Dynamic> = []; 
 				diffs = FileSystem.readDirectory(path);
 
 				var easy:String = "";
@@ -104,17 +97,42 @@ class FreeplayState extends MusicBeatState
 				}
 
 				if (easy != "") //me trying to figure out how to sort the diffs in correct order :(
+				{
+					var shittyFile = StringTools.replace(easy,".json", ""); 
+					var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
+					ratingList.push(ratingShit);
 					diffTexts.push("EASY"); //it works pog
+				}
 				if (normal != "")
+				{
+					var shittyFile = StringTools.replace(normal,".json", ""); 
+					var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
+					ratingList.push(ratingShit);
 					diffTexts.push("NORMAL");
+				}
 				if (hard != "")
+				{
+					var shittyFile = StringTools.replace(hard,".json", ""); 
+					var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
+					ratingList.push(ratingShit);
 					diffTexts.push("HARD");
+				}	
 				if (extraCount != 0)
+				{
 					for (i in extra)
+					{
+						var poop:String = CoolUtil.getSongFromJsons(data[0].toLowerCase(), diffTexts.length);
+						var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(poop, data[0].toLowerCase()));
+						ratingList.push(ratingShit);
 						diffTexts.push(i);
+					}
+				}
+
+						
 
 				//diffArrays.push(sortedDiffs);
 				diffTextArrays.push(diffTexts);
+				ratingArray.push(ratingList);
 				trace(sortedDiffs);
 				trace(diffTexts);
 				
@@ -242,7 +260,7 @@ class FreeplayState extends MusicBeatState
 		scoreText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
 		// scoreText.alignment = RIGHT;
 
-		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 66, 0xFF000000);
+		var scoreBG:FlxSprite = new FlxSprite(scoreText.x - 6, 0).makeGraphic(Std.int(FlxG.width * 0.35), 136, 0xFF000000);
 		scoreBG.alpha = 0.6;
 		add(scoreBG);
 
@@ -250,6 +268,13 @@ class FreeplayState extends MusicBeatState
 		diffText = new FlxText(scoreText.x, scoreText.y + 36, 0, "", 24);
 		diffText.font = scoreText.font;
 		add(diffText);
+
+		ratingsText = new FlxText(scoreText.x, scoreText.y + 66, 0, "", 24);
+		ratingsText.font = scoreText.font;
+		add(ratingsText);
+		p2ratingsText = new FlxText(scoreText.x, scoreText.y + 96, 0, "", 24);
+		p2ratingsText.font = scoreText.font;
+		add(p2ratingsText);
 
 		add(scoreText);
 
@@ -354,6 +379,7 @@ class FreeplayState extends MusicBeatState
 		if (FlxG.keys.justPressed.SPACE)
 			FlxG.sound.playMusic(Sound.fromFile(Paths.inst(songs[curSelected].songName)), 0);
 
+
 		if (accepted)
 		{
 			if (FlxG.keys.pressed.SHIFT)
@@ -407,6 +433,8 @@ class FreeplayState extends MusicBeatState
 		#end
 
 		diffText.text = diffTextArrays[curSelected][curDifficulty];
+		ratingsText.text = "P1 Rating: " + ratingArray[curSelected][curDifficulty][0];
+		p2ratingsText.text = "P2 Rating: " + ratingArray[curSelected][curDifficulty][1];
 	}
 
 	function changeSelection(change:Int = 0)

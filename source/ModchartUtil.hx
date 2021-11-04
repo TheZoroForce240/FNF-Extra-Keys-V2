@@ -4,67 +4,127 @@ import lime.utils.Assets;
 import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.FlxG;
+import flixel.math.FlxAngle;
 import flixel.math.FlxMath;
+import flixel.math.FlxPoint;
+import flixel.math.FlxRandom;
+import flixel.math.FlxRect;
+import flixel.math.FlxVelocity;
+import hscript.Expr;
+import hscript.Interp;
+import hscript.Parser;
 using StringTools;
 
+class EventList
+{
+    public static var Events:Array<Array<String>> = [
+        ["none", "none"],
+        ["Move P1 Notes X", "Type in a calculation for the movement\nor select a preset."],
+        ["Move P1 Notes Y", "Type in a calculation for the movement\nor select a preset."],
+        ["Move P1 Notes Angle", "Type in a calculation for the movement\nor select a preset."],
+        ["Stop All P1 Movements", ""],
+        ["Move P2 Notes X", "Type in a calculation for the movement\nor select a preset."],
+        ["Move P2 Notes Y", "Type in a calculation for the movement\nor select a preset."],
+        ["Move P2 Notes Angle", "Type in a calculation for the movement\nor select a preset."],
+        ["Stop All P2 Movements", ""],
+        ["Change P1 Mania", "Type the new Mania Value.\n(WARNING: the song mania HAS to be set to 9k to work!)"],
+        ["Change P2 Mania", "Type the new Mania Value.\n(WARNING: the song mania HAS to be set to 9k to work!)"],
+        ["Change Camera Beats", "Type in Cam Zoom amount, Hud Zoom amount, and how often it zooms(in beats)\nSeperate Each value with a comma, no Spaces."],
+        ["Change Current Active BF Characters", "For multiple Characters, type in the character names with no Caps, seperate each name with a comma, no Spaces."],
+        ["Change Current Active Dad Characters", "For multiple Characters, type in the character names with no Caps, seperate each name with a comma, no Spaces."]
+    ];
 
-class ModchartUtil //where all da functions go, can be used for events and modcharts (also can be hard-coded i guess)
+    public static var noteMovementsPresets:Array<Array<String>> = [
+        ["Wiggle Notes X", "x + 32 * math.sin((currentBeat * 1) + i + 1)"],
+        ["Wiggle Notes Y", "y + 32 * math.sin((currentBeat * 1) + i + 1)"],
+        ["Move Notes in Sync X", "x + 32 * math.sin((currentBeat * 1) * math.PI)"],
+        ["Move Notes in Sync Y", "y + 32 * math.sin((currentBeat * 1) * math.PI)"],
+        ["Cross P1 Notes X", "x - 300 * math.sin(currentBeat * 1) - 300"],
+        ["Cross P2 Notes X", "x + 300 * math.sin(currentBeat * 1) + 300"]
+        //["Cheating Notes X", "arrow.x + (math.sin(elapsedTime * 1) * ((i % 2) == 0 ? 1 : -1)) - (math.sin(elapsedTime * 1) * 1.5)"],
+    ];
+
+    public static function convertEventDataToEvent(eventName:String, data:String)
+    {
+        trace("finding Event from Event Name"); 
+        trace(eventName);
+        trace(data);
+        if (eventName == null)
+            return;
+        switch(eventName)
+        {
+            case "Start Player Strums X movement": //old names still here for legacy charts that still used them
+                ModchartUtil.playerStrumsInfo[0] = data;
+            case "Start Player Strums Y movement":
+                ModchartUtil.playerStrumsInfo[1] = data;
+            case "Start Player Strums Angle movement":
+                ModchartUtil.playerStrumsInfo[2] = data;
+            case "Start CPU Strums X movement":
+                ModchartUtil.cpuStrumsInfo[0] = data;
+            case "Start CPU Strums Y movement":
+                ModchartUtil.cpuStrumsInfo[1] = data;
+            case "Start CPU Strums Angle movement":
+                ModchartUtil.cpuStrumsInfo[2] = data;
+            case "Stop Player Strums X movement":
+                ModchartUtil.playerStrumsInfo[0] = "";
+            case "Stop Player Strums Y movement":
+                ModchartUtil.playerStrumsInfo[1] = "";
+            case "Stop Player Strums Angle movement":
+                ModchartUtil.playerStrumsInfo[2] = "";
+            case "Stop CPU Strums X movement":
+                ModchartUtil.cpuStrumsInfo[0] = "";
+            case "Stop CPU Strums Y movement":
+                ModchartUtil.cpuStrumsInfo[1] = "";
+            case "Stop CPU Strums Angle movement":
+                ModchartUtil.cpuStrumsInfo[2] = "";
+
+            case "Move P1 Notes X":
+                ModchartUtil.playerStrumsInfo[0] = data;
+            case "Move P1 Notes Y":
+                ModchartUtil.playerStrumsInfo[1] = data;
+            case "Move P1 Notes Angle":
+                ModchartUtil.playerStrumsInfo[2] = data;
+            case "Move P2 Notes X":
+                ModchartUtil.cpuStrumsInfo[0] = data;
+            case "Move P2 Notes Y":
+                ModchartUtil.cpuStrumsInfo[1] = data;
+            case "Move P2 Notes Angle":
+                ModchartUtil.cpuStrumsInfo[2] = data;
+            case "Stop All P1 Movements": 
+                ModchartUtil.playerStrumsInfo = ["", "", ""];
+            case "Stop All P2 Movements": 
+                ModchartUtil.cpuStrumsInfo = ["", "", ""];
+
+            case "Change P1 Mania":
+                PlayState.instance.switchMania(Std.parseInt(data), 1);
+            case "Change P2 Mania":
+                PlayState.instance.switchMania(Std.parseInt(data), 0);
+            case "Change Camera Beats": 
+                var split:Array<String> = data.split(",");
+                PlayState.beatCamZoom = Std.parseFloat(split[0]);
+                PlayState.beatCamHUD = Std.parseFloat(split[1]);
+                PlayState.beatCamHowOften = Std.parseInt(split[2]);
+        }
+    }
+}
+
+class ModchartUtil
 {
 
+    public static var playerStrumsInfo:Array<String> = ["", "", ""];
+    public static var cpuStrumsInfo:Array<String> = ["", "", ""];
+
+    public static var camHudInfo:Array<String> = ["", "", ""];
+    public static var camGameInfo:Array<String> = ["", "", ""];
+
+    public static var interp:Interp = new Interp();
+
     // epic modchart like effects using events instead of lua
-	// you change the numbers inside the things and set to enabled and bam you got moving arrows
-
-	// i have some reasoning behind why i am doing it this way, firstly you can do modchart shit without modcharts, so people
-	// who know nothing about coding can do modchart shit in the chart editor (once i set it up), secondly modcharts in most engines make the static arrows a variable in their lua state
-	// and because of the mania switching, this likely wont work after switching, this system should hopefully fix this shit and automatically do everything, but idk there might be a better way to do this, kinda just tryin stuff
-	
-	public static var pXEnabled:Bool = false;
-	public static var pXnum:Float = 0;
-	public static var pXbeatShit:Float = 0;
-	public static var pXExtra:Float = 0;
-	public static var pXPi:Bool = false;
-	public static var pXSin:Bool = false;
-
-	public static var pYEnabled:Bool = false;
-	public static var pYnum:Float = 0;
-	public static var pYbeatShit:Float = 0;
-	public static var pYExtra:Float = 0;
-	public static var pYPi:Bool = false;
-	public static var pYSin:Bool = false;
-
-	public static var pAngleEnabled:Bool = false;
-	public static var pAnglenum:Float = 0;
-	public static var pAnglebeatShit:Float = 0;
-	public static var pAngleExtra:Float = 0;
-	public static var pAnglePi:Bool = false;
-	public static var pAngleSin:Bool = false;
-
-	public static var cpuXEnabled:Bool = false;
-	public static var cpuXnum:Float = 0;
-	public static var cpuXbeatShit:Float = 0;
-	public static var cpuXExtra:Float = 0;
-	public static var cpuXPi:Bool = false;
-	public static var cpuXSin:Bool = false;
-
-	public static var cpuYEnabled:Bool = false;
-	public static var cpuYnum:Float = 0;
-	public static var cpuYbeatShit:Float = 0;
-	public static var cpuYExtra:Float = 0;
-	public static var cpuYPi:Bool = false;
-	public static var cpuYSin:Bool = false;
-
-	public static var cpuAngleEnabled:Bool = false;
-	public static var cpuAnglenum:Float = 0;
-	public static var cpuAnglebeatShit:Float = 0;
-	public static var cpuAngleExtra:Float = 0;
-	public static var cpuAnglePi:Bool = false;
-	public static var cpuAngleSin:Bool = false;
-
-    //is it bad having this many public statics????
 
 	////////////////////////////////////////////////////////////////
 
-    public static function ChangeArrowY(i:BabyArrow, Y:Float = 0)
+    /*public static function ChangeArrowY(i:BabyArrow, Y:Float = 0)
         i.y = Y;
     public static function ChangeArrowX(i:BabyArrow, X:Float = 0)
         i.x = X;
@@ -81,44 +141,125 @@ class ModchartUtil //where all da functions go, can be used for events and modch
         FlxTween.tween(i, {angle: i.defaultAngle}, Time);
     public static function resetArrowPos(i:BabyArrow, Time:Float = 0.1) //reset x and y
         FlxTween.tween(i, {y: i.defaultY, x: i.defaultX}, Time);
-    public static function resetArrow(i:BabyArrow, Time:Float = 0.1) //just reset the whole fucking thing
-        FlxTween.tween(i, {y: i.defaultY, x: i.defaultX, angle: i.defaultAngle}, Time);
+    public static function resetArrow(i:BabyArrow, Time:Float = 0.1) 
+        FlxTween.tween(i, {y: i.defaultY, x: i.defaultX, angle: i.defaultAngle}, Time);*/
 
-    public static function CalculateArrowShit(i:BabyArrow, ID:Int, num:Float, whatToChange:Int, beatMulti:Float, extraShit:Float, UsePi:Bool = false, sin:Bool = true)
+    public static function CalculateArrowShit(i:BabyArrow, ID:Int, strumnum:Int = 1, thingToCalculate:String = "X", beat:Float)
     {
         var CalculatedShit:Float = 0;
-        var whatItsChanging:Float;
-        switch (whatToChange)
+        var stringToBeExecuted:String = "";
+        var shit:Int = 0;
+        switch (thingToCalculate)
         {
-            case 0: 
-                whatItsChanging = i.defaultX;
-            case 1: 
-                whatItsChanging = i.defaultY;
-            case 2: 
-                whatItsChanging = i.defaultAngle;
-            default:
-                whatItsChanging = i.defaultX; //backup
+            case "X": 
+                shit = 0;
+            case "Y": 
+                shit = 1;
+            case "Angle":
+                shit = 2;
         }
+        if (strumnum == 1)
+            stringToBeExecuted = playerStrumsInfo[shit];
+        else 
+            stringToBeExecuted = cpuStrumsInfo[shit];
 
-        if (sin && !UsePi) //could probably be improved, but it allows modchart shit without modcharts
-            CalculatedShit = whatItsChanging + num * Math.sin(beatMulti) + extraShit;
-        else if (sin && UsePi)
-            CalculatedShit = whatItsChanging + num * Math.sin((beatMulti) * Math.PI) + extraShit;
-        else if (!sin && !UsePi)
-            CalculatedShit = whatItsChanging + num * Math.cos(beatMulti) + extraShit;
-        else  
-            CalculatedShit = whatItsChanging + num * Math.cos((beatMulti) * Math.PI) + extraShit;
+        if (stringToBeExecuted == "")
+            return;
 
-        return CalculatedShit;
+        interp.variables.set("arrow", i);
+        interp.variables.set("i", ID);
+        interp.variables.set("x", i.defaultX);
+        interp.variables.set("y", i.defaultY);
+        interp.variables.set("elapsedTime", PlayState.instance.elapsedTime);
+        interp.variables.set("defaultAngle", i.defaultAngle);
+        interp.variables.set("currentBeat", beat);
+        interp.variables.set("math", Math);
+        interp.variables.set("FlxG", FlxG);
+        interp.variables.set("FlxMath", FlxMath);
+        interp.variables.set("FlxAngle", FlxAngle);
+        interp.variables.set("FlxPoint", FlxPoint);
+        interp.variables.set("FlxRandom", FlxRandom);
+        interp.variables.set("FlxRect", FlxRect);
+        interp.variables.set("FlxVelocity", FlxVelocity);
+
+        var parser = new Parser();
+		var expr:Expr;
+
+        try
+        {
+            expr = parser.parseString(stringToBeExecuted);
+            CalculatedShit = interp.execute(expr);
+            
+            switch (thingToCalculate)
+            {
+                case "X": 
+                    i.x = CalculatedShit;
+                case "Y": 
+                    i.y = CalculatedShit;
+                case "Angle":
+                    i.angle = CalculatedShit;
+            }
+        }
+        catch (unknown:Dynamic)
+        {
+            trace("error or something idk");
+        }
     }
-
-
-
-
-
-
-
-
+    public static function CalculateCharaterFloat(i:Character, thingToCalculate:String = "X", beat:Float)
+        {
+            var CalculatedShit:Float = 0;
+            var stringToBeExecuted:String = "";
+            var shit:Int = 0;
+            switch (thingToCalculate)
+            {
+                case "X": 
+                    shit = 0;
+                case "Y": 
+                    shit = 1;
+                case "Angle":
+                    shit = 2;
+            }
+            stringToBeExecuted = i.floatInfo[shit];
+    
+            if (stringToBeExecuted == "")
+                return;
+    
+            interp.variables.set("x", i.defaultPos[0]);
+            interp.variables.set("y", i.defaultPos[1]);
+            interp.variables.set("defaultAngle", i.defaultPos[2]);
+            interp.variables.set("currentBeat", beat);
+            interp.variables.set("math", Math);
+            interp.variables.set("FlxG", FlxG);
+            interp.variables.set("FlxMath", FlxMath);
+            interp.variables.set("FlxAngle", FlxAngle);
+            interp.variables.set("FlxPoint", FlxPoint);
+            interp.variables.set("FlxRandom", FlxRandom);
+            interp.variables.set("FlxRect", FlxRect);
+            interp.variables.set("FlxVelocity", FlxVelocity);
+    
+            var parser = new Parser();
+            var expr:Expr;
+    
+            try
+            {
+                expr = parser.parseString(stringToBeExecuted);
+                CalculatedShit = interp.execute(expr);
+                
+                switch (thingToCalculate)
+                {
+                    case "X": 
+                        i.x = CalculatedShit;
+                    case "Y": 
+                        i.y = CalculatedShit;
+                    case "Angle":
+                        i.angle = CalculatedShit;
+                }
+            }
+            catch (unknown:Dynamic)
+            {
+                trace("error or something idk");
+            }
+        }
 
 
     function getEase(ease:String = '')
