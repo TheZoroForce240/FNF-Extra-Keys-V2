@@ -84,6 +84,18 @@ class ColorPresets
         }
         ColorPresets.fixColorArray(mania);
     }
+    public static function resetColors()
+    {
+        purple = [0,0,0,0];
+        blue = [0,0,0,0];
+        green = [0,0,0,0];
+        red = [0,0,0,0];
+        white = [0,0,0,0];
+        yellow = [0,0,0,0];
+        violet = [0,0,0,0];
+        darkred = [0,0,0,0];
+        dark = [0,0,0,0];
+    }
 
 
 }

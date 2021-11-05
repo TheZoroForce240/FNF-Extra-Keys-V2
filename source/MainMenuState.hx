@@ -273,6 +273,8 @@ class MainMenuState extends MusicBeatState
 
 		curSong = data[0];
 
+		//CacheShit.clearCache();
+
 		/*songText = new FlxText(FlxG.width * 0.7, -1000, 0, "Now Playing: " + curSong, 20);
         songText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
         songText.scrollFactor.set();

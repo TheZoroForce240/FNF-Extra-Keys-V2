@@ -13,12 +13,26 @@ class BabyArrow extends FlxSprite
 {
     var HSV:HSVEffect = new HSVEffect();
 
+    public static var offsetshit:Float = 56;
+
     var pathList:Array<String> = [
         'noteassets/NOTE_assets',
         'noteassets/PURPLE_NOTE_assets',
         'noteassets/BLUE_NOTE_assets',
         'noteassets/GREEN_NOTE_assets',
         'noteassets/RED_NOTE_assets'
+    ];
+
+    public static var maniaSwitchPositions:Array<Dynamic> = [
+        [0, 1, 2, 3, "alpha0", "alpha0", "alpha0", "alpha0", "alpha0"],
+        [0, 4, 1, 2, "alpha0", 3, "alpha0", "alpha0", 5],
+        [0, 1, 2, 3, 4, 5, 6, 7, 8],
+        [0, 1, 3, 4, 2, "alpha0", "alpha0", "alpha0", "alpha0"],
+        [0, 5, 1, 2, 3, 4, "alpha0", "alpha0", 6],
+        [0, 1, 2, 3, "alpha0", 4, 5, 6, 7],
+        ["alpha0", "alpha0", "alpha0", "alpha0", 0, "alpha0", "alpha0", "alpha0", "alpha0"],
+        [0, "alpha0", "alpha0", 1, "alpha0", "alpha0", "alpha0", "alpha0", "alpha0"],
+        [0, "alpha0", "alpha0", 2, 1, "alpha0", "alpha0", "alpha0", "alpha0"]
     ];
 
     var whichPlayer:Int = 0;
@@ -30,6 +44,9 @@ class BabyArrow extends FlxSprite
     public var defaultX:Float = 0;
     public var defaultY:Float = 0;
     public var defaultAngle:Float = 0;
+
+    public var defaultWidth:Float;
+    public var curID:Int;
 
     public function new(strumline:Float, player:Int, i:Int, style:String, ?isPlayState:Bool = true)
     {
@@ -132,7 +149,7 @@ class BabyArrow extends FlxSprite
                             startconf = [27, 31, 30];
                             endconf = [36, 40, 39];
                     }
-
+                defaultWidth = width;
                 setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelnoteScale * scaleMulti));
                 x += Note.swagWidth * i * scaleMulti; 
                 updateHitbox();
@@ -183,7 +200,7 @@ class BabyArrow extends FlxSprite
                 animation.addByPrefix('red', 'arrowRIGHT');
 
                 antialiasing = true;
-
+                defaultWidth = width;
                 setGraphicSize(Std.int(width * Note.noteScale * scaleMulti));
                 x += Note.swagWidth * i * scaleMulti; 
 
@@ -198,9 +215,9 @@ class BabyArrow extends FlxSprite
 			scrollFactor.set();
 
 			if ((SaveData.downscroll && player == 1) || (SaveData.P2downscroll && player == 0))
-				{
-					scale.y *= -1;
-				}
+            {
+                scale.y *= -1;
+            }
 
 			animation.play('static');
 			x += 50;
@@ -244,17 +261,35 @@ class BabyArrow extends FlxSprite
             }
         }
 
+        if (stylelol != 'pixel') //pixel note style doesnt need to be offset
+        {
+            //offset.x -= xoffset;
+            //offset.y -= yoffset;
+            /*updateHitbox();
+            offset.x = frameWidth / 2;
+            offset.y = frameHeight / 2;
+
+
+    
+            offset.x -= (offsetshit / 0.7) * (scaleToUse * scaleMulti);
+            offset.y -= (offsetshit / 0.7) * (scaleToUse * scaleMulti);*/
+        }
+
         if (animation.curAnim.name == 'confirm')
         {
             var yoffset:Float = 13;
             var xoffset:Float = 13;
             var downscrollOffset:Float = 42; //downscroll needs another offset for some reason ??????            
                                             //idk why tf flipping the camera affects this
+                                            
+            var scaleToUse = Note.p1NoteScale;
+            if (whichPlayer == 0)
+                scaleToUse = Note.p2NoteScale;
+
+            xoffset = (xoffset * 0.7) / (scaleToUse * scaleMulti); //calculates offset based on notescale 
+            yoffset = (yoffset * 0.7) / (scaleToUse * scaleMulti);
     
-            xoffset = (xoffset * 0.7) / (Note.noteScale * scaleMulti); //calculates offset based on notescale 
-            yoffset = (yoffset * 0.7) / (Note.noteScale * scaleMulti);
-    
-            downscrollOffset = (downscrollOffset / 0.7) * (Note.noteScale * scaleMulti);
+            downscrollOffset = (downscrollOffset / 0.7) * (scaleToUse * scaleMulti);
             if ((SaveData.downscroll && whichPlayer == 1) || (SaveData.P2downscroll && whichPlayer == 0))
                 yoffset += downscrollOffset;
     
@@ -263,6 +298,8 @@ class BabyArrow extends FlxSprite
                 offset.x -= xoffset;
                 offset.y -= yoffset;
             }
+
+
         }
         
     }
@@ -270,210 +307,33 @@ class BabyArrow extends FlxSprite
     {
         spr.x = 0;
         spr.alpha = 1;
-        switch(newMania)
+
+        if ((SaveData.downscroll && player == 1) || (SaveData.P2downscroll && player == 0))
         {
-            case 10: 
-                switch(spr.ID)
-                {
-                    case 0: 
-                        spr.x += (160 * 0.7) * 0;
-                    case 1: 
-                        spr.x += (160 * 0.7) * 1;
-                    case 2: 
-                        spr.x += (160 * 0.7) * 2;
-                    case 3: 
-                        spr.x += (160 * 0.7) * 3;
-                    case 4: 
-                        spr.alpha = 0;
-                    case 5: 
-                        spr.alpha = 0;
-                    case 6: 
-                        spr.alpha = 0;
-                    case 7: 
-                        spr.alpha = 0;
-                    case 8:
-                        spr.alpha = 0;
-                }
-            case 11: 
-                switch(spr.ID)
-                {
-                    case 0: 
-                        spr.x += (120 * 0.7) * 0;
-                    case 1: 
-                        spr.x += (120 * 0.7) * 4;
-                    case 2: 
-                        spr.x += (120 * 0.7) * 1;
-                    case 3: 
-                        spr.x += (120 * 0.7) * 2;
-                    case 4: 
-                        spr.alpha = 0;
-                    case 5: 
-                        spr.x += (120 * 0.7) * 3;
-                    case 6: 
-                        spr.alpha = 0;
-                    case 7: 
-                        spr.alpha = 0;
-                    case 8:
-                        spr.x += (120 * 0.7) * 5;
-                }
-            case 12: 
-                switch(spr.ID)
-                {
-                    case 0: 
-                        spr.x += (95 * 0.7) * 0;
-                    case 1: 
-                        spr.x += (95 * 0.7) * 1;
-                    case 2: 
-                        spr.x += (95 * 0.7) * 2;
-                    case 3: 
-                        spr.x += (95 * 0.7) * 3;
-                    case 4: 
-                        spr.x += (95 * 0.7) * 4;
-                    case 5: 
-                        spr.x += (95 * 0.7) * 5;
-                    case 6: 
-                        spr.x += (95 * 0.7) * 6;
-                    case 7: 
-                        spr.x += (95 * 0.7) * 7;
-                    case 8:
-                        spr.x += (95 * 0.7) * 8;
-                }
-                spr.x -= Note.tooMuch;
-            case 13: 
-                switch(spr.ID)
-                {
-                    case 0: 
-                        spr.x += (130 * 0.7) * 0;
-                    case 1: 
-                        spr.x += (130 * 0.7) * 1;
-                    case 2: 
-                        spr.x += (130 * 0.7) * 3;
-                    case 3: 
-                        spr.x += (130 * 0.7) * 4;
-                    case 4: 
-                        spr.x += (130 * 0.7) * 2;
-                    case 5: 
-                        spr.alpha = 0;
-                    case 6: 
-                        spr.alpha = 0;
-                    case 7: 
-                        spr.alpha = 0;
-                    case 8:
-                        spr.alpha = 0;
-                }
-            case 14: 
-                switch(spr.ID)
-                {
-                    case 0: 
-                        spr.x += (110 * 0.7) * 0;
-                    case 1: 
-                        spr.x += (110 * 0.7) * 5;
-                    case 2: 
-                        spr.x += (110 * 0.7) * 1;
-                    case 3: 
-                        spr.x += (110 * 0.7) * 2;
-                    case 4: 
-                        spr.x += (110 * 0.7) * 3;
-                    case 5: 
-                        spr.x += (110 * 0.7) * 4;
-                    case 6: 
-                        spr.alpha = 0;
-                    case 7: 
-                        spr.alpha = 0;
-                    case 8:
-                        spr.x += (110 * 0.7) * 6;
-                }
-            case 15: 
-                switch(spr.ID)
-                {
-                    case 0: 
-                        spr.x += (100 * 0.7) * 0;
-                    case 1: 
-                        spr.x += (100 * 0.7) * 1;
-                    case 2: 
-                        spr.x += (100 * 0.7) * 2;
-                    case 3: 
-                        spr.x += (100 * 0.7) * 3;
-                    case 4: 
-                        spr.alpha = 0;
-                    case 5: 
-                        spr.x += (100 * 0.7) * 4;
-                    case 6: 
-                        spr.x += (100 * 0.7) * 5;
-                    case 7: 
-                        spr.x += (100 * 0.7) * 6;
-                    case 8:
-                        spr.x += (100 * 0.7) * 7;
-                }
-            case 16: 
-                switch(spr.ID)
-                {
-                    case 0: 
-                        spr.alpha = 0;
-                    case 1: 
-                        spr.alpha = 0;
-                    case 2: 
-                        spr.alpha = 0;
-                    case 3: 
-                        spr.alpha = 0;
-                    case 4: 
-                        spr.x += (160 * 0.7) * 0;
-                    case 5: 
-                        spr.alpha = 0;
-                    case 6: 
-                        spr.alpha = 0;
-                    case 7: 
-                        spr.alpha = 0;
-                    case 8:
-                        spr.alpha = 0;
-                }
-            case 17: 
-                switch(spr.ID)
-                {
-                    case 0: 
-                        spr.x += (160 * 0.7) * 0;
-                    case 1: 
-                        spr.alpha = 0;
-                    case 2: 
-                        spr.alpha = 0;
-                    case 3: 
-                        spr.x += (160 * 0.7) * 1;
-                    case 4: 
-                        spr.alpha = 0;
-                    case 5: 
-                        spr.alpha = 0;
-                    case 6: 
-                        spr.alpha = 0;
-                    case 7: 
-                        spr.alpha = 0;
-                    case 8:
-                        spr.alpha = 0;
-                }
-            case 18: 
-                switch(spr.ID)
-                {
-                    case 0: 
-                        spr.x += (160 * 0.7) * 0;
-                    case 1: 
-                        spr.alpha = 0;
-                    case 2: 
-                        spr.alpha = 0;
-                    case 3: 
-                        spr.x += (160 * 0.7) * 2;
-                    case 4: 
-                        spr.x += (160 * 0.7) * 1;
-                    case 5: 
-                        spr.alpha = 0;
-                    case 6: 
-                        spr.alpha = 0;
-                    case 7: 
-                        spr.alpha = 0;
-                    case 8:
-                        spr.alpha = 0;
-                }
+            scale.y *= -1;
         }
+        
+        if (maniaSwitchPositions[newMania][spr.ID] == "alpha0")
+        {
+            spr.alpha = 0;
+            curID = 10;
+        }            
+        else
+        {
+            spr.x += Note.noteWidths[newMania] * maniaSwitchPositions[newMania][spr.ID];
+            curID = maniaSwitchPositions[newMania][spr.ID];
+        }
+
+        if (newMania == 2)
+            spr.x -= Note.tooMuch;
+            
         spr.x += 50;
-        spr.x += ((FlxG.width / 2) * player);
+        if (SaveData.middlescroll && player == 1)
+            spr.x += ((FlxG.width / 2) * 0.5) + (Note.noteWidths[newMania] / 2);
+        else 
+            spr.x += ((FlxG.width / 2) * player);
+
+        defaultX = spr.x;
     }
         
 }

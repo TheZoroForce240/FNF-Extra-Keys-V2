@@ -10,8 +10,11 @@ import flixel.util.FlxTimer;
 
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
+
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
+
+import flash.media.Sound;
 
 import haxe.io.Path;
 
@@ -26,6 +29,8 @@ class LoadingState extends MusicBeatState
 	var logo:FlxSprite;
 	var gfDance:FlxSprite;
 	var danceLeft = false;
+
+	private static var lastLoadedLibrary:String;
 	
 	function new(target:FlxState, stopMusic:Bool)
 	{
@@ -99,9 +104,16 @@ class LoadingState extends MusicBeatState
 			@:privateAccess
 			if (!LimeAssets.libraryPaths.exists(library))
 				throw "Missing library: " + library;
+
+			/*if (lastLoadedLibrary != library && lastLoadedLibrary != null)
+				Assets.unloadLibrary(lastLoadedLibrary); //hopefully optimize some stuff??????*/
 			
 			var callback = callbacks.add("library:" + library);
-			Assets.loadLibrary(library).onComplete(function (_) { callback(); });
+			Assets.loadLibrary(library).onComplete(function (_) 
+			{ 
+				callback(); 
+				//lastLoadedLibrary = library;
+			});
 		}
 	}
 	
