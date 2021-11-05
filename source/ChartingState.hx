@@ -427,6 +427,7 @@ class ChartingState extends MusicBeatState
 		FlxG.camera.follow(strumLine);
 	}
 	var eventInfoLabel:FlxText;
+	var eventDropDown:FlxUIDropDownMenu;
 
 	function addEventUI()
 	{
@@ -440,7 +441,7 @@ class ChartingState extends MusicBeatState
 		for (i in 0...EventList.Events.length)
 			eventList.push(EventList.Events[i][0]);
 
-		var eventDropDown = new FlxUIDropDownMenu(10, 100, FlxUIDropDownMenu.makeStrIdLabelArray(eventList, true), function(event:String)
+		eventDropDown = new FlxUIDropDownMenu(10, 100, FlxUIDropDownMenu.makeStrIdLabelArray(eventList, true), function(event:String)
 		{
 			curEventData[0] = eventList[Std.parseInt(event)];
 			curEventInfo = EventList.Events[Std.parseInt(event)][1];
@@ -1517,6 +1518,13 @@ class ChartingState extends MusicBeatState
 			{
 				stepperNoteVelocity.value = curSelectedNote[5][0];
 				stepperNoteVelocityTime.value = curSelectedNote[5][1];
+			}
+			if (curSelectedNote[6] != null)
+			{
+				curEventData[0] = curSelectedNote[6][0];
+				curEventData[1] = curSelectedNote[6][1];
+				eventDropDown.selectedLabel = curEventData[0];
+				eventTypingShit.text = curEventData[1];
 			}
 
 		}

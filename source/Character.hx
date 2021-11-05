@@ -619,7 +619,6 @@ class Character extends FlxSprite
 					var image:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(imagePath));
 					image.persist = true;
 					CacheShit.images[imagePath] = image;
-					trace("added custom stage piece");
 				}
 				imageGraphic = CacheShit.images[imagePath];
 
@@ -647,11 +646,7 @@ class Character extends FlxSprite
 				#else
 				var rawJson = Assets.getText(Paths.imageJson("characters/" + curCharacter + "/offsets"));
 				#end
-				if (rawJson != null)
-					trace("got raw json");
 				var json:OffsetFile = cast Json.parse(rawJson);
-				if (json != null)
-					trace("got json");
 
 				if (json.otherOffsets.length != 0 && frames != null)
 				{
@@ -660,15 +655,11 @@ class Character extends FlxSprite
 					{
 						var type:String = i.type;
 						var offsets:Array<Int> = i.offsets; 
-						trace(type);
-						trace(offsets);
-
 						addPosOffset(type, offsets[0], offsets[1]);
 					}
 				}
 				if (json.anims.length != 0 && frames != null)
 				{
-					trace("doing anim offsets");
 					for (i in json.anims)
 					{
 						var animname:String = i.anim;
@@ -676,11 +667,6 @@ class Character extends FlxSprite
 						var fps:Int = i.frameRate;
 						var loop:Bool = i.loop;
 						var offsets:Array<Int> = i.offsets;
-						trace(animname);
-						trace(xmlname);
-						trace(fps);
-						trace(loop);
-						trace(offsets);
 
 						animation.addByPrefix(animname, xmlname, fps, loop);
 						addOffset(animname, offsets[0], offsets[1]);
@@ -707,7 +693,6 @@ class Character extends FlxSprite
 				healthColors = [color.red, color.green, color.blue];
 					
 
-				trace("hopefully loaded the character"); //why is it still crashing????? AAAAAAAAAAAAAAAAAA
 		}
 
 		dance();

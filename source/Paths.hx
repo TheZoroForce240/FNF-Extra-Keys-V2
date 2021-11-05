@@ -190,9 +190,7 @@ class Paths
 				var imageGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(image(path)));
 				imageGraphic.persist = true;
 				CacheShit.images[path] = imageGraphic;
-				trace("added custom image");
 			}
-			trace("got dat image");
 			return CacheShit.images[path];
 			
 
