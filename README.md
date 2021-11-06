@@ -11,23 +11,22 @@ WARNING: this mod is still pretty early in development, so expect bugs and missi
 ## Some Features
  - Better Input + rebindable keys
  - Downscroll
- - Middlescroll
- - Crazy Note Customization with an interactable menu
+ - Middlescroll (while still being able to see the oppenents notes)
+ - Crazy note customization with an interactable menu (plan to make this more in depth soon)
  - 1-9 Key Support
- - Bunch of note types already set up
- - Note Specfic Speed + Velocity Changes
- - Custom Song and Character Support (no compiling required!, currently pretty basic though)
- - A lot of randomizaton options (not all are readded yet)
- - New Difficulty System which is based on the chart files (currently only in freeplay)
- - Local Multiplayer Support
+ - a bunch of note types already set up
+ - Note specfic speed + velocity changes (going to improve this at some point)
+ - Custom song, character and stage support (no compiling required!, currently pretty basic though)
+ - A lot of randomizaton options (not all are readded yet, just random speed and velocity changes right now)
+ - New difficulty system which is based on the chart files (currently only in freeplay)
+ - Local multiplayer support
+ - Changing mania mid song (now seperate for each player!)
 
 ## Planned Features
  - Unhardcoding most things
  - Documenting as much code as i can, to help noob coders understand the game better and how it works
  - Android Support (not guaranteed, might not happen)
  - Editors for most things
- - Modchart creator??
- - Changing Mania Mid Song (want to remake the system i used for it)
  - probably some other stuff as well i forgot
 
 # Friday Night Funkin
