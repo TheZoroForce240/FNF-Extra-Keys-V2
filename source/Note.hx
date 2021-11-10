@@ -78,6 +78,9 @@ class Note extends FlxSprite
 	//public static var prevNoteScale:Float = 0.5;
 	public static var pixelnoteScale:Float;
 	public static var tooMuch:Float = 30;
+	var scaleToUse:Float = 1;
+	public var curMania:Int = 0; //im watching you, you better not steal this fucking code
+	public var changesMania:Bool = false;
 
 	public static var noteScales:Array<Float> = [0.7, 0.6, 0.5, 0.65, 0.58, 0.55, 0.7, 0.7, 0.7];
 	public static var pixelNoteScales:Array<Float> = [1, 0.83, 0.7, 0.9, 0.8, 0.74, 1, 1, 1];
@@ -197,14 +200,20 @@ class Note extends FlxSprite
 		}
 
 
-		p1NoteScale = noteScale;
-		p2NoteScale = noteScale;
+		if (!PlayState.regeneratingNotes)
+		{
+			p1NoteScale = noteScale;
+			p2NoteScale = noteScale;
+		}
+
 
 
 		if (_speed <= 1) //sets speed to song speed if the speed value of a note is 1 or less, just as a backup in case it becomes 0
 			speed = PlayState.SongSpeed;
 		else
 			speed = _speed;
+
+
 
 		super();
 
@@ -229,11 +238,14 @@ class Note extends FlxSprite
 		if (SaveData.speedScaling)
 			speed = FlxMath.roundDecimal((speed / 0.7) * (noteScale * scaleMulti), 2); //adjusts speed based on note size, i should make this an option at some point
 
+
+		if (!PlayState.rewinding)
+			speed = FlxMath.roundDecimal(speed / PlayState.SongSpeedMultiplier, 2);
+		else
+			speed = FlxMath.roundDecimal(speed, 2);
+		
 		x += 50;
-		if (PlayState.SONG.mania == 2)
-		{
-			x -= tooMuch; //moves notes a little to the left on 9k
-		}
+
 
 
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
@@ -245,6 +257,8 @@ class Note extends FlxSprite
 
 		if (this.strumTime < 0 )
 			this.strumTime = 0;
+
+		baseStrum = this.strumTime;
 
 
 		if (velocityData != null)
@@ -289,11 +303,15 @@ class Note extends FlxSprite
 		{
 			ColorPresets.fixColorArray(mania);
 			colorShit = ColorPresets.ccolorArray[noteData];
+			curMania = PlayState.curP2NoteMania;
+			scaleToUse = noteScales[curMania];
 		}
 		else
 		{
 			SaveData.fixColorArray(mania);
 			colorShit = SaveData.colorArray[noteData];
+			curMania = PlayState.curP1NoteMania;
+			scaleToUse = noteScales[curMania];
 		}
 
 		if (!isGFNote)
@@ -307,6 +325,16 @@ class Note extends FlxSprite
 
 		if (inCharter)
 			style = "";
+
+		if (curMania == 2)
+		{
+			x -= tooMuch; //moves notes a little to the left on 9k
+		}
+
+		if (curMania != mania)
+		{
+			changesMania = true;
+		}
 
 
 		switch (style)
@@ -362,8 +390,7 @@ class Note extends FlxSprite
 
 				//finally got around to cleaning this shit up
 
-				defaultWidth = width;
-				setGraphicSize(Std.int(width * noteScale * scaleMulti));
+				setGraphicSize(Std.int(width * scaleToUse * scaleMulti));
 				updateHitbox();
 				antialiasing = true;
 		}
@@ -422,7 +449,7 @@ class Note extends FlxSprite
 			{
 				prevNote.animation.play(frameN[mania][prevNote.noteData] + 'hold');
 				prevNote.updateHitbox();
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (noteScale * scaleMulti));
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (scaleToUse * scaleMulti));
 				prevNote.updateHitbox();
 
 				//prevNote.sustainOffset = Math.round(-prevNote.offset.y);
@@ -457,7 +484,7 @@ class Note extends FlxSprite
 		{
 			isSustainEnd = false;
 		}
-		var scaleToCheck = Note.p1NoteScale;
+		/*var scaleToCheck = Note.p1NoteScale;
 		if (!mustPress)
 			scaleToCheck = Note.p2NoteScale;
 
@@ -477,7 +504,7 @@ class Note extends FlxSprite
 				scale.y *= -1;
 			}
 			//updateHitbox();
-		}
+		}*/
 
 		if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped) || (PlayState.multiplayer))
 		{
@@ -530,7 +557,7 @@ class Note extends FlxSprite
 
 
 
-	function fixSustains():Void
+	/*function fixSustains():Void
 	{
 		if (!changedVelocityScale)
 		{
@@ -579,10 +606,10 @@ class Note extends FlxSprite
 			else
 				scale = currentP2Scale;
 			//updateHitbox();
-		}*/
+		}
 	}
 
-	/*public function reloadSustains(scaleToCheck:Float):Void
+	public function reloadSustains(scaleToCheck:Float):Void
 	{
 		var newSustain:Note = new Note(strumTime, noteData, noteType, true, speed, velocityData, false, false, mustPress, prevNote);
 		//this = newSustain;

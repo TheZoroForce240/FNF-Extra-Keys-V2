@@ -218,6 +218,10 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             curCategory[curSelected][1] = 60;
         else if (curCategory[curSelected][1] > 300 && curCategory[curSelected][0] == "FPS Cap")
             curCategory[curSelected][1] = 300;
+        else if (curCategory[curSelected][1] <= 0.1 && curCategory[curSelected][0] == "Song Speed Multi") //need to figure out a better way to do this, TODO
+            curCategory[curSelected][1] = 0.1;
+        else if (curCategory[curSelected][1] > 10 && curCategory[curSelected][0] == "Song Speed Multi")
+            curCategory[curSelected][1] = 10;
             
 
 
@@ -234,7 +238,7 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
     {
         switch(curCategory[curSelected][0])
         {
-            case "Scroll Speed": 
+            case "Scroll Speed" | "Song Speed Multi": 
                 change = change / 10; //makes it 0.1
             case "FPS Cap": 
                 change = change * 10; //makes it 10
@@ -431,7 +435,9 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["Randomize Note Speed", SaveData.randomNoteSpeed, "toggle", "yes pain"],
             ["Randomize Note Velocity", SaveData.randomNoteVelocity, "toggle", "now its even worse"],
             ["Hellchart", SaveData.Hellchart, "toggle", "oh fuck it gets worse"],
-            ["Play As Oppenent", SaveData.flip, "toggle", "figure it out lol"]
+            ["Play As Oppenent", SaveData.flip, "toggle", "figure it out lol"],
+            ["Song Speed Multi", PlayState.SongSpeedMultiplier, "slider", "change the song speed"],
+            ["Random Speed Change", PlayState.RandomSpeedChange, "toggle", "randomly change the speed"]
         ];
 
         switch (daCat)
@@ -636,6 +642,10 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                     SaveData.noteMovements = curCategory[i][1];
                 case "Scale Speed with Mania":
                     SaveData.speedScaling = curCategory[i][1];
+                case "Song Speed Multi":
+                    PlayState.SongSpeedMultiplier = curCategory[i][1]; 
+                case "Random Speed Change":
+                    PlayState.RandomSpeedChange = curCategory[i][1]; 
 ////////////////////////////////////////////////////////////////////////////////////// stick ur custom options here
                 case "your option": 
                     //stick da shit here
