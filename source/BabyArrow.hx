@@ -252,7 +252,7 @@ class BabyArrow extends FlxSprite
                 lane.x = this.x + laneOffset[maniaToUse];
                 lane.y = this.y - 300;
             }
-            y += 200;
+            //y += 200;
             //lane.angle = this.angle;
 
             defaultX = this.x;

@@ -3264,10 +3264,6 @@ class PlayState extends MusicBeatState
 
 	function cameraZooming():Void
 	{
-		camHUD.zoom = 0.7;
-		camP1Notes.zoom = camHUD.zoom;
-		camP2Notes.zoom = camHUD.zoom;
-		camOnTop.zoom = camHUD.zoom;
 		if (camZooming)
 		{
 			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, 0.95);
@@ -3815,29 +3811,6 @@ class PlayState extends MusicBeatState
 		{
 			var randomShit = FlxMath.roundDecimal(FlxG.random.float(0.8, 2), 2);
 			lerpSongSpeed(randomShit, 1);
-		}
-
-		if (curBeat % 4 == 0 && !rewinding)
-		{
-			var flipscroll = FlxG.random.bool(50);
-			playerStrums.forEach(function(spr:BabyArrow)
-			{					
-				var angle = FlxG.random.int(-50, 50);
-				if (flipscroll)
-					angle = FlxG.random.int(130, 220);
-
-				FlxTween.tween(spr, {angle: angle}, (Conductor.stepCrochet / 1000));
-					
-			});
-
-			cpuStrums.forEach(function(spr:BabyArrow)
-			{					
-				var angle = FlxG.random.int(-50, 50);
-				if (flipscroll)
-					angle = FlxG.random.int(130, 220);
-
-				FlxTween.tween(spr, {angle: angle}, (Conductor.stepCrochet / 1000));
-			});
 		}
 
 		iconP1.setGraphicSize(Std.int(iconP1.width + 30));
