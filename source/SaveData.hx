@@ -26,6 +26,30 @@ class SaveData
     public static var speedScaling:Bool = false;
     public static var randomizationMode:String = "Normal";
 
+    public static var hudPos:String = "Left";
+    public static var songhudPos:String = "Left";
+    public static var hpBarPos:String = "Left";
+    public static var enabledHudSections:Array<Bool> = [
+        true, //score
+        true, //rank
+        true, //acc
+        true, //misses
+        true, //song name
+        true, //timer
+        true, //sicks
+        true, //goods
+        true, //bads
+        true, //shits
+        true, //ghost misses
+        true, //combo
+        true, //highest combo
+        true, //nps
+        true, //highest nps
+        true, //health percentage
+    ];
+
+    public static var arrowLanes:String = "Off";
+
 
     //hue, saturation, brightness, asset
     public static var purple:Array<Float> = [0, 0, 0, 0];
@@ -61,8 +85,6 @@ class SaveData
         if (FlxG.save.data.middlescroll == null)
 			FlxG.save.data.middlescroll = false;
 
-        if (FlxG.save.data.multiplayer == null)
-			FlxG.save.data.multiplayer = false;
 
         if (FlxG.save.data.ScrollSpeed == null || FlxG.save.data.ScrollSpeed < 1 || FlxG.save.data.ScrollSpeed > 10)
 			FlxG.save.data.ScrollSpeed = 1;
@@ -79,25 +101,38 @@ class SaveData
         if (FlxG.save.data.speedScaling == null)
 			FlxG.save.data.speedScaling = false;
 
-        /////////////////////////////////////////////////////////////////
+        if (FlxG.save.data.hudPos == null)
+			FlxG.save.data.hudPos = "Vanilla";
 
-        if (FlxG.save.data.randomNotes == null)
-			FlxG.save.data.randomNotes = false;
+        if (FlxG.save.data.songhudPos == null)
+			FlxG.save.data.songhudPos = "Vanilla";
+        
+        if (FlxG.save.data.hpBarPos == null)
+			FlxG.save.data.hpBarPos = "Vanilla";
 
-        if (FlxG.save.data.randomizationMode == null)
-			FlxG.save.data.randomizationMode = "Normal";
+        if (FlxG.save.data.enabledHudSections == null)
+			FlxG.save.data.enabledHudSections = [
+                true, //score
+                true, //rank
+                true, //acc
+                true, //misses
+                true, //song name
+                true, //timer
+                true, //sicks
+                true, //goods
+                true, //bads
+                true, //shits
+                true, //ghost misses
+                true, //combo
+                true, //highest combo
+                true, //nps
+                true, //highest nps
+                true, //health percentage
+            ];
 
-        if (FlxG.save.data.flip == null)
-			FlxG.save.data.flip = false;
-
-        if (FlxG.save.data.randomNoteSpeed == null)
-			FlxG.save.data.randomNoteSpeed = false;
-
-        if (FlxG.save.data.randomNoteVelocity == null)
-			FlxG.save.data.randomNoteVelocity = false;
-
-        if (FlxG.save.data.Hellchart == null)
-			FlxG.save.data.Hellchart = false;
+        if (FlxG.save.data.arrowLanes == null)
+            FlxG.save.data.arrowLanes = "Off";
+        
 
         //////////////////////////////////////////////////////////////
 
@@ -131,21 +166,17 @@ class SaveData
         FlxG.save.data.botplay = botplay;
         FlxG.save.data.noteSplash = noteSplash;
         FlxG.save.data.middlescroll = middlescroll;
-        FlxG.save.data.multiplayer = multiplayer;
         FlxG.save.data.ScrollSpeed = ScrollSpeed;
         FlxG.save.data.fps = fps;
         FlxG.save.data.casual = casual;
         FlxG.save.data.noteMovements = noteMovements;
         FlxG.save.data.speedScaling = speedScaling;
-       
 
-
-        FlxG.save.data.randomNotes = randomNotes;
-        FlxG.save.data.flip = flip;
-        FlxG.save.data.randomizationMode = randomizationMode;
-        FlxG.save.data.randomNoteSpeed = randomNoteSpeed;
-        FlxG.save.data.randomNoteVelocity = randomNoteVelocity;
-        FlxG.save.data.Hellchart = Hellchart;
+        FlxG.save.data.hudPos = hudPos;
+        FlxG.save.data.songhudPos = songhudPos;
+        FlxG.save.data.hpBarPos = hpBarPos;
+        FlxG.save.data.enabledHudSections = enabledHudSections;
+        FlxG.save.data.arrowLanes = arrowLanes;
 
         FlxG.save.data.purple = purple;
         FlxG.save.data.blue = blue;
@@ -170,7 +201,6 @@ class SaveData
         botplay = FlxG.save.data.botplay;
         noteSplash = FlxG.save.data.noteSplash;
         middlescroll = FlxG.save.data.middlescroll;
-        multiplayer = FlxG.save.data.multiplayer;
         noteMovements = FlxG.save.data.noteMovements;
         speedScaling = FlxG.save.data.speedScaling;
 
@@ -178,12 +208,12 @@ class SaveData
         fps = FlxG.save.data.fps;
         casual = FlxG.save.data.casual;
 
-        randomNotes = FlxG.save.data.randomNotes;
-        randomizationMode = FlxG.save.data.randomizationMode;
-        flip = FlxG.save.data.flip;
-        randomNoteSpeed = FlxG.save.data.randomNoteSpeed;
-        randomNoteVelocity = FlxG.save.data.randomNoteVelocity;
-        Hellchart = FlxG.save.data.Hellchart;
+        hudPos = FlxG.save.data.hudPos;
+        songhudPos = FlxG.save.data.songhudPos;
+        hpBarPos = FlxG.save.data.hpBarPos;
+        enabledHudSections = FlxG.save.data.enabledHudSections;
+
+        arrowLanes = FlxG.save.data.arrowLanes;
 
         purple = FlxG.save.data.purple;
         blue = FlxG.save.data.blue;
@@ -207,7 +237,6 @@ class SaveData
         FlxG.save.data.randomNotes = false;
         FlxG.save.data.mania = 0;
         FlxG.save.data.flip = false;
-        FlxG.save.data.multiplayer = false;
         FlxG.save.data.noteMovements = false;
         FlxG.save.data.speedScaling = false;
         FlxG.save.data.purple = [0, 0, 0, 0];
@@ -225,7 +254,7 @@ class SaveData
         saveTheData();
     }
 
-    public static function resetBinds():Void
+    public static function resetBinds():Void //todo uhhhh put in an array or somethin
     {
 
         FlxG.save.data.upBind = "W";
@@ -299,7 +328,7 @@ class SaveData
 
         keyBindCheck();
 	}
-    public static function keyBindCheck():Void
+    public static function keyBindCheck():Void 
         {
             if(FlxG.save.data.upBind == null)
                 FlxG.save.data.upBind = "W";

@@ -1154,7 +1154,7 @@ class ChartingState extends MusicBeatState
 						}
 						else
 						{
-							trace('tryin to delete note...');
+							//('tryin to delete note...');
 							deleteNote(note, whichSectionYouIn);
 						}
 					}
@@ -1416,7 +1416,7 @@ class ChartingState extends MusicBeatState
 
 	function changeSection(sec:Int = 0, ?updateMusic:Bool = true):Void
 	{
-		trace('changing section' + sec);
+		//trace('changing section' + sec);
 		autosaveSong();
 
 		if (_song.notes[sec] != null && _song.notes[sec + 1] != null)
@@ -1533,24 +1533,9 @@ class ChartingState extends MusicBeatState
 
 	function updateGrid():Void
 	{
-		while (curRenderedNotes.members.length > 0)
-		{
-			curRenderedNotes.remove(curRenderedNotes.members[0], true);
-		}
-
-		while (curRenderedSustains.members.length > 0)
-		{
-			curRenderedSustains.remove(curRenderedSustains.members[0], true);
-		}
-
-		while (curRenderedTypes.members.length > 0)
-			{
-				curRenderedTypes.remove(curRenderedTypes.members[0], true);
-			}
-		while (curRenderedSpeed.members.length > 0)
-			{
-				curRenderedSpeed.remove(curRenderedSpeed.members[0], true);
-			}
+		curRenderedSustains.clear();
+		curRenderedTypes.clear();
+		curRenderedSpeed.clear();
 
 		var sectionInfo:Array<Dynamic> = _song.notes[curSection].sectionNotes;
 
@@ -1576,24 +1561,126 @@ class ChartingState extends MusicBeatState
 					daBPM = _song.notes[i].bpm;
 			Conductor.changeBPM(daBPM);
 		}
+		
+		curRenderedNotes.forEach(function(note:Note) //finally stop notes from being cleared and repalce everytime the grid updates
+		{
+			note.updated = false;
+		});
 
 		for (i in sectionInfo)
 		{
-			generateNotes(i, "normal");
+			var foundNote:Bool = false;
+			curRenderedNotes.forEach(function(note:Note)
+			{
+				
+				if ((i[1] + 4) == note.rawNoteData && i[0] == note.strumTime)
+				{
+					updateNotePos(note, "normal");
+					updateCurRenderedStuff(note);
+					note.updated = true;
+					foundNote = true;
+					//trace("reusing notes");
+				}
+			});
+			if (!foundNote)
+				generateNotes(i, "normal");
+			
 		}
 		if (curSection != 0 && lastSectionInfo != null)
 		{
 			for (i in lastSectionInfo)
 				{
-					generateNotes(i, "above");
+					var foundNote:Bool = false;
+					curRenderedNotes.forEach(function(note:Note)
+					{
+						
+						if ((i[1] + 4) == note.rawNoteData && i[0] == note.strumTime)
+						{
+							updateNotePos(note, "above");
+							updateCurRenderedStuff(note);
+							note.updated = true;
+							foundNote = true;
+							//trace("reusing notes");
+						}
+					});
+					if (!foundNote)
+						generateNotes(i, "above");
 				}
 		}
 		if (nextSectionInfo != null)
 		{
 			for (i in nextSectionInfo)
 				{
-					generateNotes(i, "below");
+					var foundNote:Bool = false;
+					curRenderedNotes.forEach(function(note:Note)
+					{
+						
+						if ((i[1] + 4) == note.rawNoteData && i[0] == note.strumTime)
+						{
+							updateNotePos(note, "below");
+							updateCurRenderedStuff(note);
+							note.updated = true;
+							foundNote = true;
+							//trace("reusing notes");
+						}
+					});
+					if (!foundNote)
+						generateNotes(i, "below");
 				}
+		}
+		curRenderedNotes.forEach(function(note:Note)
+		{
+			if (!note.updated)
+			{
+				note.kill();
+				curRenderedNotes.remove(note);
+				note.destroy();
+				//trace("removed unused notes");
+			}
+		});
+	}
+
+	function updateNotePos(note:Note, sectionType:String = "normal")
+	{
+		switch (sectionType)
+		{
+			case "normal": 
+				note.y = Math.floor(getYfromStrum((note.strumTime - sectionStartTime(curSection)) % (Conductor.stepCrochet * _song.notes[curSection].lengthInSteps)));
+			case "above": 
+				note.y = Math.floor(getAboveYfromStrum((note.strumTime - sectionStartTime(curSection - 1)) % (Conductor.stepCrochet * _song.notes[curSection - 1].lengthInSteps)));
+			case "below": 
+				note.canPlaySound = false;
+				note.y = Math.floor(getBelowYfromStrum((note.strumTime - sectionStartTime(curSection + 1)) % (Conductor.stepCrochet * _song.notes[curSection + 1].lengthInSteps)));
+		}
+	}
+
+	function updateCurRenderedStuff(note:Dynamic)
+	{
+		if (note.speed != 1 && note.speed != null && note.speed != 0)
+		{
+			var thetext:String = Std.string(note.speed);
+			var typeText:FlxText = new FlxText(note.x, note.y, 0, thetext, 25, true);
+			typeText.color = FlxColor.fromRGB(255,0,0);
+			curRenderedSpeed.add(typeText);
+		}
+
+		if (note.noteType == 5)
+		{
+			var thetext:String = Std.string(note.noteType);
+			var typeText:FlxText = new FlxText(note.x, note.y, 0, thetext, 25, true);
+			typeText.color = FlxColor.fromRGB(255,0,0);
+			if (note.noteType == 5)
+			{
+				typeText.text = "Alt";
+			}
+			curRenderedTypes.add(typeText);
+		}
+
+		if (note.sustainLength > 0)
+		{
+			var sustainVis:FlxSprite = new FlxSprite(note.x + (GRID_SIZE / 2),
+				note.y + GRID_SIZE).makeGraphic(8, Math.floor(FlxMath.remapToRange(note.sustainLength, 0, Conductor.stepCrochet * 16, 0, gridBG.height)));
+			curRenderedSustains.add(sustainVis);
 		}
 	}
 
@@ -1624,6 +1711,7 @@ class ChartingState extends MusicBeatState
 		note.updateHitbox();
 		note.rawNoteData = daNoteInfo;
 		note.playedSound = true;
+		note.updated = true;
 
 		switch (sectionType)
 		{
@@ -1665,7 +1753,7 @@ class ChartingState extends MusicBeatState
 			note.x = Math.floor(daNoteInfo * S_GRID_SIZE);
 		}
 
-		if (daSpeed != 1 && daSpeed != null)
+		if (daSpeed != 1 && daSpeed != null && note.speed != 0)
 		{
 			var thetext:String = Std.string(daSpeed);
 			var typeText:FlxText = new FlxText(note.x, note.y, 0, thetext, 25, true);
@@ -1728,7 +1816,7 @@ class ChartingState extends MusicBeatState
 
 	function deleteNote(note:Note, daSection:SwagSection):Void
 	{
-		trace("ahhhhhhhhhhhhh");
+		//trace("ahhhhhhhhhhhhh");
 		//i solved it hahahhahahahah
 		//fuckjing strumtime are decimals ahghhhhhhhh
 		var deleted:Bool = false;
@@ -1736,7 +1824,7 @@ class ChartingState extends MusicBeatState
 		{
 			if (i[0] == note.strumTime && i[1] == (note.rawNoteData - 4))
 			{
-				trace("please delete the note i fucking hate this");
+				//trace("please delete the note i fucking hate this");
 				FlxG.log.add('FOUND EVIL NUMBER');
 				daSection.sectionNotes.remove(i);
 				deleted = true;
@@ -1744,7 +1832,7 @@ class ChartingState extends MusicBeatState
 		}
 		if (!deleted)
 		{
-			trace("fucking stupid fucking notes not being deleted");
+			//trace("fucking stupid fucking notes not being deleted");
 			for(sec in _song.notes) //search the whole song rather than section
 			{
 				for (daNote in sec.sectionNotes)
@@ -1791,7 +1879,7 @@ class ChartingState extends MusicBeatState
 		noteVelocity = [stepperNoteVelocity.value, stepperNoteVelocityTime.value];
 		var eventData:Array<String> = ["none", ""];
 		eventData = [curEventData[0], curEventData[1]];
-		trace(eventData);
+		//trace(eventData);
 
 		if (_song.mania == 2 || _song.mania == 5)
 			var noteData = Math.floor(FlxG.mouse.x / S_GRID_SIZE);
@@ -1809,8 +1897,8 @@ class ChartingState extends MusicBeatState
 		if (FlxG.keys.pressed.CONTROL)
 			daSection.sectionNotes.push([noteStrum, (noteData -18), noteSus, noteType, noteSpeed, noteVelocity, eventData]);
 
-		trace(noteStrum);
-		trace(curSection);
+		//trace(noteStrum);
+		//trace(curSection);
 
 		updateGrid();
 		updateNoteUI();

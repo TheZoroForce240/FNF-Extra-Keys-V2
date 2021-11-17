@@ -115,7 +115,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
     var sDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'UP', 'RIGHT']; //bf anims from note data, or input data in this state
 
-    var menuList:Array<String> = ['Keybinds', 'Notes', 'Gameplay'];                           //used for creating menus
+    var menuList:Array<String> = ['Keybinds', 'Notes', 'Gameplay', 'Hud'];                           //used for creating menus
     var KeybindList:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
     var selectedPlayer:Int = 1;
     var NotesList:Array<String> = ['Color', '', '', '', '', 'Assets','Note Scale', 'Color Presets', 'Reset Colors'];
@@ -325,6 +325,10 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                             openSubState(new QuickOptions());
                             inMain = true;
                             waitingForSettings = true;
+                        case 3: 
+                            openSubState(new HUDCustomizeSubstate());
+                            inMain = true;
+                            waitingForSettings = true;  
                             
                     }
                     if (i != 2)
@@ -713,9 +717,9 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
     function updateKeybinds():Void
     {
-        KeybindList = CoolUtil.bindCheck(maniaToChange);
+        KeybindList = CoolUtil.bindCheck(maniaToChange, true);
         if (selectedPlayer != 1)
-            KeybindList = CoolUtil.P2bindCheck(maniaToChange);
+            KeybindList = CoolUtil.P2bindCheck(maniaToChange, true);
 
         grpKeybinds.clear();
         for (i in 0...KeybindList.length)
@@ -797,9 +801,9 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
         var binds:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
         var data = -1;
-		binds = CoolUtil.bindCheck(maniaToChange);
+		binds = CoolUtil.bindCheck(maniaToChange, true);
         if (selectedPlayer != 1)
-			binds = CoolUtil.P2bindCheck(maniaToChange);
+			binds = CoolUtil.P2bindCheck(maniaToChange, true);
 
         for (i in 0...binds.length) // binds
         {
@@ -819,9 +823,9 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         var key = FlxKey.toStringMap.get(evt.keyCode);
         var data = -1;
         var binds:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind]; 
-        binds = CoolUtil.bindCheck(maniaToChange);
+        binds = CoolUtil.bindCheck(maniaToChange, true);
         if (selectedPlayer != 1)
-			binds = CoolUtil.P2bindCheck(maniaToChange);
+			binds = CoolUtil.P2bindCheck(maniaToChange, true);
 
         for (i in 0...binds.length) // binds
             {

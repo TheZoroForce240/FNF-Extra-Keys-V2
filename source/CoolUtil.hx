@@ -4,6 +4,10 @@ import lime.utils.Assets;
 import flixel.FlxG;
 import haxe.Json;
 import openfl.utils.Assets as OpenFlAssets;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.math.FlxMath;
+import PlayState;
 
 #if sys
 import sys.io.File;
@@ -44,6 +48,10 @@ class CoolUtil
 		var path = "assets/data/charts/" + song;
 		if (customChart)
 			path = "assets/data/customChart/" + song;
+
+		if (PlayState.isStoryMode) //idk why its flagged as incorrect, game still compiles??????
+			return song + PlayState.storySuffix;
+
 		#if sys
 		if (FileSystem.exists(path))
 		{
@@ -132,7 +140,7 @@ class CoolUtil
 		#end
 	}
 
-	public static function bindCheck(mania:Int)
+	public static function bindCheck(mania:Int, customizing:Bool = false)
 	{
 		var maniaToUse = PlayState.p1Mania;
 		if (PlayState.flipped)
@@ -145,7 +153,7 @@ class CoolUtil
 			case 1: 
 				binds = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
 			case 2: 
-				if (maniaToUse != mania)
+				if (maniaToUse != mania && !customizing)
 				{
 					switch(maniaToUse) //for mania switches
 					{
@@ -187,7 +195,7 @@ class CoolUtil
 		return binds;
 	}
 
-	public static function P2bindCheck(mania:Int)
+	public static function P2bindCheck(mania:Int, customizing:Bool = false)
 		{
 			var P2binds:Array<String> = [FlxG.save.data.P2leftBind,FlxG.save.data.P2downBind, FlxG.save.data.P2upBind, FlxG.save.data.P2rightBind];
 			switch(mania)
@@ -197,7 +205,7 @@ class CoolUtil
 				case 1: 
 					P2binds = [FlxG.save.data.P2L1Bind, FlxG.save.data.P2U1Bind, FlxG.save.data.P2R1Bind, FlxG.save.data.P2L2Bind, FlxG.save.data.P2D1Bind, FlxG.save.data.P2R2Bind];
 				case 2: 
-					if (PlayState.p2Mania != mania)
+					if (PlayState.p2Mania != mania && !customizing)
 					{
 						switch(PlayState.p2Mania) //for mania switches
 						{
@@ -267,9 +275,9 @@ class CoolUtil
 
 	public static function complexAssKeybindSaving(maniaToChange:Int, key:String, curSelectedNote:Int, player:Int = 1) //wait shouldnt i put this in save data?? who cares lol
 	{
-		var binds = bindCheck(maniaToChange);
+		var binds = bindCheck(maniaToChange, true);
 		if (player != 1)
-			binds = P2bindCheck(maniaToChange);
+			binds = P2bindCheck(maniaToChange, true);
 
 		binds[curSelectedNote] = key;
 
@@ -433,4 +441,7 @@ class CoolUtil
 
 		return noteType;
 	}
+
+
+
 }

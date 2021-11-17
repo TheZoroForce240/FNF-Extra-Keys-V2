@@ -1,20 +1,12 @@
 package;
 
-import Controls.Control;
-import flixel.input.keyboard.FlxKey;
+
 import flixel.FlxG;
-import flixel.FlxObject;
 import flixel.FlxSprite;
-import flixel.effects.FlxFlicker;
-import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.text.FlxText;
-import flixel.FlxSubState;
 import flixel.util.FlxColor;
-import openfl.display.FPS;
 import openfl.Lib;
 import flixel.input.gamepad.FlxGamepad;
-import flixel.input.gamepad.FlxGamepadInputID;
-import flixel.input.gamepad.FlxGamepadManager;
 import flixel.util.FlxTimer;
 
 
@@ -127,53 +119,83 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
     
             if (accepted)
             {
-                if (curCategory[curSelected][2] == "toggle")
+                switch (curCategory[curSelected][2]) //option type for pressing enter
                 {
-                    curCategory[curSelected][1] = !curCategory[curSelected][1];
-                    turnOptionsIntoSaveData();
-                    SaveData.saveDataCheck();
-                    reloadOptions();
-                    createText();
-                }
-                else if (curCategory[curSelected][2] == "cat")
-                {
-                    //curCat 0 = catergory menu, might be a little confusing lol
-                    
-                    reloadOptions();
-                    switch (curCategory[curSelected][0])
-                    {
-                        case "Gameplay": 
-                            curCategory = gameplay;
-                            daCat = "Gameplay";
-                        case "Misc": 
-                            curCategory = misc;
-                            daCat = "Misc";
-                        case "Keybinds": 
-                            curCategory = keybinds;
-                            daCat = "Keybinds";
-                        case "P2 Keybinds": 
-                            curCategory = P2keybinds;
-                            daCat = "P2 Keybinds";
-                        case "Gamepad Binds": 
-                            curCategory = gamepad;
-                            daCat = "Gamepad Binds";
-                        case "Randomization": 
-                            curCategory = randomization;
-                            daCat = "Randomization";
-                        default: 
-                            curCategory = categories; //backup
-                            daCat = "";
-                    }
-                    curSelected = 0;
-                    inCat = true;
-                    createText();
-                }
-                else if (curCategory[curSelected][2] == "keybind" || curCategory[curSelected][2] == "gamepad")
-                {
-                    waitingForInput = true;
-                    if (curCategory[curSelected][2] == "gamepad")
-                        gamepadInput = true;
-                    createText();
+                    case "toggle": 
+                        curCategory[curSelected][1] = !curCategory[curSelected][1];
+                        turnOptionsIntoSaveData();
+                        SaveData.saveDataCheck();
+                        reloadOptions();
+                        createText();
+                    case "cat": 
+                        //curCat 0 = catergory menu, might be a little confusing lol
+                                            
+                        reloadOptions();
+                        switch (curCategory[curSelected][0])
+                        {
+                            case "Gameplay": 
+                                curCategory = gameplay;
+                                daCat = "Gameplay";
+                            case "Misc": 
+                                curCategory = misc;
+                                daCat = "Misc";
+                            case "Keybinds": 
+                                curCategory = keybinds;
+                                daCat = "Keybinds";
+                            case "P2 Keybinds": 
+                                curCategory = P2keybinds;
+                                daCat = "P2 Keybinds";
+                            case "Gamepad Binds": 
+                                curCategory = gamepad;
+                                daCat = "Gamepad Binds";
+                            case "Randomization": 
+                                curCategory = randomization;
+                                daCat = "Randomization";
+                            default: 
+                                curCategory = categories; //backup
+                                daCat = "";
+                        }
+                        curSelected = 0;
+                        inCat = true;
+                        createText();
+                    case "keybind" | "gamepad": 
+                        waitingForInput = true;
+                        if (curCategory[curSelected][2] == "gamepad")
+                            gamepadInput = true;
+                        createText();
+                    case "button": 
+                        switch (curCategory[curSelected][0])
+                        {
+                            case "Quick DFJK": 
+                                FlxG.save.data.leftBind = "D";
+                                FlxG.save.data.downBind = "F";
+                                FlxG.save.data.upBind = "J";
+                                FlxG.save.data.rightBind = "K";
+                            case "Quick WASD": 
+                                FlxG.save.data.leftBind = "A";
+                                FlxG.save.data.downBind = "S";
+                                FlxG.save.data.upBind = "W";
+                                FlxG.save.data.rightBind = "D";
+                            case "Quick Arrow Keys": 
+                                FlxG.save.data.leftBind = "LEFT";
+                                FlxG.save.data.downBind = "DOWN";
+                                FlxG.save.data.upBind = "UP";
+                                FlxG.save.data.rightBind = "RIGHT";
+                            case "Quick AS^>": 
+                                FlxG.save.data.leftBind = "A";
+                                FlxG.save.data.downBind = "S";
+                                FlxG.save.data.upBind = "UP";
+                                FlxG.save.data.rightBind = "RIGHT";
+                            case "Reset All Keybinds": 
+                                SaveData.resetBinds();
+                            case "Customize HUD": 
+                                openSubState(new HUDCustomizeSubstate());
+                            
+                        }
+                        //turnOptionsIntoSaveData();
+                        SaveData.saveDataCheck();
+                        reloadOptions();
+                        createText();
                 }
             }   
         }
@@ -181,32 +203,65 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
         {
             var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
 
-            if (FlxG.keys.justPressed.ANY || (gamepad.justPressed.ANY && gamepad != null))
+            if (gamepadInput && gamepad != null)
             {
-                var key:String = "F"; //press f to pay respects
-                if (!gamepadInput)
-                    key = FlxG.keys.getIsDown()[0].ID.toString(); //dont wanna add keyboard events to make this substate larger, but should work for most keys, it might break numpad though idk
-                else
-                {    
-                    if (gamepad != null)
-                        key = gamepad.firstJustPressedID().toString();
-                }
-                    
-                if (key != "BACKSPACE" || key != "ESCAPE" || key != "ENTER")
-                {
-                    curCategory[curSelected][1] = key;
-                    turnOptionsIntoSaveData();
-                    SaveData.saveDataCheck();
-                    reloadOptions();
-                    createText();
-                }
-                waitingForInput = false;
-                gamepadInput = false;
-                turnOptionsIntoSaveData();
-                SaveData.saveDataCheck();
-                reloadOptions();
-                createText();
+                if (gamepad.justPressed.ANY)
+                    {
+                        var key:String = "F"; //press f to pay respects
+                        if (!gamepadInput)
+                            key = FlxG.keys.getIsDown()[0].ID.toString(); //dont wanna add keyboard events to make this substate larger, but should work for most keys, it might break numpad though idk
+                        else
+                        {    
+                            if (gamepad != null)
+                                key = gamepad.firstJustPressedID().toString();
+                        }
+                            
+                        if (key != "BACKSPACE" || key != "ESCAPE" || key != "ENTER")
+                        {
+                            curCategory[curSelected][1] = key;
+                            turnOptionsIntoSaveData();
+                            SaveData.saveDataCheck();
+                            reloadOptions();
+                            createText();
+                        }
+                        waitingForInput = false;
+                        gamepadInput = false;
+                        turnOptionsIntoSaveData();
+                        SaveData.saveDataCheck();
+                        reloadOptions();
+                        createText();
+                    }
             }
+            else
+            {
+                if (FlxG.keys.justPressed.ANY)
+                    {
+                        var key:String = "F"; //press f to pay respects
+                        if (!gamepadInput)
+                            key = FlxG.keys.getIsDown()[0].ID.toString(); //dont wanna add keyboard events to make this substate larger, but should work for most keys, it might break numpad though idk
+                        else
+                        {    
+                            if (gamepad != null)
+                                key = gamepad.firstJustPressedID().toString();
+                        }
+                            
+                        if (key != "BACKSPACE" || key != "ESCAPE" || key != "ENTER")
+                        {
+                            curCategory[curSelected][1] = key;
+                            turnOptionsIntoSaveData();
+                            SaveData.saveDataCheck();
+                            reloadOptions();
+                            createText();
+                        }
+                        waitingForInput = false;
+                        gamepadInput = false;
+                        turnOptionsIntoSaveData();
+                        SaveData.saveDataCheck();
+                        reloadOptions();
+                        createText();
+                    }
+            }
+            
         }
         
 
@@ -301,7 +356,7 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                 middleThing = " <";
                 extraThing = ">";
             }
-            if (curCategory[i][2] == "cat")
+            if (curCategory[i][2] == "cat" || curCategory[i][2] == "button")
                 middleThing = "";
 
             if (i == curSelected && waitingForInput)
@@ -337,7 +392,8 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["Keybinds", "", "cat"],
             ["P2 Keybinds", "", "cat"],
             ["Gamepad Binds", "", "cat"],
-            ["Randomization", "", "cat"]
+            ["Randomization", "", "cat"],
+            ["Customize HUD", "", "button"]
         ];
         //name, savedata, type of option, info
         gameplay = [ 
@@ -359,6 +415,10 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
         ];
     
         keybinds = [
+            ["Quick DFJK","", "button", ""],
+            ["Quick AS^>","", "button", ""],
+            ["Quick WASD","", "button", ""],
+            ["Quick Arrow Keys","", "button", ""],
             ["4K/5K Left", FlxG.save.data.leftBind, "keybind", ""],
             ["4K/5K Down", FlxG.save.data.downBind, "keybind", ""],
             ["4K/5K Up", FlxG.save.data.upBind, "keybind", ""],
@@ -379,7 +439,8 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["6K/7K Right 1", FlxG.save.data.R1Bind, "keybind", ""],
             ["6K/7K Left 2", FlxG.save.data.L2Bind, "keybind", ""],
             ["6K/7K Down", FlxG.save.data.D1Bind, "keybind", ""],
-            ["6K/7K Right 2", FlxG.save.data.R2Bind, "keybind", ""]
+            ["6K/7K Right 2", FlxG.save.data.R2Bind, "keybind", ""],
+            ["Reset All Keybinds","", "button", "includes P2 and gamepad!"]
         ];
         P2keybinds = [
             ["P2 4K/5K Left", FlxG.save.data.P2leftBind, "keybind", ""],
@@ -402,7 +463,8 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["P2 6K/7K Right 1", FlxG.save.data.P2R1Bind, "keybind", ""],
             ["P2 6K/7K Left 2", FlxG.save.data.P2L2Bind, "keybind", ""],
             ["P2 6K/7K Down", FlxG.save.data.P2D1Bind, "keybind", ""],
-            ["P2 6K/7K Right 2", FlxG.save.data.P2R2Bind, "keybind", ""]
+            ["P2 6K/7K Right 2", FlxG.save.data.P2R2Bind, "keybind", ""],
+            ["Reset All Keybinds","", "button", "includes P1 and gamepad!"]
         ];
 
         gamepad = [
@@ -426,7 +488,8 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["Gamepad 6K/7K Right 1", FlxG.save.data.GR1Bind, "gamepad", ""],
             ["Gamepad 6K/7K Left 2", FlxG.save.data.GL2Bind, "gamepad", ""],
             ["Gamepad 6K/7K Down", FlxG.save.data.GD1Bind, "gamepad", ""],
-            ["Gamepad 6K/7K Right 2", FlxG.save.data.GR2Bind, "gamepad", ""]
+            ["Gamepad 6K/7K Right 2", FlxG.save.data.GR2Bind, "gamepad", ""],
+            ["Reset All Keybinds","", "button", "includes keyboard Keybinds!"]
         ];
     
         randomization = [
