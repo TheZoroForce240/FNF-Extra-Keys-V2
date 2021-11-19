@@ -6,6 +6,9 @@ import flixel.FlxG;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
+
+import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
 #if polymod
 import polymod.format.ParseRules.TargetSignatureElement;
 #end
@@ -181,6 +184,8 @@ class Note extends FlxSprite
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
 	var changedVelocityScale:Bool = false;
+	public var defaultScaleY:Float = 1;
+	public var curAlpha:Float = 1;
 
 	////////////////////////////////////////////////////////////
 
@@ -534,7 +539,7 @@ class Note extends FlxSprite
 		speedMulti = prevNote.speedMulti;
 		velocityChangeTime = prevNote.velocityChangeTime;
 		noteScore * 0.2;
-		alpha = 0.6;
+		curAlpha = 0.6;
 
 		sustainXOffset = (((37 / 0.7) * scaleToUse) * scaleMulti);
 
@@ -564,6 +569,7 @@ class Note extends FlxSprite
 			prevNote.updateHitbox();
 			prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (scaleToUse * scaleMulti));
 			prevNote.updateHitbox();
+			prevNote.defaultScaleY = prevNote.scale.y;
 
 			//prevNote.sustainOffset = Math.round(-prevNote.offset.y);
 			//sustainOffset = Math.round(-offset.y);
@@ -726,5 +732,16 @@ class Note extends FlxSprite
 			default: 
 				//add custom ntoe tyeps scucppotp 
 		}
+	}
+
+	public function clipSustain(clipTo:Float)
+	{
+		var fuckYouRect = new FlxRect(0, 0, width / scale.x, 0);
+		fuckYouRect.y = ((clipTo - y) / scale.y);
+		//fuckYouRect.y /= scale.y;
+		fuckYouRect.height -= fuckYouRect.y;
+		clipRect = fuckYouRect;
+
+		//clipTo - (y + offset.y * scale.y)
 	}
 }

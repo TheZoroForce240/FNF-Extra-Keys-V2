@@ -1,0 +1,102 @@
+{
+    "lockWeeks": false,
+    "weeks": [
+        {
+            "weekNum": 0,
+            "characters": ["dad", "bf", "gf"],
+            "diffs": ["easy", "normal", "hard"],
+            "diffSuffix": ["-easy", "", "-hard"],
+            "songs": ["Tutorial"],
+            "desc": ""
+        },
+        {
+            "weekNum": 1,
+            "characters": ["dad", "bf", "gf"],
+            "diffs": ["easy", "normal", "hard"],
+            "diffSuffix": ["-easy", "", "-hard"],
+            "songs": ["Bopeebo", "Fresh", "Dadbattle"],
+            "desc": "Daddy Dearest"
+        },
+        {
+            "weekNum": 2,
+            "characters": ["spooky", "bf", "gf"],
+            "diffs": ["easy", "normal", "hard"],
+            "diffSuffix": ["-easy", "", "-hard"],
+            "songs": ["Spookeez", "South", "Monster"],
+            "desc": "Spooky Month"
+        },
+        {
+            "weekNum": 3,
+            "characters": ["pico", "bf", "gf"],
+            "diffs": ["easy", "normal", "hard"],
+            "diffSuffix": ["-easy", "", "-hard"],
+            "songs": ["Pico", "Philly", "Blammed"],
+            "desc": "PICO"
+        },
+        {
+            "weekNum": 4,
+            "characters": ["mom", "bf", "gf"],
+            "diffs": ["easy", "normal", "hard"],
+            "diffSuffix": ["-easy", "", "-hard"],
+            "songs": ["Satin-Panties", "High", "Milf"],
+            "desc": "MOMMY MUST MURDER"
+        },
+        {
+            "weekNum": 5,
+            "characters": ["parents-christmas", "bf", "gf"],
+            "diffs": ["easy", "normal", "hard"],
+            "diffSuffix": ["-easy", "", "-hard"],
+            "songs": ["Cocoa", "Eggnog", "Winter-Horrorland"],
+            "desc": "RED SNOW"
+        },
+        {
+            "weekNum": 6,
+            "characters": ["senpai", "bf", "gf"],
+            "diffs": ["easy", "normal", "hard"],
+            "diffSuffix": ["-easy", "", "-hard"],
+            "songs": ["Senpai", "Roses", "Thorns"],
+            "desc": "hating simulator ft. moawling"
+        }
+    ],
+    "menuCharacters": [
+        {
+            "name": "test-bf",
+            "fileName": "campaign_menu_UI_characters",
+            "anims": [
+                {
+                    "anim": "idle",
+                    "xmlname": "BF idle dance white",
+                    "frameRate": 24,
+                    "loop": true
+                },
+                {
+                    "anim": "confirm",
+                    "xmlname": "BF HEY!!",
+                    "frameRate": 24,
+                    "loop": false
+                }
+            ],
+            "offsets": [-80, 0],
+            "flip": false,
+            "scale": 0.9
+        },
+        {
+            "name": "test-dad",
+            "fileName": "campaign_menu_UI_characters",
+            "anims": [
+                {
+                    "anim": "idle",
+                    "xmlname": "Dad idle dance BLACK LINE",
+                    "frameRate": 24,
+                    "loop": true
+                }
+            ],
+            "offsets": [0, 0],
+            "flip": false,
+            "scale": 0.5
+        }
+    ]
+
+
+
+}

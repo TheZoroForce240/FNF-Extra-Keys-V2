@@ -16,6 +16,19 @@ import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import lime.net.curl.CURLCode;
 
+import flixel.graphics.FlxGraphic;
+import openfl.display.BitmapData;
+
+import haxe.Json;
+import haxe.format.JsonParser;
+import openfl.utils.Assets as OpenFlAssets;
+import lime.utils.Assets;
+
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+#end
+
 using StringTools;
 
 
@@ -23,26 +36,31 @@ typedef StoryMenuData =
 {
 	var menuCharacters:Array<MenuChar>;
 	var weeks:Array<Weeks>;
+	var lockWeeks:Bool;
 }
 typedef Weeks =
 {
+	var weekNum:Int;
 	var characters:Array<String>;
 	var diffs:Array<String>;
 	var diffSuffix:Array<String>;
+	var songs:Array<String>;
+	var desc:String;
 } 
 
 typedef MenuChar = 
 {
+	var fileName:String;
 	var anims:Array<AnimOffsets>;
 	var offsets:Array<Float>;
 	var flip:Bool;
 	var scale:Float;
+	var name:String;
 }
 typedef AnimOffsets = 
 {
 	var anim:String; 
 	var xmlname:String;
-	var offsets:Array<Int>;
 	var frameRate:Int;
 	var loop:Bool;
 }
@@ -51,8 +69,15 @@ class StoryMenuState extends MusicBeatState
 {
 	var scoreText:FlxText;
 
-	var diffList = ["easy", "normal", "hard"];
-
+	/*var diffList:Array<Array<String>> = [
+		["easy", "normal", "hard"],
+		["easy", "normal", "hard"],
+		["easy", "normal", "hard"],
+		["easy", "normal", "hard"],
+		["easy", "normal", "hard"],
+		["easy", "normal", "hard"],
+		["easy", "normal", "hard"]
+	];
 	var weekData:Array<Dynamic> = [
 		['Tutorial'],
 		['Bopeebo', 'Fresh', 'Dadbattle'],
@@ -62,10 +87,6 @@ class StoryMenuState extends MusicBeatState
 		['Cocoa', 'Eggnog', 'Winter-Horrorland'],
 		['Senpai', 'Roses', 'Thorns']
 	];
-	var curDifficulty:Int = 1;
-
-	public static var weekUnlocked:Array<Bool> = [true, true, true, true, true, true, true];
-
 	var weekCharacters:Array<Dynamic> = [
 		['dad', 'bf', 'gf'],
 		['dad', 'bf', 'gf'],
@@ -84,7 +105,20 @@ class StoryMenuState extends MusicBeatState
 		"MOMMY MUST MURDER",
 		"RED SNOW",
 		"hating simulator ft. moawling"
-	];
+	];*/
+
+	var diffList:Array<Array<String>> = [];
+	var weekData:Array<Dynamic> = [];
+	var weekCharacters:Array<Dynamic> = [];
+	var weekNames:Array<String> = [];
+
+	var curDifficulty:Int = 1;
+
+	public static var weekUnlocked:Array<Bool> = [true, true, true, true, true, true, true];
+
+	public static var StoryData:StoryMenuData;
+
+
 
 	var txtWeekTitle:FlxText;
 
@@ -102,6 +136,9 @@ class StoryMenuState extends MusicBeatState
 	var leftArrow:FlxSprite;
 	var rightArrow:FlxSprite;
 
+	public static var lockWeeks:Bool = false;
+	var weeks:Array<Weeks>;
+
 	override function create()
 	{
 		transIn = FlxTransitionableState.defaultTransIn;
@@ -111,6 +148,23 @@ class StoryMenuState extends MusicBeatState
 		{
 			if (!FlxG.sound.music.playing)
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+		}
+
+		#if sys
+		var rawJson = File.getContent(Paths.imageJson("storymenu/menu"));
+		#else
+		var rawJson = Assets.getText(Paths.imageJson("storymenu/menu"));
+		#end
+		StoryData = cast Json.parse(rawJson);
+		lockWeeks = StoryData.lockWeeks;
+		weeks = StoryData.weeks;
+
+		for (i in weeks)
+		{
+			diffList.push(i.diffs);
+			weekData.push(i.songs);
+			weekCharacters.push(i.characters);
+			weekNames.push(i.desc);
 		}
 
 		persistentUpdate = persistentDraw = true;
@@ -161,7 +215,7 @@ class StoryMenuState extends MusicBeatState
 			// weekThing.updateHitbox();
 
 			// Needs an offset thingie
-			if (!weekUnlocked[i])
+			if (!weekUnlocked[i] && lockWeeks)
 			{
 				var lock:FlxSprite = new FlxSprite(weekThing.width + 10 + weekThing.x);
 				lock.frames = ui_tex;
@@ -215,17 +269,31 @@ class StoryMenuState extends MusicBeatState
 		leftArrow.animation.play('idle');
 		difficultySelectors.add(leftArrow);
 
-		sprDifficulty = new FlxSprite(leftArrow.x + 130, leftArrow.y).loadGraphic(Paths.image('storymenu/diffs/' + diffList[curDifficulty]));
-		changeDifficulty();
+		var diffPath = 'assets/images/storymenu/diffs/' + diffList[curWeek][curDifficulty] + ".png";
+		//trace(diffList[curWeek][curDifficulty]);
+		/*var diffImage:FlxGraphic;
+		if (CacheShit.images[diffPath] == null)
+		{
+			var image:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(diffPath));
+			image.persist = true;
+			CacheShit.images[diffPath] = image;
+		}
+		diffImage = CacheShit.images[diffPath];*/
+		//trace(BitmapData.fromFile(diffPath));
+		//trace(diffPath);
+
+		sprDifficulty = new FlxSprite(leftArrow.x + 130, leftArrow.y).loadGraphic(BitmapData.fromFile(diffPath));
+		
 
 		difficultySelectors.add(sprDifficulty);
 
-		rightArrow = new FlxSprite(sprDifficulty.x + sprDifficulty.width + 50, leftArrow.y);
+		rightArrow = new FlxSprite(sprDifficulty.x + sprDifficulty.width, leftArrow.y);
 		rightArrow.frames = ui_tex;
 		rightArrow.animation.addByPrefix('idle', 'arrow right');
 		rightArrow.animation.addByPrefix('press', "arrow push right", 24, false);
 		rightArrow.animation.play('idle');
 		difficultySelectors.add(rightArrow);
+		changeDifficulty();
 
 		trace("Line 150");
 
@@ -260,7 +328,7 @@ class StoryMenuState extends MusicBeatState
 
 		// FlxG.watch.addQuick('font', scoreText.font);
 
-		difficultySelectors.visible = weekUnlocked[curWeek];
+		difficultySelectors.visible = weekUnlocked[curWeek] || !lockWeeks;
 
 		grpLocks.forEach(function(lock:FlxSprite)
 		{
@@ -324,7 +392,7 @@ class StoryMenuState extends MusicBeatState
 
 	function selectWeek()
 	{
-		if (weekUnlocked[curWeek])
+		if (weekUnlocked[curWeek] || !lockWeeks)
 		{
 			if (stopspamming == false)
 			{
@@ -346,6 +414,7 @@ class StoryMenuState extends MusicBeatState
 			#end
 
 			PlayState.storyDifficulty = curDifficulty;
+			PlayState.storySuffix = weeks[curWeek].diffSuffix[curDifficulty];
 
 			PlayState.SONG = Song.loadFromJson(poop, PlayState.storyPlaylist[0].toLowerCase());
 			PlayState.storyWeek = curWeek;
@@ -362,15 +431,25 @@ class StoryMenuState extends MusicBeatState
 		curDifficulty += change;
 
 		if (curDifficulty < 0)
-			curDifficulty = 2;
-		if (curDifficulty > 2)
+			curDifficulty = diffList[curWeek].length - 1;
+		if (curDifficulty > diffList[curWeek].length - 1)
 			curDifficulty = 0;
 
-		difficultySelectors.remove(sprDifficulty);
-		sprDifficulty = new FlxSprite(leftArrow.x + 130, leftArrow.y).loadGraphic(Paths.image('storymenu/diffs/' + diffList[curDifficulty]));
+		difficultySelectors.remove(sprDifficulty); //remake diff sprite
+		var diffPath = 'assets/images/storymenu/diffs/' + diffList[curWeek][curDifficulty] + ".png";
+		/*var diffImage:FlxGraphic;
+		if (CacheShit.images[diffPath] == null)
+		{
+			var image:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(diffPath));
+			image.persist = true;
+			CacheShit.images[diffPath] = image;
+		}
+		diffImage = CacheShit.images[diffPath];*/
+		sprDifficulty = new FlxSprite(leftArrow.x + 130, leftArrow.y).loadGraphic(BitmapData.fromFile(diffPath));
 		difficultySelectors.add(sprDifficulty);
 
 		sprDifficulty.offset.x = 0;
+
 
 		switch (curDifficulty)
 		{
@@ -381,6 +460,8 @@ class StoryMenuState extends MusicBeatState
 			case 2:
 				sprDifficulty.offset.x = 20;
 		}
+
+		rightArrow.x = sprDifficulty.x + sprDifficulty.width;
 
 		sprDifficulty.alpha = 0;
 
@@ -409,10 +490,12 @@ class StoryMenuState extends MusicBeatState
 
 		var bullShit:Int = 0;
 
+		changeDifficulty();
+
 		for (item in grpWeekText.members)
 		{
 			item.targetY = bullShit - curWeek;
-			if (item.targetY == Std.int(0) && weekUnlocked[curWeek])
+			if (item.targetY == Std.int(0) && (weekUnlocked[curWeek] || !lockWeeks))
 				item.alpha = 1;
 			else
 				item.alpha = 0.6;
@@ -440,6 +523,8 @@ class StoryMenuState extends MusicBeatState
 
 		txtTracklist.screenCenter(X);
 		txtTracklist.x -= FlxG.width * 0.35;
+
+		txtTracklist.text += "\n"; //apparently this fixes the missing last song????????????/nfjdniujgfnwrioun
 
 		#if !switch
 		intendedScore = Highscore.getWeekScore(curWeek, curDifficulty);

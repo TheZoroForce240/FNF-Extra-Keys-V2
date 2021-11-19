@@ -24,6 +24,7 @@ import openfl.utils.AssetManifest;
 import openfl.utils.AssetLibrary;
 import flixel.system.FlxAssets;
 import openfl.utils.Assets as OpenFlAssets;
+import flixel.util.FlxSpriteUtil;
 
 import lime.app.Application;
 import lime.media.AudioContext;
@@ -315,7 +316,11 @@ class PlayState extends MusicBeatState
 
 		var songLowercase = PlayState.SONG.song.toLowerCase();
 
-		songtext = PlayState.SONG.song + " - " + CoolUtil.CurSongDiffs[storyDifficulty];
+		var diffText = CoolUtil.CurSongDiffs[storyDifficulty];
+		if (isStoryMode)
+			diffText = StoryMenuState.StoryData.weeks[storyWeek].diffs[storyDifficulty];
+
+		songtext = PlayState.SONG.song + " - " + diffText;
 
 		noteSplashes = new FlxTypedGroup<NoteSplash>(); //note splash spawning before the song
 		var daSplash = new NoteSplash(100, 100, 0);
@@ -380,6 +385,9 @@ class PlayState extends MusicBeatState
 		if (SaveData.P2downscroll) //well it works lol
 			camP2Notes.flashSprite.scaleY *= -1;
 
+		/*var sustainRect:Rectangle = new Rectangle(0, 0, FlxG.width, strumLine.y);
+		camP1Notes.flashSprite.scrollRect(sustainRect, sustainRect);*/
+
 		mania = SONG.mania; //setting the manias
 		p1Mania = mania;
 		p2Mania = mania;
@@ -440,7 +448,11 @@ class PlayState extends MusicBeatState
 		#if desktop
 		// Making difficulty text for Discord Rich Presence.
 
-		storyDifficultyText = CoolUtil.CurSongDiffs[storyDifficulty];
+		var diffText = CoolUtil.CurSongDiffs[storyDifficulty];
+		if (isStoryMode)
+			diffText = StoryMenuState.StoryData.weeks[storyWeek].diffs[storyDifficulty];
+
+		storyDifficultyText = diffText;
 
 		iconRPC = SONG.player2;
 
@@ -1698,7 +1710,7 @@ class PlayState extends MusicBeatState
 
 		if (noteAngle > 180)
 		{
-			xCalc = noteX + 0.45 * noteCurPos * angleX;
+			xCalc = noteX + 0.45 * noteCurPos * angleX; //flip scroll
 			yCalc = noteY - 0.45 * noteCurPos * angleY;
 		}
 		
@@ -1710,24 +1722,50 @@ class PlayState extends MusicBeatState
 
 		//TODO: fix clipping
 
-		if (isSustainNote) //im not sure if doing nested if statements is bad for performance, but at least it looks much nicer
+		/*if (isSustainNote) //im not sure if doing nested if statements is bad for performance, but at least it looks much nicer
 			if (!mustPress || (wasGoodHit || (daNote.prevNote.wasGoodHit && !canBeHit) || SaveData.botplay))
-				if (daNote.y + (daNote.offset.y) <= middleOfNote)
+				if (daNote.y + daNote.offset.y * daNote.scale.y <= middleOfNote)
 				{
-					var fuckYouRect = new FlxRect(0, middleOfNote - daNote.y, daNote.width / daNote.scale.x, daNote.height / daNote.scale.y);
+					/*var fuckYouRect = new FlxRect(0, middleOfNote - daNote.y, daNote.width / daNote.scale.x, daNote.height / daNote.scale.y);
 					fuckYouRect.y /= daNote.scale.y;
 					fuckYouRect.height -= fuckYouRect.y; 
 					//fuckYouRect.y = daNote.frameHeight - fuckYouRect.height;
 														//fuck you clipping
 					daNote.clipRect = fuckYouRect;
+
+					daNote.clipSustain(middleOfNote);
+				}*/
+
+		if (isSustainNote) //im not sure if doing nested if statements is bad for performance, but at least it looks much nicer
+			if (!mustPress || keys[noteData] || SaveData.botplay)
+			{
+				if (!daNote.isSustainEnd) //looks weird on sustain ends
+				{
+					FlxSpriteUtil.bound(daNote, 0, FlxG.width, middleOfNote, 2000);
+					///new sustain clipping system????? and it kinda works?????
 				}
+				if (daNote.y + daNote.offset.y <= middleOfNote)
+				{
+					if (daNote.isSustainEnd)
+						daNote.clipSustain(middleOfNote);
+					else
+						daNote.curAlpha = 0.6;
+					//daNote.scale.y = daNote.defaultScaleY - 0.04 * noteCurPos;
+					
+				}
+					
+
+
+			}
+
+						
 
 		daNote.visible = noteVisible;
 		daNote.angle = noteAngle;
 		
 		if (isSustainNote)
 		{
-			daNote.alpha = noteAlpha * 0.6;
+			daNote.alpha = noteAlpha * daNote.curAlpha;
 			daNote.x += daNote.sustainXOffset;
 		}
 		else
@@ -3640,6 +3678,8 @@ class PlayState extends MusicBeatState
 
 					if (susLength != 0)
 						susLength++; //increase length of all sustains, so they dont look off in game
+
+					//susLength *= 2;
 	
 	
 	
@@ -3650,12 +3690,12 @@ class PlayState extends MusicBeatState
 						if (daSpeed != null || daSpeed > 1)
 							speedToUse = daSpeed;
 
-						//var crocs = Conductor.stepCrochet * SongSpeedMultiplier; //crocs lol
+						var crocs = Conductor.stepCrochet; //crocs lol
 	
 						
-						var susStrum = daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / speedToUse / SongSpeedMultiplier);
+						var susStrum = daStrumTime + (crocs * susNote) + (crocs / speedToUse / SongSpeedMultiplier);
 						if (rewinding)
-							susStrum = daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / speedToUse);
+							susStrum = daStrumTime + (crocs * susNote) + (crocs / speedToUse);
 
 						var sustainNote:Note = new Note(susStrum, daNoteData, daType, true, daSpeed, daVelocityData, false, false, gottaHitNote, oldNote);
 						sustainNote.scrollFactor.set();

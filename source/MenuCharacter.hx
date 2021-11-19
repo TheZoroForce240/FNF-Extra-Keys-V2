@@ -3,6 +3,15 @@ package;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+#end
+import flixel.graphics.FlxGraphic;
+import openfl.display.BitmapData;
+import openfl.utils.Assets as OpenFlAssets;
+import lime.utils.Assets;
+
 class MenuCharacter extends FlxSprite
 {
 	public var character:String;
@@ -55,6 +64,58 @@ class MenuCharacter extends FlxSprite
 				animation.addByPrefix('idle', "SENPAI idle Black Lines", 24);
 				setGraphicSize(Std.int(width * 1));
 				baseOffsets = [-130, 100];
+			default: 
+				for (i in StoryMenuState.StoryData.menuCharacters) //mostly copied from character.hx
+				{
+					if (i.name == character)
+					{
+						var imagePath = "assets/storymenu/characters/" + i.fileName + ".png";
+
+						var imageGraphic:FlxGraphic;
+		
+						if (CacheShit.images[imagePath] == null)
+						{
+							var image:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(imagePath));
+							image.persist = true;
+							CacheShit.images[imagePath] = image;
+						}
+						imageGraphic = CacheShit.images[imagePath];
+		
+						var xmlPath = "assets/storymenu/characters/" + i.fileName + ".xml";
+						var xml:String;
+		
+						if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
+							xml = CacheShit.xmls[xmlPath];
+						else
+						{
+							#if sys
+							xml = File.getContent(xmlPath);
+							#else
+							xml = Assets.getText(xmlPath);
+							#end
+							CacheShit.SaveXml(xmlPath, xml);
+						}
+						var texture = FlxAtlasFrames.fromSparrow(imageGraphic, xml);
+						frames = texture;
+
+						if (i.anims.length != 0)
+						{
+							for (ii in i.anims)
+							{
+								var animname:String = ii.anim;
+								var xmlname:String = ii.xmlname;
+								var fps:Int = ii.frameRate;
+								var loop:Bool = ii.loop;
+		
+								animation.addByPrefix(animname, xmlname, fps, loop);
+							}
+						}
+						flipX = i.flip;
+						setGraphicSize(Std.int(this.width * i.scale));
+						baseOffsets = [i.offsets[0], i.offsets[1]];
+						break;
+					}
+				}
 		}
 
 		
