@@ -49,7 +49,7 @@ class SaveData
     ];
 
     public static var arrowLanes:String = "Off";
-
+    public static var laneOpacity:Float = 0.2;
 
     //hue, saturation, brightness, asset
     public static var purple:Array<Float> = [0, 0, 0, 0];
@@ -102,13 +102,13 @@ class SaveData
 			FlxG.save.data.speedScaling = false;
 
         if (FlxG.save.data.hudPos == null)
-			FlxG.save.data.hudPos = "Vanilla";
+			FlxG.save.data.hudPos = "Default";
 
         if (FlxG.save.data.songhudPos == null)
-			FlxG.save.data.songhudPos = "Vanilla";
+			FlxG.save.data.songhudPos = "Default";
         
         if (FlxG.save.data.hpBarPos == null)
-			FlxG.save.data.hpBarPos = "Vanilla";
+			FlxG.save.data.hpBarPos = "Default";
 
         if (FlxG.save.data.enabledHudSections == null)
 			FlxG.save.data.enabledHudSections = [
@@ -256,73 +256,23 @@ class SaveData
 
     public static function resetBinds():Void //todo uhhhh put in an array or somethin
     {
+        FlxG.save.data.binds = [
+            ["A", "S", "W", "D"],
+            ["S", "D", "F", "J", "K", "L"],
+            ["A", "S", "D", "F", "SPACE", "H", "J", "K", "L"]
+        ];
 
-        FlxG.save.data.upBind = "W";
-        FlxG.save.data.downBind = "S";
-        FlxG.save.data.leftBind = "A";
-        FlxG.save.data.rightBind = "D";
+        FlxG.save.data.P2binds = [
+            ["LEFT", "DOWN", "UP", "RIGHT"],
+            ["W", "E", "R", "U", "I", "O"],
+            ["Q", "W", "E", "R", "B", "Y", "U", "I", "O"]
+        ];
 
-        FlxG.save.data.N0Bind = "A";
-        FlxG.save.data.N1Bind = "S";
-        FlxG.save.data.N2Bind = "D";
-        FlxG.save.data.N3Bind = "F";
-        FlxG.save.data.N4Bind = "SPACE";
-        FlxG.save.data.N5Bind = "H";
-        FlxG.save.data.N6Bind = "J";
-        FlxG.save.data.N7Bind = "K";
-        FlxG.save.data.N8Bind = "L";
-
-        FlxG.save.data.L1Bind = "S";
-        FlxG.save.data.U1Bind = "D";
-        FlxG.save.data.R1Bind = "F";
-        FlxG.save.data.L2Bind = "J";
-        FlxG.save.data.D1Bind = "K";
-        FlxG.save.data.R2Bind = "L";
-
-        FlxG.save.data.P2upBind = "UP";
-        FlxG.save.data.P2downBind = "DOWN";
-        FlxG.save.data.P2leftBind = "LEFT";
-        FlxG.save.data.P2rightBind = "RIGHT";
-
-        FlxG.save.data.P2N0Bind = "Q";
-        FlxG.save.data.P2N1Bind = "W";
-        FlxG.save.data.P2N2Bind = "E";
-        FlxG.save.data.P2N3Bind = "R";
-        FlxG.save.data.P2N4Bind = "B";
-        FlxG.save.data.P2N5Bind = "Y";
-        FlxG.save.data.P2N6Bind = "U";
-        FlxG.save.data.P2N7Bind = "I";
-        FlxG.save.data.P2N8Bind = "O";
-
-        FlxG.save.data.P2L1Bind = "W";
-        FlxG.save.data.P2U1Bind = "E";
-        FlxG.save.data.P2R1Bind = "R";
-        FlxG.save.data.P2L2Bind = "U";
-        FlxG.save.data.P2D1Bind = "I";
-        FlxG.save.data.P2R2Bind = "O";
-
-
-        FlxG.save.data.GupBind = "DPAD_UP";
-        FlxG.save.data.GdownBind = "DPAD_DOWN";
-        FlxG.save.data.GleftBind = "DPAD_LEFT";
-        FlxG.save.data.GrightBind = "DPAD_RIGHT";
-
-        FlxG.save.data.GN0Bind = "DPAD_LEFT";
-        FlxG.save.data.GN1Bind = "DPAD_DOWN";
-        FlxG.save.data.GN2Bind = "DPAD_UP";
-        FlxG.save.data.GN3Bind = "DPAD_RIGHT";
-        FlxG.save.data.GN4Bind = "LEFT_TRIGGER";
-        FlxG.save.data.GN5Bind = "X";
-        FlxG.save.data.GN6Bind = "A";
-        FlxG.save.data.GN7Bind = "Y";
-        FlxG.save.data.GN8Bind = "B";
-
-        FlxG.save.data.GL1Bind = "DPAD_LEFT";
-        FlxG.save.data.GU1Bind = "DPAD_DOWN";
-        FlxG.save.data.GR1Bind = "DPAD_RIGHT";
-        FlxG.save.data.GL2Bind = "X";
-        FlxG.save.data.GD1Bind = "A";
-        FlxG.save.data.GR2Bind = "B";
+        FlxG.save.data.GPbinds = [
+            ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "DPAD_RIGHT"],
+            ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "X", "A", "B"],
+            ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "DPAD_RIGHT", "LEFT_TRIGGER", "X", "A", "Y", "B"]
+        ];
 
         PlayerSettings.player1.controls.loadKeyBinds();
 
@@ -330,132 +280,26 @@ class SaveData
 	}
     public static function keyBindCheck():Void 
         {
-            if(FlxG.save.data.upBind == null)
-                FlxG.save.data.upBind = "W";
-            if(FlxG.save.data.downBind == null)
-                FlxG.save.data.downBind = "S";
-            if(FlxG.save.data.leftBind == null)
-                FlxG.save.data.leftBind = "A";
-            if(FlxG.save.data.rightBind == null)
-                FlxG.save.data.rightBind = "D";
-            
-            if(FlxG.save.data.N0Bind == null)
-                FlxG.save.data.N0Bind = "A";
-            if(FlxG.save.data.N1Bind == null)
-                FlxG.save.data.N1Bind = "S";
-            if(FlxG.save.data.N2Bind == null)
-                FlxG.save.data.N2Bind = "D";
-            if(FlxG.save.data.N3Bind == null)
-                FlxG.save.data.N3Bind = "F";
-            if(FlxG.save.data.N4Bind == null)
-                FlxG.save.data.N4Bind = "SPACE";
-            if(FlxG.save.data.N5Bind == null)
-                FlxG.save.data.N5Bind = "H";
-            if(FlxG.save.data.N6Bind == null)
-                FlxG.save.data.N6Bind = "J";
-            if(FlxG.save.data.N7Bind == null)
-                FlxG.save.data.N7Bind = "K";
-            if(FlxG.save.data.N8Bind == null)
-                FlxG.save.data.N8Bind = "L";
-            
-            if(FlxG.save.data.L1Bind == null)
-                FlxG.save.data.L1Bind = "S";
-            if(FlxG.save.data.U1Bind == null)
-                FlxG.save.data.U1Bind = "D";
-            if(FlxG.save.data.R1Bind == null)
-                FlxG.save.data.R1Bind = "F";
-            if(FlxG.save.data.L2Bind == null)
-                FlxG.save.data.L2Bind = "J";
-            if(FlxG.save.data.D1Bind == null)
-                FlxG.save.data.D1Bind = "K";
-            if(FlxG.save.data.R2Bind == null)
-                FlxG.save.data.R2Bind = "L";
+            if (FlxG.save.data.binds == null)
+                FlxG.save.data.binds = [
+                    ["A", "S", "W", "D"],
+                    ["S", "D", "F", "J", "K", "L"],
+                    ["A", "S", "D", "F", "SPACE", "H", "J", "K", "L"]
+                ];
 
-            ////////////////////////////////////////// player 2 shit
+            if (FlxG.save.data.P2binds == null)
+                FlxG.save.data.P2binds = [
+                    ["LEFT", "DOWN", "UP", "RIGHT"],
+                    ["W", "E", "R", "U", "I", "O"],
+                    ["Q", "W", "E", "R", "B", "Y", "U", "I", "O"]
+                ];
 
-            if(FlxG.save.data.P2upBind == null)
-                FlxG.save.data.P2upBind = "UP";
-            if(FlxG.save.data.P2downBind == null)
-                FlxG.save.data.P2downBind = "DOWN";
-            if(FlxG.save.data.P2leftBind == null)
-                FlxG.save.data.P2leftBind = "LEFT";
-            if(FlxG.save.data.P2rightBind == null)
-                FlxG.save.data.P2rightBind = "RIGHT";
-            
-            if(FlxG.save.data.P2N0Bind == null)
-                FlxG.save.data.P2N0Bind = "Q";
-            if(FlxG.save.data.P2N1Bind == null)
-                FlxG.save.data.P2N1Bind = "W";
-            if(FlxG.save.data.P2N2Bind == null)
-                FlxG.save.data.P2N2Bind = "E";
-            if(FlxG.save.data.P2N3Bind == null)
-                FlxG.save.data.P2N3Bind = "R";
-            if(FlxG.save.data.P2N4Bind == null)
-                FlxG.save.data.P2N4Bind = "B";
-            if(FlxG.save.data.P2N5Bind == null)
-                FlxG.save.data.P2N5Bind = "Y";
-            if(FlxG.save.data.P2N6Bind == null)
-                FlxG.save.data.P2N6Bind = "U";
-            if(FlxG.save.data.P2N7Bind == null)
-                FlxG.save.data.P2N7Bind = "I";
-            if(FlxG.save.data.P2N8Bind == null)
-                FlxG.save.data.P2N8Bind = "O";
-            
-            if(FlxG.save.data.P2L1Bind == null)
-                FlxG.save.data.P2L1Bind = "W";
-            if(FlxG.save.data.P2U1Bind == null)
-                FlxG.save.data.P2U1Bind = "E";
-            if(FlxG.save.data.P2R1Bind == null)
-                FlxG.save.data.P2R1Bind = "R";
-            if(FlxG.save.data.P2L2Bind == null)
-                FlxG.save.data.P2L2Bind = "U";
-            if(FlxG.save.data.P2D1Bind == null)
-                FlxG.save.data.P2D1Bind = "I";
-            if(FlxG.save.data.P2R2Bind == null)
-                FlxG.save.data.P2R2Bind = "O";
-
-            //////////////////////////////////// P1 Gamepad, theres so many if statements ahhhhhhhhhh
-
-            if(FlxG.save.data.GupBind == null)
-                FlxG.save.data.GupBind = "DPAD_UP";
-            if(FlxG.save.data.GdownBind == null)
-                FlxG.save.data.GdownBind = "DPAD_DOWN";
-            if(FlxG.save.data.GleftBind == null)
-                FlxG.save.data.GleftBind = "DPAD_LEFT";
-            if(FlxG.save.data.GrightBind == null)
-                FlxG.save.data.GrightBind = "DPAD_RIGHT";
-            
-            if(FlxG.save.data.GN0Bind == null)
-                FlxG.save.data.GN0Bind = "DPAD_LEFT";
-            if(FlxG.save.data.GN1Bind == null)
-                FlxG.save.data.GN1Bind = "DPAD_DOWN";
-            if(FlxG.save.data.GN2Bind == null)
-                FlxG.save.data.GN2Bind = "DPAD_UP";
-            if(FlxG.save.data.GN3Bind == null)
-                FlxG.save.data.GN3Bind = "DPAD_RIGHT";
-            if(FlxG.save.data.GN4Bind == null)
-                FlxG.save.data.GN4Bind = "LEFT_TRIGGER";
-            if(FlxG.save.data.GN5Bind == null)
-                FlxG.save.data.GN5Bind = "X";
-            if(FlxG.save.data.GN6Bind == null)
-                FlxG.save.data.GN6Bind = "A";
-            if(FlxG.save.data.GN7Bind == null)
-                FlxG.save.data.GN7Bind = "Y";
-            if(FlxG.save.data.GN8Bind == null)
-                FlxG.save.data.GN8Bind = "B";
-            
-            if(FlxG.save.data.GL1Bind == null)
-                FlxG.save.data.GL1Bind = "DPAD_LEFT";
-            if(FlxG.save.data.GU1Bind == null)
-                FlxG.save.data.GU1Bind = "DPAD_DOWN";
-            if(FlxG.save.data.GR1Bind == null)
-                FlxG.save.data.GR1Bind = "DPAD_RIGHT";
-            if(FlxG.save.data.GL2Bind == null)
-                FlxG.save.data.GL2Bind = "X";
-            if(FlxG.save.data.GD1Bind == null)
-                FlxG.save.data.GD1Bind = "A";
-            if(FlxG.save.data.GR2Bind == null)
-                FlxG.save.data.GR2Bind = "B";
+            if (FlxG.save.data.GPbinds == null)
+                FlxG.save.data.GPbinds = [
+                    ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "DPAD_RIGHT"],
+                    ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "X", "A", "B"],
+                    ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "DPAD_RIGHT", "LEFT_TRIGGER", "X", "A", "Y", "B"]
+                ];
         }    
     public static function updateColorArray(mania:Int):Void //its better than having shit loads of case statements for every single thing
     {

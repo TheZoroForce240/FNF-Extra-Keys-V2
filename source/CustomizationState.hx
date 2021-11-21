@@ -116,7 +116,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     var sDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'UP', 'RIGHT']; //bf anims from note data, or input data in this state
 
     var menuList:Array<String> = ['Keybinds', 'Notes', 'Gameplay', 'Hud'];                           //used for creating menus
-    var KeybindList:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
+    //var KeybindList:Array<String> = FlxG.save.data.binds[0];
     var selectedPlayer:Int = 1;
     var NotesList:Array<String> = ['Color', '', '', '', '', 'Assets','Note Scale', 'Color Presets', 'Reset Colors'];
 
@@ -580,15 +580,19 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     }
     function createKeybinds():Void
         {
+            var KeybindList:Array<String> = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.binds, maniaToChange);
+            if (selectedPlayer != 1)
+                KeybindList = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.P2binds, maniaToChange);
+
             grpKeybinds.clear();
             for (i in 0...KeybindList.length)
-                {
-                    var text:FlxText = new FlxText(strumLineNotes.members[i].x + 140, (strumLine.y + 200), 48, KeybindList[i], 32, false);
-                    text.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
-                    grpKeybinds.add(text);
-                    if (SaveData.downscroll)
-                        text.y += 320;
-                }
+            {
+                var text:FlxText = new FlxText(strumLineNotes.members[i].x + 140, (strumLine.y + 200), 48, KeybindList[i], 32, false);
+                text.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+                grpKeybinds.add(text);
+                if (SaveData.downscroll)
+                    text.y += 320;
+            }
         }
 
     function createSelectedNote():Void
@@ -717,21 +721,26 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
     function updateKeybinds():Void
     {
-        KeybindList = CoolUtil.bindCheck(maniaToChange, true);
+        var KeybindList:Array<String> = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.binds, maniaToChange);
         if (selectedPlayer != 1)
-            KeybindList = CoolUtil.P2bindCheck(maniaToChange, true);
+            KeybindList = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.P2binds, maniaToChange);
 
         grpKeybinds.clear();
-        for (i in 0...KeybindList.length)
+
+        if (KeybindList.length != 0)
         {
-            var text:FlxText = new FlxText(strumLineNotes.members[i].x + 140, (strumLine.y + 200), 32, KeybindList[i], 32, false);
-            text.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
-            grpKeybinds.add(text);
-            if (SaveData.downscroll)
-                text.y += 350;
-            if (i == curSelectedNote && waitingForInput)
-                text.text = "?";
+            for (i in 0...KeybindList.length)
+                {
+                    var text:FlxText = new FlxText(strumLineNotes.members[i].x + 140, (strumLine.y + 200), 32, KeybindList[i], 32, false);
+                    text.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+                    grpKeybinds.add(text);
+                    if (SaveData.downscroll)
+                        text.y += 350;
+                    if (i == curSelectedNote && waitingForInput)
+                        text.text = "?";
+                }
         }
+
     }
     function createActualNotes():Void
     {
@@ -799,11 +808,11 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         @:privateAccess
         var key = FlxKey.toStringMap.get(evt.keyCode);
 
-        var binds:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
+        var binds:Array<String> = FlxG.save.data.binds[0];
         var data = -1;
-		binds = CoolUtil.bindCheck(maniaToChange, true);
+		binds = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.binds, maniaToChange);
         if (selectedPlayer != 1)
-			binds = CoolUtil.P2bindCheck(maniaToChange, true);
+			binds = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.P2binds, maniaToChange);
 
         for (i in 0...binds.length) // binds
         {
@@ -822,10 +831,10 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         @:privateAccess
         var key = FlxKey.toStringMap.get(evt.keyCode);
         var data = -1;
-        var binds:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind]; 
-        binds = CoolUtil.bindCheck(maniaToChange, true);
+        var binds:Array<String> = FlxG.save.data.binds[0]; 
+		binds = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.binds, maniaToChange);
         if (selectedPlayer != 1)
-			binds = CoolUtil.P2bindCheck(maniaToChange, true);
+			binds = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.P2binds, maniaToChange);
 
         for (i in 0...binds.length) // binds
             {
@@ -838,12 +847,10 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                 if (key.toLowerCase() != "escape" && key.toLowerCase() != "enter" && key.toLowerCase() != "backspace")
                 {
                     CoolUtil.complexAssKeybindSaving(maniaToChange, key, curSelectedNote, selectedPlayer);
-                    updateKeybinds();
                     FlxG.save.flush();
                     PlayerSettings.player1.controls.loadKeyBinds();
-    
-        
                 }
+                updateKeybinds();
     
             }   
             if (data == -1)

@@ -117,7 +117,7 @@ class PlayState extends MusicBeatState
 	public static var keyAmmo:Array<Int> = [4, 6, 9, 5, 7, 8, 1, 2, 3];
 	public static var SongSpeed:Float;
 	public var songLength:Float = 0;
-	private var vocals:FlxSound;
+	public var vocals:FlxSound;
 	private var curSong:String = "";
 	public static var instance:PlayState = null; //to access in other places
 	public var elapsedTime:Float = 0; //used for arrow movements and shit i think
@@ -810,7 +810,7 @@ class PlayState extends MusicBeatState
 		if (centerHealthBar)
 		{
 			timeText.y = (FlxG.height * 0.1) - 60;
-			if (SaveData.hudPos == "Vanilla")
+			if (SaveData.hudPos == "Default")
 				scoreTxt.y = (FlxG.height * 0.9) + 30;
 		}
 
@@ -1107,8 +1107,8 @@ class PlayState extends MusicBeatState
 
 		
 
-		var P1binds:Array<String> = CoolUtil.bindCheck(mania);
-		var P2binds:Array<String> = CoolUtil.P2bindCheck(mania);
+		var P1binds:Array<String> = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, mania);
+		var P2binds:Array<String> = CoolUtil.bindCheck(mania, false, FlxG.save.data.P2binds, mania);
 
 		if (multiplayer)
 		{
@@ -1140,16 +1140,16 @@ class PlayState extends MusicBeatState
 		@:privateAccess
 		var key = FlxKey.toStringMap.get(evt.keyCode);
 
-		var binds:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
+		var binds:Array<String> = FlxG.save.data.binds[0];
 		var data = -1;
 		var playernum:Int = 1;
 		
-		binds = CoolUtil.bindCheck(mania);
+		binds = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, p1Mania);
 		//data = CoolUtil.arrowKeyCheck(maniaToChange, evt.keyCode); //arrow keys are shit, just set them in keybinds, sorry to anyone who plays both wasd + arrow keys, might add alt keys at some point
 
 		var P2binds:Array<String> = [null,null,null,null]; //null so you cant misspress while not in multi
 		if (multiplayer) //so it only checks when in multi
-			P2binds = CoolUtil.P2bindCheck(mania);
+			P2binds = CoolUtil.bindCheck(mania, false, FlxG.save.data.P2binds, p2Mania);
 
 		for (i in 0...binds.length)//convert binds to key to data
 		{
@@ -1197,13 +1197,13 @@ class PlayState extends MusicBeatState
 		var key = FlxKey.toStringMap.get(evt.keyCode);
 		var data = -1;
 		var playernum:Int = 1;
-		var binds:Array<String> = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
-		binds = CoolUtil.bindCheck(mania); //finally got rid of that fucking huge case statement, its still inside coolutil, but theres only 1, not like 4 lol
+		var binds:Array<String> = FlxG.save.data.binds[0];
+		binds = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, p1Mania); //finally got rid of that fucking huge case statement, its still inside coolutil, but theres only 1, not like 4 lol
 		//data = CoolUtil.arrowKeyCheck(maniaToChange, evt.keyCode);
 
 		var P2binds:Array<String> = [null,null,null,null]; //null so you cant misspress while not in multi
 		if (multiplayer) //so it only checks when in multi
-			P2binds = CoolUtil.P2bindCheck(mania);
+			P2binds = CoolUtil.bindCheck(mania, false, FlxG.save.data.P2binds, p2Mania);
 
 		for (i in 0...binds.length)//convert binds to key to data
 		{
@@ -1671,27 +1671,22 @@ class PlayState extends MusicBeatState
 		var tooLate:Bool = daNote.tooLate;
 		var noteData:Int = daNote.noteData;
 		
+		
 		if (strums == 'player') //playerStrums
-		{
 			strumNote = playerStrums.members[Math.floor(Math.abs(daNote.noteData))];
-			noteX = strumNote.x;
-			noteY = strumNote.y;
-			noteAngle = strumNote.angle;
-			noteAlpha = strumNote.alpha;
-			noteVisible = strumNote.visible;
-		}
 		else //cpuStrums
-		{
 			strumNote = cpuStrums.members[Math.floor(Math.abs(daNote.noteData))];
-			noteX = strumNote.x;
-			noteY = strumNote.y;
-			noteAngle = strumNote.angle;
-			noteAlpha = strumNote.alpha;
-			noteVisible = strumNote.visible;
-		}
+
+		var middleOfNote:FlxPoint = strumNote.centerOfArrow;
+		
+		noteX = strumNote.x;
+		noteY = strumNote.y;
+		noteAngle = strumNote.angle;
+		noteAlpha = strumNote.alpha;
+		noteVisible = strumNote.visible;
+		
 
 
-		var middleOfNote:Float = noteY + Note.noteWidths[daNote.curMania] / 2;
 		var calculatedStrumtime = calculateStrumtime(daNote, Conductor.songPosition);
 
 		var angleX:Float = 1; //1 = none
@@ -1736,28 +1731,11 @@ class PlayState extends MusicBeatState
 					daNote.clipSustain(middleOfNote);
 				}*/
 
-		if (isSustainNote) //im not sure if doing nested if statements is bad for performance, but at least it looks much nicer
+		if (isSustainNote)
 			if (!mustPress || keys[noteData] || SaveData.botplay)
-			{
-				if (!daNote.isSustainEnd) //looks weird on sustain ends
-				{
-					FlxSpriteUtil.bound(daNote, 0, FlxG.width, middleOfNote, 2000);
-					///new sustain clipping system????? and it kinda works?????
-				}
-				if (daNote.y + daNote.offset.y <= middleOfNote)
-				{
-					if (daNote.isSustainEnd)
-						daNote.clipSustain(middleOfNote);
-					else
-						daNote.curAlpha = 0.6;
-					//daNote.scale.y = daNote.defaultScaleY - 0.04 * noteCurPos;
-					
-				}
-					
-
-
-			}
-
+				daNote.clipSustain(middleOfNote);
+	
+		//if (daNote.y + daNote.offset.y * daNote.scale.y <= middleOfNote)
 						
 
 		daNote.visible = noteVisible;
@@ -1767,6 +1745,7 @@ class PlayState extends MusicBeatState
 		{
 			daNote.alpha = noteAlpha * daNote.curAlpha;
 			daNote.x += daNote.sustainXOffset;
+			//daNote.x += ((Note.noteWidths[daNote.curMania] * daNote.scaleMulti) / 2) - (daNote.width / 2);
 		}
 		else
 		{
@@ -1797,48 +1776,11 @@ class PlayState extends MusicBeatState
 
 		var statsToUse = getStats(playernum);
 
-		if (isSustainNote && wasGoodHit && Conductor.songPosition >= daNote.strumTime)
-			removeNote(daNote, strums);
-		else if (SaveData.botplay && Conductor.songPosition >= daNote.strumTime && !daNote.badNoteType)
+		if (SaveData.botplay && Conductor.songPosition >= daNote.strumTime && !daNote.badNoteType)
 			goodNoteHit(daNote, playernum);
 		else if (mustPress && (tooLate && !wasGoodHit))
 		{
-			if (daNote.normalNote)
-			{
-				if (isSustainNote && wasGoodHit) //to 100% make sure the sustain is gone
-					{
-						daNote.kill();
-						removeNote(daNote, strums);
-					}
-					else
-					{
-						vocals.volume = 0;
-						noteMiss(noteData, daNote, playernum);								
-					}
-				removeNote(daNote, strums);
-			}
-			else if (daNote.badNoteType)
-			{
-				removeNote(daNote, strums);
-			}
-			else if (daNote.warningNoteType)
-			{
-				statsToUse.misses++;
-				badNoteHit();
-				removeNote(daNote, strums);
-				switch (daNote.noteType)
-				{
-					case 3: //regular warning note
-					statsToUse.health -= 1;
-						vocals.volume = 0;
-					case 7: //glitch note
-						HealthDrain(playernum);
-				}
-			}
-			else
-			{
-				removeNote(daNote, strums);
-			}
+			daNote.noteTypeMiss(strums, playernum);
 		}
 	}
 
@@ -1847,7 +1789,7 @@ class PlayState extends MusicBeatState
 		var wasGoodHit:Bool = daNote.wasGoodHit;
 		var noteData:Int = daNote.noteData;
 
-		if (wasGoodHit)
+		if (wasGoodHit && !daNote.sustainHit)
 		{
 			if (SONG.song != 'Tutorial')
 				camZooming = false;
@@ -1905,9 +1847,16 @@ class PlayState extends MusicBeatState
 			if (SONG.needsVoices)
 				vocals.volume = 1;
 
-			daNote.active = false;
+			if (!daNote.isSustainNote)
+			{
+				daNote.active = false;
+				removeNote(daNote, strums);
+			}
+			else 
+			{
+				daNote.sustainHit = true;
+			}
 
-			removeNote(daNote, strums);
 		}
 	}
 	function GFNoteHit(daNote:Note)
@@ -1919,7 +1868,6 @@ class PlayState extends MusicBeatState
 
 		if (wasGoodHit)
 		{
-
 			var altAnim:String = "";
 
 			if (Note.noteTypeList[daNote.noteType] == "alt")
@@ -2719,7 +2667,7 @@ class PlayState extends MusicBeatState
 
 	private function gamepadCheck(gamepad:FlxGamepad):Void
 	{
-		var binds:Array<String> = CoolUtil.gamepadBindCheck(p1Mania);
+		var binds:Array<String> = CoolUtil.bindCheck(mania, false, FlxG.save.data.GPbinds, p1Mania);
 		for (i in 0...binds.length) //im suprised this worked first try without any issues
 		{
 			var data = -1;
@@ -2760,7 +2708,7 @@ class PlayState extends MusicBeatState
 		}*/
 	}
 
-	function noteMiss(direction:Int = 1, daNote:Note, playernum:Int = 1):Void
+	public function noteMiss(direction:Int = 1, daNote:Note, playernum:Int = 1):Void
 	{
 		var shit = player;
 		var statsToUse = getStats(playernum);
@@ -2883,10 +2831,13 @@ class PlayState extends MusicBeatState
 			else
 			{
 				note.rating = "sick";
-				statsToUse.sicks++;
-				statsToUse.totalNotesHit++;
-			}
+				if (!note.isSustainNote)
+				{
+					statsToUse.sicks++;
+					statsToUse.totalNotesHit++;
+				}
 
+			}
 			if ((!note.isSustainNote || SaveData.casual) && !note.badNoteType)
 				note.healthChangesOnHit = 0.02;
 
@@ -3006,7 +2957,7 @@ class PlayState extends MusicBeatState
 
 		new FlxTimer().start(0.01, function(tmr:FlxTimer)
 		{
-			statsToUse.health -= 0.005; //TODO
+			statsToUse.health -= 0.005;
 		}, 300);
 	}
 
@@ -3016,7 +2967,7 @@ class PlayState extends MusicBeatState
 		FlxG.sound.play(Paths.soundRandom('badnoise', 1, 3), FlxG.random.float(0.7, 1));
 	}
 
-	function removeNote(daNote:Note, strums:String = 'player'):Void
+	public function removeNote(daNote:Note, strums:String = 'player'):Void
 	{
 		daNote.kill();
 		if (strums == 'player')
@@ -3120,17 +3071,17 @@ class PlayState extends MusicBeatState
 				}
 				else 
 				{
-					if ((i == 6 || i == 11) && SaveData.hudPos == "Vanilla")
+					if ((i == 6 || i == 11) && SaveData.hudPos == "Default")
 						scoreTxt.text += "\n";
 
-					if (SaveData.hudPos != "Vanilla")
+					if (SaveData.hudPos != "Default")
 						scoreTxt.text += "\n";
 					else
 						scoreTxt.text += "|";
 
 					scoreTxt.text += listOShit[i];
 
-					if (SaveData.hudPos == "Vanilla")
+					if (SaveData.hudPos == "Default")
 						scoreTxt.text += "|";
 
 				}
@@ -3188,7 +3139,7 @@ class PlayState extends MusicBeatState
 
 	var justChangedMania:Bool = false;
 
-	public function switchMania(newMania:Int, strumnum = 1):Void //TODO, now done lol
+	public function switchMania(newMania:Int, strumnum = 1):Void
 	{
 		if (mania == 2) //so it doesnt break the fucking game
 		{
@@ -3205,7 +3156,7 @@ class PlayState extends MusicBeatState
 				scaleToCheck = Note.p1NoteScale;
 				strums = playerStrums;
 				if (!flipped && !multiplayer)
-					bindsToUse = CoolUtil.bindCheck(mania);
+					bindsToUse = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, p1Mania);
 				else 
 					showKeyBindText = false;
 			}
@@ -3216,9 +3167,9 @@ class PlayState extends MusicBeatState
 				scaleToCheck = Note.p2NoteScale;
 				strums = cpuStrums;
 				if (multiplayer)
-					bindsToUse = CoolUtil.P2bindCheck(mania);
+					bindsToUse = CoolUtil.bindCheck(mania, false, FlxG.save.data.P2binds, p2Mania);
 				else if (flipped)
-					bindsToUse = CoolUtil.bindCheck(mania);
+					bindsToUse = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, p1Mania);
 				else 
 					showKeyBindText = false;
 				downscroll = SaveData.P2downscroll;
@@ -3374,6 +3325,10 @@ class PlayState extends MusicBeatState
 			else
 				text.x += 40;
 			text.cameras = [camHUD];
+
+			text.y -= 10;
+			text.alpha = 0;
+			FlxTween.tween(text, {y: text.y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[mania]))});
 			new FlxTimer().start(4, function(tmr:FlxTimer)
 			{
 				FlxTween.tween(text, {alpha: 0}, 1, {
@@ -3387,33 +3342,38 @@ class PlayState extends MusicBeatState
 		}
 	}
 	function createManiaSwitchKeybindText(strums:FlxTypedGroup<BabyArrow>, binds:Array<String>, downscroll:Bool):Void
+	{
+		for (i in 0...binds.length)
 		{
-			for (i in 0...binds.length)
-			{
-				var text:FlxText = new FlxText(strums.members[i].x, (strumLine.y + 200), 48, binds[i], 32, false);
-				text.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
-				add(text);
-				text.scrollFactor.set();
-				if (downscroll)
-					{
-						text.y += 170;	
-						text.x += 15;
-					}
-				else
-					text.x += 40;
-				text.cameras = [camHUD];
-				new FlxTimer().start(2, function(tmr:FlxTimer)
+			var text:FlxText = new FlxText(strums.members[i].x, (strumLine.y + 200), 48, binds[i], 32, false);
+			text.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+			add(text);
+			text.scrollFactor.set();
+			if (downscroll)
 				{
-					FlxTween.tween(text, {alpha: 0}, 1, {
-						onComplete: function(twn:FlxTween)
-						{
-							remove(text);
-							text.destroy();
-						}
-					});
-				});	
-			}
+					text.y += 170;	
+					text.x += 15;
+				}
+			else
+				text.x += 40;
+			var id = strums.members[i].curID;
+
+			text.cameras = [camHUD];
+			text.y -= 10;
+			text.alpha = 0;
+			FlxTween.tween(text, {y: text.y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.05 + (0.1 * ((id * 4) / PlayState.keyAmmo[mania]))});
+			new FlxTimer().start(2, function(tmr:FlxTimer)
+			{
+				FlxTween.tween(text, {alpha: 0}, 1, {
+					onComplete: function(twn:FlxTween)
+					{
+						remove(text);
+						text.destroy();
+					}
+				});
+			});	
 		}
+	}
 	function collectNotes(shit:FlxTypedGroup<Note>, checkMustPresses:Bool) //lot of functions for code optimizations, and less copy pasted shit
 	{
 		var collectedNotes:Array<Note> = [];

@@ -9,11 +9,6 @@ import openfl.Lib;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.util.FlxTimer;
 
-
-
-
-
-
 class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu from kade engine, just wanted something simple, also a substate, so we got mid song options, kade engine is doing that now lol
 {
     var curSelected:Int = 0;
@@ -167,25 +162,13 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                         switch (curCategory[curSelected][0])
                         {
                             case "Quick DFJK": 
-                                FlxG.save.data.leftBind = "D";
-                                FlxG.save.data.downBind = "F";
-                                FlxG.save.data.upBind = "J";
-                                FlxG.save.data.rightBind = "K";
+                                FlxG.save.data.binds = ["D", "F", "J", "K"];
                             case "Quick WASD": 
-                                FlxG.save.data.leftBind = "A";
-                                FlxG.save.data.downBind = "S";
-                                FlxG.save.data.upBind = "W";
-                                FlxG.save.data.rightBind = "D";
+                                FlxG.save.data.binds = ["A", "S", "W", "D"];
                             case "Quick Arrow Keys": 
-                                FlxG.save.data.leftBind = "LEFT";
-                                FlxG.save.data.downBind = "DOWN";
-                                FlxG.save.data.upBind = "UP";
-                                FlxG.save.data.rightBind = "RIGHT";
+                                FlxG.save.data.binds = ["LEFT", "DOWN", "UP", "RIGHT"];
                             case "Quick AS^>": 
-                                FlxG.save.data.leftBind = "A";
-                                FlxG.save.data.downBind = "S";
-                                FlxG.save.data.upBind = "UP";
-                                FlxG.save.data.rightBind = "RIGHT";
+                                FlxG.save.data.binds = ["A", "S", "UP", "RIGHT"];
                             case "Reset All Keybinds": 
                                 SaveData.resetBinds();
                             case "Customize HUD": 
@@ -419,76 +402,76 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["Quick AS^>","", "button", ""],
             ["Quick WASD","", "button", ""],
             ["Quick Arrow Keys","", "button", ""],
-            ["4K/5K Left", FlxG.save.data.leftBind, "keybind", ""],
-            ["4K/5K Down", FlxG.save.data.downBind, "keybind", ""],
-            ["4K/5K Up", FlxG.save.data.upBind, "keybind", ""],
-            ["4K/5K Right", FlxG.save.data.rightBind, "keybind", ""],
+            ["4K/5K Left", FlxG.save.data.binds[0][0], "keybind", ""],
+            ["4K/5K Down", FlxG.save.data.binds[0][1], "keybind", ""],
+            ["4K/5K Up", FlxG.save.data.binds[0][2], "keybind", ""],
+            ["4K/5K Right", FlxG.save.data.binds[0][3], "keybind", ""],
             ["", "", "cat", ""],
-            ["9K/8K Left 1", FlxG.save.data.N0Bind, "keybind", ""],
-            ["9K/8K Down 1", FlxG.save.data.N1Bind, "keybind", ""],
-            ["9K/8K Up 1", FlxG.save.data.N2Bind, "keybind", ""],
-            ["9K/8K Right 1", FlxG.save.data.N3Bind, "keybind", ""],
-            ["5K/7K/9K Middle", FlxG.save.data.N4Bind, "keybind", ""],
-            ["9K/8K Left 2", FlxG.save.data.N5Bind, "keybind", ""],
-            ["9K/8K Down 2", FlxG.save.data.N6Bind, "keybind", ""],
-            ["9K/8K Up 2", FlxG.save.data.N7Bind, "keybind", ""],
-            ["9K/8K Right 2", FlxG.save.data.N8Bind, "keybind", ""],
+            ["9K/8K Left 1", FlxG.save.data.binds[2][0], "keybind", ""],
+            ["9K/8K Down 1", FlxG.save.data.binds[2][1], "keybind", ""],
+            ["9K/8K Up 1", FlxG.save.data.binds[2][2], "keybind", ""],
+            ["9K/8K Right 1", FlxG.save.data.binds[2][3], "keybind", ""],
+            ["5K/7K/9K Middle", FlxG.save.data.binds[2][4], "keybind", ""],
+            ["9K/8K Left 2", FlxG.save.data.binds[2][5], "keybind", ""],
+            ["9K/8K Down 2", FlxG.save.data.binds[2][6], "keybind", ""],
+            ["9K/8K Up 2", FlxG.save.data.binds[2][7], "keybind", ""],
+            ["9K/8K Right 2", FlxG.save.data.binds[2][8], "keybind", ""],
             ["", "", "cat", ""],
-            ["6K/7K Left 1", FlxG.save.data.L1Bind, "keybind", ""],
-            ["6K/7K Up", FlxG.save.data.U1Bind, "keybind", ""],
-            ["6K/7K Right 1", FlxG.save.data.R1Bind, "keybind", ""],
-            ["6K/7K Left 2", FlxG.save.data.L2Bind, "keybind", ""],
-            ["6K/7K Down", FlxG.save.data.D1Bind, "keybind", ""],
-            ["6K/7K Right 2", FlxG.save.data.R2Bind, "keybind", ""],
+            ["6K/7K Left 1", FlxG.save.data.binds[1][0], "keybind", ""],
+            ["6K/7K Up", FlxG.save.data.binds[1][1], "keybind", ""],
+            ["6K/7K Right 1", FlxG.save.data.binds[1][2], "keybind", ""],
+            ["6K/7K Left 2", FlxG.save.data.binds[1][3], "keybind", ""],
+            ["6K/7K Down", FlxG.save.data.binds[1][4], "keybind", ""],
+            ["6K/7K Right 2", FlxG.save.data.binds[1][5], "keybind", ""],
             ["Reset All Keybinds","", "button", "includes P2 and gamepad!"]
         ];
         P2keybinds = [
-            ["P2 4K/5K Left", FlxG.save.data.P2leftBind, "keybind", ""],
-            ["P2 4K/5K Down", FlxG.save.data.P2downBind, "keybind", ""],
-            ["P2 4K/5K Up", FlxG.save.data.P2upBind, "keybind", ""],
-            ["P2 4K/5K Right", FlxG.save.data.P2rightBind, "keybind", ""],
+            ["P2 4K/5K Left", FlxG.save.data.P2binds[0][0], "keybind", ""],
+            ["P2 4K/5K Down", FlxG.save.data.P2binds[0][1], "keybind", ""],
+            ["P2 4K/5K Up", FlxG.save.data.P2binds[0][2], "keybind", ""],
+            ["P2 4K/5K Right", FlxG.save.data.P2binds[0][3], "keybind", ""],
             ["", "", "cat", ""],
-            ["P2 9K/8K Left 1", FlxG.save.data.P2N0Bind, "keybind", ""],
-            ["P2 9K/8K Down 1", FlxG.save.data.P2N1Bind, "keybind", ""],
-            ["P2 9K/8K Up 1", FlxG.save.data.P2N2Bind, "keybind", ""],
-            ["P2 9K/8K Right 1", FlxG.save.data.P2N3Bind, "keybind", ""],
-            ["P2 5K/7K/9K Middle", FlxG.save.data.P2N4Bind, "keybind", ""],
-            ["P2 9K/8K Left 2", FlxG.save.data.P2N5Bind, "keybind", ""],
-            ["P2 9K/8K Down 2", FlxG.save.data.P2N6Bind, "keybind", ""],
-            ["P2 9K/8K Up 2", FlxG.save.data.P2N7Bind, "keybind", ""],
-            ["P2 9K/8K Right 2", FlxG.save.data.P2N8Bind, "keybind", ""],
+            ["P2 9K/8K Left 1", FlxG.save.data.P2binds[2][0], "keybind", ""],
+            ["P2 9K/8K Down 1", FlxG.save.data.P2binds[2][1], "keybind", ""],
+            ["P2 9K/8K Up 1", FlxG.save.data.P2binds[2][2], "keybind", ""],
+            ["P2 9K/8K Right 1", FlxG.save.data.P2binds[2][3], "keybind", ""],
+            ["P2 5K/7K/9K Middle", FlxG.save.data.P2binds[2][4], "keybind", ""],
+            ["P2 9K/8K Left 2", FlxG.save.data.P2binds[2][5], "keybind", ""],
+            ["P2 9K/8K Down 2", FlxG.save.data.P2binds[2][6], "keybind", ""],
+            ["P2 9K/8K Up 2", FlxG.save.data.P2binds[2][7], "keybind", ""],
+            ["P2 9K/8K Right 2", FlxG.save.data.P2binds[2][8], "keybind", ""],
             ["", "", "cat", ""],
-            ["P2 6K/7K Left 1", FlxG.save.data.P2L1Bind, "keybind", ""],
-            ["P2 6K/7K Up", FlxG.save.data.P2U1Bind, "keybind", ""],
-            ["P2 6K/7K Right 1", FlxG.save.data.P2R1Bind, "keybind", ""],
-            ["P2 6K/7K Left 2", FlxG.save.data.P2L2Bind, "keybind", ""],
-            ["P2 6K/7K Down", FlxG.save.data.P2D1Bind, "keybind", ""],
-            ["P2 6K/7K Right 2", FlxG.save.data.P2R2Bind, "keybind", ""],
+            ["P2 6K/7K Left 1", FlxG.save.data.P2binds[1][0], "keybind", ""],
+            ["P2 6K/7K Up", FlxG.save.data.P2binds[1][1], "keybind", ""],
+            ["P2 6K/7K Right 1", FlxG.save.data.P2binds[1][2], "keybind", ""],
+            ["P2 6K/7K Left 2", FlxG.save.data.P2binds[1][3], "keybind", ""],
+            ["P2 6K/7K Down", FlxG.save.data.P2binds[1][4], "keybind", ""],
+            ["P2 6K/7K Right 2", FlxG.save.data.P2binds[1][5], "keybind", ""],
             ["Reset All Keybinds","", "button", "includes P1 and gamepad!"]
         ];
 
         gamepad = [
-            ["Gamepad 4K/5K Left", FlxG.save.data.GleftBind, "gamepad", ""],
-            ["Gamepad 4K/5K Down", FlxG.save.data.GdownBind, "gamepad", ""],
-            ["Gamepad 4K/5K Up", FlxG.save.data.GupBind, "gamepad", ""],
-            ["Gamepad 4K/5K Right", FlxG.save.data.GrightBind, "gamepad", ""],
+            ["Gamepad 4K/5K Left", FlxG.save.data.GPbinds[0][0], "gamepad", ""],
+            ["Gamepad 4K/5K Down", FlxG.save.data.GPbinds[0][1], "gamepad", ""],
+            ["Gamepad 4K/5K Up", FlxG.save.data.GPbinds[0][2], "gamepad", ""],
+            ["Gamepad 4K/5K Right", FlxG.save.data.GPbinds[0][3], "gamepad", ""],
             ["", "", "cat", ""],
-            ["Gamepad 9K/8K Left 1", FlxG.save.data.GN0Bind, "gamepad", ""],
-            ["Gamepad 9K/8K Down 1", FlxG.save.data.GN1Bind, "gamepad", ""],
-            ["Gamepad 9K/8K Up 1", FlxG.save.data.GN2Bind, "gamepad", ""],
-            ["Gamepad 9K/8K Right 1", FlxG.save.data.GN3Bind, "gamepad", ""],
-            ["Gamepad 5K/7K/9K Middle", FlxG.save.data.GN4Bind, "gamepad", ""],
-            ["Gamepad 9K/8K Left 2", FlxG.save.data.GN5Bind, "gamepad", ""],
-            ["Gamepad 9K/8K Down 2", FlxG.save.data.GN6Bind, "gamepad", ""],
-            ["Gamepad 9K/8K Up 2", FlxG.save.data.GN7Bind, "gamepad", ""],
-            ["Gamepad 9K/8K Right 2", FlxG.save.data.GN8Bind, "gamepad", ""],
+            ["Gamepad 9K/8K Left 1", FlxG.save.data.GPbinds[2][0], "gamepad", ""],
+            ["Gamepad 9K/8K Down 1", FlxG.save.data.GPbinds[2][1], "gamepad", ""],
+            ["Gamepad 9K/8K Up 1", FlxG.save.data.GPbinds[2][2], "gamepad", ""],
+            ["Gamepad 9K/8K Right 1", FlxG.save.data.GPbinds[2][3], "gamepad", ""],
+            ["Gamepad 5K/7K/9K Middle", FlxG.save.data.GPbinds[2][4], "gamepad", ""],
+            ["Gamepad 9K/8K Left 2", FlxG.save.data.GPbinds[2][5], "gamepad", ""],
+            ["Gamepad 9K/8K Down 2", FlxG.save.data.GPbinds[2][6], "gamepad", ""],
+            ["Gamepad 9K/8K Up 2", FlxG.save.data.GPbinds[2][7], "gamepad", ""],
+            ["Gamepad 9K/8K Right 2", FlxG.save.data.GPbinds[2][8], "gamepad", ""],
             ["", "", "cat", ""],
-            ["Gamepad 6K/7K Left 1", FlxG.save.data.GL1Bind, "gamepad", ""],
-            ["Gamepad 6K/7K Up", FlxG.save.data.GU1Bind, "gamepad", ""],
-            ["Gamepad 6K/7K Right 1", FlxG.save.data.GR1Bind, "gamepad", ""],
-            ["Gamepad 6K/7K Left 2", FlxG.save.data.GL2Bind, "gamepad", ""],
-            ["Gamepad 6K/7K Down", FlxG.save.data.GD1Bind, "gamepad", ""],
-            ["Gamepad 6K/7K Right 2", FlxG.save.data.GR2Bind, "gamepad", ""],
+            ["Gamepad 6K/7K Left 1", FlxG.save.data.GPbinds[1][0], "gamepad", ""],
+            ["Gamepad 6K/7K Up", FlxG.save.data.GPbinds[1][1], "gamepad", ""],
+            ["Gamepad 6K/7K Right 1", FlxG.save.data.GPbinds[1][2], "gamepad", ""],
+            ["Gamepad 6K/7K Left 2", FlxG.save.data.GPbinds[1][3], "gamepad", ""],
+            ["Gamepad 6K/7K Down", FlxG.save.data.GPbinds[1][4], "gamepad", ""],
+            ["Gamepad 6K/7K Right 2", FlxG.save.data.GPbinds[1][5], "gamepad", ""],
             ["Reset All Keybinds","", "button", "includes keyboard Keybinds!"]
         ];
     
@@ -540,9 +523,35 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
         SaveData.randomNoteVelocity = options[13][1];
         SaveData.Hellchart = options[14][1];
         SaveData.flip = options[15][1];*/
+        if (daCat == "Keybinds")
+        {
+            
+        }
+        switch (daCat) //reminder to change this if new stuff is added to keybind options category
+        {
+            case "Keybinds": 
+                FlxG.save.data.binds = [
+                    [curCategory[4][1], curCategory[5][1], curCategory[6][1], curCategory[7][1]],
+                    [curCategory[19][1], curCategory[20][1], curCategory[21][1], curCategory[22][1], curCategory[23][1], curCategory[24][1]],
+                    [curCategory[9][1], curCategory[10][1], curCategory[11][1], curCategory[12][1], curCategory[13][1], curCategory[14][1], curCategory[15][1], curCategory[16][1], curCategory[17][1]]
+                ];
+            case "P2 Keybinds": 
+                FlxG.save.data.P2binds = [
+                    [curCategory[0][1], curCategory[1][1], curCategory[2][1], curCategory[3][1]],
+                    [curCategory[15][1], curCategory[16][1], curCategory[17][1], curCategory[18][1], curCategory[19][1], curCategory[20][1]],
+                    [curCategory[5][1], curCategory[6][1], curCategory[7][1], curCategory[8][1], curCategory[9][1], curCategory[10][1], curCategory[11][1], curCategory[12][1], curCategory[13][1]]
+                ]; 
+            case "Gamepad Binds": 
+                FlxG.save.data.GPbinds = [
+                    [curCategory[0][1], curCategory[1][1], curCategory[2][1], curCategory[3][1]],
+                    [curCategory[15][1], curCategory[16][1], curCategory[17][1], curCategory[18][1], curCategory[19][1], curCategory[20][1]],
+                    [curCategory[5][1], curCategory[6][1], curCategory[7][1], curCategory[8][1], curCategory[9][1], curCategory[10][1], curCategory[11][1], curCategory[12][1], curCategory[13][1]]
+                ]; 
+        }
 
         for (i in 0...curCategory.length) //this is the best i could come up with OK, just so it only saves the ones in your current category
         {
+
             switch (curCategory[i][0])
             {
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -564,130 +573,7 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                 case "FPS Cap": 
                     SaveData.fps = curCategory[i][1];
                 case "Middlescroll": 
-                    SaveData.middlescroll = curCategory[i][1];
-//////////////////////////////////////////////////////////////////////////////////////////
-                case "4K/5K Left": 
-                    FlxG.save.data.leftBind = curCategory[i][1];
-                case "4K/5K Down": 
-                    FlxG.save.data.downBind = curCategory[i][1];
-                case "4K/5K Up": 
-                    FlxG.save.data.upBind = curCategory[i][1];
-                case "4K/5K Right": 
-                    FlxG.save.data.rightBind = curCategory[i][1];
-
-                case "9K/8K Left 1": 
-                    FlxG.save.data.N0Bind = curCategory[i][1];
-                case "9K/8K Down 1": 
-                    FlxG.save.data.N1Bind = curCategory[i][1];
-                case "9K/8K Up 1": 
-                    FlxG.save.data.N2Bind = curCategory[i][1];
-                case "9K/8K Right 1": 
-                    FlxG.save.data.N3Bind = curCategory[i][1];
-                case "5K/7K/9K Middle": 
-                    FlxG.save.data.N4Bind = curCategory[i][1];
-                case "9K/8K Left 2": 
-                    FlxG.save.data.N5Bind = curCategory[i][1];
-                case "9K/8K Down 2": 
-                    FlxG.save.data.N6Bind = curCategory[i][1];
-                case "9K/8K Up 2": 
-                    FlxG.save.data.N7Bind = curCategory[i][1];
-                case "9K/8K Right 2": 
-                    FlxG.save.data.N8Bind = curCategory[i][1];
-
-                case "6K/7K Left 1": 
-                    FlxG.save.data.L1Bind = curCategory[i][1];
-                case "6K/7K Up": 
-                    FlxG.save.data.U1Bind = curCategory[i][1];
-                case "6K/7K Right 1": 
-                    FlxG.save.data.R1Bind = curCategory[i][1];
-                case "6K/7K Left 2": 
-                    FlxG.save.data.L2Bind = curCategory[i][1];
-                case "6K/7K Down": 
-                    FlxG.save.data.D1Bind = curCategory[i][1];
-                case "6K/7K Right 2": 
-                    FlxG.save.data.R2Bind = curCategory[i][1];
-//////////////////////////////////////////////////////////////////////////////////////////
-                case "P2 4K/5K Left": 
-                    FlxG.save.data.P2leftBind = curCategory[i][1];
-                case "P2 4K/5K Down": 
-                    FlxG.save.data.P2downBind = curCategory[i][1];
-                case "P2 4K/5K Up": 
-                    FlxG.save.data.P2upBind = curCategory[i][1];
-                case "P2 4K/5K Right": 
-                    FlxG.save.data.P2rightBind = curCategory[i][1];
-
-                case "P2 9K/8K Left 1": 
-                    FlxG.save.data.P2N0Bind = curCategory[i][1];
-                case "P2 9K/8K Down 1": 
-                    FlxG.save.data.P2N1Bind = curCategory[i][1];
-                case "P2 9K/8K Up 1": 
-                    FlxG.save.data.P2N2Bind = curCategory[i][1];
-                case "P2 9K/8K Right 1": 
-                    FlxG.save.data.P2N3Bind = curCategory[i][1];
-                case "P2 5K/7K/9K Middle": 
-                    FlxG.save.data.P2N4Bind = curCategory[i][1];
-                case "P2 9K/8K Left 2": 
-                    FlxG.save.data.P2N5Bind = curCategory[i][1];
-                case "P2 9K/8K Down 2": 
-                    FlxG.save.data.P2N6Bind = curCategory[i][1];
-                case "P2 9K/8K Up 2": 
-                    FlxG.save.data.P2N7Bind = curCategory[i][1];
-                case "P2 9K/8K Right 2": 
-                    FlxG.save.data.P2N8Bind = curCategory[i][1];
-
-                case "P2 6K/7K Left 1": 
-                    FlxG.save.data.P2L1Bind = curCategory[i][1];
-                case "P2 6K/7K Up": 
-                    FlxG.save.data.P2U1Bind = curCategory[i][1];
-                case "P2 6K/7K Right 1": 
-                    FlxG.save.data.P2R1Bind = curCategory[i][1];
-                case "P2 6K/7K Left 2": 
-                    FlxG.save.data.P2L2Bind = curCategory[i][1];
-                case "P2 6K/7K Down": 
-                    FlxG.save.data.P2D1Bind = curCategory[i][1];
-                case "P2 6K/7K Right 2": 
-                    FlxG.save.data.P2R2Bind = curCategory[i][1];
-//////////////////////////////////////////////////////////////////////////////////////////
-                case "Gamepad 4K/5K Left": 
-                    FlxG.save.data.GleftBind = curCategory[i][1];
-                case "Gamepad 4K/5K Down": 
-                    FlxG.save.data.GdownBind = curCategory[i][1];
-                case "Gamepad 4K/5K Up": 
-                    FlxG.save.data.GupBind = curCategory[i][1];
-                case "Gamepad 4K/5K Right": 
-                    FlxG.save.data.GrightBind = curCategory[i][1];
-
-                case "Gamepad 9K/8K Left 1": 
-                    FlxG.save.data.GN0Bind = curCategory[i][1];
-                case "Gamepad 9K/8K Down 1": 
-                    FlxG.save.data.GN1Bind = curCategory[i][1];
-                case "Gamepad 9K/8K Up 1": 
-                    FlxG.save.data.GN2Bind = curCategory[i][1];
-                case "Gamepad 9K/8K Right 1": 
-                    FlxG.save.data.GN3Bind = curCategory[i][1];
-                case "Gamepad 5K/7K/9K Middle": 
-                    FlxG.save.data.GN4Bind = curCategory[i][1];
-                case "Gamepad 9K/8K Left 2": 
-                    FlxG.save.data.GN5Bind = curCategory[i][1];
-                case "Gamepad 9K/8K Down 2": 
-                    FlxG.save.data.GN6Bind = curCategory[i][1];
-                case "Gamepad 9K/8K Up 2": 
-                    FlxG.save.data.GN7Bind = curCategory[i][1];
-                case "Gamepad 9K/8K Right 2": 
-                    FlxG.save.data.GN8Bind = curCategory[i][1];
-
-                case "Gamepad 6K/7K Left 1": 
-                    FlxG.save.data.GL1Bind = curCategory[i][1];
-                case "Gamepad 6K/7K Up": 
-                    FlxG.save.data.GU1Bind = curCategory[i][1];
-                case "Gamepad 6K/7K Right 1": 
-                    FlxG.save.data.GR1Bind = curCategory[i][1];
-                case "Gamepad 6K/7K Left 2": 
-                    FlxG.save.data.GL2Bind = curCategory[i][1];
-                case "Gamepad 6K/7K Down": 
-                    FlxG.save.data.GD1Bind = curCategory[i][1];
-                case "Gamepad 6K/7K Right 2": 
-                    FlxG.save.data.GR2Bind = curCategory[i][1];
+                    SaveData.middlescroll = curCategory[i][1];         
 /////////////////////////////////////////////////////////////////////////////////////////
                 case "Randomize Notes": 
                     SaveData.randomNotes = curCategory[i][1];

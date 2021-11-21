@@ -30,6 +30,7 @@ class Note extends FlxSprite
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
+	public var sustainHit:Bool = false;
 	public var prevNote:Note;
 	
 	public var sustainLength:Float = 0;
@@ -421,6 +422,9 @@ class Note extends FlxSprite
 
 			if (strumTime <= Conductor.songPosition && !badNoteType)
 				wasGoodHit = true;
+
+			if (sustainHit && strumTime - Conductor.songPosition < -300)
+				deleteShit();
 		}
 
 		if (isGFNote)
@@ -441,6 +445,15 @@ class Note extends FlxSprite
 			if (alpha > 0.3)
 				alpha = 0.3;
 		}
+	}
+
+	function deleteShit():Void
+	{
+		var strums = "cpu";
+		if (PlayState.flipped && !PlayState.multiplayer)
+			strums = "player";
+
+		PlayState.instance.removeNote(this, strums);
 	}
 
 	function positionNote():Void //dont think this is needed but il do it anyway
@@ -486,7 +499,7 @@ class Note extends FlxSprite
 				var prefix:String = noteTypePrefixes[noteType];
 				if (normalNote)
 				{
-					prefix = frameN[mania][noteData];
+					prefix = frameN[mania][noteData]; 
 					frames = Paths.getSparrowAtlas(pathList[pathToUse]);
 				}	
 				else
@@ -664,7 +677,7 @@ class Note extends FlxSprite
 				normalNote = false;
 				downscrollYOffset = 50;
 			case "drain": 
-				normalNote = true;
+				normalNote = false;
 				downscrollYOffset = 50;
 			case "burning" | "death" | "bob" | "poison": 
 				normalNote = false;
@@ -734,11 +747,52 @@ class Note extends FlxSprite
 		}
 	}
 
-	public function clipSustain(clipTo:Float)
+	public function noteTypeMiss(strums:String, playernum:Int):Void 
 	{
-		var fuckYouRect = new FlxRect(0, 0, width / scale.x, 0);
-		fuckYouRect.y = ((clipTo - y) / scale.y);
-		//fuckYouRect.y /= scale.y;
+		switch (noteTypeList[noteType])
+		{
+			case "warning": 
+				PlayState.instance.removeNote(this, strums);
+				var statsToUse = PlayState.instance.P1Stats;
+				if (!mustPress && PlayState.multiplayer)
+					statsToUse = PlayState.instance.P2Stats;
+				PlayState.instance.badNoteHit();
+				statsToUse.health -= 1;
+				statsToUse.misses++;
+			case "glitch": 
+				PlayState.instance.removeNote(this, strums);
+				var statsToUse = PlayState.instance.P1Stats;
+				if (!mustPress && PlayState.multiplayer)
+					statsToUse = PlayState.instance.P2Stats;
+				PlayState.instance.HealthDrain(playernum);
+				PlayState.instance.badNoteHit();
+				statsToUse.misses++;
+			case "angel": 
+				//nothing, they literally do nothing if you miss
+			case "burning" | "death" | "bob" | "poison": 
+				PlayState.instance.removeNote(this, strums);
+			case "regular" | "alt" | "drain": 
+				if (isSustainNote && wasGoodHit) //to 100% make sure the sustain is gone
+				{
+					this.kill();
+					PlayState.instance.removeNote(this, strums);
+				}
+				else
+				{
+					PlayState.instance.vocals.volume = 0;
+					PlayState.instance.noteMiss(this.noteData, this, playernum);								
+				}
+				PlayState.instance.removeNote(this, strums);
+			default: 
+				//add custom ntoe tyeps scucppotp 
+				PlayState.instance.removeNote(this, strums); //temp
+		}
+	}
+
+	public function clipSustain(clipTo:FlxPoint)
+	{
+		var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
+		fuckYouRect.y = ((clipTo.y - y) / scale.y);
 		fuckYouRect.height -= fuckYouRect.y;
 		clipRect = fuckYouRect;
 

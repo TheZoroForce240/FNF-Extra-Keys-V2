@@ -241,17 +241,17 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
                 }
                 else 
                 {
-                    if ((i == 6 || i == 11) && SaveData.hudPos == "Vanilla")
+                    if ((i == 6 || i == 11) && SaveData.hudPos == "Default")
                         scoreTxt.text += "\n";
 
-                    if (SaveData.hudPos != "Vanilla")
+                    if (SaveData.hudPos != "Default")
                         scoreTxt.text += "\n";
                     else
                         scoreTxt.text += "|";
 
                     scoreTxt.text += listOShit[i];
 
-                    if (SaveData.hudPos == "Vanilla")
+                    if (SaveData.hudPos == "Default")
                         scoreTxt.text += "|";
 
                 }
@@ -271,16 +271,14 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
 
         if (curCategory[curSelected][2] == "mode")
         {
-
-            var list = ["Vanilla", "Left", "Right"];
+            var list = ["Default", "Left", "Right"];
             switch (curCategory[curSelected][0])
             {
                 case "Health Bar Position": 
-                    list = ["Vanilla", "Left", "Right", "Center"];
+                    list = ["Default", "Left", "Right", "Center"];
                 case "Arrow Lanes/backing": 
                     list = ["Off", "Colored", "Black"];
             }
-
             var selected:Int = 0; //backup or something idk
             selected = list.indexOf(curCategory[curSelected][1]);
             selected += Std.int(change);
@@ -461,7 +459,7 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
 		{
 			case "Left" | "Right" | "Center": 
 				centerHealthBar = true;
-            case "Vanilla": 
+            case "Default": 
                 centerHealthBar = false;
 		}
 
@@ -505,7 +503,7 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
 		if (centerHealthBar)
 		{
 			timeText.y = (FlxG.height * 0.1) - 60;
-			if (SaveData.hudPos == "Vanilla")
+			if (SaveData.hudPos == "Default")
 				scoreTxt.y = (FlxG.height * 0.9) + 30;
 		}
 

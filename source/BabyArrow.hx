@@ -6,8 +6,11 @@ import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import Shaders;
+import flixel.math.FlxPoint;
 
 class BabyArrow extends FlxSprite
 {
@@ -87,6 +90,8 @@ class BabyArrow extends FlxSprite
 
     public var defaultWidth:Float;
     public var curID:Int;
+
+    public var centerOfArrow:FlxPoint;
 
     var flxcolorToUse:FlxColor = FlxColor.BLACK;
 
@@ -229,6 +234,13 @@ class BabyArrow extends FlxSprite
             else 
                 x += ((FlxG.width / 2) * player);
 
+            if (!PlayState.isStoryMode)
+            {
+                y -= 10;
+                alpha = 0;
+                FlxTween.tween(this, {y: y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
+            }
+
             /*switch (i) //dumb center scroll i did for a video
             {
                 case 0: 
@@ -258,6 +270,8 @@ class BabyArrow extends FlxSprite
             defaultX = this.x;
             defaultY = this.y;
             defaultAngle = this.angle;
+
+            centerOfArrow = new FlxPoint(this.getGraphicMidpoint().x, this.getGraphicMidpoint().y);
 
 
     }
@@ -387,6 +401,7 @@ class BabyArrow extends FlxSprite
             lane.x = this.x + laneOffset[curMania];
             lane.y = this.y - 300;
         }
+        centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti) / 2);
 
     }
         
