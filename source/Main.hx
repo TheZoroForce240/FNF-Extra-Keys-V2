@@ -125,7 +125,7 @@ class Main extends Sprite
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 	public static var editor:Bool = false;
-	public static var gameData:GameData; //unhardcode literally everything lol
+	public static var gameData:GameData; //unhardcode almost everything lol
 	public static var enabledMod:String = "";
 	public static var curCustomPath = "assets/";
 

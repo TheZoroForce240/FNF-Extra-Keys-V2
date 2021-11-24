@@ -402,6 +402,27 @@ class BabyArrow extends FlxSprite
 
         curMania = newMania;
 
+        if (SaveData.splitScroll && player == 1)
+        {
+            if (curID >= (PlayState.keyAmmo[curMania] / 2))
+            {
+                this.cameras = [PlayState.instance.camP1NotesSplit];
+                scale.y *= -1;
+            }
+            else
+                this.cameras = [PlayState.instance.camP1Notes];
+        }
+        else if (SaveData.P2splitScroll && player == 0)
+        {
+            if (curID >= (PlayState.keyAmmo[curMania] / 2))
+            {
+                this.cameras = [PlayState.instance.camP2NotesSplit];
+                scale.y *= -1;
+            }
+            else
+                this.cameras = [PlayState.instance.camP2Notes];
+        }
+
         if ((player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
         {
             PlayState.instance.remove(lane);

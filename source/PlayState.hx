@@ -1169,6 +1169,8 @@ class PlayState extends MusicBeatState
 
 	var keys = [false, false, false, false, false, false, false, false, false];
 	var P2keys = [false, false, false, false, false, false, false, false, false];
+	var sustainsHeld = [false, false, false, false, false, false, false, false, false];
+	var P2sustainsHeld = [false, false, false, false, false, false, false, false, false];
 
 	function startCountdown():Void
 	{
@@ -1260,12 +1262,14 @@ class PlayState extends MusicBeatState
 						return;
 					}
 				P2keys[data] = false;
+				P2sustainsHeld[data] = false;
 			case 1: 
 				if (data == -1)
 					{
 						return;
 					}
 				keys[data] = false;
+				sustainsHeld[data] = false;
 		}
 	}
 
@@ -1295,7 +1299,6 @@ class PlayState extends MusicBeatState
 				data = i;
 				playernum = 1;
 			}
-
 		}
 		for (i in 0...P2binds.length)
 		{
@@ -1314,12 +1317,14 @@ class PlayState extends MusicBeatState
 						return;
 					}
 				P2keys[data] = true;
+				P2sustainsHeld[data] = true;
 			case 1: 
 				if (keys[data] || data == -1)
 					{
 						return;
 					}
 				keys[data] = true;
+				sustainsHeld[data] = true;
 		}
 		normalInputSystem(data, playernum);		
 	}
@@ -1332,6 +1337,22 @@ class PlayState extends MusicBeatState
 
 	function normalInputSystem(data:Int, playernum:Int)
 	{
+		closestNotes = []; //moved here because if notes were in a null section it would prevent them from being hit (i was testing on dave and bambi charts and they all have weird charts and all notes seem to be in one section????)
+		P2closestNotes = [];
+		if (multiplayer)
+		{
+			closestNotes = collectNotes(P1notes, true);
+			P2closestNotes = collectNotes(P2notes, false);
+		}
+		else if (flipped)
+			closestNotes = collectNotes(P2notes, false);
+		else
+			closestNotes = collectNotes(P1notes, true);
+		
+
+		closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		P2closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+
 		var hittableNotes = [];
 		switch(playernum)
 		{
@@ -1687,15 +1708,18 @@ class PlayState extends MusicBeatState
 
 	function resyncVocals():Void
 	{
-		trace("synced vocals");
-		vocals.pause();
-
-		FlxG.sound.music.play();
-		FlxG.sound.music.time = Conductor.songPosition;
-		vocals.time = FlxG.sound.music.time;
-		vocals.play();
-
-		updateSongMulti();
+		if (!endingSong)
+		{
+			trace("synced vocals");
+			vocals.pause();
+	
+			FlxG.sound.music.play();
+			FlxG.sound.music.time = Conductor.songPosition;
+			vocals.time = FlxG.sound.music.time;
+			vocals.play();
+	
+			updateSongMulti();
+		}
 	}
 
 	function updateSongMulti():Void
@@ -1730,7 +1754,7 @@ class PlayState extends MusicBeatState
 
 	function NotePositionShit(daNote:Note, strums:String)
 	{
-		if (daNote.y > FlxG.height)
+		if (daNote.y > FlxG.height && daNote.y < 0 && daNote.x < 0 && daNote.x > FlxG.width)
 		{
 			daNote.active = false;
 			daNote.visible = false;
@@ -1813,7 +1837,7 @@ class PlayState extends MusicBeatState
 					daNote.clipSustain(middleOfNote);
 				}*/
 
-		var holdingSustain:Bool = keys[noteData] || (multiplayer && strums == "cpu" && P2keys[noteData]);
+		var holdingSustain:Bool = sustainsHeld[noteData] || (multiplayer && strums == "cpu" && P2sustainsHeld[noteData]);
 
 		if (isSustainNote)
 			if (!mustPress || holdingSustain || SaveData.botplay)
@@ -1836,7 +1860,7 @@ class PlayState extends MusicBeatState
 			daNote.alpha = noteAlpha;
 		}
 		
-		if (SaveData.downscroll)
+		if (daNote.beenFlipped)
 		{
 			daNote.y += daNote.downscrollYOffset; //y offset of notetypes  (only downscroll for some reason, weird shit with the graphic flip)
 			//bruh i made a whole menu just to help fix and it doesnt even match up wtf
@@ -2194,22 +2218,6 @@ class PlayState extends MusicBeatState
 
 		if (generatedMusic && currentSection != null)
 		{
-			closestNotes = [];
-			P2closestNotes = [];
-			if (multiplayer)
-			{
-				closestNotes = collectNotes(P1notes, true);
-				P2closestNotes = collectNotes(P2notes, false);
-			}
-			else if (flipped)
-				closestNotes = collectNotes(P2notes, false);
-			else
-				closestNotes = collectNotes(P1notes, true);
-			
-
-			closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
-			P2closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
-
 
 			if (!currentSection.mustHitSection)
 				moveCamera(getCameraPos(0));
@@ -2706,17 +2714,17 @@ class PlayState extends MusicBeatState
 	private function keyShit():Void
 	{
 		// HOLDS, check for sustain notes
-		if ((keys.contains(true) || P2keys.contains(true))&& /*!boyfriend.stunned && */ generatedMusic)
+		if ((sustainsHeld.contains(true) || P2sustainsHeld.contains(true))&& /*!boyfriend.stunned && */ generatedMusic)
 		{
 			if (multiplayer)
 			{
-				sustainHoldCheck(keys, P1notes, true);
-				sustainHoldCheck(P2keys, P2notes, false, 0);
+				sustainHoldCheck(sustainsHeld, P1notes, true);
+				sustainHoldCheck(P2sustainsHeld, P2notes, false, 0);
 			}
 			else if (flipped && !multiplayer)
-				sustainHoldCheck(keys, P2notes, false);
+				sustainHoldCheck(sustainsHeld, P2notes, false);
 			else
-				sustainHoldCheck(keys, P1notes, true);
+				sustainHoldCheck(sustainsHeld, P1notes, true);
 		}
 
 		if (player.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!keys.contains(true)))
@@ -2755,14 +2763,22 @@ class PlayState extends MusicBeatState
 			{
 				data = i;
 				if (data != -1)
+				{
+					sustainsHeld[data] = true;
 					keys[data] = true;
+				}
+					
 				normalInputSystem(data, 1);
 			}
 			else if (gamepad.checkStatus(input, JUST_RELEASED))
 			{
 				data = i;
 				if (data != -1)
+				{
+					sustainsHeld[data] = false;
 					keys[data] = false;
+				}
+					
 			}
 
 
@@ -3282,6 +3298,12 @@ class PlayState extends MusicBeatState
 			if (showKeyBindText)
 				createManiaSwitchKeybindText(strums, bindsToUse, downscroll);
 
+			if (strumnum == 1 && !flipped || strumnum == 0 && flipped)
+				keys = [false, false, false, false, false, false, false, false, false];
+			else if (multiplayer)
+				P2keys = [false, false, false, false, false, false, false, false, false];
+
+
 			/*regeneratingNotes = true;
 			generateNotes();*/
 		}
@@ -3679,6 +3701,7 @@ class PlayState extends MusicBeatState
 				if (songNotes[1] >= 0)
 				{
 					var daStrumTime:Float = songNotes[0];
+					daStrumTime += SaveData.offset;
 					if (daStrumTime < 0)
 						daStrumTime = 0;
 	

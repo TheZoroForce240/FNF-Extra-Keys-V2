@@ -386,7 +386,8 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["Ghost Tapping", SaveData.ghost, "toggle", "Turning on this means you dont miss when misspressing a note"],
             ["Scroll Speed", SaveData.ScrollSpeed, "slider", "Change the default scroll speed (does not include notes changed by the chart)"],
             ["Casual Mode", SaveData.casual, "toggle", "More Spammable Input, Heal from Sustains and no health loss from bad accuracy"],
-            ["Multiplayer", SaveData.multiplayer, "toggle", "Turn on to play with a friend locally\n(or just play both side because you have no friends)"]
+            ["Multiplayer", SaveData.multiplayer, "toggle", "Turn on to play with a friend locally\n(or just play both side because you have no friends)"],
+            ["Strumtime Offset", SaveData.offset, "slider", "offset notes to match your audio delay"]
         ];
     
         misc = [ 
@@ -569,6 +570,8 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                     SaveData.multiplayer = curCategory[i][1];
                 case "P2 Downscroll": 
                     SaveData.P2downscroll = curCategory[i][1];
+                case "Strumtime Offset":
+                    SaveData.offset = curCategory[i][1];
 //////////////////////////////////////////////////////////////////////////////////////////
                 case "Note Splash": 
                     SaveData.noteSplash = curCategory[i][1];

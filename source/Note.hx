@@ -178,6 +178,18 @@ class Note extends FlxSprite
 	var changedVelocityScale:Bool = false;
 	public var curAlpha:Float = 1;
 	public var split:Bool = false; //split scroll fixing graphic flip shit
+	public static var splitFlip:Array<Array<Bool>> = [
+		[false, false, true, true, false, false, false, false, false],
+		[false, true, false, false, false, true, false, false, true],
+		[false, false, false, false, false, true, true, true, true],
+		[false, false, true, true, false, false, false, false, false],
+		[false, true, false, false, false, true, false, false, true],
+		[false, false, false, false, false, true, true, true, true],
+		[false, false, false, true, false, false, false, false, false],
+		[false, false, false, true, false, false, false, false, false],
+		[false, false, false, true, false, false, false, false, false],
+	];
+	public var beenFlipped:Bool = false;
 
 	////////////////////////////////////////////////////////////
 
@@ -266,13 +278,7 @@ class Note extends FlxSprite
 			speed = FlxMath.roundDecimal(speed / PlayState.SongSpeedMultiplier, 2);
 		else
 			speed = FlxMath.roundDecimal(speed, 2);
-		
-		
-
-
-
-		// MAKE SURE ITS DEFINITELY OFF SCREEN?
-		
+				
 		if (Main.editor)
 			this.strumTime = strumTime;
 		else 
@@ -297,6 +303,8 @@ class Note extends FlxSprite
 
 		this.noteData = _noteData % MaxNoteData;
 
+
+
 		//note types shit //TODO fix this shit
 		isGFNote = _gfNote;
 
@@ -304,32 +312,32 @@ class Note extends FlxSprite
 
 		noteTypeCheck();
 
-
-
-
 		//curMania = mania;
 		//getCurMania();
-		
+
+		if (!inCharter && SaveData.randomNotes)
+			noteData = FlxG.random.int(0, PlayState.keyAmmo[mania] - 1);
+
+		if (isSustainNote && prevNote != null)
+			noteData = prevNote.noteData;
 
 		if (!_mustPress)
 		{
-			ColorPresets.fixColorArray(mania);
-			colorShit = ColorPresets.ccolorArray[noteData];
 			if (strumTime >= PlayState.lastP2mChange)
 				curMania = PlayState.curP2NoteMania;
 			else
 				curMania = PlayState.prevP2NoteMania;
-			
-			
+			ColorPresets.fixColorArray(mania);
+			colorShit = ColorPresets.ccolorArray[noteData];
 		}
 		else
 		{
-			SaveData.fixColorArray(mania);
-			colorShit = SaveData.colorArray[noteData];
 			if (strumTime >= PlayState.lastP1mChange)
 				curMania = PlayState.curP1NoteMania;
 			else
 				curMania = PlayState.prevP1NoteMania;
+			SaveData.fixColorArray(mania);
+			colorShit = SaveData.colorArray[noteData];
 		}
 
 		scaleToUse = noteScales[curMania];
@@ -348,9 +356,12 @@ class Note extends FlxSprite
 		else if (pathToUse == 5)
 			style = 'pixel';
 
+
+
 		if (mustPress && !inCharter)
 		{
-			if (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && !inCharter && SaveData.splitScroll)
+			if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
+				&& !inCharter && SaveData.splitScroll)
 			{
 				this.cameras = [PlayState.instance.camP1NotesSplit];
 				split = true;
@@ -360,7 +371,8 @@ class Note extends FlxSprite
 		}
 		else if (!mustPress && !inCharter)
 		{
-			if (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && !inCharter && SaveData.P2splitScroll)
+			if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
+				&& !inCharter && SaveData.P2splitScroll)
 			{
 				this.cameras = [PlayState.instance.camP2NotesSplit];
 				split = true;
@@ -616,10 +628,18 @@ class Note extends FlxSprite
 			!inCharter)
 		{
 			if (!split)
+			{
+				beenFlipped = true;
 				scale.y *= -1;
+			}
+				
 		}
 		else if (split && !isSustainNote)
+		{
 			scale.y *= -1;
+			beenFlipped = true;
+		}
+			
 		
 	}
 

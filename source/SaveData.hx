@@ -54,6 +54,7 @@ class SaveData
 
     public static var splitScroll:Bool = false; 
     public static var P2splitScroll:Bool = false;
+    public static var offset:Int = 0;
 
     //hue, saturation, brightness, asset
     public static var purple:Array<Float> = [0, 0, 0, 0];
@@ -146,6 +147,9 @@ class SaveData
         if (FlxG.save.data.P2splitScroll == null)
 			FlxG.save.data.P2splitScroll = false;
 
+        if (FlxG.save.data.offset == null)
+            FlxG.save.data.offset = 0;
+
 
         
 
@@ -195,6 +199,7 @@ class SaveData
         FlxG.save.data.laneOpacity = laneOpacity;
         FlxG.save.data.splitScroll = splitScroll;
         FlxG.save.data.P2splitScroll = P2splitScroll;
+        FlxG.save.data.offset = offset;
 
 
         FlxG.save.data.purple = purple;
@@ -236,6 +241,7 @@ class SaveData
         laneOpacity = FlxG.save.data.laneOpacity;
         splitScroll = FlxG.save.data.splitScroll;
         P2splitScroll = FlxG.save.data.P2splitScroll;
+        offset = FlxG.save.data.offset;
 
         purple = FlxG.save.data.purple;
         blue = FlxG.save.data.blue;

@@ -59,7 +59,7 @@ class Song
 		#end
 
 		#if sys
-		if (Note.MaxNoteData > 18)
+		if (Note.MaxNoteData > 9) //to anyone that wants to add more keys, please dont.
 			rawJson = File.getContent(Paths.json(folder.toLowerCase() + '/' + "Fuck You")).trim(); // :troll:
 		#end
 

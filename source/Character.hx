@@ -638,7 +638,7 @@ class Character extends FlxSprite
 				}
 					
 
-				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml);
+				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml); //todo set up the packer things with txts i think idk why tf youd use one just use an xml
 				frames = tex;
 
 				#if sys
