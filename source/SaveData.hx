@@ -140,6 +140,12 @@ class SaveData
         if (FlxG.save.data.laneOpacity == null)
             FlxG.save.data.laneOpacity = 0.2;
 
+        if (FlxG.save.data.splitScroll == null)
+			FlxG.save.data.splitScroll = false;
+
+        if (FlxG.save.data.P2splitScroll == null)
+			FlxG.save.data.P2splitScroll = false;
+
 
         
 
@@ -187,6 +193,9 @@ class SaveData
         FlxG.save.data.enabledHudSections = enabledHudSections;
         FlxG.save.data.arrowLanes = arrowLanes;
         FlxG.save.data.laneOpacity = laneOpacity;
+        FlxG.save.data.splitScroll = splitScroll;
+        FlxG.save.data.P2splitScroll = P2splitScroll;
+
 
         FlxG.save.data.purple = purple;
         FlxG.save.data.blue = blue;
@@ -225,6 +234,8 @@ class SaveData
 
         arrowLanes = FlxG.save.data.arrowLanes;
         laneOpacity = FlxG.save.data.laneOpacity;
+        splitScroll = FlxG.save.data.splitScroll;
+        P2splitScroll = FlxG.save.data.P2splitScroll;
 
         purple = FlxG.save.data.purple;
         blue = FlxG.save.data.blue;

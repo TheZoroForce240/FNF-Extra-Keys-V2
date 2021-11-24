@@ -69,7 +69,7 @@ class MenuCharacter extends FlxSprite
 				{
 					if (i.name == character)
 					{
-						var imagePath = "assets/storymenu/characters/" + i.fileName + ".png";
+						var imagePath = "assets/images/storymenu/characters/" + i.fileName + ".png";
 
 						var imageGraphic:FlxGraphic;
 		
@@ -81,7 +81,7 @@ class MenuCharacter extends FlxSprite
 						}
 						imageGraphic = CacheShit.images[imagePath];
 		
-						var xmlPath = "assets/storymenu/characters/" + i.fileName + ".xml";
+						var xmlPath = "assets/images/storymenu/characters/" + i.fileName + ".xml";
 						var xml:String;
 		
 						if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache

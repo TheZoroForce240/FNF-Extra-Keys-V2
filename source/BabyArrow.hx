@@ -177,8 +177,8 @@ class BabyArrow extends FlxSprite
                 animation.add('dark', [17]);
 
                 defaultWidth = width;
-                setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelnoteScale * scaleMulti));
-                x += Note.swagWidth * i * scaleMulti; 
+                setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelNoteScales[maniaToUse] * scaleMulti));
+                x += Note.noteWidths[maniaToUse] * i * scaleMulti; 
                 updateHitbox();
                 antialiasing = false;
                 animation.add('static', [colorFromData[maniaToUse][i]]);
@@ -186,11 +186,7 @@ class BabyArrow extends FlxSprite
                 animation.add('confirm', [colorFromData[maniaToUse][i] + 27, colorFromData[maniaToUse][i] + 36], 24, false);
 
             default:
-                switch (maniaToUse)
-                {
-                    case 2:
-                        x -= Note.tooMuch;
-                }
+
                 var dir = dirArray[maniaToUse][i];
                 
 
@@ -203,8 +199,8 @@ class BabyArrow extends FlxSprite
 
                 antialiasing = true;
                 defaultWidth = width;
-                setGraphicSize(Std.int(width * Note.noteScale * scaleMulti));
-                x += Note.swagWidth * i * scaleMulti; 
+                setGraphicSize(Std.int(width * Note.noteScales[maniaToUse] * scaleMulti));
+                x += Note.noteWidths[maniaToUse] * i * scaleMulti; 
 
                 animation.addByPrefix('static', 'arrow' + dir);
                 animation.addByPrefix('pressed', color + ' press', 24, false);
@@ -212,6 +208,12 @@ class BabyArrow extends FlxSprite
 			}
 
             this.shader = HSV.shader;
+
+            switch (maniaToUse)
+            {
+                case 2:
+                    x -= Note.tooMuch;
+            }
 
 			updateHitbox();
 			scrollFactor.set();
@@ -228,7 +230,7 @@ class BabyArrow extends FlxSprite
             else 
                 x += ((FlxG.width / 2) * player);
 
-            if (!PlayState.isStoryMode)
+            if (!PlayState.isStoryMode && isPlayState)
             {
                 y -= 10;
                 alpha = 0;
@@ -324,7 +326,7 @@ class BabyArrow extends FlxSprite
             }
         }
 
-        if (stylelol != 'pixel') //pixel note style doesnt need to be offset
+        if (stylelol != "pixel")
         {
             //offset.x -= xoffset;
             //offset.y -= yoffset;
@@ -336,11 +338,10 @@ class BabyArrow extends FlxSprite
             offset.x = frameWidth / 2;
             offset.y = frameHeight / 2;
 
-
-    
             offset.x -= (offsetshit / 0.7) * (scaleToUse * scaleMulti);
             offset.y -= (offsetshit / 0.7) * (scaleToUse * scaleMulti);
         }
+
 
         /*if (animation.curAnim.name == 'confirm')
         {

@@ -126,6 +126,8 @@ class Main extends Sprite
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 	public static var editor:Bool = false;
 	public static var gameData:GameData; //unhardcode literally everything lol
+	public static var enabledMod:String = "";
+	public static var curCustomPath = "assets/";
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -196,10 +198,13 @@ class Main extends Sprite
 
 	public static function loadGameDataFile():Void
 	{
+		var filePath = "assets/data/gameData.json"; 
+		if (enabledMod != "")
+			filePath = "mods/" + enabledMod + "/data/gameData"; //next update hopefully :)
 		#if sys
-		var rawJson = File.getContent("assets/data/gameData.json");
+		var rawJson = File.getContent(filePath);
 		#else
-		var rawJson = Assets.getText("assets/data/gameData.json");
+		var rawJson = Assets.getText(filePath);
 		#end
 		gameData = cast Json.parse(rawJson);
 	}
@@ -271,7 +276,7 @@ class Main extends Sprite
 
 		FreeplayState.useAutoDiffSystem = free.useAutoDiffSystem;
 		PauseSubState.menuItems = pause.menuItems;
-		//StoryMenuState.weekUnlocked = story.weekUnlocked;
+		//StoryMenuState.weekUnlocked = story.weekUnlocked; //crashes for some reason?????
 		MainMenuState.optionShit = mainmenu.optionList;
 
 		ChartingState.GRID_SIZE = chart.GRID_SIZE;

@@ -145,9 +145,6 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 		}
 
         maniaToChange = 0;                  //makes sure its all set to 4k when entering the menu
-        Note.noteScale = Note.noteScales[0];
-        Note.swagWidth = Note.noteWidths[0];
-        Note.pixelnoteScale = Note.pixelNoteScales[0];
 
         FlxG.mouse.visible = true; //well you kinda need the mouse to use the menu
 
@@ -419,7 +416,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                 if (FlxG.keys.justPressed.TWO)
                     changeMania(7);
                 if (FlxG.keys.justPressed.THREE)
-                    changeMania(8);*/ //temp disable due to crash
+                    changeMania(8); *///temp disable due to crash
                 if (FlxG.keys.justPressed.FOUR)
                     changeMania(0);
                 if (FlxG.keys.justPressed.FIVE)
@@ -565,7 +562,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
             grpKeybinds.clear();
             for (i in 0...KeybindList.length)
             {
-                var text:FlxText = new FlxText(strumLineNotes.members[i].x + 140, (strumLine.y + 200), 48, KeybindList[i], 32, false);
+                var text:FlxText = new FlxText(strumLineNotes.members[i].x + 100, (strumLine.y + 200), 48, KeybindList[i], 32, false);
                 text.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
                 grpKeybinds.add(text);
                 if (SaveData.downscroll)
@@ -592,7 +589,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                     selectedNote.animation.add(noteColors[ii] + 'hold', [ii]); // Holds
                     selectedNote.animation.add(noteColors[ii] + 'holdend', [ii + 9]); // Tails
                 }
-            selectedNote.setGraphicSize(Std.int(selectedNote.width * PlayState.daPixelZoom * Note.pixelnoteScale));
+            selectedNote.setGraphicSize(Std.int(selectedNote.width * PlayState.daPixelZoom * Note.pixelNoteScales[maniaToChange]));
             selectedNote.updateHitbox();
             selectedNote.antialiasing = false;
         }
@@ -605,7 +602,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                     selectedNote.animation.addByPrefix(noteColors[ii] + 'hold', noteColors[ii] + ' hold piece'); // Hold
                     selectedNote.animation.addByPrefix(noteColors[ii] + 'holdend', noteColors[ii] + ' hold end'); // Tails
                 }
-            selectedNote.setGraphicSize(Std.int(selectedNote.width * Note.noteScale));
+            selectedNote.setGraphicSize(Std.int(selectedNote.width * Note.noteScales[maniaToChange]));
             selectedNote.updateHitbox();
             selectedNote.antialiasing = true;
         }
@@ -709,7 +706,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         {
             for (i in 0...KeybindList.length)
                 {
-                    var text:FlxText = new FlxText(strumLineNotes.members[i].x + 140, (strumLine.y + 200), 32, KeybindList[i], 32, false);
+                    var text:FlxText = new FlxText(strumLineNotes.members[i].x + 100, (strumLine.y + 200), 32, KeybindList[i], 32, false);
                     text.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
                     grpKeybinds.add(text);
                     if (SaveData.downscroll)
@@ -740,7 +737,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                             note.animation.add(noteColors[ii] + 'hold', [ii]); // Holds
                             note.animation.add(noteColors[ii] + 'holdend', [ii + 9]); // Tails
                         }
-                    note.setGraphicSize(Std.int(note.width * PlayState.daPixelZoom * Note.pixelnoteScale));
+                    note.setGraphicSize(Std.int(note.width * PlayState.daPixelZoom * Note.pixelNoteScales[maniaToChange]));
                     note.updateHitbox();
                     note.antialiasing = false;
                 }
@@ -753,7 +750,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                             note.animation.addByPrefix(noteColors[ii] + 'hold', noteColors[ii] + ' hold piece'); // Hold
                             note.animation.addByPrefix(noteColors[ii] + 'holdend', noteColors[ii] + ' hold end'); // Tails
                         }
-                    note.setGraphicSize(Std.int(note.width * Note.noteScale));
+                    note.setGraphicSize(Std.int(note.width * Note.noteScales[maniaToChange]));
                     note.updateHitbox();
                     note.antialiasing = true;
                 }
@@ -768,7 +765,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
                 noteHSV.update();
                 note.animation.play(Note.frameN[maniaToChange][i] + 'Scroll');
-                note.x = strumLineNotes.members[Math.floor(Math.abs(i))].x + 98;
+                note.x = strumLineNotes.members[Math.floor(Math.abs(i))].x + 50;
                 notes.add(note);
             }   
     }
@@ -882,9 +879,6 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         
         playerStrums.clear();
         strumLineNotes.clear();
-        Note.noteScale = Note.noteScales[mania];
-        Note.pixelnoteScale = Note.pixelNoteScales[mania];
-        Note.swagWidth = Note.noteWidths[mania];
         maniaToChange = mania;
         generateStaticArrows(1);
         updateKeybinds();

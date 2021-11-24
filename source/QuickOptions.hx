@@ -381,19 +381,20 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
         ];
         //name, savedata, type of option, info
         gameplay = [ 
-            ["Ghost Tapping", SaveData.ghost, "toggle", "Turning on this means you dont miss when misspressing a note"],
             ["P1 Downscroll", SaveData.downscroll, "toggle", "Flip Da Notes"],
+            ["P2 Downscroll", SaveData.P2downscroll, "toggle", "Flip Da Notes but for the second guy"],
+            ["Ghost Tapping", SaveData.ghost, "toggle", "Turning on this means you dont miss when misspressing a note"],
             ["Scroll Speed", SaveData.ScrollSpeed, "slider", "Change the default scroll speed (does not include notes changed by the chart)"],
             ["Casual Mode", SaveData.casual, "toggle", "More Spammable Input, Heal from Sustains and no health loss from bad accuracy"],
-            ["Multiplayer", SaveData.multiplayer, "toggle", "Turn on to play with a friend locally\n(or just play both side because you have no friends)"],
-            ["P2 Downscroll", SaveData.P2downscroll, "toggle", "Flip Da Notes but for the second guy"]
-            
+            ["Multiplayer", SaveData.multiplayer, "toggle", "Turn on to play with a friend locally\n(or just play both side because you have no friends)"]
         ];
     
         misc = [ 
+            ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"],
+            ["P1 Splitscroll", SaveData.splitScroll, "toggle", "Both Upscroll and downscroll (change normal downscroll setting to switch the side thats flipped)"],
+            ["P2 Splitscroll", SaveData.P2splitScroll, "toggle", "Both Upscroll and downscroll (change normal downscroll setting to switch the side thats flipped)"],
             ["Note Splash", SaveData.noteSplash, "toggle", "Turn on the funni effect when hitting sicks"],
             ["FPS Cap", SaveData.fps, "slider", "Turn up for more frames"],
-            ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"],
             ["Camera Movements on Note Hits", SaveData.noteMovements, "toggle", "the thing that every mod does now"],
             ["Scale Speed with Mania", SaveData.speedScaling, "toggle", "Scales down the speed based on note scale \n(so the same scroll speed should feel mostly the same for every mania)"]
         ];
@@ -574,7 +575,11 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                 case "FPS Cap": 
                     SaveData.fps = curCategory[i][1];
                 case "Middlescroll": 
-                    SaveData.middlescroll = curCategory[i][1];         
+                    SaveData.middlescroll = curCategory[i][1];      
+                case "P1 Splitscroll": 
+                    SaveData.splitScroll = curCategory[i][1];
+                case "P2 Splitscroll": 
+                    SaveData.P2splitScroll = curCategory[i][1];
 /////////////////////////////////////////////////////////////////////////////////////////
                 case "Randomize Notes": 
                     SaveData.randomNotes = curCategory[i][1];
