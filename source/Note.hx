@@ -43,19 +43,9 @@ class Note extends FlxSprite
 
 	////////////////////////////////////////////////////////////
 
-	//note type shit //TODO make this an enum or something idk
+	//note type shit
 	public var noteType:Int = 0;
 
-	/*public var regular:Bool = false; //just a regular note
-	public var burning:Bool = false; //fire
-	public var death:Bool = false; //halo/death
-	public var warning:Bool = false; //warning
-	public var angel:Bool = false; //angel
-	public var alt:Bool = false; //alt animation note
-	public var bob:Bool = false; //bob arrow
-	public var glitch:Bool = false; //glitch
-	public var poison:Bool = false; //poison notes
-	public var drain:Bool = false; //health drain notes*/
 	public static var noteTypeList = [
 		"regular",
 		"burning",
@@ -84,8 +74,9 @@ class Note extends FlxSprite
 	public var rating:String = "shit";
 	public var scaleMulti:Float = 1; //for middlescroll
 	public var daShit:Int = 0; //this is just for note data and anim shit that was annoying me
-	public var earlyHitTiming = 145;
-	public var lateHitTiming = -145;
+	public static var hitTiming = 145;
+	public var earlyHitTiming = hitTiming;
+	public var lateHitTiming = -hitTiming;
 	public var followAngle:Bool = true;
 
 	////////////////////////////////////////////////////////////
@@ -122,19 +113,19 @@ class Note extends FlxSprite
 		['purple', 'red'],
 		['purple', 'white', 'red']
 	];
-	var GFframeN:Array<String> = ['purple', 'blue', 'green', 'red']; //gf cant have more than 4k
+	public static var GFframeN:Array<String> = ['purple', 'blue', 'green', 'red']; //gf cant have more than 4k
 
 	////////////////////////////////////////////////////////////
 
 	//note asset shit
-	var pathList:Array<String> = [ //main assets //TODO unhardcode this shit and add note skin support
+	public static var pathList:Array<String> = [ //main assets //TODO unhardcode this shit and add note skin support
         'noteassets/NOTE_assets',
         'noteassets/PURPLE_NOTE_assets',
         'noteassets/BLUE_NOTE_assets',
         'noteassets/GREEN_NOTE_assets',
         'noteassets/RED_NOTE_assets'
     ];
-	var noteTypeAssetPaths:Array<String> = [ //for noteTypes, just cleaning code a bit
+	public static var noteTypeAssetPaths:Array<String> = [ //for noteTypes, just cleaning code a bit
 		'noteassets/NOTE_assets', //not exactly needed but who cares
 		'noteassets/notetypes/NOTE_types', //most note types are in a big spritesheet, if youre wondering why tf i did this
 		'noteassets/notetypes/NOTE_types',
@@ -146,7 +137,7 @@ class Note extends FlxSprite
 		'noteassets/notetypes/poison',
 		'noteassets/notetypes/drain'
 	];
-	var noteTypePrefixes:Array<String> = [
+	public static var noteTypePrefixes:Array<String> = [
 		"",
 		"fire",
 		"halo",
@@ -159,11 +150,11 @@ class Note extends FlxSprite
 		"poison" //forgot to change xml when copy pasting drain notes, if youre wondering why theres 2 poison
 	];
 	public var style:String = "";
-	public var noteColors:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
+	public static var noteColors:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
 	var colorShit:Array<Float>;
 	var pathToUse:Int = 0;
 
-	var pixelAssetPaths:Array<Array<String>> = [ //for noteTypes, epic code cleanup
+	public static var pixelAssetPaths:Array<Array<String>> = [ //for noteTypes, epic code cleanup
 		['noteassets/pixel/arrows-pixels', 'noteassets/pixel/arrowEnds'],
 		['noteassets/pixel/firenotes/arrows-pixels', 'noteassets/pixel/firenotes/arrowEnds'],
 		['noteassets/pixel/halo/arrows-pixels', 'noteassets/pixel/halo/arrowEnds'],
@@ -185,8 +176,8 @@ class Note extends FlxSprite
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
 	var changedVelocityScale:Bool = false;
-	public var defaultScaleY:Float = 1;
 	public var curAlpha:Float = 1;
+	public var split:Bool = false; //split scroll fixing graphic flip shit
 
 	////////////////////////////////////////////////////////////
 
@@ -242,6 +233,8 @@ class Note extends FlxSprite
 			speed = PlayState.SongSpeed;
 		else
 			speed = _speed;
+
+		
 
 
 
@@ -313,6 +306,7 @@ class Note extends FlxSprite
 
 
 
+
 		//curMania = mania;
 		//getCurMania();
 		
@@ -353,6 +347,29 @@ class Note extends FlxSprite
 		}
 		else if (pathToUse == 5)
 			style = 'pixel';
+
+		if (mustPress && !inCharter)
+		{
+			if (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && !inCharter && SaveData.splitScroll)
+			{
+				this.cameras = [PlayState.instance.camP1NotesSplit];
+				split = true;
+			}	
+			else
+				this.cameras = [PlayState.instance.camP1Notes];
+		}
+		else if (!mustPress && !inCharter)
+		{
+			if (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && !inCharter && SaveData.P2splitScroll)
+			{
+				this.cameras = [PlayState.instance.camP2NotesSplit];
+				split = true;
+			}
+			else
+				this.cameras = [PlayState.instance.camP2Notes];
+		}
+
+
 			
 
 
@@ -582,7 +599,6 @@ class Note extends FlxSprite
 			prevNote.updateHitbox();
 			prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (scaleToUse * scaleMulti));
 			prevNote.updateHitbox();
-			prevNote.defaultScaleY = prevNote.scale.y;
 
 			//prevNote.sustainOffset = Math.round(-prevNote.offset.y);
 			//sustainOffset = Math.round(-offset.y);
@@ -599,8 +615,12 @@ class Note extends FlxSprite
 			(SaveData.P2downscroll && !mustPress && !isSustainNote)) && 
 			!inCharter)
 		{
-			scale.y *= -1;
+			if (!split)
+				scale.y *= -1;
 		}
+		else if (split && !isSustainNote)
+			scale.y *= -1;
+		
 	}
 
 	function quantCheck():Void 
@@ -701,22 +721,22 @@ class Note extends FlxSprite
 				{
 					case "shit": 
 						PlayState.instance.badNoteHit();
-						healthChangesOnHit = -2;
+						healthChangesOnHit = PlayState.angelNoteDamage[0];
 					case "bad": 
 						PlayState.instance.badNoteHit();
-						healthChangesOnHit = -0.5;
+						healthChangesOnHit = PlayState.angelNoteDamage[1];
 					case "good": 
-						healthChangesOnHit = 0.5;
+						healthChangesOnHit = PlayState.angelNoteDamage[2];
 					case "sick": 
-						healthChangesOnHit = 1;
+						healthChangesOnHit = PlayState.angelNoteDamage[3];
 				}
 
 			case "burning": 
 				PlayState.instance.badNoteHit();
-				healthChangesOnHit = -0.5;
+				healthChangesOnHit = PlayState.fireNoteDamage;
 			case "death": 
 				PlayState.instance.badNoteHit();
-				healthChangesOnHit = -2.2;
+				healthChangesOnHit = PlayState.deathNoteDamage;
 			case "bob": 
 				PlayState.instance.badNoteHit();
 				if (PlayState.multiplayer && !mustPress)
@@ -725,7 +745,7 @@ class Note extends FlxSprite
 					PlayState.instance.HealthDrain(1);
 			case "poison": 
 				PlayState.instance.badNoteHit();
-				healthChangesOnHit = -0.3;
+				healthChangesOnHit = PlayState.poisonNoteDamage;
 				if (PlayState.multiplayer && !mustPress)
 					PlayState.instance.P2Stats.poisonHits++;
 				else
@@ -757,7 +777,7 @@ class Note extends FlxSprite
 				if (!mustPress && PlayState.multiplayer)
 					statsToUse = PlayState.instance.P2Stats;
 				PlayState.instance.badNoteHit();
-				statsToUse.health -= 1;
+				statsToUse.health -= PlayState.warningNoteDamage;
 				statsToUse.misses++;
 			case "glitch": 
 				PlayState.instance.removeNote(this, strums);

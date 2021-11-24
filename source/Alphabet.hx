@@ -65,6 +65,11 @@ class Alphabet extends FlxSpriteGroup
 		}
 	}
 
+	function checkCharacter(shit:String, character:String)
+	{
+		return shit.indexOf(character.toLowerCase()) != -1;
+	}
+
 	public function addText()
 	{
 		doSplitWords();
@@ -80,8 +85,14 @@ class Alphabet extends FlxSpriteGroup
 			{
 				lastWasSpace = true;
 			}
+			if (character == "-")
+				character = " "; //lazy fix lol
 
-			if (AlphaCharacter.alphabet.indexOf(character.toLowerCase()) != -1)
+			var isLetter = checkCharacter(AlphaCharacter.alphabet, character);
+			var isNumber = checkCharacter(AlphaCharacter.numbers, character);
+			var isSymbol = checkCharacter(AlphaCharacter.symbols, character);
+
+			if (isLetter || isNumber || isSymbol)
 				// if (AlphaCharacter.alphabet.contains(character.toLowerCase()))
 			{
 				if (lastSprite != null)
@@ -97,12 +108,19 @@ class Alphabet extends FlxSpriteGroup
 
 				// var letter:AlphaCharacter = new AlphaCharacter(30 * loopNum, 0);
 				var letter:AlphaCharacter = new AlphaCharacter(xPos, 0);
-
 				if (isBold)
-					letter.createBold(character);
+				{
+					if (isNumber)
+						letter.createBoldNumber(character);
+					else
+						letter.createBold(character);
+				}
 				else
 				{
-					letter.createLetter(character);
+					if (isNumber)
+						letter.createNumber(character);
+					else
+						letter.createLetter(character);
 				}
 
 				add(letter);
@@ -185,22 +203,21 @@ class Alphabet extends FlxSpriteGroup
 				letter.row = curRow;
 				if (isBold)
 				{
-					letter.createBold(splitWords[loopNum]);
+					if (isNumber)
+						letter.createBoldNumber(splitWords[loopNum]);
+					else if (isSymbol)
+						letter.createSymbol(splitWords[loopNum]);
+					else
+						letter.createBold(splitWords[loopNum]);
 				}
 				else
 				{
 					if (isNumber)
-					{
 						letter.createNumber(splitWords[loopNum]);
-					}
 					else if (isSymbol)
-					{
 						letter.createSymbol(splitWords[loopNum]);
-					}
 					else
-					{
 						letter.createLetter(splitWords[loopNum]);
-					}
 
 					letter.x += 90;
 				}
@@ -245,25 +262,33 @@ class AlphaCharacter extends FlxSprite
 	public static var symbols:String = "|~#$%()*+-:;<=>@[]^_.,'!?";
 
 	public var row:Int = 0;
-
+	var tex = Paths.getSparrowAtlas('alphabet');
 	public function new(x:Float, y:Float)
 	{
 		super(x, y);
-		var tex = Paths.getSparrowAtlas('alphabet');
-		frames = tex;
-
 		antialiasing = true;
 	}
 
 	public function createBold(letter:String)
 	{
+		frames = tex; //uhh i dunno if they get reused when typed or something idk how half of this code works lol
 		animation.addByPrefix(letter, letter.toUpperCase() + " bold", 24);
 		animation.play(letter);
+		scale.set(1, 1);
+		updateHitbox();
+	}
+
+	public function createBoldNumber(letter:String)
+	{
+		loadGraphic(Paths.image('num' + letter));
+		scale.set(0.55, 0.55);
 		updateHitbox();
 	}
 
 	public function createLetter(letter:String):Void
 	{
+		frames = tex;
+		scale.set(1, 1);
 		var letterCase:String = "lowercase";
 		if (letter.toLowerCase() != letter)
 		{
@@ -282,6 +307,8 @@ class AlphaCharacter extends FlxSprite
 
 	public function createNumber(letter:String):Void
 	{
+		frames = tex;
+		scale.set(1, 1);
 		animation.addByPrefix(letter, letter, 24);
 		animation.play(letter);
 
@@ -290,6 +317,8 @@ class AlphaCharacter extends FlxSprite
 
 	public function createSymbol(letter:String)
 	{
+		frames = tex;
+		scale.set(1, 1);
 		switch (letter)
 		{
 			case '.':

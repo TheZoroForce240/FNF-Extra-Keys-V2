@@ -62,9 +62,9 @@ class ChartingState extends MusicBeatState
 	var amountSteps:Int = 0;
 	var bullshitUI:FlxGroup;
 
-	var GRID_SIZE:Int = 40;
-	var S_GRID_SIZE:Int = 40;
-	var GF_GRID:Int = 160;
+	public static var GRID_SIZE:Int = 40;
+	public static var S_GRID_SIZE:Int = 40;
+	public static var GF_GRID:Int = 160;
 
 	var dummyArrow:FlxSprite;
 
@@ -109,9 +109,11 @@ class ChartingState extends MusicBeatState
 	//private var sDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 	private var GFsDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 
+	public static var noteTypes:Array<String> = ['Normal', 'Fire', 'Death', 'Warning', 'Angel', 'Alt Anim', 'Bob', 'Glitch', 'Poison', 'Health Drain'];
+
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
-	var keyAmmo:Array<Int> = [4, 6, 9, 5, 7, 8, 1, 2, 3];
+	var keyAmmo:Array<Int> = PlayState.keyAmmo;
 	private var lastNote:Note;
 
 	var selectedType:Int = 0;
@@ -661,7 +663,7 @@ class ChartingState extends MusicBeatState
 	var stepperNoteVelocity:FlxUINumericStepper;
 	var stepperNoteVelocityTime:FlxUINumericStepper;
 
-	var noteTypes:Array<String> = ['Normal', 'Fire', 'Death', 'Warning', 'Angel', 'Alt Anim', 'Bob', 'Glitch', 'Poison', 'Health Drain'];
+	
 	var typeChangeLabel:FlxText;
 	var speedLabel:FlxText;
 
@@ -1448,9 +1450,6 @@ class ChartingState extends MusicBeatState
 
 			updateGrid();
 			updateSectionUI();
-
-			if (newGridSize > 18)
-				FlxG.switchState(new StoryMenuState()); //:troll:
 		}
 	}
 

@@ -118,7 +118,6 @@ class CoolUtil
 				var noSongName = StringTools.replace(noJson,song.toLowerCase(), "");
 				outputDiffs.push(noSongName); //gets just the difficulty on the end of the file
 			}
-			trace(outputDiffs);
 			
 			if (extraCount != 0)
 				for (file in extra)
@@ -209,11 +208,11 @@ class CoolUtil
 			switch (maniaToChange) //this code scares me
 			{
 				case 0: 
-					FlxG.save.data.binds = binds;
+					FlxG.save.data.binds[0] = binds;
 				case 1: 
-					FlxG.save.data.binds = binds;
+					FlxG.save.data.binds[1] = binds;
 				case 2: 
-					FlxG.save.data.binds = binds;
+					FlxG.save.data.binds[2] = binds;
 				case 3: 
 					FlxG.save.data.binds[0][0] = binds[0];
 					FlxG.save.data.binds[0][1] = binds[1];
@@ -253,11 +252,11 @@ class CoolUtil
 			switch (maniaToChange) //for player 2
 			{
 				case 0: 
-					FlxG.save.data.P2binds = binds;
+					FlxG.save.data.P2binds[0] = binds;
 				case 1: 
-					FlxG.save.data.P2binds = binds;
+					FlxG.save.data.P2binds[1] = binds;
 				case 2: 
-					FlxG.save.data.P2binds = binds;
+					FlxG.save.data.P2binds[2] = binds;
 				case 3: 
 					FlxG.save.data.P2binds[0][0] = binds[0];
 					FlxG.save.data.P2binds[0][1] = binds[1];

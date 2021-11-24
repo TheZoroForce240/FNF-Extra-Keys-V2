@@ -18,13 +18,7 @@ class BabyArrow extends FlxSprite
 
     public static var offsetshit:Float = 56;
 
-    var pathList:Array<String> = [
-        'noteassets/NOTE_assets',
-        'noteassets/PURPLE_NOTE_assets',
-        'noteassets/BLUE_NOTE_assets',
-        'noteassets/GREEN_NOTE_assets',
-        'noteassets/RED_NOTE_assets'
-    ];
+    var pathList:Array<String> = Note.pathList;
 
     public static var maniaSwitchPositions:Array<Dynamic> = [
         [0, 1, 2, 3, "alpha0", "alpha0", "alpha0", "alpha0", "alpha0"],
@@ -64,7 +58,7 @@ class BabyArrow extends FlxSprite
 	];
 
     public var lane:FlxSprite;
-    var laneOffset:Array<Float> = [
+    public static var laneOffset:Array<Float> = [
         0,
         10,
         13,
@@ -73,7 +67,7 @@ class BabyArrow extends FlxSprite
         12,
         0,
         0,
-        0,
+        0
     ];
 
 
@@ -154,12 +148,12 @@ class BabyArrow extends FlxSprite
         }
 
 
-        if (isPlayState && player == 1 && SaveData.arrowLanes != "Off")
+        if (isPlayState && (player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
         {
             lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[maniaToUse]), Std.int(FlxG.height * 2), flxcolorToUse);
             PlayState.instance.add(lane);
             lane.cameras = [PlayState.instance.camHUD];
-            lane.alpha = 0.2;
+            lane.alpha = SaveData.laneOpacity;
         }
             
 
@@ -239,6 +233,32 @@ class BabyArrow extends FlxSprite
                 y -= 10;
                 alpha = 0;
                 FlxTween.tween(this, {y: y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
+                if (lane != null)
+                {
+                    lane.alpha = 0;
+                    FlxTween.tween(lane, {alpha: SaveData.laneOpacity}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
+                }    
+            }
+
+            if (SaveData.splitScroll && player == 1)
+            {
+                if (i >= (PlayState.keyAmmo[maniaToUse] / 2) && isPlayState)
+                {
+                    this.cameras = [PlayState.instance.camP1NotesSplit];
+                    scale.y *= -1;
+                }
+                else
+                    this.cameras = [PlayState.instance.camP1Notes];
+            }
+            else if (SaveData.P2splitScroll && player == 0)
+            {
+                if (i >= (PlayState.keyAmmo[maniaToUse] / 2) && isPlayState)
+                {
+                    this.cameras = [PlayState.instance.camP2NotesSplit];
+                    scale.y *= -1;
+                }
+                else
+                    this.cameras = [PlayState.instance.camP2Notes];
             }
 
             /*switch (i) //dumb center scroll i did for a video
@@ -381,13 +401,13 @@ class BabyArrow extends FlxSprite
 
         curMania = newMania;
 
-        if (player == 1 && SaveData.arrowLanes != "Off")
+        if ((player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
         {
             PlayState.instance.remove(lane);
             lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[curMania]), Std.int(FlxG.height * 2), flxcolorToUse);
             PlayState.instance.add(lane);
             lane.cameras = [PlayState.instance.camHUD];
-            lane.alpha = 0.2;
+            lane.alpha = SaveData.laneOpacity;
         }
 
         defaultX = spr.x;

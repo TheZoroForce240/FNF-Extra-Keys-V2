@@ -5,6 +5,7 @@ import flixel.FlxSprite;
 import flixel.animation.FlxBaseAnimation;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.util.FlxColor;
+import flixel.FlxCamera;
 import Shaders;
 
 using StringTools;
@@ -30,12 +31,13 @@ class NoteSplash extends FlxSprite
 		}
 		antialiasing = true;
 		updateHitbox();
-		makeSplash(nX, nY, color);
+		makeSplash(nX, nY, color, 1, [PlayState.instance.camP1Notes]);
 		this.shader = HSV.shader;
 		
 	}
-	public function makeSplash(nX:Float, nY:Float, color:Int, playernum:Int = 1) 
+	public function makeSplash(nX:Float, nY:Float, color:Int, playernum:Int = 1, cameraShit:Array<FlxCamera>) 
 	{
+		this.cameras = cameraShit;
 		var maniaToUse = PlayState.p1Mania;
 		if (playernum == 0)
 			maniaToUse = PlayState.p2Mania;

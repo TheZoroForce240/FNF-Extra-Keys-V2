@@ -22,7 +22,7 @@ class Boyfriend extends Character
 		{
 			if (animation.curAnim.name.startsWith('sing'))
 			{
-				holdTimer += elapsed;
+				holdTimer += elapsed * PlayState.SongSpeedMultiplier;
 			}
 			else
 				holdTimer = 0;

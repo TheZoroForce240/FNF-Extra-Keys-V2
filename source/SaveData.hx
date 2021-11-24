@@ -51,6 +51,10 @@ class SaveData
     public static var arrowLanes:String = "Off";
     public static var laneOpacity:Float = 0.2;
 
+
+    public static var splitScroll:Bool = false; 
+    public static var P2splitScroll:Bool = false;
+
     //hue, saturation, brightness, asset
     public static var purple:Array<Float> = [0, 0, 0, 0];
     public static var blue:Array<Float> = [0, 0, 0, 0];
@@ -132,6 +136,11 @@ class SaveData
 
         if (FlxG.save.data.arrowLanes == null)
             FlxG.save.data.arrowLanes = "Off";
+
+        if (FlxG.save.data.laneOpacity == null)
+            FlxG.save.data.laneOpacity = 0.2;
+
+
         
 
         //////////////////////////////////////////////////////////////
@@ -177,6 +186,7 @@ class SaveData
         FlxG.save.data.hpBarPos = hpBarPos;
         FlxG.save.data.enabledHudSections = enabledHudSections;
         FlxG.save.data.arrowLanes = arrowLanes;
+        FlxG.save.data.laneOpacity = laneOpacity;
 
         FlxG.save.data.purple = purple;
         FlxG.save.data.blue = blue;
@@ -214,6 +224,7 @@ class SaveData
         enabledHudSections = FlxG.save.data.enabledHudSections;
 
         arrowLanes = FlxG.save.data.arrowLanes;
+        laneOpacity = FlxG.save.data.laneOpacity;
 
         purple = FlxG.save.data.purple;
         blue = FlxG.save.data.blue;

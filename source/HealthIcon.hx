@@ -28,7 +28,7 @@ class HealthIcon extends FlxSprite
 		if (FileSystem.exists(path))
 		{
 			var iconGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path));
-			trace("loading da custom icon");
+			//trace("loading da custom icon");
 			loadGraphic(iconGraphic, true, 150, 150);
 			animation.add(char, [0, 1], 0, false, isPlayer);
 		}
@@ -36,14 +36,14 @@ class HealthIcon extends FlxSprite
 		if (OpenFlAssets.exists(path))
 			{
 				var iconGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path));
-				trace("loading da custom icon");
+				//trace("loading da custom icon");
 				loadGraphic(iconGraphic, true, 150, 150);
 				animation.add(char, [0, 1], 0, false, isPlayer);
 			}
 		#end
 		else
 		{
-			trace("loading da regaulr icon");
+			//trace("loading da regaulr icon");
 			loadGraphic(Paths.image('iconGrid'), true, 150, 150);
 
 			antialiasing = true;

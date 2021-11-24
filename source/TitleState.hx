@@ -31,6 +31,7 @@ import flixel.FlxSubState;
 
 using StringTools;
 
+
 class TitleState extends MusicBeatState
 {
 	static var initialized:Bool = false;
@@ -45,9 +46,12 @@ class TitleState extends MusicBeatState
 
 	var wackyImage:FlxSprite;
 
+	
+
 	override public function create():Void
 	{
-
+		//Main.updateGameData();
+		
 		PlayerSettings.init();
 		PlayerSettings.player1.controls.loadKeyBinds();
 		SaveData.keyBindCheck();
@@ -100,6 +104,11 @@ class TitleState extends MusicBeatState
 			DiscordClient.shutdown();
 		 });
 		#end
+
+		if (FlxG.save.data.volume != null)
+			FlxG.sound.volume = FlxG.save.data.volume;
+
+
 	}
 
 	var logoBl:FlxSprite;
@@ -365,14 +374,12 @@ class TitleState extends MusicBeatState
 			// credTextShit.text = 'In association \nwith';
 			// credTextShit.screenCenter();
 			case 5:
-				createCoolText(['In association', 'with']);
+				createCoolText(['mod by']);
 			case 7:
-				addMoreText('newgrounds');
-				ngSpr.visible = true;
+				addMoreText('thezoroforce240');
 			// credTextShit.text += '\nNewgrounds';
 			case 8:
 				deleteCoolText();
-				ngSpr.visible = false;
 			// credTextShit.visible = false;
 
 			// credTextShit.text = 'Shoutouts Tom Fulp';

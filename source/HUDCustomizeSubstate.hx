@@ -174,6 +174,11 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
             
         }
 
+        if (curCategory[curSelected][1] <= 0.1 && curCategory[curSelected][0] == "Lane Opacity") //need to figure out a better way to do this, TODO
+            curCategory[curSelected][1] = 0.1;
+        else if (curCategory[curSelected][1] > 1 && curCategory[curSelected][0] == "Lane Opacity")
+            curCategory[curSelected][1] = 1;
+
         P1Stats.scorelerp = Math.floor(FlxMath.lerp(P1Stats.scorelerp, P1Stats.songScore, 0.4)); //funni lerp
 		P1Stats.acclerp = FlxMath.roundDecimal(FlxMath.lerp(P1Stats.acclerp, P1Stats.accuracy, 0.4), 2);
 
@@ -288,8 +293,16 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
                 selected = 0;
 
             curCategory[curSelected][1] = list[selected];
+        }
+        else if (curCategory[curSelected][2] == "slider")
+        {
+            switch(curCategory[curSelected][0])
+            {
+                case "Lane Opacity": 
+                    change = change / 10; //makes it 0.1
+            }
 
-
+            curCategory[curSelected][1]+= change;
         }
 
         turnOptionsIntoSaveData();
@@ -378,7 +391,8 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
             ["NPS", SaveData.enabledHudSections[13], "toggle"],
             ["Highest NPS", SaveData.enabledHudSections[14], "toggle"],
             ["", "", ""],
-            ["Arrow Lanes/backing", SaveData.arrowLanes, "mode"]
+            ["Arrow Lanes/backing", SaveData.arrowLanes, "mode"],
+            ["Lane Opacity", SaveData.laneOpacity, "slider"]
         ];
         //name, savedata, type of option, info
         
@@ -436,6 +450,8 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
                     SaveData.enabledHudSections[15] = curCategory[i][1]; 
                 case "Arrow Lanes/backing":
                     SaveData.arrowLanes = curCategory[i][1]; 
+                case "Lane Opacity": 
+                    SaveData.laneOpacity = curCategory[i][1]; 
             }
         }
     }

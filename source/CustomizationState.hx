@@ -57,29 +57,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
     var UI_box:FlxUITabMenu; //didnt even use this lol
 
-    var pathList:Array<String> = [
-        'noteassets/NOTE_assets',
-        'noteassets/PURPLE_NOTE_assets',
-        'noteassets/BLUE_NOTE_assets',
-        'noteassets/GREEN_NOTE_assets',
-        'noteassets/RED_NOTE_assets'
-    ]; 
-    //used for finding which assets you using, will probably add a way to add your own assets
-
     var inMain:Bool = true;
-
-    //this shit is painful, but its how i did the keybind saving, i have to do it indivually for every mania
-    /*public static var ZeroKeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
-    public static var OneKeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
-    public static var TwoKeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N4Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
-    public static var ThreeKeybindList = [FlxG.save.data.leftBind,FlxG.save.data.downBind, FlxG.save.data.N4Bind, FlxG.save.data.upBind, FlxG.save.data.rightBind];
-    public static var FourKeybindList = [FlxG.save.data.L1Bind, FlxG.save.data.U1Bind, FlxG.save.data.R1Bind,FlxG.save.data.N4Bind, FlxG.save.data.L2Bind, FlxG.save.data.D1Bind, FlxG.save.data.R2Bind];
-    public static var FiveKeybindList = [FlxG.save.data.N0Bind, FlxG.save.data.N1Bind, FlxG.save.data.N2Bind, FlxG.save.data.N3Bind, FlxG.save.data.N5Bind, FlxG.save.data.N6Bind, FlxG.save.data.N7Bind, FlxG.save.data.N8Bind];
-    public static var SixKeybindList = [FlxG.save.data.N4Bind];
-    public static var SevenKeybindList = [FlxG.save.data.leftBind, FlxG.save.data.rightBind];
-    public static var EightKeybindList = [FlxG.save.data.leftBind, FlxG.save.data.N4Bind, FlxG.save.data.rightBind];*/
-
-    //got rid of this shitty system i used
 
     var curSelected:Int = 0;
     var curSelectedNote:Int = 0;
@@ -104,14 +82,14 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     var saturationSlider:FlxSlider;
     var brightnessSlider:FlxSlider;
 
-    var sliderThing:FlxSprite; //sliders are weird as fuck and i used a sprite to track the hsv, you literally have to have an object for it, idk why its coded like that, was thinking for editing it but who cares this system works
+    var sliderThing:FlxSprite; //sliders are weird as fuck
 
     public static var maniaToChange = 0; //the mania
 
     var keys = [false, false, false, false, false, false, false, false, false]; //tracks inputs
     //var frameN:Array<String> = ['purple', 'blue', 'green', 'red']; //used for note anims
 
-    var keyAmmo:Array<Int> = [4, 6, 9, 5, 7, 8, 1, 2, 3]; //turns mania value into amount of keys, thats why its called key Ammo(unt), duh
+    var keyAmmo:Array<Int> = PlayState.keyAmmo; //turns mania value into amount of keys, thats why its called key Ammo(unt), duh
 
     var sDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'UP', 'LEFT', 'DOWN', 'UP', 'RIGHT']; //bf anims from note data, or input data in this state
 
@@ -132,7 +110,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
     private var notes:FlxTypedGroup<FlxSprite>; //daNotes
 
-    var assetList:Array<String> = ["default", "purple", 'blue', 'green', 'red', 'pixel']; //list of note asset names for the text
+    public static var assetList:Array<String> = ["default", "purple", 'blue', 'green', 'red', 'pixel']; //list of note asset names for the text
     var baseAsset:Int = 0; //note asset value
 
     var assetsOption:FlxText;
@@ -620,7 +598,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         }
         else
         {
-            selectedNote.frames = Paths.getSparrowAtlas(pathList[pathToUse]);
+            selectedNote.frames = Paths.getSparrowAtlas(Note.pathList[pathToUse]);
             for (ii in 0...9)
                 {
                     selectedNote.animation.addByPrefix(noteColors[ii] + 'Scroll', noteColors[ii] + '0'); // Normal notes
@@ -768,7 +746,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                 }
                 else
                 {
-                    note.frames = Paths.getSparrowAtlas(pathList[pathToUse]);
+                    note.frames = Paths.getSparrowAtlas(Note.pathList[pathToUse]);
                     for (ii in 0...9)
                         {
                             note.animation.addByPrefix(noteColors[ii] + 'Scroll', noteColors[ii] + '0'); // Normal notes

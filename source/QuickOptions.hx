@@ -143,9 +143,9 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                             case "Gamepad Binds": 
                                 curCategory = gamepad;
                                 daCat = "Gamepad Binds";
-                            case "Randomization": 
+                            case "Song Modifiers": 
                                 curCategory = randomization;
-                                daCat = "Randomization";
+                                daCat = "Song Modifiers";
                             default: 
                                 curCategory = categories; //backup
                                 daCat = "";
@@ -162,13 +162,13 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                         switch (curCategory[curSelected][0])
                         {
                             case "Quick DFJK": 
-                                FlxG.save.data.binds = ["D", "F", "J", "K"];
+                                FlxG.save.data.binds[0] = ["D", "F", "J", "K"];
                             case "Quick WASD": 
-                                FlxG.save.data.binds = ["A", "S", "W", "D"];
+                                FlxG.save.data.binds[0] = ["A", "S", "W", "D"];
                             case "Quick Arrow Keys": 
-                                FlxG.save.data.binds = ["LEFT", "DOWN", "UP", "RIGHT"];
+                                FlxG.save.data.binds[0] = ["LEFT", "DOWN", "UP", "RIGHT"];
                             case "Quick AS^>": 
-                                FlxG.save.data.binds = ["A", "S", "UP", "RIGHT"];
+                                FlxG.save.data.binds[0] = ["A", "S", "UP", "RIGHT"];
                             case "Reset All Keybinds": 
                                 SaveData.resetBinds();
                             case "Customize HUD": 
@@ -375,8 +375,9 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["Keybinds", "", "cat"],
             ["P2 Keybinds", "", "cat"],
             ["Gamepad Binds", "", "cat"],
-            ["Randomization", "", "cat"],
-            ["Customize HUD", "", "button"]
+            ["Customize HUD", "", "button"],
+            ["Song Modifiers", "", "cat"]
+            
         ];
         //name, savedata, type of option, info
         gameplay = [ 
@@ -498,7 +499,7 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                 curCategory = P2keybinds;
             case "Gamepad Binds": 
                 curCategory = gamepad;
-            case "Randomization": 
+            case "Song Modifiers": 
                 curCategory = randomization;
             default: 
                 curCategory = categories; //backup
