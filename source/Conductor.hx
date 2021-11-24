@@ -14,6 +14,13 @@ typedef BPMChangeEvent =
 	var bpm:Float;
 }
 
+typedef ManiaChangeEvent = 
+{
+	var strumTime:Float;
+	var maniaToChangeTo:Int;
+	//var playernum:Int;
+}
+
 class Conductor
 {
 	public static var bpm:Float = 100;
@@ -27,7 +34,17 @@ class Conductor
 	public static var safeZoneOffset:Float = Math.floor((safeFrames / 60) * 1000); // is calculated in create(), is safeFrames in milliseconds
 	public static var timeScale:Float = Conductor.safeZoneOffset / 166;
 
+	/*public static var curP1NoteMania:Int = 0; //mapping changessss
+	public static var curP2NoteMania:Int = 0;
+	public static var prevP1NoteMania:Int = 0; 
+	public static var prevP2NoteMania:Int = 0;
+	public static var lastP1mChange:Float = 0; 
+	public static var lastP2mChange:Float = 0;*/
+
 	public static var bpmChangeMap:Array<BPMChangeEvent> = [];
+
+	public static var P1maniaChangeMap:Array<ManiaChangeEvent>;
+	public static var P2maniaChangeMap:Array<ManiaChangeEvent>;
 
 	public function new()
 	{
@@ -36,7 +53,7 @@ class Conductor
 	public static function recalculateTimings()
 	{
 		//Conductor.safeFrames = FlxG.save.data.frames;
-		Conductor.safeZoneOffset = Math.floor((Conductor.safeFrames / 60) * 1000);
+		Conductor.safeZoneOffset = Math.floor(((Conductor.safeFrames / 60) * 1000) * PlayState.SongSpeedMultiplier);
 		Conductor.timeScale = Conductor.safeZoneOffset / 166;
 	}
 
@@ -73,5 +90,59 @@ class Conductor
 
 		crochet = ((60 / bpm) * 1000);
 		stepCrochet = crochet / 4;
+	}
+
+	public static function mapManiaChanges(song:SwagSong) //get real :troll:
+	{
+
+		P1maniaChangeMap = [];
+		P2maniaChangeMap = [];
+
+		/*if (playernum == 1)
+		{
+			prevP1NoteMania = curP1NoteMania;
+			curP1NoteMania = Std.parseInt(eventNote.eventData[1]);
+			lastP1mChange = eventNote.strumTime;
+
+			
+		}
+		else 
+		{
+			prevP2NoteMania = curP2NoteMania;
+			curP2NoteMania = Std.parseInt(eventNote.eventData[1]);
+			lastP2mChange = eventNote.strumTime;
+		}*/
+		for (i in 0...song.notes.length)
+		{
+			for(songNotes in song.notes[i].sectionNotes)
+			{
+				if (songNotes[1] >= -3 && songNotes[1] <= 0)
+				{
+					var eventData:Array<String> = songNotes[6];
+					if (eventData != null)
+					{
+						if (eventData[0] == "Change P1 Mania")
+						{
+							var maniaChange:ManiaChangeEvent = {
+								strumTime: songNotes[0],
+								maniaToChangeTo: Std.parseInt(eventData[1])
+							};
+							P1maniaChangeMap.push(maniaChange);
+						}
+						else if (eventData[0] == "Change P2 Mania")
+						{
+							var maniaChange:ManiaChangeEvent = {
+								strumTime: songNotes[0],
+								maniaToChangeTo: Std.parseInt(eventData[1])
+							};
+							P2maniaChangeMap.push(maniaChange);
+						}
+					}	
+				}
+				
+			}
+		}
+		trace("new Mania map BUDDY " + P1maniaChangeMap);
+		trace("new Mania map BUDDY " + P2maniaChangeMap);
 	}
 }

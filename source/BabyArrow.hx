@@ -6,8 +6,11 @@ import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import Shaders;
+import flixel.math.FlxPoint;
 
 class BabyArrow extends FlxSprite
 {
@@ -15,13 +18,7 @@ class BabyArrow extends FlxSprite
 
     public static var offsetshit:Float = 56;
 
-    var pathList:Array<String> = [
-        'noteassets/NOTE_assets',
-        'noteassets/PURPLE_NOTE_assets',
-        'noteassets/BLUE_NOTE_assets',
-        'noteassets/GREEN_NOTE_assets',
-        'noteassets/RED_NOTE_assets'
-    ];
+    var pathList:Array<String> = Note.pathList;
 
     public static var maniaSwitchPositions:Array<Dynamic> = [
         [0, 1, 2, 3, "alpha0", "alpha0", "alpha0", "alpha0", "alpha0"],
@@ -35,11 +32,51 @@ class BabyArrow extends FlxSprite
         [0, "alpha0", "alpha0", 2, 1, "alpha0", "alpha0", "alpha0", "alpha0"]
     ];
 
+
+    public static var dirArray:Array<Dynamic> = [
+        ['LEFT', 'DOWN', 'UP', 'RIGHT'],
+        ['LEFT', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'RIGHT'],
+        ['LEFT', 'DOWN', 'UP', 'RIGHT', 'SPACE', 'LEFT', 'DOWN', 'UP', 'RIGHT'],
+        ['LEFT', 'DOWN', 'SPACE', 'UP', 'RIGHT'],
+        ['LEFT', 'UP', 'RIGHT', 'SPACE', 'LEFT', 'DOWN', 'RIGHT'],
+        ['LEFT', 'DOWN', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'UP', 'RIGHT'],
+        ['SPACE'],
+        ['LEFT', 'RIGHT'],
+        ['LEFT', 'SPACE', 'RIGHT'],
+    ];
+
+    public static var colorFromData:Array<Array<Int>> = [
+		[0,1,2,3],
+		[0,2,3,5,1,8],
+		[0,1,2,3,4,5,6,7,8],
+		[0,1,4,2,3],
+		[0,2,3,4,5,1,8],
+		[0,1,2,3,5,6,7,8],
+		[4],
+		[0,3],
+		[0,4,3]
+	];
+
+    public var lane:FlxSprite;
+    public static var laneOffset:Array<Float> = [
+        0,
+        10,
+        13,
+        5,
+        10,
+        12,
+        0,
+        0,
+        0
+    ];
+
+
     var whichPlayer:Int = 0;
     public var stylelol:String = "";
     var colorShiz:Array<Float>;
     var pathToUse:Int = 0;
     public var scaleMulti:Float = 1;
+    public var curMania:Int = 0;
 
     public var defaultX:Float = 0;
     public var defaultY:Float = 0;
@@ -48,6 +85,10 @@ class BabyArrow extends FlxSprite
     public var defaultWidth:Float;
     public var curID:Int;
 
+    public var centerOfArrow:FlxPoint;
+
+    var flxcolorToUse:FlxColor = FlxColor.BLACK;
+
     public function new(strumline:Float, player:Int, i:Int, style:String, ?isPlayState:Bool = true)
     {
         super();
@@ -55,6 +96,8 @@ class BabyArrow extends FlxSprite
         var maniaToUse:Int = PlayState.mania;
         if (!isPlayState)
             maniaToUse = CustomizationState.maniaToChange;
+
+        curMania = maniaToUse;
 
         whichPlayer = player;
 
@@ -77,6 +120,45 @@ class BabyArrow extends FlxSprite
         if (SaveData.middlescroll && player == 0)
             scaleMulti = 0.55;
 
+        
+        var color = Note.frameN[maniaToUse][i];
+        if (SaveData.arrowLanes == "Colored")
+        {
+            switch (color)
+            {
+                case "purple": 
+                    flxcolorToUse = FlxColor.PURPLE;
+                case "blue": 
+                    flxcolorToUse = FlxColor.CYAN;
+                case "green": 
+                    flxcolorToUse = FlxColor.GREEN;
+                case "red": 
+                    flxcolorToUse = FlxColor.RED;
+                case "white": 
+                    flxcolorToUse = FlxColor.WHITE;
+                case "yellow": 
+                    flxcolorToUse = FlxColor.YELLOW;
+                case "violet": 
+                    flxcolorToUse = FlxColor.PURPLE;
+                case "darkred": 
+                    flxcolorToUse = FlxColor.RED;
+                case "dark": 
+                    flxcolorToUse = FlxColor.BLUE;
+            }
+        }
+
+
+        if (isPlayState && (player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
+        {
+            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[maniaToUse]), Std.int(FlxG.height * 2), flxcolorToUse);
+            PlayState.instance.add(lane);
+            lane.cameras = [PlayState.instance.camHUD];
+            lane.alpha = SaveData.laneOpacity;
+        }
+            
+
+        
+
         switch (style)
         {
             case 'pixel':
@@ -94,105 +176,21 @@ class BabyArrow extends FlxSprite
                 animation.add('orange', [16]);
                 animation.add('dark', [17]);
 
-
-
-                var numstatic:Array<Int> = [0, 1, 2, 3, 4, 5, 6, 7, 8]; //this is most tedious shit ive ever done why the fuck is this so hard
-                var startpress:Array<Int> = [9, 10, 11, 12, 13, 14, 15, 16, 17];
-                var endpress:Array<Int> = [18, 19, 20, 21, 22, 23, 24, 25, 26];
-                var startconf:Array<Int> = [27, 28, 29, 30, 31, 32, 33, 34, 35];
-                var endconf:Array<Int> = [36, 37, 38, 39, 40, 41, 42, 43, 44];                    
-                    switch (maniaToUse)
-                    {
-                        case 1:
-                            numstatic = [0, 2, 3, 5, 1, 8];
-                            startpress = [9, 11, 12, 14, 10, 17];
-                            endpress = [18, 20, 21, 23, 19, 26];
-                            startconf = [27, 29, 30, 32, 28, 35];
-                            endconf = [36, 38, 39, 41, 37, 44];
-
-                        case 2: 
-                            x -= Note.tooMuch;
-                        case 3: 
-                            numstatic = [0, 1, 4, 2, 3];
-                            startpress = [9, 10, 13, 11, 12];
-                            endpress = [18, 19, 22, 20, 21];
-                            startconf = [27, 28, 31, 29, 30];
-                            endconf = [36, 37, 40, 38, 39];
-                        case 4: 
-                            numstatic = [0, 2, 3, 4, 5, 1, 8];
-                            startpress = [9, 11, 12, 13, 14, 10, 17];
-                            endpress = [18, 20, 21, 22, 23, 19, 26];
-                            startconf = [27, 29, 30, 31, 32, 28, 35];
-                            endconf = [36, 38, 39, 40, 41, 37, 44];
-                        case 5: 
-                            numstatic = [0, 1, 2, 3, 5, 6, 7, 8];
-                            startpress = [9, 10, 11, 12, 14, 15, 16, 17];
-                            endpress = [18, 19, 20, 21, 23, 24, 25, 26];
-                            startconf = [27, 28, 29, 30, 32, 33, 34, 35];
-                            endconf = [36, 37, 38, 39, 41, 42, 43, 44];
-                        case 6: 
-                            numstatic = [4];
-                            startpress = [13];
-                            endpress = [22];
-                            startconf = [31];
-                            endconf = [40];
-                        case 7: 
-                            numstatic = [0, 3];
-                            startpress = [9, 12];
-                            endpress = [18, 21];
-                            startconf = [27, 30];
-                            endconf = [36, 39];
-                        case 8: 
-                            numstatic = [0, 4, 3];
-                            startpress = [9, 13, 12];
-                            endpress = [18, 22, 21];
-                            startconf = [27, 31, 30];
-                            endconf = [36, 40, 39];
-                    }
                 defaultWidth = width;
-                setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelnoteScale * scaleMulti));
-                x += Note.swagWidth * i * scaleMulti; 
+                setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelNoteScales[maniaToUse] * scaleMulti));
+                x += Note.noteWidths[maniaToUse] * i * scaleMulti; 
                 updateHitbox();
                 antialiasing = false;
-                animation.add('static', [numstatic[i]]);
-                animation.add('pressed', [startpress[i], endpress[i]], 12, false);
-                animation.add('confirm', [startconf[i], endconf[i]], 24, false);
+                animation.add('static', [colorFromData[maniaToUse][i]]);
+                animation.add('pressed', [colorFromData[maniaToUse][i] + 9, colorFromData[maniaToUse][i] + 18], 12, false);
+                animation.add('confirm', [colorFromData[maniaToUse][i] + 27, colorFromData[maniaToUse][i] + 36], 24, false);
 
             default:
-                var nSuf:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
-                var pPre:Array<String> = ['purple', 'blue', 'green', 'red'];
-                    switch (maniaToUse)
-                    {
-                        case 1:
-                            nSuf = ['LEFT', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'RIGHT'];
-                            pPre = ['purple', 'green', 'red', 'yellow', 'blue', 'dark'];
-    
-                        case 2:
-                            nSuf = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'SPACE', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
-                            pPre = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
-                            x -= Note.tooMuch;
-                        case 3: 
-                            nSuf = ['LEFT', 'DOWN', 'SPACE', 'UP', 'RIGHT'];
-                            pPre = ['purple', 'blue', 'white', 'green', 'red'];
-                        case 4: 
-                            nSuf = ['LEFT', 'UP', 'RIGHT', 'SPACE', 'LEFT', 'DOWN', 'RIGHT'];
-                            pPre = ['purple', 'green', 'red', 'white', 'yellow', 'blue', 'dark'];
-                        case 5: 
-                            nSuf = ['LEFT', 'DOWN', 'UP', 'RIGHT', 'LEFT', 'DOWN', 'UP', 'RIGHT'];
-                            pPre = ['purple', 'blue', 'green', 'red', 'yellow', 'violet', 'darkred', 'dark'];
-                        case 6: 
-                            nSuf = ['SPACE'];
-                            pPre = ['white'];
-                        case 7: 
-                            nSuf = ['LEFT', 'RIGHT'];
-                            pPre = ['purple', 'red'];
-                        case 8: 
-                            nSuf = ['LEFT', 'SPACE', 'RIGHT'];
-                            pPre = ['purple', 'white', 'red'];
-                    }
+
+                var dir = dirArray[maniaToUse][i];
+                
 
 
-                var color:String = pPre[i];
                 frames = Paths.getSparrowAtlas(pathList[pathToUse]);
                 animation.addByPrefix('green', 'arrowUP');
                 animation.addByPrefix('blue', 'arrowDOWN');
@@ -201,15 +199,21 @@ class BabyArrow extends FlxSprite
 
                 antialiasing = true;
                 defaultWidth = width;
-                setGraphicSize(Std.int(width * Note.noteScale * scaleMulti));
-                x += Note.swagWidth * i * scaleMulti; 
+                setGraphicSize(Std.int(width * Note.noteScales[maniaToUse] * scaleMulti));
+                x += Note.noteWidths[maniaToUse] * i * scaleMulti; 
 
-                animation.addByPrefix('static', 'arrow' + nSuf[i]);
-                animation.addByPrefix('pressed', pPre[i] + ' press', 24, false);
-                animation.addByPrefix('confirm', pPre[i] + ' confirm', 24, false);
+                animation.addByPrefix('static', 'arrow' + dir);
+                animation.addByPrefix('pressed', color + ' press', 24, false);
+                animation.addByPrefix('confirm', color + ' confirm', 24, false);
 			}
 
             this.shader = HSV.shader;
+
+            switch (maniaToUse)
+            {
+                case 2:
+                    x -= Note.tooMuch;
+            }
 
 			updateHitbox();
 			scrollFactor.set();
@@ -226,9 +230,70 @@ class BabyArrow extends FlxSprite
             else 
                 x += ((FlxG.width / 2) * player);
 
+            if (!PlayState.isStoryMode && isPlayState)
+            {
+                y -= 10;
+                alpha = 0;
+                FlxTween.tween(this, {y: y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
+                if (lane != null)
+                {
+                    lane.alpha = 0;
+                    FlxTween.tween(lane, {alpha: SaveData.laneOpacity}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
+                }    
+            }
+
+            if (SaveData.splitScroll && player == 1)
+            {
+                if (i >= (PlayState.keyAmmo[maniaToUse] / 2) && isPlayState)
+                {
+                    this.cameras = [PlayState.instance.camP1NotesSplit];
+                    scale.y *= -1;
+                }
+                else
+                    this.cameras = [PlayState.instance.camP1Notes];
+            }
+            else if (SaveData.P2splitScroll && player == 0)
+            {
+                if (i >= (PlayState.keyAmmo[maniaToUse] / 2) && isPlayState)
+                {
+                    this.cameras = [PlayState.instance.camP2NotesSplit];
+                    scale.y *= -1;
+                }
+                else
+                    this.cameras = [PlayState.instance.camP2Notes];
+            }
+
+            /*switch (i) //dumb center scroll i did for a video
+            {
+                case 0: 
+                    angle -= 270;
+                case 1: 
+                    y += Note.swagWidth;
+                case 2: 
+                    x -= Note.swagWidth;
+                    y -= Note.swagWidth;
+                    angle -= 180;
+                case 3: 
+                    x -= Note.swagWidth;
+                    angle -= 90;
+                
+            }
+            y += Note.swagWidth * 2;
+            x += 50;*/
+
+            if (lane != null)
+            {
+                lane.x = this.x + laneOffset[maniaToUse];
+                lane.y = this.y - 300;
+            }
+            //y += 200;
+            //lane.angle = this.angle;
+
             defaultX = this.x;
             defaultY = this.y;
             defaultAngle = this.angle;
+
+            centerOfArrow = new FlxPoint(this.getGraphicMidpoint().x, this.getGraphicMidpoint().y);
 
 
     }
@@ -261,21 +326,24 @@ class BabyArrow extends FlxSprite
             }
         }
 
-        if (stylelol != 'pixel') //pixel note style doesnt need to be offset
+        if (stylelol != "pixel")
         {
             //offset.x -= xoffset;
             //offset.y -= yoffset;
-            /*updateHitbox();
+            var scaleToUse = Note.p1NoteScale;
+            if (whichPlayer == 0)
+                scaleToUse = Note.p2NoteScale;
+
+            updateHitbox();
             offset.x = frameWidth / 2;
             offset.y = frameHeight / 2;
 
-
-    
             offset.x -= (offsetshit / 0.7) * (scaleToUse * scaleMulti);
-            offset.y -= (offsetshit / 0.7) * (scaleToUse * scaleMulti);*/
+            offset.y -= (offsetshit / 0.7) * (scaleToUse * scaleMulti);
         }
 
-        if (animation.curAnim.name == 'confirm')
+
+        /*if (animation.curAnim.name == 'confirm')
         {
             var yoffset:Float = 13;
             var xoffset:Float = 13;
@@ -298,9 +366,7 @@ class BabyArrow extends FlxSprite
                 offset.x -= xoffset;
                 offset.y -= yoffset;
             }
-
-
-        }
+        }*/
         
     }
     public function moveKeyPositions(spr:FlxSprite, newMania:Int, player:Int):Void 
@@ -317,10 +383,11 @@ class BabyArrow extends FlxSprite
         {
             spr.alpha = 0;
             curID = 10;
+            spr.x += 2000; //make it offscreen to not fuck with the arrow lanes
         }            
         else
         {
-            spr.x += Note.noteWidths[newMania] * maniaSwitchPositions[newMania][spr.ID];
+            spr.x += Note.noteWidths[newMania] * maniaSwitchPositions[newMania][spr.ID] * scaleMulti;
             curID = maniaSwitchPositions[newMania][spr.ID];
         }
 
@@ -333,7 +400,51 @@ class BabyArrow extends FlxSprite
         else 
             spr.x += ((FlxG.width / 2) * player);
 
+        curMania = newMania;
+
+        if (SaveData.splitScroll && player == 1)
+        {
+            if (curID >= (PlayState.keyAmmo[curMania] / 2))
+            {
+                this.cameras = [PlayState.instance.camP1NotesSplit];
+                scale.y *= -1;
+            }
+            else
+                this.cameras = [PlayState.instance.camP1Notes];
+        }
+        else if (SaveData.P2splitScroll && player == 0)
+        {
+            if (curID >= (PlayState.keyAmmo[curMania] / 2))
+            {
+                this.cameras = [PlayState.instance.camP2NotesSplit];
+                scale.y *= -1;
+            }
+            else
+                this.cameras = [PlayState.instance.camP2Notes];
+        }
+
+        if ((player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
+        {
+            PlayState.instance.remove(lane);
+            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[curMania]), Std.int(FlxG.height * 2), flxcolorToUse);
+            PlayState.instance.add(lane);
+            lane.cameras = [PlayState.instance.camHUD];
+            lane.alpha = SaveData.laneOpacity;
+        }
+
         defaultX = spr.x;
+    }
+    override function update(elapsed:Float) 
+    {
+        super.update(elapsed);
+
+        if (lane != null)
+        {
+            lane.x = this.x + laneOffset[curMania];
+            lane.y = this.y - 300;
+        }
+        centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti) / 2);
+
     }
         
 }

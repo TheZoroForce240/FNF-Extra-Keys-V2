@@ -1,0 +1,181 @@
+{
+    "notesData": {
+        "keyAmmo": [4, 6, 9, 5, 7, 8, 1, 2, 3],
+        "frameN": [
+            ["purple", "blue", "green", "red"],
+            ["purple", "green", "red", "yellow", "blue", "dark"],
+            ["purple", "blue", "green", "red", "white", "yellow", "violet", "darkred", "dark"],
+            ["purple", "blue", "white", "green", "red"],
+            ["purple", "green", "red", "white", "yellow", "blue", "dark"],
+            ["purple", "blue", "green", "red", "yellow", "violet", "darkred", "dark"],
+            ["white"],
+            ["purple", "red"],
+            ["purple", "white", "red"]
+        ],
+        "GFframeN": ["purple", "blue", "green", "red"],
+        "noteTypeList": [
+            "regular",
+            "burning",
+            "death",
+            "warning",
+            "angel",
+            "alt",
+            "bob",
+            "glitch",
+            "poison",
+            "drain"
+        ],
+        "noteAssetList": [
+            "noteassets/NOTE_assets",
+            "noteassets/PURPLE_NOTE_assets",
+            "noteassets/BLUE_NOTE_assets",
+            "noteassets/GREEN_NOTE_assets",
+            "noteassets/RED_NOTE_assets",
+            "pixel notes dont remove this its hardcoded lol"
+        ],
+        "assetList": ["default", "purple", "blue", "green", "red", "pixel"],
+        "noteTypeAssetPaths": [
+            "noteassets/NOTE_assets", 
+            "noteassets/notetypes/NOTE_types", 
+            "noteassets/notetypes/NOTE_types",
+            "noteassets/notetypes/NOTE_types",
+            "noteassets/notetypes/NOTE_types",
+            "noteassets/NOTE_assets",
+            "noteassets/notetypes/NOTE_types",
+            "noteassets/notetypes/NOTE_types",
+            "noteassets/notetypes/poison",
+            "noteassets/notetypes/drain"
+        ],
+        "noteTypePrefixes": [
+            "",
+            "fire",
+            "halo",
+            "warning",
+            "angel",
+            "",
+            "bob",
+            "glitch",
+            "poison",
+            "poison"
+        ],
+        "noteColors": ["purple", "blue", "green", "red", "white", "yellow", "violet", "darkred", "dark"],
+        "pixelAssetPaths": [ 
+            ["noteassets/pixel/arrows-pixels", "noteassets/pixel/arrowEnds"],
+            ["noteassets/pixel/firenotes/arrows-pixels", "noteassets/pixel/firenotes/arrowEnds"],
+            ["noteassets/pixel/halo/arrows-pixels", "noteassets/pixel/halo/arrowEnds"],
+            ["noteassets/pixel/warning/arrows-pixels", "noteassets/pixel/warning/arrowEnds"],
+            ["noteassets/pixel/angel/arrows-pixels", "noteassets/pixel/angel/arrowEnds"],
+            ["noteassets/pixel/arrows-pixels", "noteassets/pixel/arrowEnds"], 
+            ["noteassets/pixel/bob/arrows-pixels", "noteassets/pixel/bob/arrowEnds"],
+            ["noteassets/pixel/glitch/arrows-pixels", "noteassets/pixel/glitch/arrowEnds"], 
+            ["noteassets/pixel/firenotes/arrows-pixels", "noteassets/pixel/firenotes/arrowEnds"],
+            ["noteassets/pixel/arrows-pixels", "noteassets/pixel/arrowEnds"]
+        ],
+        "poisonDrain": 0.075,
+        "drainNoteAmount": 0.025,
+        "fireNoteDamage": 0.5,
+        "deathNoteDamage": 2.2,
+        "warningNoteDamage": 1,
+        "angelNoteDamage": [-2, -0.5, 0.5, 1],
+        "poisonNoteDamage": 0.3,
+        "HealthDrainFromGlitchAndBob": 0.005,
+        "maniaSwitchPositions": [
+            [0, 1, 2, 3, "alpha0", "alpha0", "alpha0", "alpha0", "alpha0"],
+            [0, 4, 1, 2, "alpha0", 3, "alpha0", "alpha0", 5],
+            [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            [0, 1, 3, 4, 2, "alpha0", "alpha0", "alpha0", "alpha0"],
+            [0, 5, 1, 2, 3, 4, "alpha0", "alpha0", 6],
+            [0, 1, 2, 3, "alpha0", 4, 5, 6, 7],
+            ["alpha0", "alpha0", "alpha0", "alpha0", 0, "alpha0", "alpha0", "alpha0", "alpha0"],
+            [0, "alpha0", "alpha0", 1, "alpha0", "alpha0", "alpha0", "alpha0", "alpha0"],
+            [0, "alpha0", "alpha0", 2, 1, "alpha0", "alpha0", "alpha0", "alpha0"]
+        ],
+        "dirArray": [
+            ["LEFT", "DOWN", "UP", "RIGHT"],
+            ["LEFT", "UP", "RIGHT", "LEFT", "DOWN", "RIGHT"],
+            ["LEFT", "DOWN", "UP", "RIGHT", "SPACE", "LEFT", "DOWN", "UP", "RIGHT"],
+            ["LEFT", "DOWN", "SPACE", "UP", "RIGHT"],
+            ["LEFT", "UP", "RIGHT", "SPACE", "LEFT", "DOWN", "RIGHT"],
+            ["LEFT", "DOWN", "UP", "RIGHT", "LEFT", "DOWN", "UP", "RIGHT"],
+            ["SPACE"],
+            ["LEFT", "RIGHT"],
+            ["LEFT", "SPACE", "RIGHT"]
+        ],
+        "colorFromData": [
+            [0,1,2,3],
+            [0,2,3,5,1,8],
+            [0,1,2,3,4,5,6,7,8],
+            [0,1,4,2,3],
+            [0,2,3,4,5,1,8],
+            [0,1,2,3,5,6,7,8],
+            [4],
+            [0,3],
+            [0,4,3]
+        ],
+        "laneOffset": [
+            0,
+            10,
+            13,
+            5,
+            10,
+            12,
+            0,
+            0,
+            0
+        ],
+        "MaxNoteData": 9,
+        "noteScales": [0.7, 0.6, 0.5, 0.65, 0.58, 0.55, 0.7, 0.7, 0.7],
+        "pixelNoteScales": [1, 0.83, 0.7, 0.9, 0.8, 0.74, 1, 1, 1],
+        "noteWidths": [112, 84, 66.5, 91, 77, 70, 140, 126, 119]
+    },
+    "PlayStateData": {
+        "sDir": [
+            ["LEFT", "DOWN", "UP", "RIGHT"],
+            ["LEFT", "UP", "RIGHT", "LEFT", "DOWN", "RIGHT"],
+            ["LEFT", "DOWN", "UP", "RIGHT", "UP", "LEFT", "DOWN", "UP", "RIGHT"],
+            ["LEFT", "DOWN", "UP", "UP", "RIGHT"],
+            ["LEFT", "UP", "RIGHT", "UP", "LEFT", "DOWN", "RIGHT"],
+            ["LEFT", "DOWN", "UP", "RIGHT", "LEFT", "DOWN", "UP", "RIGHT"],
+            ["UP"],
+            ["LEFT", "RIGHT"],
+            ["LEFT", "UP", "RIGHT"]
+        ],
+        "GFsDir": ["LEFT", "DOWN", "UP", "RIGHT"],
+        "bfDefaultPos": [770, 450],
+        "dadDefaultPos": [100, 100],
+        "gfDefaultPos": [400, 130],
+        "bfDefaultCamOffset": [-100, -100],
+        "dadDefaultCamOffset": [150, 100],
+        "defaultCamZoom": 1.05,
+        "daPixelZoom": 6,
+        "strumLineStartY": 50,
+        "healthToDieOn": 0,
+        "shitTiming": 0.7,
+        "badTiming": 0.55,
+        "goodTiming": 0.3,
+        "healthFromAnyHit": 0.02,
+        "healthFromRating": [0.15, 0.1, -0.07, -0.12],
+        "healthLossFromMiss": 0.15,
+        "healthLossFromSustainMiss": 0.03,
+        "healthLossFromMissPress": 0.04,
+        "graceTimerCooldown": 0.15
+    },
+    "FreeplayData": {
+        "useAutoDiffSystem": true
+    },
+    "PauseMenuData": {
+        "menuItems": ["Resume", "Rewind Song", "Restart Song", "Quick Options", "Toggle Botplay", "Exit to menu"]
+    },
+    "StoryMenuData": {
+        "weekUnlocked": [true, true, true, true, true, true, true, true]
+    },
+    "MainMenuData": {
+        "optionList": ["story mode", "freeplay", "donate", "options"]
+    },
+    "ChartingStateData": {
+        "GRID_SIZE": 40,
+        "S_GRID_SIZE": 40,
+        "GF_GRID": 160,
+        "noteTypes": ["Normal", "Fire", "Death", "Warning", "Angel", "Alt Anim", "Bob", "Glitch", "Poison", "Health Drain"]
+    }
+}

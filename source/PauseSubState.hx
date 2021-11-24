@@ -17,7 +17,7 @@ class PauseSubState extends MusicBeatSubstate
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
-	var menuItems:Array<String> = ['Resume', 'Restart Song', 'Quick Options', 'Toggle Botplay', 'Exit to menu'];
+	public static var menuItems:Array<String> = ['Resume', 'Rewind Song', 'Restart Song', 'Quick Options', 'Toggle Botplay', 'Exit to menu'];
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
@@ -115,6 +115,10 @@ class PauseSubState extends MusicBeatSubstate
 					openSubState(new QuickOptions());
 				case 'Toggle Botplay': 
 					SaveData.botplay = !SaveData.botplay;
+				case 'Rewind Song': 
+					close();
+					PlayState.instance.rewindTime();
+					PlayState.rewinding = true;
 			}
 		}
 	}

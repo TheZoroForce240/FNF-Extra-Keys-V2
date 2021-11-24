@@ -45,102 +45,112 @@ class FreeplayState extends MusicBeatState
 	private var diffTextArrays:Array<Array<String>> = [];
 	private var ratingArray:Array<Dynamic> = [];
 	private var customSongCheck:Array<Bool> = [];
+	public static var useAutoDiffSystem:Bool = true;
 
 	override function create()
 	{
+		PlayState.isStoryMode = false; //so files load properly
+
 		var initSonglist = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
+
+		#if !sys
+		useAutoDiffSystem = false;
+		#end
 
 		for (i in 0...initSonglist.length)
 		{
 			var data:Array<String> = initSonglist[i].split(':');
 			songs.push(new SongMetadata(data[0], Std.parseInt(data[2]), data[1]));
-			//customSongCheck.push(false);
-			#if sys
-			var path = "assets/data/charts/" + data[0];
-			if (FileSystem.exists(path))
+			if (useAutoDiffSystem)
 			{
-				var diffs:Array<String> = [];
-				var sortedDiffs:Array<String> = [];
-				var diffTexts:Array<String> = []; //for display text
-				var ratingList:Array<Dynamic> = []; 
-				diffs = FileSystem.readDirectory(path);
-
-				var easy:String = "";
-				var normal:String = "";
-				var hard:String = "";
-				var extra:Array<String> = [];
-				var extraCount = 0;
-				
-				for (file in diffs)
+				#if sys
+				var path = "assets/data/charts/" + data[0];
+				if (FileSystem.exists(path))
 				{
-					if (!file.endsWith(".json")) //get rid of non json files
-						diffs.remove(file);
-					else if (file.endsWith("-easy.json")) //add easy first
+					var diffs:Array<String> = [];
+					var sortedDiffs:Array<String> = [];
+					var diffTexts:Array<String> = []; //for display text
+					var ratingList:Array<Dynamic> = []; 
+					diffs = FileSystem.readDirectory(path);
+	
+					var easy:String = "";
+					var normal:String = "";
+					var hard:String = "";
+					var extra:Array<String> = [];
+					var extraCount = 0;
+					
+					for (file in diffs)
 					{
-						easy = file;
+						if (!file.endsWith(".json")) //get rid of non json files
+							diffs.remove(file);
+						else if (file.endsWith("-easy.json")) //add easy first
+						{
+							easy = file;
+						}
+						else if (file.endsWith(data[0].toLowerCase() + ".json")) //add normal
+						{
+							normal = file;
+						}
+						else if (file.endsWith("-hard.json")) //add hard
+						{
+							hard = file;
+						}
+						else if (file.endsWith(".json"))
+						{
+							var text:String = StringTools.replace(file, data[0].toLowerCase() + "-", "");
+							var fixedText:String = StringTools.replace(text,".json", "");
+							extra.push(fixedText.toUpperCase());
+							extraCount++;
+						}
 					}
-					else if (file.endsWith(data[0].toLowerCase() + ".json")) //add normal
+	
+					if (easy != "") //me trying to figure out how to sort the diffs in correct order :(
 					{
-						normal = file;
-					}
-					else if (file.endsWith("-hard.json")) //add hard
-					{
-						hard = file;
-					}
-					else if (file.endsWith(".json"))
-					{
-						var text:String = StringTools.replace(file, data[0].toLowerCase() + "-", "");
-						var fixedText:String = StringTools.replace(text,".json", "");
-						extra.push(fixedText.toUpperCase());
-						extraCount++;
-					}
-				}
-
-				if (easy != "") //me trying to figure out how to sort the diffs in correct order :(
-				{
-					var shittyFile = StringTools.replace(easy,".json", ""); 
-					var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
-					ratingList.push(ratingShit);
-					diffTexts.push("EASY"); //it works pog
-				}
-				if (normal != "")
-				{
-					var shittyFile = StringTools.replace(normal,".json", ""); 
-					var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
-					ratingList.push(ratingShit);
-					diffTexts.push("NORMAL");
-				}
-				if (hard != "")
-				{
-					var shittyFile = StringTools.replace(hard,".json", ""); 
-					var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
-					ratingList.push(ratingShit);
-					diffTexts.push("HARD");
-				}	
-				if (extraCount != 0)
-				{
-					for (i in extra)
-					{
-						var poop:String = CoolUtil.getSongFromJsons(data[0].toLowerCase(), diffTexts.length);
-						var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(poop, data[0].toLowerCase()));
+						var shittyFile = StringTools.replace(easy,".json", ""); 
+						var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
 						ratingList.push(ratingShit);
-						diffTexts.push(i);
+						diffTexts.push("EASY"); //it works pog
 					}
+					if (normal != "")
+					{
+						var shittyFile = StringTools.replace(normal,".json", ""); 
+						var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
+						ratingList.push(ratingShit);
+						diffTexts.push("NORMAL");
+					}
+					if (hard != "")
+					{
+						var shittyFile = StringTools.replace(hard,".json", ""); 
+						var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
+						ratingList.push(ratingShit);
+						diffTexts.push("HARD");
+					}	
+					if (extraCount != 0)
+					{
+						for (i in extra)
+						{
+							var poop:String = CoolUtil.getSongFromJsons(data[0].toLowerCase(), diffTexts.length);
+							var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(poop, data[0].toLowerCase()));
+							ratingList.push(ratingShit);
+							diffTexts.push(i);
+						}
+					}
+	
+							
+	
+					//diffArrays.push(sortedDiffs);
+					diffTextArrays.push(diffTexts);
+					ratingArray.push(ratingList);
+					
 				}
-
-						
-
-				//diffArrays.push(sortedDiffs);
-				diffTextArrays.push(diffTexts);
-				ratingArray.push(ratingList);
-				trace(sortedDiffs);
-				trace(diffTexts);
-				
+				#end
 			}
-			#else
-			var diffTexts = ["EASY", "NORMAL", "HARD", "ALT"];
-			diffTextArrays.push(diffTexts);
-			#end
+			else 
+			{
+				var diffTexts = ["EASY", "NORMAL", "HARD", "ALT"];
+				diffTextArrays.push(diffTexts);
+			}
+
 
 		}
 		

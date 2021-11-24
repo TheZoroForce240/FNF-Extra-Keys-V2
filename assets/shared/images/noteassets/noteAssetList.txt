@@ -1,0 +1,6 @@
+NOTE_assets
+PURPLE_NOTE_assets
+BLUE_NOTE_assets
+GREEN_NOTE_assets
+RED_NOTE_assets
+pixel

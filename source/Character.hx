@@ -235,8 +235,8 @@ class Character extends FlxSprite
 				animation.addByIndices('danceLeft', 'spooky dance idle', [0, 2, 6], "", 12, false);
 				animation.addByIndices('danceRight', 'spooky dance idle', [8, 10, 12, 14], "", 12, false);
 
-				addOffset('danceLeft');
-				addOffset('danceRight');
+				addOffset('danceLeft', 0, 0);
+				addOffset('danceRight', 0, 0);
 
 				addOffset("singUP", -20, 26);
 				addOffset("singRIGHT", -130, -14);
@@ -638,7 +638,7 @@ class Character extends FlxSprite
 				}
 					
 
-				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml);
+				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml); //todo set up the packer things with txts i think idk why tf youd use one just use an xml
 				frames = tex;
 
 				#if sys
@@ -726,7 +726,7 @@ class Character extends FlxSprite
 			{
 				if (animation.curAnim.name.startsWith('sing'))
 				{
-					holdTimer += elapsed;
+					holdTimer += elapsed * PlayState.SongSpeedMultiplier;
 				}
 	
 				var dadVar:Float = 4;
@@ -819,11 +819,13 @@ class Character extends FlxSprite
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
 		animation.play(AnimName, Force, Reversed, Frame);
+		
 
 		var daOffset = animOffsets.get(AnimName);
 		if (animOffsets.exists(AnimName))
 		{
 			offset.set(daOffset[0], daOffset[1]);
+			animation.curAnim.frameRate = Std.int(daOffset[2] * PlayState.SongSpeedMultiplier);
 		}
 		else
 			offset.set(0, 0);
@@ -848,7 +850,8 @@ class Character extends FlxSprite
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)
 	{
-		animOffsets[name] = [x, y];
+		var defaultFrameRate = animation.getByName(name).frameRate;
+		animOffsets[name] = [x, y, defaultFrameRate];
 	}
 
 	public function addPosOffset(name:String, x:Float = 0, y:Float = 0)
