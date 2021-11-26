@@ -10,7 +10,6 @@ typedef SwagSection =
 	var changeBPM:Bool;
 	var altAnim:Bool;
 	var mania:Int;
-	var changeMania:Bool;
 }
 
 class Section

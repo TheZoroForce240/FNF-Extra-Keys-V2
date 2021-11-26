@@ -206,7 +206,8 @@ class ChartingState extends MusicBeatState
 				stage: 'stage',
 				speed: 1,
 				mania: 0,
-				validScore: false
+				validScore: false,
+				showGFStrums: false
 			};
 		}
 		dadcharacter = _song.player2;
@@ -334,6 +335,14 @@ class ChartingState extends MusicBeatState
 			trace('CHECKED!');
 		};
 
+		var gf_strum = new FlxUICheckBox(10, 400, null, null, "Show GF strums", 100);
+		gf_strum.checked = _song.showGFStrums;
+		gf_strum.callback = function()
+		{
+			_song.showGFStrums = gf_strum.checked;
+			trace('CHECKED!');
+		};
+
 
 
 		var saveButton:FlxButton = new FlxButton(110, 8, "Save", function()
@@ -419,6 +428,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(p2DropDown);
 		tab_group_song.add(p1Label);
 		tab_group_song.add(p1DropDown);
+		tab_group_song.add(gf_strum);
 
 
 
@@ -590,7 +600,6 @@ class ChartingState extends MusicBeatState
 	var stepperLength:FlxUINumericStepper;
 	var check_mustHitSection:FlxUICheckBox;
 	var check_changeBPM:FlxUICheckBox;
-	var check_changeMania:FlxUICheckBox;
 	var stepperSectionBPM:FlxUINumericStepper;
 	var check_altAnim:FlxUICheckBox;
 
@@ -701,9 +710,6 @@ class ChartingState extends MusicBeatState
 		stepperNoteVelocityTime.name = 'note_velocity_time';
 
 		velocityTimeLabel = new FlxText(200, 175, 64, "Velocity Time: -" + curNoteVelocityTime + " (WIP)");
-
-		check_changeMania = new FlxUICheckBox(10, 60, null, null, 'Change Mania', 100);
-		check_changeMania.name = 'check_changeMania';
 
 		var applyLength:FlxButton = new FlxButton(100, 10, 'Apply');
 
@@ -894,10 +900,6 @@ class ChartingState extends MusicBeatState
 				case 'Change BPM':
 					middleSection.changeBPM = check.checked;
 					FlxG.log.add('changed bpm shit');
-
-				case 'Change Mania':
-					middleSection.changeMania = check.checked;
-					FlxG.log.add('changed the mania');
 				case "Alt Animation":
 					middleSection.altAnim = check.checked;
 			}
@@ -1789,7 +1791,6 @@ class ChartingState extends MusicBeatState
 			bpm: _song.bpm,
 			mania: _song.mania,
 			changeBPM: false,
-			changeMania: false,
 			mustHitSection: true,
 			sectionNotes: [],
 			typeOfSection: 0,

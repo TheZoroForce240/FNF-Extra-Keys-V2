@@ -25,7 +25,7 @@ import openfl.utils.AssetLibrary;
 import flixel.system.FlxAssets;
 import openfl.utils.Assets as OpenFlAssets;
 import flixel.util.FlxSpriteUtil;
-
+import flixel.math.FlxAngle;
 import lime.app.Application;
 import lime.media.AudioContext;
 import lime.media.AudioManager;
@@ -206,7 +206,7 @@ class PlayState extends MusicBeatState
 	public static var strumLineNotes:FlxTypedGroup<BabyArrow> = null;
 	public static var playerStrums:FlxTypedGroup<BabyArrow> = null;
 	public static var cpuStrums:FlxTypedGroup<BabyArrow> = null;
-
+	public static var gfStrums:FlxTypedGroup<BabyArrow> = null;
 	//score and stats
 	public static var campaignScore:Int = 0;
 	public var ranksList:Array<String> = ["Skill Issue", "E", "D", "C", "B", "A", "S"]; //for score text
@@ -386,6 +386,8 @@ class PlayState extends MusicBeatState
 		camP2Notes.bgColor.alpha = 0;
 		camOnTop = new FlxCamera();
 		camOnTop.bgColor.alpha = 0;
+
+
 
 		//var splitClip = new FlxRect(0, 0, 600, 0);
 		//camP1NotesSplit.screen.clipRect = splitClip;
@@ -777,8 +779,11 @@ class PlayState extends MusicBeatState
 		add(P2noteSplashes);
 		playerStrums = new FlxTypedGroup<BabyArrow>();
 		cpuStrums = new FlxTypedGroup<BabyArrow>();
+		gfStrums = new FlxTypedGroup<BabyArrow>();
 		add(playerStrums);
 		add(cpuStrums);
+		if (SONG.showGFStrums)
+			add(gfStrums);
 
 
 		generateSong(SONG.song);
@@ -951,8 +956,10 @@ class PlayState extends MusicBeatState
 		//strumLineNotes.cameras = [camP1Notes];
 		playerStrums.cameras = [camP1Notes];
 		cpuStrums.cameras = [camP2Notes];
+		//gfStrums.cameras = [camP3Notes];
 		P1notes.cameras = [camP1Notes];
 		P2notes.cameras = [camP2Notes];
+		//P3notes.cameras = [camP3Notes];
 		healthBar.cameras = [camHUD];
 		healthBarBG.cameras = [camHUD];
 		iconP1.cameras = [camHUD];
@@ -1178,6 +1185,8 @@ class PlayState extends MusicBeatState
 
 		generateStaticArrows(0);
 		generateStaticArrows(1);
+		if (SONG.showGFStrums)
+			generateStaticArrows(2);
 
 		//var splitRect:FlxRect = new FlxRect(50 + (FlxG.width / 2) + (Note.swagWidth * (keyAmmo[mania] / 2)),0, FlxG.width / 2, 0);
 
@@ -1593,7 +1602,11 @@ class PlayState extends MusicBeatState
 
 	private function generateStaticArrows(playernum:Int):Void
 	{
-		for (i in 0...keyAmmo[mania])
+		var amountOfArrows = keyAmmo[mania];
+		if (playernum == 2)
+			amountOfArrows = 4;
+
+		for (i in 0...amountOfArrows)
 		{
 			var style:String = "normal";
 
@@ -1610,12 +1623,23 @@ class PlayState extends MusicBeatState
 						//babyArrow.x -= 500;
 				case 1:
 					playerStrums.add(babyArrow);
+				case 2: 
+					gfStrums.add(babyArrow);
 			}
 
 			cpuStrums.forEach(function(spr:BabyArrow)
-				{					
-					spr.centerOffsets();
-				});
+			{					
+				spr.centerOffsets();
+			});
+
+			if (SONG.showGFStrums)
+			{
+				gfStrums.forEach(function(spr:BabyArrow)
+					{					
+						spr.centerOffsets();
+					});
+			}
+
 	
 			strumLineNotes.add(babyArrow);
 		}
@@ -1782,6 +1806,8 @@ class PlayState extends MusicBeatState
 		
 		if (strums == 'player') //playerStrums
 			strumNote = playerStrums.members[Math.floor(Math.abs(daNote.noteData))];
+		else if (strums == 'gf')
+			strumNote = gfStrums.members[Math.floor(Math.abs(daNote.noteData))];
 		else //cpuStrums
 			strumNote = cpuStrums.members[Math.floor(Math.abs(daNote.noteData))];
 
@@ -1796,28 +1822,12 @@ class PlayState extends MusicBeatState
 
 
 		var calculatedStrumtime = calculateStrumtime(daNote, Conductor.songPosition);
-
-		var angleX:Float = 1; //1 = none
-		var angleY:Float = 1;
-
-		if (daNote.followAngle) //credit to this epic engine for angle shit https://github.com/TheLostGhostS/Ghost-engine-source-code 
-		{
-			angleX = Math.sin(noteAngle * Math.PI / 180);
-			angleY = Math.cos(noteAngle * Math.PI / 180);
-		}
-
+		var notePos:FlxPoint;
 		var noteCurPos = daNote.startPos - calculatedStrumtime;
 
-		var xCalc = noteX - 0.45 * noteCurPos * angleX;
-		var yCalc = noteY + 0.45 * noteCurPos * angleY;
-
-		if (noteAngle > 180)
-		{
-			xCalc = noteX + 0.45 * noteCurPos * angleX; //flip scroll
-			yCalc = noteY - 0.45 * noteCurPos * angleY;
-		}
+		notePos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle + 90); //this is easier than i thought
 		
-		daNote.setPosition(xCalc, yCalc);
+		daNote.setPosition(noteX - notePos.x, noteY + notePos.y);
 			
 		if (flipped || (multiplayer && strums == "cpu"))
 			mustPress = !mustPress; //this is just for detecting it, not actually a must press note lol
@@ -1840,7 +1850,7 @@ class PlayState extends MusicBeatState
 		var holdingSustain:Bool = sustainsHeld[noteData] || (multiplayer && strums == "cpu" && P2sustainsHeld[noteData]);
 
 		if (isSustainNote)
-			if (!mustPress || holdingSustain || SaveData.botplay)
+			if (!mustPress || daNote.isGFNote || holdingSustain || SaveData.botplay)
 				daNote.clipSustain(middleOfNote);
 	
 		//if (daNote.y + daNote.offset.y * daNote.scale.y <= middleOfNote)
@@ -1969,7 +1979,8 @@ class PlayState extends MusicBeatState
 		var wasGoodHit:Bool = daNote.wasGoodHit;
 		var noteData:Int = daNote.noteData;
 
-		daNote.visible = false;
+		if (!SONG.showGFStrums)
+			daNote.visible = false; //im a fucking dummass i spend over an hour tryin to make the notes appear and its becuase of this
 
 		if (wasGoodHit)
 		{
@@ -1978,18 +1989,36 @@ class PlayState extends MusicBeatState
 			if (Note.noteTypeList[daNote.noteType] == "alt")
 				altAnim = '-alt';
 
-			trace("gf Note Hit");
-			trace(daNote.eventData);
+			if (!daNote.isSustainNote)
+			{
+				var eventName = daNote.eventData[0];
+				var eventData = daNote.eventData[1];
+	
+				EventList.convertEventDataToEvent(eventName, eventData, daNote);
+			}
+			else
+			{
+				daNote.eventWasValid = false;
+			}
 
-			if (daNote.eventName == "")
+
+			if (!daNote.eventWasValid)
 			{
 				gf.playAnim('sing' + sDir[mania][noteData] + altAnim, true);
 				gf.holdTimer = 0;
 			}
-			var eventName = daNote.eventData[0];
-			var eventData = daNote.eventData[1];
 
-			EventList.convertEventDataToEvent(eventName, eventData);
+			if (SONG.showGFStrums)
+			{
+				gfStrums.forEach(function(spr:BabyArrow)
+				{
+					if (Math.abs(noteData) == spr.ID)
+					{
+						if (!daNote.badNoteType)
+							spr.playAnim('confirm', true, spr.ID);
+					}
+				});
+			}
 
 
 			if (SONG.needsVoices)
@@ -2307,6 +2336,9 @@ class PlayState extends MusicBeatState
 			});
 			P3notes.forEachAlive(function(daNote:Note)
 			{
+				if (SONG.showGFStrums)
+					NotePositionShit(daNote, "gf");
+
 				GFNoteHit(daNote);
 			});
 		}
@@ -2314,6 +2346,9 @@ class PlayState extends MusicBeatState
 			resetBabyArrowAnim(playerStrums);
 		else if (!multiplayer)
 			resetBabyArrowAnim(cpuStrums);
+
+		if (SONG.showGFStrums)
+			resetBabyArrowAnim(gfStrums);
 
 
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
@@ -3715,7 +3750,7 @@ class PlayState extends MusicBeatState
 					if (songNotes[1] >= mn)
 						gottaHitNote = !section.mustHitSection;
 
-					var t = Std.int(songNotes[1] / 18); //compatibility with god mode final destination (or just shaggy x matt charts)
+					/*var t = Std.int(songNotes[1] / 18); //compatibility with god mode final destination (or just shaggy x matt charts)
 					switch(t)
 					{
 						case 1: 
@@ -3730,7 +3765,7 @@ class PlayState extends MusicBeatState
 							gottaHitNote = section.mustHitSection;
 							if (songNotes[1] >= (mn + 36))
 								gottaHitNote = !section.mustHitSection;
-					}
+					}*/
 	
 					var oldNote:Note;
 					if (unspawnNotes.length > 0)
@@ -3794,7 +3829,7 @@ class PlayState extends MusicBeatState
 						swagNote.x += FlxG.width / 2; // general offset
 					}
 				}
-				else if (songNotes[1] >= -3) //for gf notes (also in case notedata is less than -3)
+				else if (songNotes[1] >= -4) //for gf notes (also in case notedata is less than -3)
 				{
 					var daStrumTime:Float = songNotes[0];
 					if (daStrumTime < 0)
@@ -3810,12 +3845,47 @@ class PlayState extends MusicBeatState
 					else
 						oldNote = null;
 
+					var daSpeed = songNotes[4];
+
 					var eventData:Array<String> = songNotes[6];
 					//trace(eventData);
+					var daType = songNotes[3];
 
-					var swagNote:Note = new Note(daStrumTime, daNoteData, 0, false, 1, daVelocityData, false, true, false, eventData, oldNote);
+					var swagNote:Note = new Note(daStrumTime, daNoteData, daType, false, daSpeed, daVelocityData, false, true, false, eventData, oldNote);
 					swagNote.startPos = calculateStrumtime(swagNote, daStrumTime);
+					swagNote.sustainLength = songNotes[2];
+					var susLength:Float = swagNote.sustainLength;
+					susLength = susLength / Conductor.stepCrochet;
 					unspawnNotes.push(swagNote);
+					swagNote.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
+					
+					//i guess i gotta add sustains now that gf notes can be visible
+
+					if (susLength != 0)
+						susLength++; //increase length of all sustains, so they dont look off in game
+
+					for (susNote in 0...Math.floor(susLength))
+					{
+						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
+						var speedToUse = SongSpeed;
+						if (daSpeed != null || daSpeed > 1)
+							speedToUse = daSpeed;
+
+						var crocs = Conductor.stepCrochet; //crocs lol
+	
+						
+						var susStrum = daStrumTime + (crocs * susNote) + (crocs / speedToUse / SongSpeedMultiplier);
+						if (rewinding)
+							susStrum = daStrumTime + (crocs * susNote) + (crocs / speedToUse);
+
+						var sustainNote:Note = new Note(susStrum, daNoteData, daType, true, daSpeed, daVelocityData, false, true, false, oldNote);
+						swagNote.scrollFactor.set(gf.scrollFactor.x, gf.scrollFactor.y);
+						unspawnNotes.push(sustainNote);
+						sustainNote.startPos = calculateStrumtime(sustainNote, susStrum);
+					}
+	
+
+					swagNote.x += FlxG.width / 2; // general offset
 
 					/*if (swagNote.eventData[0] == "Change P1 Mania" && swagNote.eventData != null)
 						Conductor.mapManiaChange(swagNote, 1);
@@ -3861,6 +3931,9 @@ class PlayState extends MusicBeatState
 		if (FlxG.sound.music.time > Conductor.songPosition + (20 * PlayState.SongSpeedMultiplier) || FlxG.sound.music.time < Conductor.songPosition - (20 * PlayState.SongSpeedMultiplier)
 			|| needToResync)
 			resyncVocals();
+
+
+		
 
 		/*P1notes.forEachAlive(function(daNote:Note)
 		{

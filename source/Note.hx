@@ -6,7 +6,7 @@ import flixel.FlxG;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
-
+import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 #if polymod
@@ -198,6 +198,7 @@ class Note extends FlxSprite
 	public var eventData:Array<String>; //name + values from chart editor
 	public var eventName:String = "";
 	public var eventValues:Array<Dynamic>;
+	public var eventWasValid:Bool = true;
 
 	////////////////////////////////////////////////////////////
 
@@ -287,9 +288,6 @@ class Note extends FlxSprite
 		if (this.strumTime < 0 )
 			this.strumTime = 0;
 
-		baseStrum = this.strumTime;
-
-
 		if (velocityData != null)
 		{
 			speedMulti = _velocityData[0];
@@ -303,11 +301,7 @@ class Note extends FlxSprite
 
 		this.noteData = _noteData % MaxNoteData;
 
-
-
-		//note types shit //TODO fix this shit
 		isGFNote = _gfNote;
-
 		this.shader = HSV.shader;
 
 		noteTypeCheck();
@@ -339,6 +333,8 @@ class Note extends FlxSprite
 			SaveData.fixColorArray(mania);
 			colorShit = SaveData.colorArray[noteData];
 		}
+		if (isGFNote)
+			curMania = 0;
 
 		scaleToUse = noteScales[curMania];
 
@@ -357,29 +353,33 @@ class Note extends FlxSprite
 			style = 'pixel';
 
 
+		if (!isGFNote)
+		{
+			if (mustPress && !inCharter)
+				{
+					if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
+						&& !inCharter && SaveData.splitScroll)
+					{
+						this.cameras = [PlayState.instance.camP1NotesSplit];
+						split = true;
+					}	
+					else
+						this.cameras = [PlayState.instance.camP1Notes];
+				}
+				else if (!mustPress && !inCharter)
+				{
+					if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
+						&& !inCharter && SaveData.P2splitScroll)
+					{
+						this.cameras = [PlayState.instance.camP2NotesSplit];
+						split = true;
+					}
+					else
+						this.cameras = [PlayState.instance.camP2Notes];
+				}
+		}
 
-		if (mustPress && !inCharter)
-		{
-			if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
-				&& !inCharter && SaveData.splitScroll)
-			{
-				this.cameras = [PlayState.instance.camP1NotesSplit];
-				split = true;
-			}	
-			else
-				this.cameras = [PlayState.instance.camP1Notes];
-		}
-		else if (!mustPress && !inCharter)
-		{
-			if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
-				&& !inCharter && SaveData.P2splitScroll)
-			{
-				this.cameras = [PlayState.instance.camP2NotesSplit];
-				split = true;
-			}
-			else
-				this.cameras = [PlayState.instance.camP2Notes];
-		}
+		
 
 
 			
@@ -399,7 +399,8 @@ class Note extends FlxSprite
 		if (isSustainNote && prevNote != null)
 			createSustain();
 
-		downscrollCheck();
+		if (!isGFNote)
+			downscrollCheck();
 
 		if (normalNote && !isGFNote)
 		{
@@ -423,6 +424,10 @@ class Note extends FlxSprite
 		{
 			isSustainEnd = false;
 		}
+
+		angle = FlxAngle.wrapAngle(angle);
+		
+
 
 		if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped) || (PlayState.multiplayer))
 		{

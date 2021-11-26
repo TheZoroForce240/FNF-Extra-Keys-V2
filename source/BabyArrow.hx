@@ -97,6 +97,9 @@ class BabyArrow extends FlxSprite
         if (!isPlayState)
             maniaToUse = CustomizationState.maniaToChange;
 
+        if (player == 2)
+            maniaToUse = 0;
+
         curMania = maniaToUse;
 
         whichPlayer = player;
@@ -106,15 +109,19 @@ class BabyArrow extends FlxSprite
             ColorPresets.fixColorArray(maniaToUse);
             colorShiz = ColorPresets.ccolorArray[i];
         }
-        else
+        else if (player == 1)
         {
             SaveData.fixColorArray(maniaToUse);
             colorShiz = SaveData.colorArray[i];
         }
         
-        pathToUse = Std.int(colorShiz[3]);
-		if (pathToUse == 5)
-			style = 'pixel';
+        if (player != 2)
+        {
+            pathToUse = Std.int(colorShiz[3]);
+            if (pathToUse == 5)
+                style = 'pixel';
+        }
+
 
         stylelol = style;
         if (SaveData.middlescroll && player == 0)
@@ -148,7 +155,7 @@ class BabyArrow extends FlxSprite
         }
 
 
-        if (isPlayState && (player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
+        if (isPlayState && (player == 1 || (player == 0 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
         {
             lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[maniaToUse]), Std.int(FlxG.height * 2), flxcolorToUse);
             PlayState.instance.add(lane);
@@ -216,7 +223,10 @@ class BabyArrow extends FlxSprite
             }
 
 			updateHitbox();
-			scrollFactor.set();
+            if (player != 2)
+			    scrollFactor.set();
+            else 
+                scrollFactor.set(PlayState.gf.scrollFactor.x, PlayState.gf.scrollFactor.y); //gf notes same scroll as gf
 
 			if ((SaveData.downscroll && player == 1) || (SaveData.P2downscroll && player == 0))
             {
@@ -261,6 +271,13 @@ class BabyArrow extends FlxSprite
                 }
                 else
                     this.cameras = [PlayState.instance.camP2Notes];
+            }
+
+
+            if (player == 2)
+            {
+                y = PlayState.gf.y - 200;
+                x = (PlayState.gf.x + (PlayState.gf.width / 2)) - (Note.noteWidths[0] * 2) + Note.noteWidths[0] * i;
             }
 
             /*switch (i) //dumb center scroll i did for a video
@@ -317,7 +334,7 @@ class BabyArrow extends FlxSprite
                 HSV.brightness = colorShiz[2];
                 HSV.update();
             }
-            else 
+            else if (whichPlayer == 0)
             {
                 HSV.hue = colorShiz[0];
                 HSV.saturation = colorShiz[1];
@@ -333,6 +350,8 @@ class BabyArrow extends FlxSprite
             var scaleToUse = Note.p1NoteScale;
             if (whichPlayer == 0)
                 scaleToUse = Note.p2NoteScale;
+            if (whichPlayer == 2)
+                scaleToUse = Note.noteScales[0];
 
             updateHitbox();
             offset.x = frameWidth / 2;

@@ -26,6 +26,8 @@ typedef SwagSong =
 	var gfVersion:String;
 	var stage:String;
 	var validScore:Bool;
+
+	var showGFStrums:Bool;
 }
 
 class Song
@@ -41,6 +43,7 @@ class Song
 	public var player2:String = 'dad';
 	public var gfVersion:String = '';
 	public var stage:String = '';
+	public var showGFStrums:Bool = false;
 
 	public function new(song, notes, bpm)
 	{
@@ -58,10 +61,10 @@ class Song
 		var rawJson = Assets.getText(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
 		#end
 
-		#if sys
+		/*#if sys
 		if (Note.MaxNoteData > 9) //to anyone that wants to add more keys, please dont.
 			rawJson = File.getContent(Paths.json(folder.toLowerCase() + '/' + "Fuck You")).trim(); // :troll:
-		#end
+		#end*/
 
 		while (!rawJson.endsWith("}"))
 		{

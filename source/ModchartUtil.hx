@@ -45,7 +45,7 @@ class EventList
         //["Cheating Notes X", "arrow.x + (math.sin(elapsedTime * 1) * ((i % 2) == 0 ? 1 : -1)) - (math.sin(elapsedTime * 1) * 1.5)"],
     ];
 
-    public static function convertEventDataToEvent(eventName:String, data:String)
+    public static function convertEventDataToEvent(eventName:String, data:String, daNote:Note)
     {
         trace("finding Event from Event Name"); 
         trace(eventName);
@@ -105,6 +105,8 @@ class EventList
                 PlayState.beatCamZoom = Std.parseFloat(split[0]);
                 PlayState.beatCamHUD = Std.parseFloat(split[1]);
                 PlayState.beatCamHowOften = Std.parseInt(split[2]);
+            default: 
+                daNote.eventWasValid = false;
         }
     }
 }
