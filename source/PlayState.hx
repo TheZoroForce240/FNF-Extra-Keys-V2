@@ -1824,10 +1824,13 @@ class PlayState extends MusicBeatState
 		var calculatedStrumtime = calculateStrumtime(daNote, Conductor.songPosition);
 		var notePos:FlxPoint;
 		var noteCurPos = daNote.startPos - calculatedStrumtime;
+		var susPos:FlxPoint;
 
 		notePos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle + 90); //this is easier than i thought
+
+		//susPos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle + 90);
 		
-		daNote.setPosition(noteX - notePos.x, noteY + notePos.y);
+		daNote.setPosition(noteX + notePos.x, noteY + notePos.y);
 			
 		if (flipped || (multiplayer && strums == "cpu"))
 			mustPress = !mustPress; //this is just for detecting it, not actually a must press note lol
@@ -1863,12 +1866,18 @@ class PlayState extends MusicBeatState
 		{
 			daNote.alpha = noteAlpha * daNote.curAlpha;
 			daNote.x += daNote.sustainXOffset;
-			//daNote.x += ((Note.noteWidths[daNote.curMania] * daNote.scaleMulti) / 2) - (daNote.width / 2);
+			//daNote.angle = noteAngle * (Math.PI / 180);
+			//var susPoint:FlxPoint = new FlxPoint(daNote.x, daNote.y + daNote.height);
+
+			/*if (daNote.angle != 0)
+				daNote.angle = FlxAngle.angleBetweenPoint(daNote, middleOfNote, true) + 90;*/
 		}
 		else
 		{
 			daNote.alpha = noteAlpha;
+			
 		}
+		
 		
 		if (daNote.beenFlipped)
 		{
