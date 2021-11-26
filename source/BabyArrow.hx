@@ -11,6 +11,8 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import Shaders;
 import flixel.math.FlxPoint;
+import flixel.math.FlxAngle;
+import flixel.math.FlxMath;
 
 class BabyArrow extends FlxSprite
 {
@@ -85,9 +87,15 @@ class BabyArrow extends FlxSprite
     public var defaultWidth:Float;
     public var curID:Int;
 
+    //public var strumLineAngle:Float = 0;
+    //public var strumLineCenter:FlxPoint;
+
     public var centerOfArrow:FlxPoint;
 
     var flxcolorToUse:FlxColor = FlxColor.BLACK;
+    var inPlayState:Bool = true;
+
+    public var strumLineAngle:Float = 0;
 
     public function new(strumline:Float, player:Int, i:Int, style:String, ?isPlayState:Bool = true)
     {
@@ -96,6 +104,8 @@ class BabyArrow extends FlxSprite
         var maniaToUse:Int = PlayState.mania;
         if (!isPlayState)
             maniaToUse = CustomizationState.maniaToChange;
+
+        inPlayState = isPlayState;
 
         if (player == 2)
             maniaToUse = 0;
@@ -463,6 +473,26 @@ class BabyArrow extends FlxSprite
             lane.y = this.y - 300;
         }
         centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti) / 2);
+
+        
+        if (inPlayState)
+        {
+            var StrumGroup:StrumLineGroup;
+
+            if (whichPlayer == 1) //playerStrums
+                StrumGroup = PlayState.playerStrums;
+            else if (whichPlayer == 2)
+                StrumGroup = PlayState.gfStrums;
+            else //cpuStrums
+                StrumGroup = PlayState.cpuStrums;
+
+            if (strumLineAngle != 0) //speen
+            {
+                var distanceToCenter = StrumGroup.strumLineCenter.x - defaultX;
+                var strumPos = FlxAngle.getCartesianCoords(distanceToCenter, strumLineAngle);
+                this.setPosition(StrumGroup.strumLineCenter.x + strumPos.x, StrumGroup.strumLineCenter.y - strumPos.y);
+            }
+        }
 
     }
         

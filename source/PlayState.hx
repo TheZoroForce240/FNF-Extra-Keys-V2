@@ -203,10 +203,10 @@ class PlayState extends MusicBeatState
 	public var currentSection:SwagSection; //the current section again lol, but its actually the section not just a number
 
 	//static arrows
-	public static var strumLineNotes:FlxTypedGroup<BabyArrow> = null;
-	public static var playerStrums:FlxTypedGroup<BabyArrow> = null;
-	public static var cpuStrums:FlxTypedGroup<BabyArrow> = null;
-	public static var gfStrums:FlxTypedGroup<BabyArrow> = null;
+	public static var strumLineNotes:StrumLineGroup = null;
+	public static var playerStrums:StrumLineGroup = null;
+	public static var cpuStrums:StrumLineGroup = null;
+	public static var gfStrums:StrumLineGroup = null;
 	//score and stats
 	public static var campaignScore:Int = 0;
 	public var ranksList:Array<String> = ["Skill Issue", "E", "D", "C", "B", "A", "S"]; //for score text
@@ -310,7 +310,7 @@ class PlayState extends MusicBeatState
 	public static var stageData:Array<Dynamic>;
 
 	//some extra random stuff i didnt know where to put
-	var wiggleShit:WiggleEffect = new WiggleEffect();
+	public var wiggleShit:WiggleEffect = new WiggleEffect();
 	var grace:Bool = false;
 	var maniaChanged:Bool = false;
 
@@ -773,13 +773,13 @@ class PlayState extends MusicBeatState
 		strumLine = new FlxSprite(0, StrumLineStartY).makeGraphic(FlxG.width, 10);
 		strumLine.scrollFactor.set();
 
-		strumLineNotes = new FlxTypedGroup<BabyArrow>();
+		//strumLineNotes = new StrumLineGroup();
 		//add(strumLineNotes);
 		add(noteSplashes);
 		add(P2noteSplashes);
-		playerStrums = new FlxTypedGroup<BabyArrow>();
-		cpuStrums = new FlxTypedGroup<BabyArrow>();
-		gfStrums = new FlxTypedGroup<BabyArrow>();
+		playerStrums = new StrumLineGroup(1);
+		cpuStrums = new StrumLineGroup(0);
+		gfStrums = new StrumLineGroup(2);
 		add(playerStrums);
 		add(cpuStrums);
 		if (SONG.showGFStrums)
@@ -1619,10 +1619,12 @@ class PlayState extends MusicBeatState
 			{
 				case 0:
 					cpuStrums.add(babyArrow);
+					cpuStrums.curMania = mania;
 					//if (PlayStateChangeables.bothSide)
 						//babyArrow.x -= 500;
 				case 1:
 					playerStrums.add(babyArrow);
+					playerStrums.curMania = mania;
 				case 2: 
 					gfStrums.add(babyArrow);
 			}
@@ -1641,7 +1643,7 @@ class PlayState extends MusicBeatState
 			}
 
 	
-			strumLineNotes.add(babyArrow);
+			//strumLineNotes.add(babyArrow); //no more fuck you
 		}
 	}
 
@@ -1802,14 +1804,18 @@ class PlayState extends MusicBeatState
 		var canBeHit:Bool = daNote.canBeHit;
 		var tooLate:Bool = daNote.tooLate;
 		var noteData:Int = daNote.noteData;
+
+		var StrumGroup:StrumLineGroup;
 		
 		
 		if (strums == 'player') //playerStrums
-			strumNote = playerStrums.members[Math.floor(Math.abs(daNote.noteData))];
+			StrumGroup = playerStrums;
 		else if (strums == 'gf')
-			strumNote = gfStrums.members[Math.floor(Math.abs(daNote.noteData))];
+			StrumGroup = gfStrums;
 		else //cpuStrums
-			strumNote = cpuStrums.members[Math.floor(Math.abs(daNote.noteData))];
+			StrumGroup = cpuStrums;
+
+		strumNote = StrumGroup.members[Math.floor(Math.abs(daNote.noteData))];
 
 		var middleOfNote:FlxPoint = strumNote.centerOfArrow;
 		
@@ -1824,7 +1830,6 @@ class PlayState extends MusicBeatState
 		var calculatedStrumtime = calculateStrumtime(daNote, Conductor.songPosition);
 		var notePos:FlxPoint;
 		var noteCurPos = daNote.startPos - calculatedStrumtime;
-		var susPos:FlxPoint;
 
 		notePos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle + 90); //this is easier than i thought
 
@@ -1862,6 +1867,7 @@ class PlayState extends MusicBeatState
 		daNote.visible = noteVisible;
 		daNote.angle = noteAngle;
 		
+
 		if (isSustainNote)
 		{
 			daNote.alpha = noteAlpha * daNote.curAlpha;
@@ -3294,7 +3300,7 @@ class PlayState extends MusicBeatState
 	{
 		if (mania == 2) //so it doesnt break the fucking game
 		{
-			var strums:FlxTypedGroup<BabyArrow> = playerStrums;
+			var strums:StrumLineGroup = playerStrums;
 		
 			var scaleToCheck:Float = 1;
 			var bindsToUse:Array<String> = [];
@@ -3310,6 +3316,8 @@ class PlayState extends MusicBeatState
 					bindsToUse = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, p1Mania);
 				else 
 					showKeyBindText = false;
+
+				playerStrums.curMania = newMania;
 			}
 			else
 			{
@@ -3324,6 +3332,7 @@ class PlayState extends MusicBeatState
 				else 
 					showKeyBindText = false;
 				downscroll = SaveData.P2downscroll;
+				cpuStrums.curMania = newMania;
 			}
 	
 			strums.forEach(function(spr:BabyArrow)
@@ -3474,7 +3483,7 @@ class PlayState extends MusicBeatState
 	}
 
 
-	function createKeybindText(strums:FlxTypedGroup<BabyArrow>, binds:Array<String>, downscroll:Bool):Void
+	function createKeybindText(strums:StrumLineGroup, binds:Array<String>, downscroll:Bool):Void
 	{
 		for (i in 0...binds.length)
 		{
@@ -3506,7 +3515,7 @@ class PlayState extends MusicBeatState
 			});	
 		}
 	}
-	function createManiaSwitchKeybindText(strums:FlxTypedGroup<BabyArrow>, binds:Array<String>, downscroll:Bool):Void
+	function createManiaSwitchKeybindText(strums:StrumLineGroup, binds:Array<String>, downscroll:Bool):Void
 	{
 		for (i in 0...binds.length)
 		{
@@ -3561,7 +3570,7 @@ class PlayState extends MusicBeatState
 
 		return collectedNotes;
 	}
-	function resetBabyArrowAnim(strums:FlxTypedGroup<BabyArrow>):Void
+	function resetBabyArrowAnim(strums:StrumLineGroup):Void
 	{
 		strums.forEach(function(spr:BabyArrow)
 		{
@@ -3591,7 +3600,7 @@ class PlayState extends MusicBeatState
 			});
 		}
 	}
-	function strumPressCheck(strums:FlxTypedGroup<BabyArrow>, daKeys:Array<Bool>):Void
+	function strumPressCheck(strums:StrumLineGroup, daKeys:Array<Bool>):Void
 	{
 		strums.forEach(function(spr:BabyArrow)
 			{
@@ -3941,7 +3950,6 @@ class PlayState extends MusicBeatState
 			|| needToResync)
 			resyncVocals();
 
-
 		
 
 		/*P1notes.forEachAlive(function(daNote:Note)
@@ -3975,6 +3983,8 @@ class PlayState extends MusicBeatState
 
 		if (unspawnNotes[0] != null)
 			spawnNote();
+
+		
 
 		/*P1notes.forEachAlive(function(daNote:Note)
 		{

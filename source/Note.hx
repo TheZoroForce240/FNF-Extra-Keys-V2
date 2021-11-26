@@ -1,5 +1,7 @@
 package;
 
+import openfl.display.Bitmap;
+import openfl.geom.Rectangle;
 import openfl.ui.Multitouch;
 import flixel.FlxSprite;
 import flixel.FlxG;
@@ -14,6 +16,10 @@ import polymod.format.ParseRules.TargetSignatureElement;
 #end
 import PlayState;
 import Shaders;
+import openfl.filters.BitmapFilter;
+import openfl.filters.ShaderFilter;
+import openfl.geom.Rectangle;
+import openfl.geom.Point;
 
 using StringTools;
 
@@ -219,8 +225,18 @@ class Note extends FlxSprite
 
 	////////////////////////////////////////////////////////////
 
+	//experimental stuff
+
+	//public var noteCam:FlxCamera; //just because i want multiple shaders on a note
+	//terrible idea, pc almost exploded playing bopeebo
+
+	///////////////////////////////////////////////////////////
+
 	public function new(strumTime:Float, _noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Float>, ?charter = false, ?_gfNote, ?_mustPress:Bool = false, ?_eventData:Array<String>, ?prevNote:Note)
 	{
+
+
+
 		swagWidth = 160 * 0.7;
 		noteScale = 0.7;
 		pixelnoteScale = 1;
@@ -240,16 +256,10 @@ class Note extends FlxSprite
 			p2NoteScale = noteScale;
 		}
 
-
-
 		if (_speed <= 1) //sets speed to song speed if the speed value of a note is 1 or less, just as a backup in case it becomes 0
 			speed = PlayState.SongSpeed;
 		else
 			speed = _speed;
-
-		
-
-
 
 		super();
 
@@ -265,8 +275,7 @@ class Note extends FlxSprite
 		if (_eventData != null)
 		{
 			eventData = _eventData;
-		}	
-
+		}
 
 		if (SaveData.randomNoteSpeed)
 			speed = FlxMath.roundDecimal(FlxG.random.float(2.2, 3.8), 2);
@@ -302,8 +311,10 @@ class Note extends FlxSprite
 		this.noteData = _noteData % MaxNoteData;
 
 		isGFNote = _gfNote;
-		this.shader = HSV.shader;
 
+
+
+		
 		noteTypeCheck();
 
 		//curMania = mania;
@@ -379,13 +390,6 @@ class Note extends FlxSprite
 				}
 		}
 
-		
-
-
-			
-
-
-
 		if (curMania != mania)
 		{
 			changesMania = true;
@@ -401,6 +405,16 @@ class Note extends FlxSprite
 
 		if (!isGFNote)
 			downscrollCheck();
+
+		/*var noteRect = new Rectangle(this.x, this.x, this.width, this.height);
+		var notePoint = new Point(this.x, this.y);
+		var tempBitmap = this.pixels.clone();
+		tempBitmap.applyFilter(this.pixels, noteRect, notePoint, new ShaderFilter(HSV.shader));
+		this.pixels = tempBitmap;
+		tempBitmap.dispose();*/ //fuck you you little bitch i just wanna use multiple shaders on a sprite without a fucking camera filter
+
+		//this.shader = [HSV.shader];
+		this.shader = HSV.shader;
 
 		if (normalNote && !isGFNote)
 		{
@@ -426,7 +440,7 @@ class Note extends FlxSprite
 		}
 
 		angle = FlxAngle.wrapAngle(angle);
-		
+	
 
 
 		if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped) || (PlayState.multiplayer))
@@ -643,9 +657,7 @@ class Note extends FlxSprite
 		{
 			scale.y *= -1;
 			beenFlipped = true;
-		}
-			
-		
+		}		
 	}
 
 	function quantCheck():Void 
