@@ -229,6 +229,7 @@ class Note extends FlxSprite
 
 	//public var noteCam:FlxCamera; //just because i want multiple shaders on a note
 	//terrible idea, pc almost exploded playing bopeebo
+	var StrumGroup:StrumLineGroup;
 
 	///////////////////////////////////////////////////////////
 
@@ -423,6 +424,17 @@ class Note extends FlxSprite
 			HSV.brightness = colorShit[2];
 			HSV.update();
 		}
+
+
+		if (!inCharter)
+		{
+			if (isGFNote) //playerStrums
+				StrumGroup = PlayState.gfStrums;
+			else if (mustPress)
+				StrumGroup = PlayState.playerStrums;
+			else //cpuStrums
+				StrumGroup = PlayState.cpuStrums;
+		}
 			
 	}
 
@@ -437,10 +449,7 @@ class Note extends FlxSprite
 		else
 		{
 			isSustainEnd = false;
-		}
-
-		angle = FlxAngle.wrapAngle(angle);
-	
+		}	
 
 
 		if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped) || (PlayState.multiplayer))

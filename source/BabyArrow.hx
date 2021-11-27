@@ -95,7 +95,7 @@ class BabyArrow extends FlxSprite
     var flxcolorToUse:FlxColor = FlxColor.BLACK;
     var inPlayState:Bool = true;
 
-    public var strumLineAngle:Float = 0;
+    public var strumLineAngle:Float = -90;
 
     public function new(strumline:Float, player:Int, i:Int, style:String, ?isPlayState:Bool = true)
     {
@@ -486,12 +486,10 @@ class BabyArrow extends FlxSprite
             else //cpuStrums
                 StrumGroup = PlayState.cpuStrums;
 
-            if (strumLineAngle != 0) //speen
-            {
-                var distanceToCenter = StrumGroup.strumLineCenter.x - defaultX;
-                var strumPos = FlxAngle.getCartesianCoords(distanceToCenter, strumLineAngle);
-                this.setPosition(StrumGroup.strumLineCenter.x + strumPos.x, StrumGroup.strumLineCenter.y - strumPos.y);
-            }
+
+            var distanceToCenter = StrumGroup.strumLineCenter.x - defaultX;
+            var strumPos = FlxAngle.getCartesianCoords(distanceToCenter, strumLineAngle + 90);
+            this.setPosition(StrumGroup.strumLineCenter.x - strumPos.x, StrumGroup.strumLineCenter.y - strumPos.y);
         }
 
     }

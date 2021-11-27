@@ -1807,7 +1807,6 @@ class PlayState extends MusicBeatState
 
 		var StrumGroup:StrumLineGroup;
 		
-		
 		if (strums == 'player') //playerStrums
 			StrumGroup = playerStrums;
 		else if (strums == 'gf')
@@ -1821,21 +1820,22 @@ class PlayState extends MusicBeatState
 		
 		noteX = strumNote.x;
 		noteY = strumNote.y;
-		noteAngle = strumNote.angle;
 		noteAlpha = strumNote.alpha;
 		noteVisible = strumNote.visible;
-		
+
+		strumNote.angle = strumNote.strumLineAngle + 90;
+		noteAngle = strumNote.angle;
 
 
 		var calculatedStrumtime = calculateStrumtime(daNote, Conductor.songPosition);
 		var notePos:FlxPoint;
 		var noteCurPos = daNote.startPos - calculatedStrumtime;
-
-		notePos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle + 90); //this is easier than i thought
+																	//+90 so notes come from the correct angle
+		notePos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle - 90); //this is easier than i thought
 
 		//susPos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle + 90);
 		
-		daNote.setPosition(noteX + notePos.x, noteY + notePos.y);
+		daNote.setPosition(noteX - notePos.x, noteY - notePos.y);
 			
 		if (flipped || (multiplayer && strums == "cpu"))
 			mustPress = !mustPress; //this is just for detecting it, not actually a must press note lol
@@ -2328,6 +2328,18 @@ class PlayState extends MusicBeatState
 
 		}
 
+		if (FlxG.keys.justPressed.ONE)
+			playerStrums.forEach(function(spr:BabyArrow)
+			{
+				spr.strumLineAngle += 5;
+			});
+
+		if (FlxG.keys.justPressed.TWO)
+			playerStrums.forEach(function(spr:BabyArrow)
+			{
+				spr.strumLineAngle -= 5;
+			});
+
 		if (generatedMusic)
 		{
 			P1notes.forEachAlive(function(daNote:Note)
@@ -2356,6 +2368,8 @@ class PlayState extends MusicBeatState
 
 				GFNoteHit(daNote);
 			});
+
+
 		}
 		if (flipped && !multiplayer)
 			resetBabyArrowAnim(playerStrums);
@@ -3983,6 +3997,24 @@ class PlayState extends MusicBeatState
 
 		if (unspawnNotes[0] != null)
 			spawnNote();
+
+		/*if (curBeat % 16 == 0)
+		{
+			var pangle = FlxG.random.int(-120, 120);
+			var cpupangle = FlxG.random.int(-120, 120);
+			trace(pangle);
+			trace(cpupangle);
+			playerStrums.forEach(function(spr:BabyArrow)
+			{
+				spr.strumLineAngle = pangle;
+				spr.angle = spr.strumLineAngle;
+			});
+			cpuStrums.forEach(function(spr:BabyArrow)
+			{
+				spr.strumLineAngle = cpupangle;
+				spr.angle = spr.strumLineAngle;
+			});
+		}*/
 
 		
 
