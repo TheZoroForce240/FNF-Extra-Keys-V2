@@ -70,6 +70,9 @@ import openfl.display.StageQuality;
 import openfl.filters.ShaderFilter;
 import Shaders;
 import ModchartUtil;
+import hscript.Expr;
+import hscript.Interp;
+import hscript.Parser;
 
 #if sys
 import sys.io.File;
@@ -129,7 +132,7 @@ class PlayState extends MusicBeatState
 	public static var StrumLineStartY:Float = 50;
 	public static var healthToDieOn:Float = 0;
 
-	public static var shitTiming:Float = 0.7;
+	public static var shitTiming:Float = 0.7; //TODO make these use ms timing
 	public static var badTiming:Float = 0.55;
 	public static var goodTiming:Float = 0.3;
 	public static var healthFromAnyHit:Float = 0.02;
@@ -304,7 +307,7 @@ class PlayState extends MusicBeatState
 
 	//stages
 	public var dancingStagePieces:FlxTypedGroup<StagePiece>; //for stage pieces that bop/dance/whatever every beat, no need for a variable/hx
-	var stageException:Bool = false; //just used for week 6 stage, because of its weird set graphic size shit
+	var stageException:Bool = false; //just used for week 6 stage, because of its weird set graphic size shit, oh wait i fixed it right
 	var stageOffsets:Map<String, Array<Dynamic>>;
 	var limo:StagePiece; //for the shitty layering
 	var pieceArray = [];
@@ -338,6 +341,13 @@ class PlayState extends MusicBeatState
 	var detailsText:String = "";
 	var detailsPausedText:String = "";
 	#end
+
+	public var modchartScript:HscriptShit;
+	function call(tfisthis:String, shitToGoIn:Array<Dynamic>)
+	{
+		if (modchartScript.enabled)
+			modchartScript.call(tfisthis, shitToGoIn); //because
+	}
 	override public function create()
 	{
 		instance = this;
@@ -349,6 +359,9 @@ class PlayState extends MusicBeatState
 			FlxG.sound.music.stop();
 
 		var songLowercase = PlayState.SONG.song.toLowerCase();
+		modchartScript = new HscriptShit(songLowercase);
+		trace ("file loaded = " + modchartScript.enabled);
+		call("loadScript", []);
 
 		var diffText = CoolUtil.CurSongDiffs[storyDifficulty];
 		if (isStoryMode)
@@ -1519,6 +1532,7 @@ class PlayState extends MusicBeatState
 			#else
 			FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 1, false);
 			#end
+			call("startSong", [PlayState.SONG.song]);
 		}
 			
 
@@ -2080,6 +2094,7 @@ class PlayState extends MusicBeatState
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
+		call("update", [elapsed]);
 
 		elapsedTime += elapsed;
 		
@@ -3979,6 +3994,7 @@ class PlayState extends MusicBeatState
 	override function stepHit()
 	{
 		super.stepHit();
+		call("stepHit", [curStep]);
 
 		var needToResync:Bool = (((FlxG.sound.music.time - vocals.time) >= 10) && vocals.playing);
 		if (!allowSpeedChanges)
@@ -4003,7 +4019,7 @@ class PlayState extends MusicBeatState
 	override function beatHit()
 	{
 		super.beatHit();
-
+		call("beatHit", [curBeat]);
 		if (generatedMusic)
 		{
 			P1notes.sort(FlxSort.byY, FlxSort.DESCENDING);
