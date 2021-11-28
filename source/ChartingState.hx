@@ -1,5 +1,6 @@
 package;
 
+import Note.CharterSustain;
 import Conductor.BPMChangeEvent;
 import Section.SwagSection;
 import Song.SwagSong;
@@ -33,6 +34,7 @@ import openfl.events.IOErrorEvent;
 import openfl.media.Sound;
 import openfl.net.FileReference;
 import openfl.utils.ByteArray;
+import flixel.addons.ui.FlxSlider;
 
 import lime.media.openal.AL;
 
@@ -56,6 +58,7 @@ class ChartingState extends MusicBeatState
 	public static var lastSection:Int = 0;
 
 	var bpmTxt:FlxText;
+	var songSlider:FlxSlider;
 
 	var strumLine:FlxSprite;
 	var curSong:String = 'Dadbattle';
@@ -69,7 +72,7 @@ class ChartingState extends MusicBeatState
 	var dummyArrow:FlxSprite;
 
 	var curRenderedNotes:FlxTypedGroup<Note>;
-	var curRenderedSustains:FlxTypedGroup<FlxSprite>;
+	var curRenderedSustains:FlxTypedGroup<CharterSustain>;
 	var curRenderedTypes:FlxTypedGroup<FlxSprite>; //old system i used for note types, i figred out how to make them show properly, so now this is just used for displaying an alt note
 	var curRenderedSpeed:FlxTypedGroup<FlxSprite>; //for displaying the text of note speed, so you know its different
 
@@ -153,6 +156,8 @@ class ChartingState extends MusicBeatState
 			piece.scrollFactor.set();
 		}
 
+		
+
 		ColorPresets.resetColors();
 
 		curSection = 0;
@@ -186,7 +191,7 @@ class ChartingState extends MusicBeatState
 		add(gridBlackLineBottom);
 
 		curRenderedNotes = new FlxTypedGroup<Note>();
-		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
+		curRenderedSustains = new FlxTypedGroup<CharterSustain>();
 		curRenderedTypes = new FlxTypedGroup<FlxSprite>();
 		curRenderedSpeed = new FlxTypedGroup<FlxSprite>();
 
@@ -317,6 +322,19 @@ class ChartingState extends MusicBeatState
 		add(curRenderedSustains);
 		add(curRenderedTypes);
 		add(curRenderedSpeed);
+
+		songSlider = new FlxSlider(FlxG.sound.music, 'time', 1000, 15, 0, FlxG.sound.music.length, 250, 15, 5);
+		songSlider.valueLabel.visible = false;
+		songSlider.maxLabel.visible = false;
+		songSlider.minLabel.visible = false;
+		add(songSlider);
+		songSlider.scrollFactor.set();
+		songSlider.callback = function(fuck:Float)
+		{
+			vocals.time = FlxG.sound.music.time;
+			var shit = Std.int(FlxG.sound.music.time / (Conductor.crochet * 4)); //TODO uhh make this work properly with bpm changes or somethin
+			changeSection(shit);
+		};
 
 		super.create();
 	}
@@ -869,6 +887,7 @@ class ChartingState extends MusicBeatState
 			vocals.time = 0;
 			FlxG.sound.music.pause();
 			FlxG.sound.music.time = 0;
+			songSlider.maxValue = FlxG.sound.music.length;
 			changeSection();
 		};
 	}
@@ -1096,7 +1115,7 @@ class ChartingState extends MusicBeatState
 				note.playedSound = false;
 			}
 		});
-		curRenderedSustains.forEach(function(sus:FlxSprite)
+		curRenderedSustains.forEach(function(sus:CharterSustain)
 		{
 			var overlap = FlxG.overlap(strumLine, sus);
 			if (overlap)
@@ -1173,6 +1192,86 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}
+		if (FlxG.mouse.justPressedRight)
+		{
+			if (FlxG.mouse.overlaps(curRenderedNotes))
+			{
+				curRenderedNotes.forEach(function(note:Note)
+				{
+					if (FlxG.mouse.overlaps(note))
+					{
+						note.beingGrabbed = true;
+					};
+				});
+			}
+			else if (dummyArrow.overlaps(curRenderedSustains))
+			{
+				curRenderedSustains.forEach(function(sus:CharterSustain)
+				{
+					if (dummyArrow.overlaps(sus))
+					{
+						sus.note.beingGrabbed = true;
+					};
+				});
+			}
+		}
+		if (FlxG.mouse.pressedRight)
+		{
+			curRenderedNotes.forEach(function(note:Note)
+			{
+				if (note.beingGrabbed)
+				{
+					var dummyStrum = getStrumTime(dummyArrow.y) + sectionStartTime(curSection);
+					var stepsDown = dummyStrum - note.strumTime;
+					if (dummyStrum > note.strumTime) //only do if dummyarrow is below note
+					{
+						for(sec in _song.notes)
+						{
+							for (daNote in sec.sectionNotes)
+							{
+								if (daNote[0] == note.strumTime && daNote[1] == (note.rawNoteData - 4))
+								{
+									daNote[2] = Conductor.stepCrochet * Std.int(stepsDown / Conductor.stepCrochet);
+									//trace('updating sustain in note array shijtt');
+								}	
+							}
+						}
+					}
+					else
+					{
+						for(sec in _song.notes)
+						{
+							for (daNote in sec.sectionNotes)
+							{
+								if (daNote[0] == note.strumTime && daNote[1] == (note.rawNoteData - 4))
+								{
+									daNote[2] = 0; // reset it
+								}									
+							}
+						}
+					}
+					updateNoteUI();
+					updateGrid();
+				}
+			});
+		}
+		if (FlxG.mouse.justReleasedRight)
+		{
+			curRenderedNotes.forEach(function(note:Note)
+			{
+				if (note.beingGrabbed)
+				{
+					note.kill();
+					curRenderedNotes.remove(note);
+					note.destroy();
+
+					updateNoteUI();
+					updateGrid();
+				}
+				note.beingGrabbed = false;
+			});
+		}
+
 
 			
 		if (FlxG.keys.pressed.C)
@@ -1369,6 +1468,17 @@ class ChartingState extends MusicBeatState
 			{
 				curSelectedNote[2] += value;
 				curSelectedNote[2] = Math.max(curSelectedNote[2], 0);
+
+				curRenderedNotes.forEach(function(note:Note)
+				{
+					if ((curSelectedNote[1] + 4) == note.rawNoteData && curSelectedNote[0] == note.strumTime) //remove the note so sustain sprite can be updated, dumb work around lol
+					{
+						trace("removed note to update sustain");
+						note.kill();
+						curRenderedNotes.remove(note);
+						note.destroy();
+					}
+				});
 			}
 		}
 
@@ -1679,9 +1789,11 @@ class ChartingState extends MusicBeatState
 
 		if (note.sustainLength > 0)
 		{
-			var sustainVis:FlxSprite = new FlxSprite(note.x + (GRID_SIZE / 2),
-				note.y + GRID_SIZE).makeGraphic(8, Math.floor(FlxMath.remapToRange(note.sustainLength, 0, Conductor.stepCrochet * 16, 0, gridBG.height)));
-			curRenderedSustains.add(sustainVis);
+			var xpos = note.x + (GRID_SIZE / 2);
+			var ypos = note.y + GRID_SIZE;
+			var height = Math.floor(FlxMath.remapToRange(note.sustainLength, 0, Conductor.stepCrochet * 16, 0, gridBG.height));
+			var sustain:CharterSustain = new CharterSustain(xpos, ypos, 8, height, _song.mania, note);
+			curRenderedSustains.add(sustain);
 		}
 	}
 
@@ -1778,9 +1890,11 @@ class ChartingState extends MusicBeatState
 
 		if (daSus > 0)
 		{
-			var sustainVis:FlxSprite = new FlxSprite(note.x + (GRID_SIZE / 2),
-				note.y + GRID_SIZE).makeGraphic(8, Math.floor(FlxMath.remapToRange(daSus, 0, Conductor.stepCrochet * 16, 0, gridBG.height)));
-			curRenderedSustains.add(sustainVis);
+			var xpos = note.x + (GRID_SIZE / 2);
+			var ypos = note.y + GRID_SIZE;
+			var height = Math.floor(FlxMath.remapToRange(note.sustainLength, 0, Conductor.stepCrochet * 16, 0, gridBG.height));
+			var sustain:CharterSustain = new CharterSustain(xpos, ypos, 8, height, _song.mania, note);
+			curRenderedSustains.add(sustain);
 		}
 	}
 

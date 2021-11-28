@@ -83,7 +83,8 @@ class Note extends FlxSprite
 	public static var hitTiming = 145;
 	public var earlyHitTiming = hitTiming;
 	public var lateHitTiming = -hitTiming;
-	public var followAngle:Bool = true;
+	public static var followAngle:Bool = false;
+	public static var StrumLinefollowAngle:Bool = false;
 
 	////////////////////////////////////////////////////////////
 
@@ -214,6 +215,7 @@ class Note extends FlxSprite
 	public var inCharter:Bool = false;
 	var charterMulti:Int = 0; //wtf was this used for again???
 	public var updated:Bool = true;
+	public var beingGrabbed:Bool = false;
 
 
 	////////////////////////////////////////////////////////////
@@ -858,10 +860,67 @@ class Note extends FlxSprite
 	public function clipSustain(clipTo:FlxPoint)
 	{
 		var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
-		fuckYouRect.y = ((clipTo.y - y) / scale.y);
-		fuckYouRect.height -= fuckYouRect.y;
+		//var notepos = new FlxPoint(this.x, this.y);
+		//var rad = clipTo.distanceTo(notepos);
+		//var rectshit = FlxAngle.getPolarCoords((clipTo.x - this.x) / scale.x, (clipTo.y - this.y) / scale.y);
+		//var rectPos = FlxAngle.getCartesianCoords(rectshit., angle + 90);
+		//fuckYouRect.y = (clipTo.y - rectPos.y) / scale.y;
+		
+		if ((angle % 360 > 180 || angle % 360 < -180) && followAngle)
+		{
+			fuckYouRect = new FlxRect(0,0, this.frameWidth * 2, this.frameHeight * 2); //TODO find a way to clip based on angle
+			fuckYouRect.height = ((clipTo.y - y) / scale.y);
+			fuckYouRect.y = this.frameHeight - fuckYouRect.height;
+		}
+		else
+		{
+			fuckYouRect.y = ((clipTo.y - y) / scale.y);
+			fuckYouRect.height -= fuckYouRect.y;
+		}
+			
 		clipRect = fuckYouRect;
 
 		//clipTo - (y + offset.y * scale.y)
+	}
+}
+
+
+class CharterSustain extends FlxSprite //so i can do the grabbing thing
+{
+	public var note:Note;
+	public var noteData:Int = 0;
+
+	public function new (xpos:Float, ypos:Float, wid:Int, height:Int, mania:Int, _note:Note)
+	{
+		super();
+		makeGraphic(wid, height);
+		x = xpos;
+		y = ypos;
+		note = _note;
+		noteData = note.noteData;
+		var color = Note.frameN[mania][noteData];
+		var flxcolorToUse:FlxColor = FlxColor.WHITE;
+		switch (color)
+		{
+			case "purple": 
+				flxcolorToUse = FlxColor.PURPLE;
+			case "blue": 
+				flxcolorToUse = FlxColor.CYAN;
+			case "green": 
+				flxcolorToUse = FlxColor.GREEN;
+			case "red": 
+				flxcolorToUse = FlxColor.RED;
+			case "white": 
+				flxcolorToUse = FlxColor.WHITE;
+			case "yellow": 
+				flxcolorToUse = FlxColor.YELLOW;
+			case "violet": 
+				flxcolorToUse = FlxColor.PURPLE;
+			case "darkred": 
+				flxcolorToUse = FlxColor.RED;
+			case "dark": 
+				flxcolorToUse = FlxColor.BLUE;
+		}
+		this.color = flxcolorToUse;
 	}
 }

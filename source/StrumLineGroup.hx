@@ -28,15 +28,19 @@ class StrumLineGroup extends FlxTypedGroup<BabyArrow>
 
     override public function update(elapsed) 
     {
-        SwagMiddle = 50;
-        if (SaveData.middlescroll && player == 1)
-            SwagMiddle += ((FlxG.width / 2) * 0.5) + (Note.noteWidths[curMania] / 2);
-        else 
-            SwagMiddle += ((FlxG.width / 2) * player);
+        if (Note.StrumLinefollowAngle)
+        {
+            SwagMiddle = 50;
+            if (SaveData.middlescroll && player == 1)
+                SwagMiddle += ((FlxG.width / 2) * 0.5) + (Note.noteWidths[curMania] / 2);
+            else 
+                SwagMiddle += ((FlxG.width / 2) * player);
+    
+            SwagMiddle += ((Note.noteWidths[curMania] * PlayState.keyAmmo[curMania]) / 2) - (Note.noteWidths[curMania] / 2);
+             
+            strumLineCenter.set(SwagMiddle, PlayState.StrumLineStartY);
+        }
 
-        SwagMiddle += ((Note.noteWidths[curMania] * PlayState.keyAmmo[curMania]) / 2) - (Note.noteWidths[curMania] / 2);
-         
-        strumLineCenter.set(SwagMiddle, PlayState.StrumLineStartY);
 
         super.update(elapsed);
     }

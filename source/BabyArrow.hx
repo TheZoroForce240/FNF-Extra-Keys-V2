@@ -486,10 +486,13 @@ class BabyArrow extends FlxSprite
             else //cpuStrums
                 StrumGroup = PlayState.cpuStrums;
 
+            if (Note.StrumLinefollowAngle)
+            {
+                var distanceToCenter = StrumGroup.strumLineCenter.x - defaultX;
+                var strumPos = FlxAngle.getCartesianCoords(distanceToCenter, strumLineAngle + 90);
+                this.setPosition(StrumGroup.strumLineCenter.x - strumPos.x, StrumGroup.strumLineCenter.y - strumPos.y);
+            }
 
-            var distanceToCenter = StrumGroup.strumLineCenter.x - defaultX;
-            var strumPos = FlxAngle.getCartesianCoords(distanceToCenter, strumLineAngle + 90);
-            this.setPosition(StrumGroup.strumLineCenter.x - strumPos.x, StrumGroup.strumLineCenter.y - strumPos.y);
         }
 
     }

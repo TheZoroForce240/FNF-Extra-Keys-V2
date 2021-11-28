@@ -124,6 +124,7 @@ class PlayState extends MusicBeatState
 	public static var rewinding:Bool = false;
 	public static var regeneratingNotes:Bool = false;
 	static var rewindOnDeath = false;
+	public static var allowSpeedChanges:Bool = true;
 
 	public static var StrumLineStartY:Float = 50;
 	public static var healthToDieOn:Float = 0;
@@ -1346,7 +1347,7 @@ class PlayState extends MusicBeatState
 
 	function normalInputSystem(data:Int, playernum:Int)
 	{
-		closestNotes = []; //moved here because if notes were in a null section it would prevent them from being hit (i was testing on dave and bambi charts and they all have weird charts and all notes seem to be in one section????)
+		closestNotes = [];
 		P2closestNotes = [];
 		if (multiplayer)
 		{
@@ -1750,15 +1751,19 @@ class PlayState extends MusicBeatState
 
 	function updateSongMulti():Void
 	{
-		#if cpp
-		@:privateAccess
+		if (allowSpeedChanges)
 		{
-			lime.media.openal.AL.sourcef(FlxG.sound.music._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, SongSpeedMultiplier);
-			//if (SONG.needsVoices)
-			if (vocals.playing)
-				lime.media.openal.AL.sourcef(vocals._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, SongSpeedMultiplier);
+			#if cpp
+			@:privateAccess
+			{
+				lime.media.openal.AL.sourcef(FlxG.sound.music._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, SongSpeedMultiplier);
+				//if (SONG.needsVoices)
+				if (vocals.playing)
+					lime.media.openal.AL.sourcef(vocals._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, SongSpeedMultiplier);
+			}
+			#end	
 		}
-		#end
+
 	}
 
 	private var paused:Bool = false;
@@ -1823,15 +1828,23 @@ class PlayState extends MusicBeatState
 		noteAlpha = strumNote.alpha;
 		noteVisible = strumNote.visible;
 
-		strumNote.angle = strumNote.strumLineAngle + 90;
+		if (Note.StrumLinefollowAngle)
+		{
+			strumNote.angle = strumNote.strumLineAngle + 90;
+		}
 		noteAngle = strumNote.angle;
+
+		var anglething = noteAngle;
+		if (!Note.followAngle)
+			anglething = 0; //so i can turn it off to reduce lag
+		
 
 
 		var calculatedStrumtime = calculateStrumtime(daNote, Conductor.songPosition);
 		var notePos:FlxPoint;
 		var noteCurPos = daNote.startPos - calculatedStrumtime;
 																	//+90 so notes come from the correct angle
-		notePos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle - 90); //this is easier than i thought
+		notePos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, anglething - 90); //this is easier than i thought
 
 		//susPos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle + 90);
 		
@@ -2069,6 +2082,9 @@ class PlayState extends MusicBeatState
 		super.update(elapsed);
 
 		elapsedTime += elapsed;
+		
+		if (!allowSpeedChanges)
+			SongSpeedMultiplier = 1;
 
 		if (SaveData.botplay)
 			botPlayTxt.visible = true;
@@ -2340,6 +2356,11 @@ class PlayState extends MusicBeatState
 				spr.strumLineAngle -= 5;
 			});
 
+		playerStrums.forEach(function(spr:BabyArrow)
+		{
+			spr.strumLineAngle = spr.strumLineAngle + 5 * Math.sin((currentBeat * 0.005) * Math.PI);
+		});
+
 		if (generatedMusic)
 		{
 			P1notes.forEachAlive(function(daNote:Note)
@@ -2582,6 +2603,7 @@ class PlayState extends MusicBeatState
 							vocals.volume = 1;
 							FlxG.sound.music.volume = 1;
 							canPause = true;
+							Conductor.recalculateTimings();
 						}
 
 							
@@ -3959,6 +3981,8 @@ class PlayState extends MusicBeatState
 		super.stepHit();
 
 		var needToResync:Bool = (((FlxG.sound.music.time - vocals.time) >= 10) && vocals.playing);
+		if (!allowSpeedChanges)
+			needToResync = false; //reduce lag from syncing
 
 		if (FlxG.sound.music.time > Conductor.songPosition + (20 * PlayState.SongSpeedMultiplier) || FlxG.sound.music.time < Conductor.songPosition - (20 * PlayState.SongSpeedMultiplier)
 			|| needToResync)
