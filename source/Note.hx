@@ -781,10 +781,10 @@ class Note extends FlxSprite
 
 			case "burning": 
 				PlayState.instance.badNoteHit();
-				healthChangesOnHit = PlayState.fireNoteDamage;
+				healthChangesOnHit -= PlayState.fireNoteDamage;
 			case "death": 
 				PlayState.instance.badNoteHit();
-				healthChangesOnHit = PlayState.deathNoteDamage;
+				healthChangesOnHit -= PlayState.deathNoteDamage;
 			case "bob": 
 				PlayState.instance.badNoteHit();
 				if (PlayState.multiplayer && !mustPress)
@@ -793,7 +793,7 @@ class Note extends FlxSprite
 					PlayState.instance.HealthDrain(1);
 			case "poison": 
 				PlayState.instance.badNoteHit();
-				healthChangesOnHit = PlayState.poisonNoteDamage;
+				healthChangesOnHit -= PlayState.poisonNoteDamage;
 				if (PlayState.multiplayer && !mustPress)
 					PlayState.instance.P2Stats.poisonHits++;
 				else

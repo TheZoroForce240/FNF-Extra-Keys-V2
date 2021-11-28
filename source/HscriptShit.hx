@@ -26,13 +26,14 @@ class HscriptShit //thing i wanna do in the future for funni modchart
 
     public function new (song:String)
     {
-        var path = "assets/data/charts/" + song + "/script.hscript"; //using hx so its detected as haxe in vsc
+        var path = "assets/data/charts/" + song + "/script.hscript";
         #if sys
 		if (FileSystem.exists(path))
 		{
             loadScript(path);
             enabled = true;
             setScriptVars();
+            interp.execute(script);
         }
         else 
         {
@@ -70,8 +71,7 @@ class HscriptShit //thing i wanna do in the future for funni modchart
 		var rawCode = Assets.getText(path);
 		#end
         script = parser.parseString(rawCode); //load da shit
-        interp = new Interp();
-        interp.execute(script);
+        interp = new Interp();       
         //trace(script);
     }
 
@@ -84,11 +84,20 @@ class HscriptShit //thing i wanna do in the future for funni modchart
         interp.variables.set("beatHit", function (beat) {});
         interp.variables.set("instance", PlayState.instance);
         interp.variables.set("PlayState", PlayState);
+        interp.variables.set("Note", Note);
+        interp.variables.set("BabyArrow", BabyArrow);
+        interp.variables.set("StrumLineGroup", StrumLineGroup);
+        interp.variables.set("NotefollowAngle", Note.followAngle);
+        interp.variables.set("NoteStrumLinefollowAngle", Note.StrumLinefollowAngle);
         interp.variables.set("math", Math);
         interp.variables.set("FlxG", FlxG);
         interp.variables.set("FlxMath", FlxMath);
         interp.variables.set("FlxAngle", FlxAngle);
         interp.variables.set("P1Health", PlayState.instance.P1Stats.health);
+        interp.variables.set("StrumLineStartY", PlayState.StrumLineStartY);
+        interp.variables.set("playerStrums", PlayState.playerStrums);
+        interp.variables.set("cpuStrums", PlayState.cpuStrums);
+        interp.variables.set("gfStrums", PlayState.gfStrums);
 
         interp.variables.set("changeValue", function (varToUpdate:String, value:Dynamic) 
         {

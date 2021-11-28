@@ -2371,11 +2371,6 @@ class PlayState extends MusicBeatState
 				spr.strumLineAngle -= 5;
 			});
 
-		playerStrums.forEach(function(spr:BabyArrow)
-		{
-			spr.strumLineAngle = spr.strumLineAngle + 5 * Math.sin((currentBeat * 0.005) * Math.PI);
-		});
-
 		if (generatedMusic)
 		{
 			P1notes.forEachAlive(function(daNote:Note)
