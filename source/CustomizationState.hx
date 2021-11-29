@@ -243,11 +243,9 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
             brightness = FlxMath.roundDecimal(sliderThing.angle, 2);
             updateColors(); //is this even used anymore lol
 
-            SaveData.fixColorArray(maniaToChange); //this changes the array based on mania
-            SaveData.colorArray[curSelectedNote][0] = hue; //saves it every frame so it can show on the notes
-            SaveData.colorArray[curSelectedNote][1] = saturation;
-            SaveData.colorArray[curSelectedNote][2] = brightness;
-            SaveData.updateColorArray(maniaToChange);//this saves it to the array i think???
+            SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][0] = hue;
+            SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][1] = saturation;
+            SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][2] = brightness;
 
 
             if (bf.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!keys.contains(true))) //holding bfs anims, copied from playstate
@@ -274,9 +272,9 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
             playerStrums.forEach(function(spr:BabyArrow) //playing arrow anims
             {
                 if (keys[spr.ID])
-                    spr.playAnim('confirm', true, spr.ID);
+                    spr.playAnim('confirm', true, spr.ID, spr.colorShiz);
                 if (!keys[spr.ID])
-                    spr.playAnim('static', false, spr.ID);
+                    spr.playAnim('static', false, spr.ID, [0,0,0,0]);
             });
 
             for (i in 0...menuList.length) //menu selction shit
@@ -324,9 +322,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                                 if (baseAsset > assetList.length - 1)
                                     baseAsset = 0;
 
-                                SaveData.fixColorArray(maniaToChange);
-                                SaveData.colorArray[curSelectedNote][3] = baseAsset;
-                                SaveData.updateColorArray(maniaToChange);
+                                SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][3] = baseAsset;
                                 changeSelectedNote(curSelectedNote); //still doesnt fucking swithc to pixel fuck you game
                                 createSelectedNote(); //i think i fixed am stupid
                                 changeMania(maniaToChange);
@@ -514,11 +510,10 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         FlxTween.tween(notes.members[curSelectedNote], {y: 320}, 0.2, {ease: FlxEase.expoInOut});
         selectedNote.animation.play(Note.frameN[maniaToChange][curSelectedNote] + 'Scroll');
 
-        SaveData.fixColorArray(maniaToChange);
-        hue = SaveData.colorArray[curSelectedNote][0];
-        saturation = SaveData.colorArray[curSelectedNote][1];
-        brightness = SaveData.colorArray[curSelectedNote][2];
-        baseAsset = Std.int(SaveData.colorArray[curSelectedNote][3]);
+        hue = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][0];
+        saturation = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][1];
+        brightness = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][2];
+        baseAsset = Std.int(SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][3]);
 
         sliderThing.x = hue;
         sliderThing.y = saturation;
@@ -529,10 +524,9 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     {
         var daColor:FlxColor = 0x00FFFFFF; //not even used lol
         
-        SaveData.fixColorArray(maniaToChange);
-        HSV.hue = SaveData.colorArray[curSelectedNote][0];
-        HSV.saturation = SaveData.colorArray[curSelectedNote][1];
-        HSV.brightness = SaveData.colorArray[curSelectedNote][2];
+        HSV.hue = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][0];
+        HSV.saturation = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][1];
+        HSV.brightness = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][2];
 
         HSV.update();
     }
@@ -576,8 +570,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         selectedNote = new FlxSprite(2000, 200);
         var color:String = Note.frameN[maniaToChange][curSelectedNote];
         var pathToUse:Int = 0;
-        SaveData.fixColorArray(maniaToChange);
-        pathToUse = Std.int(SaveData.colorArray[curSelectedNote][3]);
+        pathToUse = Std.int(SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][3]);
 
         var noteColors:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
         if (pathToUse == 5)
@@ -725,8 +718,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                 var note:FlxSprite = new FlxSprite(0, 350);
                 var color:String = Note.frameN[maniaToChange][i];
                 var pathToUse:Int = 0;
-                SaveData.fixColorArray(maniaToChange);
-                pathToUse = Std.int(SaveData.colorArray[i][3]);
+                pathToUse = Std.int(SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][i]][3]);
                 var noteColors:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
                 if (pathToUse == 5)
                 {
@@ -758,10 +750,9 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                 var noteHSV:HSVEffect = new HSVEffect();
                 note.shader = noteHSV.shader;
 
-                SaveData.fixColorArray(maniaToChange);
-                noteHSV.hue = SaveData.colorArray[i][0];
-                noteHSV.saturation = SaveData.colorArray[i][1];
-                noteHSV.brightness = SaveData.colorArray[i][2];
+                noteHSV.hue = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][i]][0];
+                noteHSV.saturation = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][i]][1];
+                noteHSV.brightness = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][i]][2];
 
                 noteHSV.update();
                 note.animation.play(Note.frameN[maniaToChange][i] + 'Scroll');

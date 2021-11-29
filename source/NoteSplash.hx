@@ -18,9 +18,6 @@ class NoteSplash extends FlxSprite
 	var colorsThatDontChange:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'black', 'darkblue', 'orange', 'darkred'];
 	public function new(nX:Float, nY:Float, color:Int)
 	{
-
-
-
 		x = nX;
 		y = nY;
 		super(x, y);
@@ -31,11 +28,11 @@ class NoteSplash extends FlxSprite
 		}
 		antialiasing = true;
 		updateHitbox();
-		makeSplash(nX, nY, color, 1, [PlayState.instance.camP1Notes]);
+		makeSplash(nX, nY, color, 1, [PlayState.instance.camP1Notes], [0,0,0,0]);
 		this.shader = HSV.shader;
 		
 	}
-	public function makeSplash(nX:Float, nY:Float, color:Int, playernum:Int = 1, cameraShit:Array<FlxCamera>) 
+	public function makeSplash(nX:Float, nY:Float, color:Int, playernum:Int = 1, cameraShit:Array<FlxCamera>, colorShiz:Array<Float>) 
 	{
 		this.cameras = cameraShit;
 		var maniaToUse = PlayState.p1Mania;
@@ -46,23 +43,21 @@ class NoteSplash extends FlxSprite
 		angle = FlxG.random.int(0, 360);
         alpha = 0.6;
         
-		var colorShit:Array<Float>;
-		colorShit = SaveData.colorArray[color];
 		if (playernum == 1)
 		{
-			HSV.hue = colorShit[0];
-			HSV.saturation = colorShit[1];
-			HSV.brightness = colorShit[2];
+			HSV.hue = colorShiz[0];
+			HSV.saturation = colorShiz[1];
+			HSV.brightness = colorShiz[2];
 			HSV.update();
 		}
 
 
-		if ((colorShit[3] != 1 && colorShit[3] != 2 && colorShit[3] != 3 && colorShit[3] != 4) || playernum != 1)
+		if ((colorShiz[3] != 1 && colorShiz[3] != 2 && colorShiz[3] != 3 && colorShiz[3] != 4) || playernum != 1)
 			animation.play(colors[color] + ' splash', true);
 		else if (playernum == 1)
 		{
 			var newColors:Array<String> = ['nonelol','purple', 'blue', 'green', 'red'];
-			animation.play(newColors[Std.int(colorShit[3])] + ' splash', true);
+			animation.play(newColors[Std.int(colorShiz[3])] + ' splash', true);
 		}
 
 		animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);

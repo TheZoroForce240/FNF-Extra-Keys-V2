@@ -75,7 +75,7 @@ class BabyArrow extends FlxSprite
 
     var whichPlayer:Int = 0;
     public var stylelol:String = "";
-    var colorShiz:Array<Float>;
+    public var colorShiz:Array<Float>;
     var pathToUse:Int = 0;
     public var scaleMulti:Float = 1;
     public var curMania:Int = 0;
@@ -116,14 +116,15 @@ class BabyArrow extends FlxSprite
 
 		if (player == 0)
         {
-            ColorPresets.fixColorArray(maniaToUse);
-            colorShiz = ColorPresets.ccolorArray[i];
+            colorShiz = ColorPresets.noteColors[BabyArrow.colorFromData[maniaToUse][i]];
         }
         else if (player == 1)
         {
-            SaveData.fixColorArray(maniaToUse);
-            colorShiz = SaveData.colorArray[i];
+            colorShiz = SaveData.noteColors[BabyArrow.colorFromData[maniaToUse][i]];
         }
+
+        if (Note.usingQuant)
+            colorShiz = [0,0,0,4];
         
         if (player != 2)
         {
@@ -165,7 +166,7 @@ class BabyArrow extends FlxSprite
         }
 
 
-        if (isPlayState && (player == 1 || (player == 0 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
+        if (isPlayState && (player == 1 || (player == 0 && PlayState.multiplayer || PlayState.flipped)) && SaveData.arrowLanes != "Off")
         {
             lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[maniaToUse]), Std.int(FlxG.height * 2), flxcolorToUse);
             PlayState.instance.add(lane);
@@ -324,7 +325,7 @@ class BabyArrow extends FlxSprite
 
 
     }
-    public function playAnim(anim:String, ?force:Bool = false, id:Int)
+    public function playAnim(anim:String, ?force:Bool = false, id:Int, colorShit:Array<Float>)
     {
         animation.play(anim, force);
         centerOffsets();  
@@ -337,20 +338,10 @@ class BabyArrow extends FlxSprite
         }
         else
         {
-            if (whichPlayer == 1)
-            {
-                HSV.hue = colorShiz[0];
-                HSV.saturation = colorShiz[1];
-                HSV.brightness = colorShiz[2];
-                HSV.update();
-            }
-            else if (whichPlayer == 0)
-            {
-                HSV.hue = colorShiz[0];
-                HSV.saturation = colorShiz[1];
-                HSV.brightness = colorShiz[2];
-                HSV.update(); 
-            }
+            HSV.hue = colorShit[0];
+            HSV.saturation = colorShit[1];
+            HSV.brightness = colorShit[2];
+            HSV.update();
         }
 
         if (stylelol != "pixel")

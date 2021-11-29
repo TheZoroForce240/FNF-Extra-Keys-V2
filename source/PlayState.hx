@@ -128,6 +128,7 @@ class PlayState extends MusicBeatState
 	public static var regeneratingNotes:Bool = false;
 	static var rewindOnDeath = false;
 	public static var allowSpeedChanges:Bool = true;
+	public static var legacyModcharts:Bool = false; //id prefer to use new modcharts rather than shitty event notes
 
 	public static var StrumLineStartY:Float = 50;
 	public static var healthToDieOn:Float = 0;
@@ -158,16 +159,16 @@ class PlayState extends MusicBeatState
 	public static var dadDefaultCamOffset:Array<Int> = [150, 100];
 
 	var oppenentColors:Array<Array<Float>>; //oppenents arrow colors and assets
-	private var gfSpeed:Int = 1;
-	private var combinedHealth:Float = 1;
+	public var gfSpeed:Int = 1;
+	private var combinedHealth:Float = 1; //dont mess with this using modcharts
 
 	//note stuff
-	private var P1notes:FlxTypedGroup<Note>; //bf
-	private var P2notes:FlxTypedGroup<Note>; //dad
-	private var P3notes:FlxTypedGroup<Note>; //gf (events notes pretty much lol)
-	private var unspawnNotes:Array<Note> = [];
-	var noteSplashes:FlxTypedGroup<NoteSplash>;
-	var P2noteSplashes:FlxTypedGroup<NoteSplash>;
+	public var P1notes:FlxTypedGroup<Note>; //bf
+	public var P2notes:FlxTypedGroup<Note>; //dad
+	public var P3notes:FlxTypedGroup<Note>; //gf (events notes pretty much lol)
+	public var unspawnNotes:Array<Note> = [];
+	public var noteSplashes:FlxTypedGroup<NoteSplash>;
+	public var P2noteSplashes:FlxTypedGroup<NoteSplash>;
 
 	public static var poisonDrain:Float = 0.075;
 	public static var drainNoteAmount:Float = 0.025;
@@ -202,9 +203,9 @@ class PlayState extends MusicBeatState
 	public static var GFsDir:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT']; //for gf
 
 	//some more song stuff
-	private var strumLine:FlxSprite; //the strumline (just for static arrow placement)
+	public var strumLine:FlxSprite; //the strumline (just for static arrow placement)
 	private var curSection:Int = 0; //current section
-	public var currentSection:SwagSection; //the current section again lol, but its actually the section not just a number
+	private var currentSection:SwagSection; //the current section again lol, but its actually the section not just a number
 
 	//static arrows
 	public static var strumLineNotes:StrumLineGroup = null;
@@ -269,17 +270,17 @@ class PlayState extends MusicBeatState
 	//hud shit
 	public var iconP1:HealthIcon; 
 	public var iconP2:HealthIcon;
-	private var healthBarBG:FlxSprite;
-	private var healthBar:FlxBar;
-	var scoreTxt:FlxText;
-	var P2scoreTxt:FlxText;
-	var timeText:FlxText;
-	var songtext:String; //for time text
-	var modeText:String; //also for time text
-	var botPlayTxt:FlxText;
+	public var healthBarBG:FlxSprite;
+	public var healthBar:FlxBar;
+	public var scoreTxt:FlxText;
+	public var P2scoreTxt:FlxText;
+	public var timeText:FlxText;
+	public var songtext:String; //for time text
+	public var modeText:String; //also for time text
+	public var botPlayTxt:FlxText;
 	//private var P2healthBar:FlxBar; //fuck this it will take too long
-	var hudThing:FlxTextAlign = LEFT;
-	var songhudThing:FlxTextAlign = CENTER;
+	public var hudThing:FlxTextAlign = LEFT;
+	public var songhudThing:FlxTextAlign = CENTER;
 
 	//camera shit
 	public var camHUD:FlxCamera;
@@ -290,9 +291,9 @@ class PlayState extends MusicBeatState
 	public var camOnTop:FlxCamera;
 	private var camGame:FlxCamera;
 
-	private var camZooming:Bool = false;
-	private var camFollow:FlxObject;
-	private static var prevCamFollow:FlxObject;
+	public var camZooming:Bool = false;
+	public var camFollow:FlxObject;
+	public static var prevCamFollow:FlxObject;
 	public var camSpeed:Float = 0.04;
 	public static var defaultCamZoom:Float = 1.05;
 
@@ -309,7 +310,7 @@ class PlayState extends MusicBeatState
 	public var dancingStagePieces:FlxTypedGroup<StagePiece>; //for stage pieces that bop/dance/whatever every beat, no need for a variable/hx
 	var stageException:Bool = false; //just used for week 6 stage, because of its weird set graphic size shit, oh wait i fixed it right
 	var stageOffsets:Map<String, Array<Dynamic>>;
-	var limo:StagePiece; //for the shitty layering
+	public var limo:StagePiece; //for the shitty layering
 	var pieceArray = [];
 	public static var stageData:Array<Dynamic>;
 
@@ -328,9 +329,9 @@ class PlayState extends MusicBeatState
 	//for flip and multiplayer
 	public static var flipped:Bool = false;
 	public static var multiplayer:Bool = false;
-	var player:Boyfriend;
-	var player2:Boyfriend;
-	var cpu:Boyfriend;
+	public var player:Boyfriend;
+	public var player2:Boyfriend;
+	public var cpu:Boyfriend;
 	var centerHealthBar:Bool = false;
 
 
@@ -343,7 +344,7 @@ class PlayState extends MusicBeatState
 	#end
 
 	public var modchartScript:HscriptShit;
-	function call(tfisthis:String, shitToGoIn:Array<Dynamic>)
+	public function call(tfisthis:String, shitToGoIn:Array<Dynamic>)
 	{
 		if (modchartScript.enabled)
 			modchartScript.call(tfisthis, shitToGoIn); //because
@@ -1560,8 +1561,6 @@ class PlayState extends MusicBeatState
 					NoteSplash.colors = ['purple', 'white', 'red'];
 			}
 		}
-		
-		SaveData.fixColorArray(mania);
 
 		//FlxG.sound.music.onComplete = endSong;
 		vocals.play();
@@ -1806,6 +1805,18 @@ class PlayState extends MusicBeatState
 		}
 		else
 		{
+			if (daNote.active == false)
+			{
+				switch (strums)
+				{
+					case "player": 
+						call('P1NoteNowOnScreen', [daNote]);
+					case "gf": 
+						call('P3NoteNowOnScreen', [daNote]);
+					default: 
+						call('P2NoteNowOnScreen', [daNote]);
+				}
+			}
 			daNote.visible = true;
 			daNote.active = true;
 		}
@@ -1967,23 +1978,25 @@ class PlayState extends MusicBeatState
 
 			if (flipped)
 			{
+				call('P1CpuNoteHit', [daNote]);
 				playerStrums.forEach(function(spr:BabyArrow)
 				{
 					if (Math.abs(noteData) == spr.ID)
 					{
 						if (!daNote.badNoteType)
-							spr.playAnim('confirm', true, spr.ID);
+							spr.playAnim('confirm', true, spr.ID, daNote.colorShit);
 					}
 				});
 			}
 			else
 			{
+				call('P2CpuNoteHit', [daNote]);
 				cpuStrums.forEach(function(spr:BabyArrow)
 				{
 					if (Math.abs(noteData) == spr.ID)
 					{
 						if (!daNote.badNoteType)
-							spr.playAnim('confirm', true, spr.ID);
+							spr.playAnim('confirm', true, spr.ID, daNote.colorShit);
 					}
 				});
 			}
@@ -2031,6 +2044,8 @@ class PlayState extends MusicBeatState
 			if (Note.noteTypeList[daNote.noteType] == "alt")
 				altAnim = '-alt';
 
+			call('P3CpuNoteHit', [daNote]);
+
 			if (!daNote.isSustainNote)
 			{
 				var eventName = daNote.eventData[0];
@@ -2057,7 +2072,7 @@ class PlayState extends MusicBeatState
 					if (Math.abs(noteData) == spr.ID)
 					{
 						if (!daNote.badNoteType)
-							spr.playAnim('confirm', true, spr.ID);
+							spr.playAnim('confirm', true, spr.ID, daNote.colorShit);
 					}
 				});
 			}
@@ -2148,18 +2163,22 @@ class PlayState extends MusicBeatState
 
 		var currentBeat = (Conductor.songPosition / 1000)*(SONG.bpm/60);
 
-		playerStrums.forEach(function(spr:BabyArrow) //uhhh make this better //TODO
+		if (legacyModcharts)
 		{
-			ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "X", currentBeat);
-			ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "Y", currentBeat);
-			ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "Angle", currentBeat);
-		});
-		cpuStrums.forEach(function(spr:BabyArrow)
-		{
-			ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "X", currentBeat);
-			ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "Y", currentBeat);
-			ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "Angle", currentBeat);
-		});
+			playerStrums.forEach(function(spr:BabyArrow) //these shitty
+				{
+					ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "X", currentBeat);
+					ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "Y", currentBeat);
+					ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "Angle", currentBeat);
+				});
+				cpuStrums.forEach(function(spr:BabyArrow)
+				{
+					ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "X", currentBeat);
+					ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "Y", currentBeat);
+					ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "Angle", currentBeat);
+				});
+		}
+
 
 		/*var shit = defaultCamScaleX + 1 * Math.sin((currentBeat * 1) * Math.PI);
 		camP1Notes.setScale(shit, camP1Notes.scaleY);*/ //just messing around
@@ -2200,6 +2219,7 @@ class PlayState extends MusicBeatState
 			Main.editor = true;
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN,handleInput);
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, releaseInput);
+			call('endScript', []);
 		}
 
 		// FlxG.watch.addQuick('VOL', vocals.amplitudeLeft);
@@ -2431,6 +2451,8 @@ class PlayState extends MusicBeatState
 	{
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN,handleInput);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, releaseInput);
+		call('endSong', []);
+		call('endScript', []);
 		canPause = false;
 		endingSong = true;
 		FlxG.sound.music.volume = 0;
@@ -2935,9 +2957,13 @@ class PlayState extends MusicBeatState
 
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 			if (daNote.mustPress)
+			{
+				call('P1NoteMiss', [daNote]);
 				shit.playAnim('sing' + sDir[mania][direction] + 'miss', true);
+			}	
 			else
 			{
+				call('P2NoteMiss', [daNote]);
 				shit.color = 0x00303f97;
 				shit.playAnim('sing' + sDir[mania][direction], true);
 			}
@@ -2987,9 +3013,13 @@ class PlayState extends MusicBeatState
 
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 			if (playernum == 1 && !flipped)
+			{
+				call('P1MissPress', [direction]);
 				shit.playAnim('sing' + sDir[mania][direction] + 'miss', true);
+			}
 			else
 			{
+				call('P2MissPress', [direction]);
 				shit.color = 0x00303f97;
 				shit.playAnim('sing' + sDir[mania][direction], true);
 			}
@@ -3053,12 +3083,14 @@ class PlayState extends MusicBeatState
 
 			if (playernum == 1)
 			{
+				call('P1NoteHit', [note]);
 				player.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
 				player.holdTimer = 0;
 				player.noteCamMovement = noteCamMovementShit(note.noteData, 1);
 			}
 			else
 			{
+				call('P2NoteHit', [note]);
 				player2.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
 				player2.holdTimer = 0;
 				player2.noteCamMovement = noteCamMovementShit(note.noteData, 0);
@@ -3080,7 +3112,7 @@ class PlayState extends MusicBeatState
 				{
 					if (Math.abs(note.noteData) == spr.ID)
 					{
-						spr.playAnim('confirm', true, spr.ID);
+						spr.playAnim('confirm', true, spr.ID, note.colorShit);
 					}
 				});
 			}
@@ -3093,7 +3125,7 @@ class PlayState extends MusicBeatState
 						{
 							if (Math.abs(note.noteData) == spr.ID)
 							{
-								spr.playAnim('confirm', true, spr.ID);
+								spr.playAnim('confirm', true, spr.ID, note.colorShit);
 							}
 						});
 					case 1: 
@@ -3101,7 +3133,7 @@ class PlayState extends MusicBeatState
 						{
 							if (Math.abs(note.noteData) == spr.ID)
 							{
-								spr.playAnim('confirm', true, spr.ID);
+								spr.playAnim('confirm', true, spr.ID, note.colorShit);
 							}
 						});
 				}
@@ -3117,7 +3149,7 @@ class PlayState extends MusicBeatState
 			if (!note.isSustainNote)
 			{
 				if (note.rating == "sick")
-					doNoteSplash(note.x, note.y, note.noteData, playernum, note.cameras);
+					doNoteSplash(note.x, note.y, note.noteData, playernum, note.cameras, note.colorShit);
 				removeNote(note, strums);
 			}
 			grace = true;
@@ -3127,7 +3159,7 @@ class PlayState extends MusicBeatState
 			});
 		}
 	}
-	function doNoteSplash(noteX:Float, noteY:Float, nData:Int, playernum:Int = 1, cameraShit:Array<FlxCamera>)
+	function doNoteSplash(noteX:Float, noteY:Float, nData:Int, playernum:Int = 1, cameraShit:Array<FlxCamera>, colorShit:Array<Float>)
 		{
 			var recycledNote = noteSplashes.recycle(NoteSplash);
 			var xPos:Float = 0;
@@ -3141,7 +3173,7 @@ class PlayState extends MusicBeatState
 				yPos = cpuStrums.members[nData].y;
 			}
 
-			recycledNote.makeSplash(xPos, yPos, nData, playernum, cameraShit);
+			recycledNote.makeSplash(xPos, yPos, nData, playernum, cameraShit, colorShit);
 			if (playernum == 1)
 				noteSplashes.add(recycledNote);
 			else
@@ -3383,7 +3415,7 @@ class PlayState extends MusicBeatState
 	
 			strums.forEach(function(spr:BabyArrow)
 			{
-				spr.playAnim('static', true, spr.ID); //changes to static because it can break the scaling of the static arrows if they are doing the confirm animation
+				spr.playAnim('static', true, spr.ID, [0,0,0,0]); //changes to static because it can break the scaling of the static arrows if they are doing the confirm animation
 				if (spr.stylelol == "pixel")
 					spr.setGraphicSize(Std.int(spr.defaultWidth * PlayState.daPixelZoom * Note.pixelnoteScale * spr.scaleMulti));
 				else 
@@ -3622,7 +3654,7 @@ class PlayState extends MusicBeatState
 		{
 			if (spr.animation.finished)
 			{
-				spr.playAnim('static',false , spr.ID);
+				spr.playAnim('static',false , spr.ID, [0,0,0,0]);
 				spr.centerOffsets();
 			}
 		});
@@ -3651,9 +3683,9 @@ class PlayState extends MusicBeatState
 		strums.forEach(function(spr:BabyArrow)
 			{
 				if (daKeys[spr.ID] && spr.animation.curAnim.name != 'confirm' && spr.animation.curAnim.name != 'pressed')
-					spr.playAnim('pressed', false, spr.ID);
+					spr.playAnim('pressed', false, spr.ID, spr.colorShiz);
 				if (!daKeys[spr.ID])
-					spr.playAnim('static', false, spr.ID);
+					spr.playAnim('static', false, spr.ID, [0,0,0,0]);
 			});
 	}
 
@@ -3685,11 +3717,21 @@ class PlayState extends MusicBeatState
 			else 
 			{
 				if (dunceNote.isGFNote)
+				{
+					call('P3NoteSpawned', [dunceNote]);
 					P3notes.add(dunceNote);
+				}	
 				else if (dunceNote.mustPress)
+				{
+					call('P1NoteSpawned', [dunceNote]);
 					P1notes.add(dunceNote);
+				}
 				else if (!dunceNote.mustPress)
+				{
+					call('P2NoteSpawned', [dunceNote]);
 					P2notes.add(dunceNote);
+				}
+					
 			}
 
 			

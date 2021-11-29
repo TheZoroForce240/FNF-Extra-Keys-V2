@@ -50,23 +50,24 @@ class SaveData
 
     public static var arrowLanes:String = "Off";
     public static var laneOpacity:Float = 0.2;
-
+    public static var noteQuant:Bool = false;
 
     public static var splitScroll:Bool = false; 
     public static var P2splitScroll:Bool = false;
     public static var offset:Int = 0;
 
     //hue, saturation, brightness, asset
-    public static var purple:Array<Float> = [0, 0, 0, 0];
-    public static var blue:Array<Float> = [0, 0, 0, 0];
-    public static var green:Array<Float> = [0, 0, 0, 0];
-    public static var red:Array<Float> = [0, 0, 0, 0];
-    public static var white:Array<Float> = [0, 0, 0, 0];
-    public static var yellow:Array<Float> = [0, 0, 0, 0];
-    public static var violet:Array<Float> = [0, 0, 0, 0];
-    public static var darkred:Array<Float> = [0, 0, 0, 0];
-    public static var dark:Array<Float> = [0, 0, 0, 0];
-    public static var colorArray:Array<Array<Float>> = [purple,blue,green,red,white,yellow,violet,darkred,dark];
+    public static var noteColors:Array<Array<Float>> = [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ];
 
 
     public static function saveDataCheck()
@@ -150,6 +151,9 @@ class SaveData
         if (FlxG.save.data.offset == null)
             FlxG.save.data.offset = 0;
 
+        if (FlxG.save.data.noteQuant == null)
+            FlxG.save.data.noteQuant = false;
+
 
         
 
@@ -173,6 +177,19 @@ class SaveData
             FlxG.save.data.darkred = [0, 0, 0, 0];
         if (FlxG.save.data.dark == null)
             FlxG.save.data.dark = [0, 0, 0, 0];
+
+        if (FlxG.save.data.noteColors == null)
+            FlxG.save.data.noteColors = [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ];
 
         keyBindCheck();
 
@@ -202,15 +219,7 @@ class SaveData
         FlxG.save.data.offset = offset;
 
 
-        FlxG.save.data.purple = purple;
-        FlxG.save.data.blue = blue;
-        FlxG.save.data.green = green;
-        FlxG.save.data.red = red;
-        FlxG.save.data.white = white;
-        FlxG.save.data.yellow = yellow;
-        FlxG.save.data.violet = violet;
-        FlxG.save.data.darkred = darkred;
-        FlxG.save.data.dark = dark;
+        FlxG.save.data.noteColors = noteColors;
 
         FlxG.save.flush();
     }
@@ -243,16 +252,7 @@ class SaveData
         P2splitScroll = FlxG.save.data.P2splitScroll;
         offset = FlxG.save.data.offset;
 
-        purple = FlxG.save.data.purple;
-        blue = FlxG.save.data.blue;
-        green = FlxG.save.data.green;
-        red = FlxG.save.data.red;
-        white = FlxG.save.data.white;
-        yellow = FlxG.save.data.yellow;
-        violet = FlxG.save.data.violet;
-        darkred = FlxG.save.data.darkred;
-        dark = FlxG.save.data.dark;
-        colorArray = [purple,blue,green,red,white,yellow,violet,darkred,dark];
+        noteColors = FlxG.save.data.noteColors;
     }
     public static function ResetData()
     {
@@ -267,16 +267,6 @@ class SaveData
         FlxG.save.data.flip = false;
         FlxG.save.data.noteMovements = false;
         FlxG.save.data.speedScaling = false;
-        FlxG.save.data.purple = [0, 0, 0, 0];
-        FlxG.save.data.blue = [0, 0, 0, 0];
-        FlxG.save.data.green = [0, 0, 0, 0];
-        FlxG.save.data.red = [0, 0, 0, 0];
-        FlxG.save.data.white = [0, 0, 0, 0];
-        FlxG.save.data.yellow = [0, 0, 0, 0];
-        FlxG.save.data.violet = [0, 0, 0, 0];
-        FlxG.save.data.darkred = [0, 0, 0, 0];
-        FlxG.save.data.dark = [0, 0, 0, 0];
-        
 
         readTheData();
         saveTheData();
@@ -328,92 +318,7 @@ class SaveData
                     ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "X", "A", "B"],
                     ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "DPAD_RIGHT", "LEFT_TRIGGER", "X", "A", "Y", "B"]
                 ];
-        }    
-    public static function updateColorArray(mania:Int):Void //its better than having shit loads of case statements for every single thing
-    {
-        switch (mania)
-        {
-            case 0: 
-                purple = colorArray[0];
-                blue = colorArray[1];
-                green = colorArray[2];
-                red = colorArray[3];
-            case 1: 
-                purple = colorArray[0];
-                green = colorArray[1];
-                red = colorArray[2];
-                yellow = colorArray[3];
-                blue = colorArray[4];
-                dark = colorArray[5];
-            case 2: 
-                purple = colorArray[0];
-                blue = colorArray[1];
-                green = colorArray[2];
-                red = colorArray[3];
-                white = colorArray[4];
-                yellow = colorArray[5];
-                violet = colorArray[6];
-                darkred = colorArray[7];
-                dark = colorArray[8];
-            case 3: 
-                purple = colorArray[0];
-                blue = colorArray[1];
-                white = colorArray[2];
-                green = colorArray[3];
-                red = colorArray[4];
-            case 4: 
-                purple = colorArray[0];
-                green = colorArray[1];
-                red = colorArray[2];
-                white = colorArray[3];
-                yellow = colorArray[4];
-                blue = colorArray[5];
-                dark = colorArray[6];
-            case 5: 
-                purple = colorArray[0];
-                blue = colorArray[1];
-                green = colorArray[2];
-                red = colorArray[3];
-                yellow = colorArray[4];
-                violet = colorArray[5];
-                darkred = colorArray[6];
-                dark = colorArray[7];
-            case 6: 
-                white = colorArray[0];
-            case 7: 
-                purple = colorArray[0];
-                red = colorArray[1];
-            case 8: 
-                purple = colorArray[0];
-                white = colorArray[1];
-                red = colorArray[2];
-
         }
-        fixColorArray(mania);
-            
-    }
-    public static function fixColorArray(mania:Int):Void //adjust color order based on amount of keys
-    {
-        switch (mania)
-        {
-            case 1: 
-                colorArray = [purple, green, red, yellow, blue, dark];
-            case 2: 
-                colorArray = [purple, blue, green, red, white, yellow, violet, darkred, dark];
-            case 3: 
-                colorArray = [purple, blue, white, green, red];
-            case 4: 
-                colorArray = [purple, green, red, white, yellow, blue, dark];
-            case 5: 
-                colorArray = [purple, blue, green, red, yellow, violet, darkred, dark];
-            case 6: 
-                colorArray = [white];
-            case 7: 
-                colorArray = [purple, red];
-            case 8: 
-                colorArray = [purple, white, red];
-        }
-    }
 
     public static function ResetColors():Void //i think you can figure out what this does
     {
@@ -426,6 +331,17 @@ class SaveData
         FlxG.save.data.violet = [0, 0, 0, 0];
         FlxG.save.data.darkred = [0, 0, 0, 0];
         FlxG.save.data.dark = [0, 0, 0, 0];
+        FlxG.save.data.noteColors = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
         
         readTheData();
         saveTheData();

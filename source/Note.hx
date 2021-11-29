@@ -158,7 +158,7 @@ class Note extends FlxSprite
 	];
 	public var style:String = "";
 	public static var noteColors:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
-	var colorShit:Array<Float>;
+	public var colorShit:Array<Float>;
 	var pathToUse:Int = 0;
 
 	public static var pixelAssetPaths:Array<Array<String>> = [ //for noteTypes, epic code cleanup
@@ -222,8 +222,8 @@ class Note extends FlxSprite
 
 	//wip note quantization stuff
 	public var noteColor:String = "purple";
-	public static var usingQuant:Bool = false;
-	static var beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64];
+	public static var usingQuant:Bool = SaveData.noteQuant;
+	static var beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64, 192];
 
 	////////////////////////////////////////////////////////////
 
@@ -237,8 +237,7 @@ class Note extends FlxSprite
 
 	public function new(strumTime:Float, _noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Float>, ?charter = false, ?_gfNote, ?_mustPress:Bool = false, ?_eventData:Array<String>, ?prevNote:Note)
 	{
-
-
+		usingQuant = SaveData.noteQuant;
 
 		swagWidth = 160 * 0.7;
 		noteScale = 0.7;
@@ -251,7 +250,6 @@ class Note extends FlxSprite
 			noteScale = noteScales[mania];
 			pixelnoteScale = pixelNoteScales[mania];
 		}
-
 
 		if (!PlayState.regeneratingNotes)
 		{
@@ -335,8 +333,7 @@ class Note extends FlxSprite
 				curMania = PlayState.curP2NoteMania;
 			else
 				curMania = PlayState.prevP2NoteMania;
-			ColorPresets.fixColorArray(mania);
-			colorShit = ColorPresets.ccolorArray[noteData];
+			colorShit = ColorPresets.noteColors[BabyArrow.colorFromData[mania][noteData]];
 		}
 		else
 		{
@@ -344,9 +341,11 @@ class Note extends FlxSprite
 				curMania = PlayState.curP1NoteMania;
 			else
 				curMania = PlayState.prevP1NoteMania;
-			SaveData.fixColorArray(mania);
-			colorShit = SaveData.colorArray[noteData];
+			colorShit = SaveData.noteColors[BabyArrow.colorFromData[mania][noteData]];
 		}
+		if (Note.usingQuant)
+            colorShit = [0,0,0,4];
+
 		if (isGFNote)
 			curMania = 0;
 
@@ -673,12 +672,11 @@ class Note extends FlxSprite
 
 	function quantCheck():Void 
 	{
-		if (!inCharter && usingQuant && !isSustainNote) //TODO finish this lol
+		if (usingQuant && !isSustainNote) //TODO finish this lol
 			{
 				pathToUse = 4; //use red notes
 			
-				var beat = Math.round((strumTime % (Conductor.crochet) * 48));
-				
+				var beat = Math.round((strumTime / (Conductor.stepCrochet * 4)) * 48); //TODO set up for da bpm changes
 				for (i in 0...beats.length)
 				{
 					if (beat % (192 / beats[i]) == 0)
@@ -687,8 +685,6 @@ class Note extends FlxSprite
 						break;
 					}			
 				}
-				trace("beat: " + beat);
-				//trace(Conductor.crochet);
 				switch (beat)
 				{
 					case 4: //red

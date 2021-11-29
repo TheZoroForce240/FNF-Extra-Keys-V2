@@ -58,6 +58,7 @@ class ChartingState extends MusicBeatState
 	public static var lastSection:Int = 0;
 
 	var bpmTxt:FlxText;
+	var tutorialTxt:FlxText;
 	var songSlider:FlxSlider;
 
 	var strumLine:FlxSprite;
@@ -142,6 +143,11 @@ class ChartingState extends MusicBeatState
 
 	var hitSound:FlxSound;
 	var pitches:Array<Float> = [1.5, 0.5, 1, 2, 0.7, 1.6, 2.3, 0.3, 1.2]; //kinda just picked random ones
+
+	var snaps:Array<Float> = [1, 2, 3/4, 4, 3/8, 3/16]; //anything larger is pretty pointless
+	var curSnap:Int = 0;
+
+	var tutorialText = "(Left Click) Place/Delete a note.\n(Hold Shift) unsnap from Grid, \n(TAB) change the current snap.\n(Control + Left Click) a note to select it.\n(Q/E) extend a note's sustain length\n(Right Click+Hold) pull the sustain length of a note to your mouse.\n(W/S or Scroll Wheel) move the strumLine while paused.\n(Left/Right Arrow Keys or A/D) Change Current Section. (Hold Shift to move 4 sections)\n(Space) Pause/Play the Song\n(Hold Z/X) Draw Tool, autoplaces notes wherever your mouse is. (X deletes instead)"; //because
 
 	override function create()
 	{
@@ -283,6 +289,12 @@ class ChartingState extends MusicBeatState
 		bpmTxt.scrollFactor.set();
 		add(bpmTxt);
 
+		tutorialTxt = new FlxText(1000, 50, 10000, "", 8);
+		tutorialTxt.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+		tutorialTxt.scrollFactor.set();
+		add(tutorialTxt);
+		tutorialTxt.text = tutorialText;
+
 		curSectionText = new FlxText(gridBG.x - 50, gridBG.y, 0, "", 16);
 		curSectionText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		add(curSectionText);
@@ -311,6 +323,8 @@ class ChartingState extends MusicBeatState
 		UI_box.x = FlxG.width / 2 + 40;
 		UI_box.y = 20;
 		add(UI_box);
+
+		tutorialTxt.y = UI_box.y + UI_box.height + 200;
 
 		addSongUI();
 		addSectionUI();
@@ -1295,16 +1309,21 @@ class ChartingState extends MusicBeatState
 			if (!player2.animation.curAnim.name.startsWith("sing"))
 				player2.dance();
 		}
+		if (FlxG.keys.justPressed.TAB)
+		{
+			curSnap++;
+			if (curSnap >= snaps.length)
+				curSnap = 0;
+		}
 		
 		if (isDaMouseInGrid)
 		{
 			var arX = Math.floor(FlxG.mouse.x / GRID_SIZE) * GRID_SIZE;
-			if (_song.mania == 2 || _song.mania == 5) arX = Math.floor(FlxG.mouse.x / S_GRID_SIZE) * S_GRID_SIZE;
 			dummyArrow.x = arX;
 			if (FlxG.keys.pressed.SHIFT)
 				dummyArrow.y = FlxG.mouse.y;
 			else
-				dummyArrow.y = Math.floor(FlxG.mouse.y / GRID_SIZE) * GRID_SIZE;
+				dummyArrow.y = Math.floor(FlxG.mouse.y / (GRID_SIZE / snaps[curSnap])) * (GRID_SIZE / snaps[curSnap]);
 		}
 
 		if (FlxG.keys.justPressed.ENTER)
@@ -1449,6 +1468,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		_song.bpm = tempBpm;
+		var tempStep:String = Std.string(curStep);
 
 		bpmTxt.text = bpmTxt.text = Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2))
 			+ " / "
@@ -1456,7 +1476,9 @@ class ChartingState extends MusicBeatState
 			+ "\nSection: "
 			+ curSection
 			+ "\nCurStep: "
-			+ curStep;
+			+ tempStep
+			+ "\nCurrent Snap: "
+			+ snaps[curSnap];
 		super.update(elapsed);
 	}
 

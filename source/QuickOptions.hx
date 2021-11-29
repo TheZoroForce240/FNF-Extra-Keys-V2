@@ -23,6 +23,7 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
     var categories:Array<Dynamic>; //main section
 
     var gameplay:Array<Dynamic>;
+    var scrolls:Array<Dynamic>;
     var misc:Array<Dynamic>;
     var keybinds:Array<Dynamic>;
     var P2keybinds:Array<Dynamic>;
@@ -131,6 +132,9 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                             case "Gameplay": 
                                 curCategory = gameplay;
                                 daCat = "Gameplay";
+                            case "Scrolls": 
+                                curCategory = scrolls;
+                                daCat = "Scrolls";
                             case "Misc": 
                                 curCategory = misc;
                                 daCat = "Misc";
@@ -371,6 +375,7 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
         //make sure you dont mess up your commas lol
         categories = [
             ["Gameplay", "", "cat"],
+            ["Scrolls", "", "cat"],
             ["Misc", "", "cat"],
             ["Keybinds", "", "cat"],
             ["P2 Keybinds", "", "cat"],
@@ -381,8 +386,6 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
         ];
         //name, savedata, type of option, info
         gameplay = [ 
-            ["P1 Downscroll", SaveData.downscroll, "toggle", "Flip Da Notes"],
-            ["P2 Downscroll", SaveData.P2downscroll, "toggle", "Flip Da Notes but for the second guy"],
             ["Ghost Tapping", SaveData.ghost, "toggle", "Turning on this means you dont miss when misspressing a note"],
             ["Scroll Speed", SaveData.ScrollSpeed, "slider", "Change the default scroll speed (does not include notes changed by the chart)"],
             ["Casual Mode", SaveData.casual, "toggle", "More Spammable Input, Heal from Sustains and no health loss from bad accuracy"],
@@ -390,12 +393,17 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["Strumtime Offset", SaveData.offset, "slider", "offset notes to match your audio delay"]
         ];
     
-        misc = [ 
+        scrolls = [
+            ["P1 Downscroll", SaveData.downscroll, "toggle", "Flip Da Notes"],
+            ["P2 Downscroll", SaveData.P2downscroll, "toggle", "Flip Da Notes but for the second guy"],
             ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"],
             ["P1 Splitscroll", SaveData.splitScroll, "toggle", "Both Upscroll and downscroll (change normal downscroll setting to switch the side thats flipped)"],
-            ["P2 Splitscroll", SaveData.P2splitScroll, "toggle", "Both Upscroll and downscroll (change normal downscroll setting to switch the side thats flipped)"],
+            ["P2 Splitscroll", SaveData.P2splitScroll, "toggle", "Both Upscroll and downscroll (change normal downscroll setting to switch the side thats flipped)"]
+        ];
+        misc = [ 
             ["Note Splash", SaveData.noteSplash, "toggle", "Turn on the funni effect when hitting sicks"],
             ["FPS Cap", SaveData.fps, "slider", "Turn up for more frames"],
+            ["Note Quantization", SaveData.noteQuant, "toggle", "Notes are colored based on the beat\nNote: disables note customization"],
             ["Camera Movements on Note Hits", SaveData.noteMovements, "toggle", "the thing that every mod does now"],
             ["Scale Speed with Mania", SaveData.speedScaling, "toggle", "Scales down the speed based on note scale \n(so the same scroll speed should feel mostly the same for every mania)"]
         ];
@@ -493,6 +501,8 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
         {
             case "Gameplay": 
                 curCategory = gameplay;
+            case "Scrolls":
+                curCategory = scrolls;
             case "Misc": 
                 curCategory = misc;
             case "Keybinds": 
@@ -583,6 +593,8 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                     SaveData.splitScroll = curCategory[i][1];
                 case "P2 Splitscroll": 
                     SaveData.P2splitScroll = curCategory[i][1];
+                case "Note Quantization": 
+                    SaveData.noteQuant = curCategory[i][1];
 /////////////////////////////////////////////////////////////////////////////////////////
                 case "Randomize Notes": 
                     SaveData.randomNotes = curCategory[i][1];

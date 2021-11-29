@@ -207,62 +207,6 @@ class ModchartUtil
             trace("error or something idk");
         }
     }
-    public static function CalculateCharaterFloat(i:Character, thingToCalculate:String = "X", beat:Float)
-        {
-            var CalculatedShit:Float = 0;
-            var stringToBeExecuted:String = "";
-            var shit:Int = 0;
-            switch (thingToCalculate)
-            {
-                case "X": 
-                    shit = 0;
-                case "Y": 
-                    shit = 1;
-                case "Angle":
-                    shit = 2;
-            }
-            stringToBeExecuted = i.floatInfo[shit];
-    
-            if (stringToBeExecuted == "")
-                return;
-    
-            interp.variables.set("x", i.defaultPos[0]);
-            interp.variables.set("y", i.defaultPos[1]);
-            interp.variables.set("defaultAngle", i.defaultPos[2]);
-            interp.variables.set("currentBeat", beat);
-            interp.variables.set("math", Math);
-            interp.variables.set("FlxG", FlxG);
-            interp.variables.set("FlxMath", FlxMath);
-            interp.variables.set("FlxAngle", FlxAngle);
-            interp.variables.set("FlxPoint", FlxPoint);
-            interp.variables.set("FlxRandom", FlxRandom);
-            interp.variables.set("FlxRect", FlxRect);
-            interp.variables.set("FlxVelocity", FlxVelocity);
-    
-            var parser = new Parser();
-            var expr:Expr;
-    
-            try
-            {
-                expr = parser.parseString(stringToBeExecuted);
-                CalculatedShit = interp.execute(expr);
-                
-                switch (thingToCalculate)
-                {
-                    case "X": 
-                        i.x = CalculatedShit;
-                    case "Y": 
-                        i.y = CalculatedShit;
-                    case "Angle":
-                        i.angle = CalculatedShit;
-                }
-            }
-            catch (unknown:Dynamic)
-            {
-                trace("error or something idk");
-            }
-        }
-
 
     function getEase(ease:String = '')
     {

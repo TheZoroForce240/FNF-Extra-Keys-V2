@@ -80,22 +80,27 @@ class Character extends FlxSprite
 
 	public var flip:Bool = false;
 
-	public var purple:Array<Float> = [0, 0, 0, 0]; //all 0 means no hsv change + default assets
-    public var blue:Array<Float> = [0, 0, 0, 0];
-    public var green:Array<Float> = [0, 0, 0, 0];
-    public var red:Array<Float> = [0, 0, 0, 0];
-    public var white:Array<Float> = [0, 0, 0, 0];
-    public var yellow:Array<Float> = [0, 0, 0, 0];
-    public var violet:Array<Float> = [0, 0, 0, 0];
-    public var darkred:Array<Float> = [0, 0, 0, 0];
-    public var dark:Array<Float> = [0, 0, 0, 0];
+	public var noteColors:Array<Array<Float>> = [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ];
 
 	public var healthColors:Array<Int> = [255, 0, 0]; //rgb, so default is set to red
 
 	public var animTime:Float = 4;
 	public var noteCamMovement:Array<Float> = [0, 0];
 	public var defaultPos:Array<Float>;
-	public var floatInfo:Array<String> = ["", "", ""];
+
+	public var canSing:Bool = true;
+	public var singAllNoteDatas:Bool = true;
+	public var noteDatasToSingOn:Array<Int> = [0,1,2,3,4,5,6,7,8];
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false, ?flip:Bool = false)
 	{
@@ -679,15 +684,18 @@ class Character extends FlxSprite
 
 				var colors = json.arrowColorShit;
 
-				purple = colors.purple;
-				blue = colors.blue;
-				green = colors.green;
-				red = colors.red;
-				white = colors.white;
-				yellow = colors.yellow;
-				violet = colors.violet;
-				darkred = colors.darkred;
-				dark = colors.dark;
+
+				noteColors = [
+					colors.purple,
+					colors.blue,
+					colors.green,
+					colors.red,
+					colors.white,
+					colors.yellow,
+					colors.violet,
+					colors.darkred,
+					colors.dark
+				];
 
 				var color = json.healthBar;
 				healthColors = [color.red, color.green, color.blue];
@@ -708,6 +716,9 @@ class Character extends FlxSprite
 				var oldRight = animation.getByName('singRIGHT').frames;
 				animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
 				animation.getByName('singLEFT').frames = oldRight;
+				var oldRightOffset = animOffsets['singRIGHT']; //finally fix the god damn offsets
+				animOffsets['singRIGHT'] = animOffsets['singLEFT'];
+				animOffsets['singLEFT'] = oldRightOffset;
 
 				// IF THEY HAVE MISS ANIMATIONS??
 				if (animation.getByName('singRIGHTmiss') != null)
@@ -715,6 +726,9 @@ class Character extends FlxSprite
 					var oldMiss = animation.getByName('singRIGHTmiss').frames;
 					animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
 					animation.getByName('singLEFTmiss').frames = oldMiss;
+					var oldMissOffset = animOffsets['singRIGHTmiss'];
+					animOffsets['singRIGHTmiss'] = animOffsets['singLEFTmiss'];
+					animOffsets['singLEFTmiss'] = oldMissOffset;
 				}
 			}
 		}
