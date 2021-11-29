@@ -144,7 +144,7 @@ class ChartingState extends MusicBeatState
 	var hitSound:FlxSound;
 	var pitches:Array<Float> = [1.5, 0.5, 1, 2, 0.7, 1.6, 2.3, 0.3, 1.2]; //kinda just picked random ones
 
-	var snaps:Array<Float> = [1, 2, 3/4, 4, 3/8, 3/16]; //anything larger is pretty pointless
+	var snaps:Array<Float> = [1, 2, 3/4, 4, 6, 8, 12, 16, 32, 64, 96, 128, 192];
 	var curSnap:Int = 0;
 
 	var tutorialText = "(Left Click) Place/Delete a note.\n(Hold Shift) unsnap from Grid, \n(TAB) change the current snap.\n(Control + Left Click) a note to select it.\n(Q/E) extend a note's sustain length\n(Right Click+Hold) pull the sustain length of a note to your mouse.\n(W/S or Scroll Wheel) move the strumLine while paused.\n(Left/Right Arrow Keys or A/D) Change Current Section. (Hold Shift to move 4 sections)\n(Space) Pause/Play the Song\n(Hold Z/X) Draw Tool, autoplaces notes wherever your mouse is. (X deletes instead)"; //because

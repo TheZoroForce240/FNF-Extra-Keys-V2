@@ -223,7 +223,7 @@ class Note extends FlxSprite
 	//wip note quantization stuff
 	public var noteColor:String = "purple";
 	public static var usingQuant:Bool = SaveData.noteQuant;
-	static var beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64, 192];
+	static var beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192,256,384,512,768,1024,1536,2048,3072,6144];
 
 	////////////////////////////////////////////////////////////
 
@@ -672,7 +672,7 @@ class Note extends FlxSprite
 
 	function quantCheck():Void 
 	{
-		if (usingQuant && !isSustainNote) //TODO finish this lol
+		if (usingQuant && !isSustainNote)
 			{
 				pathToUse = 4; //use red notes
 			
@@ -719,6 +719,54 @@ class Note extends FlxSprite
 						colorShit[0] = -0.7;
 						colorShit[1] = 0;
 						colorShit[2] = 0;
+					case 96: //salmon lookin ass
+						colorShit[0] = 0;
+						colorShit[1] = -0.33;
+						colorShit[2] = 0;
+					case 128: //light purple shit
+						colorShit[0] = -0.24;
+						colorShit[1] = -0.33;
+						colorShit[2] = 0;
+					case 192: //turquioe i cant spell
+						colorShit[0] = 0.44;
+						colorShit[1] = 0.31;
+						colorShit[2] = 0;
+					case 256: //shit (the color of it)
+						colorShit[0] = 0.03;
+						colorShit[1] = 0;
+						colorShit[2] = -0.63;
+					case 384: //dark green ugly shit
+						colorShit[0] = 0.29;
+						colorShit[1] = 1;
+						colorShit[2] = -0.89;
+					case 512: //darj blue
+						colorShit[0] = -0.33;
+						colorShit[1] = 0.29;
+						colorShit[2] = -0.7;
+					case 768: //gray ok
+						colorShit[0] = 0.04;
+						colorShit[1] = -0.86;
+						colorShit[2] = -0.23;
+					case 1024: //turqyuarfhiouhifueaig but dark
+						colorShit[0] = 0.46;
+						colorShit[1] = 0;
+						colorShit[2] = -0.46;
+					case 1536: //pure death
+						colorShit[0] = 0;
+						colorShit[1] = 0;
+						colorShit[2] = -1;
+					case 2048: //piss and shit color
+						colorShit[0] = 0.2;
+						colorShit[1] = -0.36;
+						colorShit[2] = -0.74;
+					case 3072: //boring ass color
+						colorShit[0] = 0.17;
+						colorShit[1] = -0.57;
+						colorShit[2] = -0.27;
+					case 6144: //why did i do this? idk tbh, it just funni
+						colorShit[0] = 0.23;
+						colorShit[1] = 0.76;
+						colorShit[2] = -0.83;
 					default: // white/gray
 						colorShit[0] = 0.04;
 						colorShit[1] = -0.86;
