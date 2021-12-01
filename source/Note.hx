@@ -79,7 +79,6 @@ class Note extends FlxSprite
 	public var noteScore:Float = 1;
 	public var rating:String = "shit";
 	public var scaleMulti:Float = 1; //for middlescroll
-	public var daShit:Int = 0; //this is just for note data and anim shit that was annoying me
 	public static var hitTiming = 145;
 	public var earlyHitTiming = hitTiming;
 	public var lateHitTiming = -hitTiming;
@@ -177,12 +176,10 @@ class Note extends FlxSprite
 	////////////////////////////////////////////////////////////
 
 	public var speed:Float = 1; //note speed and velocity shit
-	public var changedSpeed:Bool = false;
 	public var velocityData:Array<Float>;
 	public var speedMulti:Float = 1;
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
-	var changedVelocityScale:Bool = false;
 	public var curAlpha:Float = 1;
 	public var split:Bool = false; //split scroll fixing graphic flip shit
 	public static var splitFlip:Array<Array<Bool>> = [
@@ -203,8 +200,6 @@ class Note extends FlxSprite
 	//event note shit
 	public var isGFNote:Bool = false;
 	public var eventData:Array<String>; //name + values from chart editor
-	public var eventName:String = "";
-	public var eventValues:Array<Dynamic>;
 	public var eventWasValid:Bool = true;
 
 	////////////////////////////////////////////////////////////
@@ -220,7 +215,7 @@ class Note extends FlxSprite
 
 	////////////////////////////////////////////////////////////
 
-	//wip note quantization stuff
+	//note quantization stuff
 	public var noteColor:String = "purple";
 	public static var usingQuant:Bool = SaveData.noteQuant;
 	static var beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192,256,384,512,768,1024,1536,2048,3072,6144];
@@ -231,7 +226,8 @@ class Note extends FlxSprite
 
 	//public var noteCam:FlxCamera; //just because i want multiple shaders on a note
 	//terrible idea, pc almost exploded playing bopeebo
-	var StrumGroup:StrumLineGroup;
+
+	//var StrumGroup:StrumLineGroup; //i think this can cause lag
 
 	///////////////////////////////////////////////////////////
 
@@ -424,19 +420,7 @@ class Note extends FlxSprite
 			HSV.saturation = colorShit[1];
 			HSV.brightness = colorShit[2];
 			HSV.update();
-		}
-
-
-		if (!inCharter)
-		{
-			if (isGFNote) //playerStrums
-				StrumGroup = PlayState.gfStrums;
-			else if (mustPress)
-				StrumGroup = PlayState.playerStrums;
-			else //cpuStrums
-				StrumGroup = PlayState.cpuStrums;
-		}
-			
+		}			
 	}
 
 	override function update(elapsed:Float)
@@ -480,10 +464,10 @@ class Note extends FlxSprite
 
 			if (strumTime <= Conductor.songPosition && !badNoteType)
 				wasGoodHit = true;
-
-			if (sustainHit && strumTime - Conductor.songPosition < -300)
-				deleteShit();
 		}
+
+		if (sustainHit && strumTime - Conductor.songPosition < -300)
+			deleteShit();
 
 		if (isGFNote)
 			if (strumTime <= Conductor.songPosition)
@@ -508,8 +492,10 @@ class Note extends FlxSprite
 	function deleteShit():Void
 	{
 		var strums = "cpu";
-		if (PlayState.flipped && !PlayState.multiplayer)
+		if (mustPress)
 			strums = "player";
+		if (isGFNote)
+			strums = "gf";
 
 		PlayState.instance.removeNote(this, strums);
 	}
@@ -881,6 +867,7 @@ class Note extends FlxSprite
 				statsToUse.misses++;
 			case "angel": 
 				//nothing, they literally do nothing if you miss
+				PlayState.instance.removeNote(this, strums);
 			case "burning" | "death" | "bob" | "poison": 
 				PlayState.instance.removeNote(this, strums);
 			case "regular" | "alt" | "drain": 

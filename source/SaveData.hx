@@ -159,25 +159,6 @@ class SaveData
 
         //////////////////////////////////////////////////////////////
 
-        if (FlxG.save.data.purple == null)
-            FlxG.save.data.purple = [0, 0, 0, 0];
-        if (FlxG.save.data.blue == null)
-            FlxG.save.data.blue = [0, 0, 0, 0];
-        if (FlxG.save.data.green == null)
-            FlxG.save.data.green = [0, 0, 0, 0];
-        if (FlxG.save.data.red == null)
-            FlxG.save.data.red = [0, 0, 0, 0];
-        if (FlxG.save.data.white == null)
-            FlxG.save.data.white = [0, 0, 0, 0];
-        if (FlxG.save.data.yellow == null)
-            FlxG.save.data.yellow = [0, 0, 0, 0];
-        if (FlxG.save.data.violet == null)
-            FlxG.save.data.violet = [0, 0, 0, 0];
-        if (FlxG.save.data.darkred == null)
-            FlxG.save.data.darkred = [0, 0, 0, 0];
-        if (FlxG.save.data.dark == null)
-            FlxG.save.data.dark = [0, 0, 0, 0];
-
         if (FlxG.save.data.noteColors == null)
             FlxG.save.data.noteColors = [
                 [0, 0, 0, 0],
@@ -217,6 +198,7 @@ class SaveData
         FlxG.save.data.splitScroll = splitScroll;
         FlxG.save.data.P2splitScroll = P2splitScroll;
         FlxG.save.data.offset = offset;
+        FlxG.save.data.noteQuant = noteQuant;
 
 
         FlxG.save.data.noteColors = noteColors;
@@ -251,6 +233,8 @@ class SaveData
         splitScroll = FlxG.save.data.splitScroll;
         P2splitScroll = FlxG.save.data.P2splitScroll;
         offset = FlxG.save.data.offset;
+
+        noteQuant = FlxG.save.data.noteQuant;
 
         noteColors = FlxG.save.data.noteColors;
     }

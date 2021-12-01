@@ -459,6 +459,9 @@ class PlayState extends MusicBeatState
 		/*var sustainRect:Rectangle = new Rectangle(0, 0, FlxG.width, strumLine.y);
 		camP1Notes.flashSprite.scrollRect(sustainRect, sustainRect);*/
 
+		if (SaveData.Hellchart)
+			SONG.mania = 5; //make 8k
+
 		mania = SONG.mania; //setting the manias
 		p1Mania = mania;
 		p2Mania = mania;
@@ -1359,7 +1362,7 @@ class PlayState extends MusicBeatState
 
 
 
-	function normalInputSystem(data:Int, playernum:Int)
+	public function normalInputSystem(data:Int, playernum:Int)
 	{
 		closestNotes = [];
 		P2closestNotes = [];
@@ -1661,7 +1664,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	function tweenCamIn():Void
+	public function tweenCamIn():Void
 	{
 		FlxTween.tween(FlxG.camera, {zoom: 1.3}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
 	}
@@ -2279,11 +2282,11 @@ class PlayState extends MusicBeatState
 			iconP2.animation.curAnim.curFrame = 0;
 
 
+		if (unspawnNotes[0] != null)
+			spawnNote();
 
 		if (startingSong)
 		{
-			if (unspawnNotes[0] != null)
-				spawnNote();
 			if (startedCountdown)
 			{
 				Conductor.songPosition += FlxG.elapsed * 1000;
@@ -2537,7 +2540,7 @@ class PlayState extends MusicBeatState
 
 	var endingSong:Bool = false;
 
-	function createCountdown(rewinded:Bool = false)
+	public function createCountdown(rewinded:Bool = false)
 	{
 		var swagCounter:Int = 0;
 
@@ -3084,6 +3087,7 @@ class PlayState extends MusicBeatState
 			if (playernum == 1)
 			{
 				call('P1NoteHit', [note]);
+
 				player.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
 				player.holdTimer = 0;
 				player.noteCamMovement = noteCamMovementShit(note.noteData, 1);
@@ -3148,10 +3152,13 @@ class PlayState extends MusicBeatState
 
 			if (!note.isSustainNote)
 			{
-				if (note.rating == "sick")
+				if (note.rating == "sick" && SaveData.noteSplash)
 					doNoteSplash(note.x, note.y, note.noteData, playernum, note.cameras, note.colorShit);
 				removeNote(note, strums);
 			}
+			else
+				note.sustainHit = true; //delay removal so clipping be workin
+
 			grace = true;
 			new FlxTimer().start(graceTimerCooldown, function(tmr:FlxTimer)
 			{
@@ -3203,6 +3210,8 @@ class PlayState extends MusicBeatState
 		daNote.kill();
 		if (strums == 'player')
 			P1notes.remove(daNote, true);
+		else if (strums == "gf")
+			P3notes.remove(daNote, true);
 		else
 			P2notes.remove(daNote, true);
 		daNote.destroy();
@@ -3242,7 +3251,7 @@ class PlayState extends MusicBeatState
 	{
 		var statsToUse = getStats(playernum);
 
-		var notesAddedUp = statsToUse.sicks + (statsToUse.goods * 0.65) + (statsToUse.bads * 0.3) + (statsToUse.shits * 0.1);
+		var notesAddedUp = statsToUse.sicks + (statsToUse.goods * 0.75) + (statsToUse.bads * 0.3) + (statsToUse.shits * 0.1);
 		statsToUse.accuracy = FlxMath.roundDecimal((notesAddedUp / statsToUse.totalNotesHit) * 100, 2);
 
 		updateRank(playernum);
@@ -3363,15 +3372,6 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	/*public function easyLerp(daShit:Dynamic, time:Float):Void
-	{
-		FlxTween.num(camGame.scaleY, daShit, time, {onUpdate: function(tween:FlxTween){
-			var ting = FlxMath.lerp(camGame.scaleY, daShit, tween.percent);
-			if (ting != 0) //divide by 0 is a verry bad
-				camGame.setScale(camGame.scaleX, ting); //why cant i just tween a variable
-		}});
-	}*/
-
 	var justChangedMania:Bool = false;
 
 	public function switchMania(newMania:Int, strumnum = 1):Void
@@ -3441,7 +3441,7 @@ class PlayState extends MusicBeatState
 	}
 
 
-	function moveCamera(pos:Array<Float>):Void
+	public function moveCamera(pos:Array<Float>):Void
 	{
 		camFollow.setPosition(pos[0], pos[1]);
 	}
@@ -3718,17 +3718,17 @@ class PlayState extends MusicBeatState
 			{
 				if (dunceNote.isGFNote)
 				{
-					call('P3NoteSpawned', [dunceNote]);
+					//call('P3NoteSpawned', [dunceNote]); //laggy piece of shit
 					P3notes.add(dunceNote);
 				}	
 				else if (dunceNote.mustPress)
 				{
-					call('P1NoteSpawned', [dunceNote]);
+					//call('P1NoteSpawned', [dunceNote]);
 					P1notes.add(dunceNote);
 				}
 				else if (!dunceNote.mustPress)
 				{
-					call('P2NoteSpawned', [dunceNote]);
+					//call('P2NoteSpawned', [dunceNote]);
 					P2notes.add(dunceNote);
 				}
 					
@@ -3739,7 +3739,7 @@ class PlayState extends MusicBeatState
 			unspawnNotes.splice(index, 1);
 		}
 		if (unspawnNotes[0] != null)
-			if (unspawnNotes[0].strumTime - Conductor.songPosition < 3500)
+			if (unspawnNotes[0].strumTime - Conductor.songPosition < 2000) //force loop if close
 				spawnNote(); //loop it lol
 	}
 
@@ -3747,7 +3747,7 @@ class PlayState extends MusicBeatState
 
 
 
-	function lerpSongSpeed(num:Float, time:Float):Void
+	public function lerpSongSpeed(num:Float, time:Float):Void
 	{
 		FlxTween.num(SongSpeedMultiplier, num, time, {onUpdate: function(tween:FlxTween){
 			var ting = FlxMath.lerp(SongSpeedMultiplier,num, tween.percent);
@@ -3831,6 +3831,8 @@ class PlayState extends MusicBeatState
 		var noteData:Array<SwagSection>;
 		noteData = songData.notes;
 
+		var hellChartDataConvert = [0,2,4,6,1,3,5,7];
+
 		var daBeats:Int = 0; // Not exactly representative of 'daBeats' lol, just how much it has looped
 		for (section in noteData)
 		{
@@ -3856,7 +3858,9 @@ class PlayState extends MusicBeatState
 					if (songNotes[1] >= mn)
 						gottaHitNote = !section.mustHitSection;
 
-					/*var t = Std.int(songNotes[1] / 18); //compatibility with god mode final destination (or just shaggy x matt charts)
+
+
+					var t = Std.int(songNotes[1] / 18); //compatibility with god mode final destination (or just shaggy x matt charts)
 					switch(t)
 					{
 						case 1: 
@@ -3871,7 +3875,19 @@ class PlayState extends MusicBeatState
 							gottaHitNote = section.mustHitSection;
 							if (songNotes[1] >= (mn + 36))
 								gottaHitNote = !section.mustHitSection;
-					}*/
+					}
+
+					if (SaveData.Hellchart)
+					{
+						if (!gottaHitNote)
+							daNoteData += 4;
+
+						daNoteData = daNoteData % 8;
+						daNoteData = hellChartDataConvert[daNoteData]; //make them a little more enjoyable to play (it spreads the notes out)
+						daNoteData = daNoteData % 8; //backup so no crashy
+						gottaHitNote = true;
+					}
+						
 	
 					var oldNote:Note;
 					if (unspawnNotes.length > 0)
@@ -4040,17 +4056,6 @@ class PlayState extends MusicBeatState
 		if (FlxG.sound.music.time > Conductor.songPosition + (20 * PlayState.SongSpeedMultiplier) || FlxG.sound.music.time < Conductor.songPosition - (20 * PlayState.SongSpeedMultiplier)
 			|| needToResync)
 			resyncVocals();
-
-		
-
-		/*P1notes.forEachAlive(function(daNote:Note)
-		{
-			daNote.checkNoteScale(Note.p1NoteScale, 1);
-		});
-		P2notes.forEachAlive(function(daNote:Note)
-		{
-			daNote.checkNoteScale(Note.p2NoteScale, 0);
-		});*/
 	}
 
 	override function beatHit()
@@ -4071,38 +4076,6 @@ class PlayState extends MusicBeatState
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, hudThing, OUTLINE, FlxColor.BLACK);
 		if (multiplayer)
 			P2scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
-
-		if (unspawnNotes[0] != null)
-			spawnNote();
-
-		/*if (curBeat % 16 == 0)
-		{
-			var pangle = FlxG.random.int(-120, 120);
-			var cpupangle = FlxG.random.int(-120, 120);
-			trace(pangle);
-			trace(cpupangle);
-			playerStrums.forEach(function(spr:BabyArrow)
-			{
-				spr.strumLineAngle = pangle;
-				spr.angle = spr.strumLineAngle;
-			});
-			cpuStrums.forEach(function(spr:BabyArrow)
-			{
-				spr.strumLineAngle = cpupangle;
-				spr.angle = spr.strumLineAngle;
-			});
-		}*/
-
-		
-
-		/*P1notes.forEachAlive(function(daNote:Note)
-		{
-			daNote.checkNoteScale(Note.p1NoteScale, 1);
-		});
-		P2notes.forEachAlive(function(daNote:Note)
-		{
-			daNote.checkNoteScale(Note.p2NoteScale, 0);
-		});*/
 
 		if (currentSection != null)
 		{

@@ -147,7 +147,7 @@ class ChartingState extends MusicBeatState
 	var snaps:Array<Float> = [1, 2, 3/4, 4, 6, 8, 12, 16, 32, 64, 96, 128, 192];
 	var curSnap:Int = 0;
 
-	var tutorialText = "(Left Click) Place/Delete a note.\n(Hold Shift) unsnap from Grid, \n(TAB) change the current snap.\n(Control + Left Click) a note to select it.\n(Q/E) extend a note's sustain length\n(Right Click+Hold) pull the sustain length of a note to your mouse.\n(W/S or Scroll Wheel) move the strumLine while paused.\n(Left/Right Arrow Keys or A/D) Change Current Section. (Hold Shift to move 4 sections)\n(Space) Pause/Play the Song\n(Hold Z/X) Draw Tool, autoplaces notes wherever your mouse is. (X deletes instead)"; //because
+	var tutorialText = "(L Clk) Place/Delete a note.\n(Shift) unsnap from Grid, \n(TAB) change the current snap.\n(CTRL + L Clk) a note to select it.\n(Q/E) extend a note's sustain length\n(R Clk + Hold) pull the sustain\nlength of a note to your mouse.\n(W/S or Scroll) move the strumline.\n(<-/-> or A/D) Change Current Section.\n(Space) Pause/Play the Song.\n(Hold Z/X) Draw Tool, autoplaces\nnotes wherever your mouse is.\n(X deletes instead)"; //because
 
 	override function create()
 	{
@@ -289,8 +289,8 @@ class ChartingState extends MusicBeatState
 		bpmTxt.scrollFactor.set();
 		add(bpmTxt);
 
-		tutorialTxt = new FlxText(1000, 50, 10000, "", 8);
-		tutorialTxt.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+		tutorialTxt = new FlxText(980, 50, 10000, "", 8);
+		tutorialTxt.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		tutorialTxt.scrollFactor.set();
 		add(tutorialTxt);
 		tutorialTxt.text = tutorialText;
@@ -324,7 +324,7 @@ class ChartingState extends MusicBeatState
 		UI_box.y = 20;
 		add(UI_box);
 
-		tutorialTxt.y = UI_box.y + UI_box.height + 200;
+		tutorialTxt.y = UI_box.y + UI_box.height + 85;
 
 		addSongUI();
 		addSectionUI();
@@ -1311,8 +1311,14 @@ class ChartingState extends MusicBeatState
 		}
 		if (FlxG.keys.justPressed.TAB)
 		{
-			curSnap++;
-			if (curSnap >= snaps.length)
+			if (FlxG.keys.pressed.SHIFT)
+				curSnap--;
+			else
+				curSnap++;
+
+			if (curSnap < 0)
+				curSnap = snaps.length - 1;
+			if (curSnap >= snaps.length - 1)
 				curSnap = 0;
 		}
 		
@@ -1470,15 +1476,18 @@ class ChartingState extends MusicBeatState
 		_song.bpm = tempBpm;
 		var tempStep:String = Std.string(curStep);
 
+		var tempsnap = Std.string(snaps[curSnap]);
+
 		bpmTxt.text = bpmTxt.text = Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2))
 			+ " / "
 			+ Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2))
 			+ "\nSection: "
 			+ curSection
-			+ "\nCurStep: "
+			+ "   CurStep: "
 			+ tempStep
 			+ "\nCurrent Snap: "
-			+ snaps[curSnap];
+			+ tempsnap
+			+ "\n fuck you";
 		super.update(elapsed);
 	}
 

@@ -488,7 +488,6 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
     
         randomization = [
             ["Randomize Notes", SaveData.randomNotes, "toggle", "what else do you think it does"],
-            ["Randomization Mode", SaveData.randomizationMode, "mode", "change the mode, please just use section based it makes good charts"],
             ["Randomize Note Speed", SaveData.randomNoteSpeed, "toggle", "yes pain"],
             ["Randomize Note Velocity", SaveData.randomNoteVelocity, "toggle", "now its even worse"],
             ["Hellchart", SaveData.Hellchart, "toggle", "oh fuck it gets worse"],

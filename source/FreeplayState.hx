@@ -149,6 +149,8 @@ class FreeplayState extends MusicBeatState
 			{
 				var diffTexts = ["EASY", "NORMAL", "HARD", "ALT"];
 				diffTextArrays.push(diffTexts);
+				var ratingList = [[0,0],[0,0],[0,0],[0,0]];
+				ratingArray.push(ratingList);
 			}
 
 
