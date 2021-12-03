@@ -46,8 +46,6 @@ class TitleState extends MusicBeatState
 
 	var wackyImage:FlxSprite;
 
-	
-
 	override public function create():Void
 	{
 		//Main.updateGameData();
@@ -66,7 +64,7 @@ class TitleState extends MusicBeatState
 		//NGio.noLogin(APIStuff.API);
 
 
-		FlxG.save.bind('funkin', 'ninjamuffin99');
+		FlxG.save.bind('ek', 'bruhj');
 
 		Highscore.load();
 

@@ -365,27 +365,27 @@ class Note extends FlxSprite
 		if (!isGFNote)
 		{
 			if (mustPress && !inCharter)
+			{
+				if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
+					&& !inCharter && SaveData.splitScroll)
 				{
-					if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
-						&& !inCharter && SaveData.splitScroll)
-					{
-						this.cameras = [PlayState.instance.camP1NotesSplit];
-						split = true;
-					}	
-					else
-						this.cameras = [PlayState.instance.camP1Notes];
-				}
-				else if (!mustPress && !inCharter)
+					this.cameras = [PlayState.p1.noteCamSplit];
+					split = true;
+				}	
+				else
+					this.cameras = [PlayState.p1.noteCam];
+			}
+			else if (!mustPress && !inCharter)
+			{
+				if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
+					&& !inCharter && SaveData.P2splitScroll)
 				{
-					if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
-						&& !inCharter && SaveData.P2splitScroll)
-					{
-						this.cameras = [PlayState.instance.camP2NotesSplit];
-						split = true;
-					}
-					else
-						this.cameras = [PlayState.instance.camP2Notes];
+					this.cameras = [PlayState.p2.noteCamSplit];
+					split = true;
 				}
+				else
+					this.cameras = [PlayState.p2.noteCam];
+			}
 		}
 
 		if (curMania != mania)
@@ -825,15 +825,15 @@ class Note extends FlxSprite
 				PlayState.instance.badNoteHit();
 				healthChangesOnHit -= PlayState.poisonNoteDamage;
 				if (PlayState.multiplayer && !mustPress)
-					PlayState.instance.P2Stats.poisonHits++;
+					PlayState.p2.Stats.poisonHits++;
 				else
-					PlayState.instance.P1Stats.poisonHits++;
+					PlayState.p1.Stats.poisonHits++;
 			case "drain": 
 				if (PlayState.multiplayer)
 				{
-					var statsToUse = PlayState.instance.P1Stats;
+					var statsToUse = PlayState.p1.Stats;
 					if (!mustPress)
-						statsToUse = PlayState.instance.P2Stats;
+						statsToUse = PlayState.p2.Stats;
 
 					if (PlayState.drainNoteAmount > statsToUse.health)
 						statsToUse.health = PlayState.drainNoteAmount;
@@ -851,17 +851,17 @@ class Note extends FlxSprite
 		{
 			case "warning": 
 				PlayState.instance.removeNote(this, strums);
-				var statsToUse = PlayState.instance.P1Stats;
+				var statsToUse = PlayState.p1.Stats;
 				if (!mustPress && PlayState.multiplayer)
-					statsToUse = PlayState.instance.P2Stats;
+					statsToUse = PlayState.p2.Stats;
 				PlayState.instance.badNoteHit();
 				statsToUse.health -= PlayState.warningNoteDamage;
 				statsToUse.misses++;
 			case "glitch": 
 				PlayState.instance.removeNote(this, strums);
-				var statsToUse = PlayState.instance.P1Stats;
+				var statsToUse = PlayState.p1.Stats;
 				if (!mustPress && PlayState.multiplayer)
-					statsToUse = PlayState.instance.P2Stats;
+					statsToUse = PlayState.p2.Stats;
 				PlayState.instance.HealthDrain(playernum);
 				PlayState.instance.badNoteHit();
 				statsToUse.misses++;

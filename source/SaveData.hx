@@ -69,6 +69,25 @@ class SaveData
         [0, 0, 0, 0]
     ];
 
+    
+    public static var binds:Array<Dynamic> = [
+        ["A", "S", "W", "D"],
+        ["S", "D", "F", "J", "K", "L"],
+        ["A", "S", "D", "F", "SPACE", "H", "J", "K", "L"]
+    ];
+
+    public static var P2binds:Array<Dynamic> = [
+        ["LEFT", "DOWN", "UP", "RIGHT"],
+        ["W", "E", "R", "U", "I", "O"],
+        ["Q", "W", "E", "R", "B", "Y", "U", "I", "O"]
+    ];
+
+    public static var GPbinds:Array<Dynamic> = [
+        ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "DPAD_RIGHT"],
+        ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "X", "A", "B"],
+        ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "DPAD_RIGHT", "LEFT_TRIGGER", "X", "A", "Y", "B"]
+    ];
+
 
     public static function saveDataCheck()
     {
@@ -154,9 +173,6 @@ class SaveData
         if (FlxG.save.data.noteQuant == null)
             FlxG.save.data.noteQuant = false;
 
-
-        
-
         //////////////////////////////////////////////////////////////
 
         if (FlxG.save.data.noteColors == null)
@@ -203,6 +219,10 @@ class SaveData
 
         FlxG.save.data.noteColors = noteColors;
 
+        FlxG.save.data.binds = binds;
+        FlxG.save.data.P2binds = P2binds;
+        FlxG.save.data.GPbinds = GPbinds;
+
         FlxG.save.flush();
     }
 
@@ -235,6 +255,10 @@ class SaveData
         offset = FlxG.save.data.offset;
 
         noteQuant = FlxG.save.data.noteQuant;
+
+        binds = FlxG.save.data.binds;
+        P2binds = FlxG.save.data.P2binds;
+        GPbinds = FlxG.save.data.GPbinds;
 
         noteColors = FlxG.save.data.noteColors;
     }
@@ -277,7 +301,7 @@ class SaveData
         ];
 
         PlayerSettings.player1.controls.loadKeyBinds();
-
+        readTheData();
         keyBindCheck();
 	}
     public static function keyBindCheck():Void 

@@ -549,9 +549,9 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
     }
     function createKeybinds():Void
         {
-            var KeybindList:Array<String> = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.binds, maniaToChange);
+            var KeybindList:Array<String> = CoolUtil.bindCheck(maniaToChange, true, SaveData.binds, maniaToChange);
             if (selectedPlayer != 1)
-                KeybindList = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.P2binds, maniaToChange);
+                KeybindList = CoolUtil.bindCheck(maniaToChange, true, SaveData.P2binds, maniaToChange);
 
             grpKeybinds.clear();
             for (i in 0...KeybindList.length)
@@ -689,9 +689,9 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
     function updateKeybinds():Void
     {
-        var KeybindList:Array<String> = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.binds, maniaToChange);
+        var KeybindList:Array<String> = CoolUtil.bindCheck(maniaToChange, true, SaveData.binds, maniaToChange);
         if (selectedPlayer != 1)
-            KeybindList = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.P2binds, maniaToChange);
+            KeybindList = CoolUtil.bindCheck(maniaToChange, true, SaveData.P2binds, maniaToChange);
 
         grpKeybinds.clear();
 
@@ -774,11 +774,11 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         @:privateAccess
         var key = FlxKey.toStringMap.get(evt.keyCode);
 
-        var binds:Array<String> = FlxG.save.data.binds[0];
+        var binds:Array<String> = SaveData.binds[0];
         var data = -1;
-		binds = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.binds, maniaToChange);
+		binds = CoolUtil.bindCheck(maniaToChange, true, SaveData.binds, maniaToChange);
         if (selectedPlayer != 1)
-			binds = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.P2binds, maniaToChange);
+			binds = CoolUtil.bindCheck(maniaToChange, true, SaveData.P2binds, maniaToChange);
 
         for (i in 0...binds.length) // binds
         {
@@ -797,10 +797,10 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
         @:privateAccess
         var key = FlxKey.toStringMap.get(evt.keyCode);
         var data = -1;
-        var binds:Array<String> = FlxG.save.data.binds[0]; 
-		binds = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.binds, maniaToChange);
+        var binds:Array<String> = SaveData.binds[0]; 
+		binds = CoolUtil.bindCheck(maniaToChange, true, SaveData.binds, maniaToChange);
         if (selectedPlayer != 1)
-			binds = CoolUtil.bindCheck(maniaToChange, true, FlxG.save.data.P2binds, maniaToChange);
+			binds = CoolUtil.bindCheck(maniaToChange, true, SaveData.P2binds, maniaToChange);
 
         for (i in 0...binds.length) // binds
             {

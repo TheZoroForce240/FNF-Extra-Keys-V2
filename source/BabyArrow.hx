@@ -267,21 +267,21 @@ class BabyArrow extends FlxSprite
             {
                 if (i >= (PlayState.keyAmmo[maniaToUse] / 2) && isPlayState)
                 {
-                    this.cameras = [PlayState.instance.camP1NotesSplit];
+                    this.cameras = [PlayState.p1.noteCamSplit];
                     scale.y *= -1;
                 }
                 else
-                    this.cameras = [PlayState.instance.camP1Notes];
+                    this.cameras = [PlayState.p1.noteCam];
             }
             else if (SaveData.P2splitScroll && player == 0)
             {
                 if (i >= (PlayState.keyAmmo[maniaToUse] / 2) && isPlayState)
                 {
-                    this.cameras = [PlayState.instance.camP2NotesSplit];
+                    this.cameras = [PlayState.p2.noteCamSplit];
                     scale.y *= -1;
                 }
                 else
-                    this.cameras = [PlayState.instance.camP2Notes];
+                    this.cameras = [PlayState.p2.noteCam];
             }
 
 
@@ -426,21 +426,21 @@ class BabyArrow extends FlxSprite
         {
             if (curID >= (PlayState.keyAmmo[curMania] / 2))
             {
-                this.cameras = [PlayState.instance.camP1NotesSplit];
+                this.cameras = [PlayState.p1.noteCamSplit];
                 scale.y *= -1;
             }
             else
-                this.cameras = [PlayState.instance.camP1Notes];
+                this.cameras = [PlayState.p1.noteCam];
         }
         else if (SaveData.P2splitScroll && player == 0)
         {
             if (curID >= (PlayState.keyAmmo[curMania] / 2))
             {
-                this.cameras = [PlayState.instance.camP2NotesSplit];
+                this.cameras = [PlayState.p2.noteCamSplit];
                 scale.y *= -1;
             }
             else
-                this.cameras = [PlayState.instance.camP2Notes];
+                this.cameras = [PlayState.p2.noteCam];
         }
 
         if ((player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
@@ -471,11 +471,11 @@ class BabyArrow extends FlxSprite
             var StrumGroup:StrumLineGroup;
 
             if (whichPlayer == 1) //playerStrums
-                StrumGroup = PlayState.playerStrums;
+                StrumGroup = PlayState.p1.strums;
             else if (whichPlayer == 2)
-                StrumGroup = PlayState.gfStrums;
+                StrumGroup = PlayState.p3.strums;
             else //cpuStrums
-                StrumGroup = PlayState.cpuStrums;
+                StrumGroup = PlayState.p2.strums;
 
             if (Note.StrumLinefollowAngle)
             {

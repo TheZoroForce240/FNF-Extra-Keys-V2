@@ -166,13 +166,13 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                         switch (curCategory[curSelected][0])
                         {
                             case "Quick DFJK": 
-                                FlxG.save.data.binds[0] = ["D", "F", "J", "K"];
+                                SaveData.binds[0] = ["D", "F", "J", "K"];
                             case "Quick WASD": 
-                                FlxG.save.data.binds[0] = ["A", "S", "W", "D"];
+                                SaveData.binds[0] = ["A", "S", "W", "D"];
                             case "Quick Arrow Keys": 
-                                FlxG.save.data.binds[0] = ["LEFT", "DOWN", "UP", "RIGHT"];
+                                SaveData.binds[0] = ["LEFT", "DOWN", "UP", "RIGHT"];
                             case "Quick AS^>": 
-                                FlxG.save.data.binds[0] = ["A", "S", "UP", "RIGHT"];
+                                SaveData.binds[0] = ["A", "S", "UP", "RIGHT"];
                             case "Reset All Keybinds": 
                                 SaveData.resetBinds();
                             case "Customize HUD": 
@@ -413,76 +413,76 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["Quick AS^>","", "button", ""],
             ["Quick WASD","", "button", ""],
             ["Quick Arrow Keys","", "button", ""],
-            ["4K/5K Left", FlxG.save.data.binds[0][0], "keybind", ""],
-            ["4K/5K Down", FlxG.save.data.binds[0][1], "keybind", ""],
-            ["4K/5K Up", FlxG.save.data.binds[0][2], "keybind", ""],
-            ["4K/5K Right", FlxG.save.data.binds[0][3], "keybind", ""],
+            ["4K/5K Left", SaveData.binds[0][0], "keybind", ""],
+            ["4K/5K Down", SaveData.binds[0][1], "keybind", ""],
+            ["4K/5K Up", SaveData.binds[0][2], "keybind", ""],
+            ["4K/5K Right", SaveData.binds[0][3], "keybind", ""],
             ["", "", "cat", ""],
-            ["9K/8K Left 1", FlxG.save.data.binds[2][0], "keybind", ""],
-            ["9K/8K Down 1", FlxG.save.data.binds[2][1], "keybind", ""],
-            ["9K/8K Up 1", FlxG.save.data.binds[2][2], "keybind", ""],
-            ["9K/8K Right 1", FlxG.save.data.binds[2][3], "keybind", ""],
-            ["5K/7K/9K Middle", FlxG.save.data.binds[2][4], "keybind", ""],
-            ["9K/8K Left 2", FlxG.save.data.binds[2][5], "keybind", ""],
-            ["9K/8K Down 2", FlxG.save.data.binds[2][6], "keybind", ""],
-            ["9K/8K Up 2", FlxG.save.data.binds[2][7], "keybind", ""],
-            ["9K/8K Right 2", FlxG.save.data.binds[2][8], "keybind", ""],
+            ["9K/8K Left 1", SaveData.binds[2][0], "keybind", ""],
+            ["9K/8K Down 1", SaveData.binds[2][1], "keybind", ""],
+            ["9K/8K Up 1", SaveData.binds[2][2], "keybind", ""],
+            ["9K/8K Right 1", SaveData.binds[2][3], "keybind", ""],
+            ["5K/7K/9K Middle", SaveData.binds[2][4], "keybind", ""],
+            ["9K/8K Left 2", SaveData.binds[2][5], "keybind", ""],
+            ["9K/8K Down 2", SaveData.binds[2][6], "keybind", ""],
+            ["9K/8K Up 2", SaveData.binds[2][7], "keybind", ""],
+            ["9K/8K Right 2", SaveData.binds[2][8], "keybind", ""],
             ["", "", "cat", ""],
-            ["6K/7K Left 1", FlxG.save.data.binds[1][0], "keybind", ""],
-            ["6K/7K Up", FlxG.save.data.binds[1][1], "keybind", ""],
-            ["6K/7K Right 1", FlxG.save.data.binds[1][2], "keybind", ""],
-            ["6K/7K Left 2", FlxG.save.data.binds[1][3], "keybind", ""],
-            ["6K/7K Down", FlxG.save.data.binds[1][4], "keybind", ""],
-            ["6K/7K Right 2", FlxG.save.data.binds[1][5], "keybind", ""],
+            ["6K/7K Left 1", SaveData.binds[1][0], "keybind", ""],
+            ["6K/7K Up", SaveData.binds[1][1], "keybind", ""],
+            ["6K/7K Right 1", SaveData.binds[1][2], "keybind", ""],
+            ["6K/7K Left 2", SaveData.binds[1][3], "keybind", ""],
+            ["6K/7K Down", SaveData.binds[1][4], "keybind", ""],
+            ["6K/7K Right 2", SaveData.binds[1][5], "keybind", ""],
             ["Reset All Keybinds","", "button", "includes P2 and gamepad!"]
         ];
         P2keybinds = [
-            ["P2 4K/5K Left", FlxG.save.data.P2binds[0][0], "keybind", ""],
-            ["P2 4K/5K Down", FlxG.save.data.P2binds[0][1], "keybind", ""],
-            ["P2 4K/5K Up", FlxG.save.data.P2binds[0][2], "keybind", ""],
-            ["P2 4K/5K Right", FlxG.save.data.P2binds[0][3], "keybind", ""],
+            ["P2 4K/5K Left", SaveData.P2binds[0][0], "keybind", ""],
+            ["P2 4K/5K Down", SaveData.P2binds[0][1], "keybind", ""],
+            ["P2 4K/5K Up", SaveData.P2binds[0][2], "keybind", ""],
+            ["P2 4K/5K Right", SaveData.P2binds[0][3], "keybind", ""],
             ["", "", "cat", ""],
-            ["P2 9K/8K Left 1", FlxG.save.data.P2binds[2][0], "keybind", ""],
-            ["P2 9K/8K Down 1", FlxG.save.data.P2binds[2][1], "keybind", ""],
-            ["P2 9K/8K Up 1", FlxG.save.data.P2binds[2][2], "keybind", ""],
-            ["P2 9K/8K Right 1", FlxG.save.data.P2binds[2][3], "keybind", ""],
-            ["P2 5K/7K/9K Middle", FlxG.save.data.P2binds[2][4], "keybind", ""],
-            ["P2 9K/8K Left 2", FlxG.save.data.P2binds[2][5], "keybind", ""],
-            ["P2 9K/8K Down 2", FlxG.save.data.P2binds[2][6], "keybind", ""],
-            ["P2 9K/8K Up 2", FlxG.save.data.P2binds[2][7], "keybind", ""],
-            ["P2 9K/8K Right 2", FlxG.save.data.P2binds[2][8], "keybind", ""],
+            ["P2 9K/8K Left 1", SaveData.P2binds[2][0], "keybind", ""],
+            ["P2 9K/8K Down 1", SaveData.P2binds[2][1], "keybind", ""],
+            ["P2 9K/8K Up 1", SaveData.P2binds[2][2], "keybind", ""],
+            ["P2 9K/8K Right 1", SaveData.P2binds[2][3], "keybind", ""],
+            ["P2 5K/7K/9K Middle", SaveData.P2binds[2][4], "keybind", ""],
+            ["P2 9K/8K Left 2", SaveData.P2binds[2][5], "keybind", ""],
+            ["P2 9K/8K Down 2", SaveData.P2binds[2][6], "keybind", ""],
+            ["P2 9K/8K Up 2", SaveData.P2binds[2][7], "keybind", ""],
+            ["P2 9K/8K Right 2", SaveData.P2binds[2][8], "keybind", ""],
             ["", "", "cat", ""],
-            ["P2 6K/7K Left 1", FlxG.save.data.P2binds[1][0], "keybind", ""],
-            ["P2 6K/7K Up", FlxG.save.data.P2binds[1][1], "keybind", ""],
-            ["P2 6K/7K Right 1", FlxG.save.data.P2binds[1][2], "keybind", ""],
-            ["P2 6K/7K Left 2", FlxG.save.data.P2binds[1][3], "keybind", ""],
-            ["P2 6K/7K Down", FlxG.save.data.P2binds[1][4], "keybind", ""],
-            ["P2 6K/7K Right 2", FlxG.save.data.P2binds[1][5], "keybind", ""],
+            ["P2 6K/7K Left 1", SaveData.P2binds[1][0], "keybind", ""],
+            ["P2 6K/7K Up", SaveData.P2binds[1][1], "keybind", ""],
+            ["P2 6K/7K Right 1", SaveData.P2binds[1][2], "keybind", ""],
+            ["P2 6K/7K Left 2", SaveData.P2binds[1][3], "keybind", ""],
+            ["P2 6K/7K Down", SaveData.P2binds[1][4], "keybind", ""],
+            ["P2 6K/7K Right 2", SaveData.P2binds[1][5], "keybind", ""],
             ["Reset All Keybinds","", "button", "includes P1 and gamepad!"]
         ];
 
         gamepad = [
-            ["Gamepad 4K/5K Left", FlxG.save.data.GPbinds[0][0], "gamepad", ""],
-            ["Gamepad 4K/5K Down", FlxG.save.data.GPbinds[0][1], "gamepad", ""],
-            ["Gamepad 4K/5K Up", FlxG.save.data.GPbinds[0][2], "gamepad", ""],
-            ["Gamepad 4K/5K Right", FlxG.save.data.GPbinds[0][3], "gamepad", ""],
+            ["Gamepad 4K/5K Left", SaveData.GPbinds[0][0], "gamepad", ""],
+            ["Gamepad 4K/5K Down", SaveData.GPbinds[0][1], "gamepad", ""],
+            ["Gamepad 4K/5K Up", SaveData.GPbinds[0][2], "gamepad", ""],
+            ["Gamepad 4K/5K Right", SaveData.GPbinds[0][3], "gamepad", ""],
             ["", "", "cat", ""],
-            ["Gamepad 9K/8K Left 1", FlxG.save.data.GPbinds[2][0], "gamepad", ""],
-            ["Gamepad 9K/8K Down 1", FlxG.save.data.GPbinds[2][1], "gamepad", ""],
-            ["Gamepad 9K/8K Up 1", FlxG.save.data.GPbinds[2][2], "gamepad", ""],
-            ["Gamepad 9K/8K Right 1", FlxG.save.data.GPbinds[2][3], "gamepad", ""],
-            ["Gamepad 5K/7K/9K Middle", FlxG.save.data.GPbinds[2][4], "gamepad", ""],
-            ["Gamepad 9K/8K Left 2", FlxG.save.data.GPbinds[2][5], "gamepad", ""],
-            ["Gamepad 9K/8K Down 2", FlxG.save.data.GPbinds[2][6], "gamepad", ""],
-            ["Gamepad 9K/8K Up 2", FlxG.save.data.GPbinds[2][7], "gamepad", ""],
-            ["Gamepad 9K/8K Right 2", FlxG.save.data.GPbinds[2][8], "gamepad", ""],
+            ["Gamepad 9K/8K Left 1", SaveData.GPbinds[2][0], "gamepad", ""],
+            ["Gamepad 9K/8K Down 1", SaveData.GPbinds[2][1], "gamepad", ""],
+            ["Gamepad 9K/8K Up 1", SaveData.GPbinds[2][2], "gamepad", ""],
+            ["Gamepad 9K/8K Right 1", SaveData.GPbinds[2][3], "gamepad", ""],
+            ["Gamepad 5K/7K/9K Middle", SaveData.GPbinds[2][4], "gamepad", ""],
+            ["Gamepad 9K/8K Left 2", SaveData.GPbinds[2][5], "gamepad", ""],
+            ["Gamepad 9K/8K Down 2", SaveData.GPbinds[2][6], "gamepad", ""],
+            ["Gamepad 9K/8K Up 2", SaveData.GPbinds[2][7], "gamepad", ""],
+            ["Gamepad 9K/8K Right 2", SaveData.GPbinds[2][8], "gamepad", ""],
             ["", "", "cat", ""],
-            ["Gamepad 6K/7K Left 1", FlxG.save.data.GPbinds[1][0], "gamepad", ""],
-            ["Gamepad 6K/7K Up", FlxG.save.data.GPbinds[1][1], "gamepad", ""],
-            ["Gamepad 6K/7K Right 1", FlxG.save.data.GPbinds[1][2], "gamepad", ""],
-            ["Gamepad 6K/7K Left 2", FlxG.save.data.GPbinds[1][3], "gamepad", ""],
-            ["Gamepad 6K/7K Down", FlxG.save.data.GPbinds[1][4], "gamepad", ""],
-            ["Gamepad 6K/7K Right 2", FlxG.save.data.GPbinds[1][5], "gamepad", ""],
+            ["Gamepad 6K/7K Left 1", SaveData.GPbinds[1][0], "gamepad", ""],
+            ["Gamepad 6K/7K Up", SaveData.GPbinds[1][1], "gamepad", ""],
+            ["Gamepad 6K/7K Right 1", SaveData.GPbinds[1][2], "gamepad", ""],
+            ["Gamepad 6K/7K Left 2", SaveData.GPbinds[1][3], "gamepad", ""],
+            ["Gamepad 6K/7K Down", SaveData.GPbinds[1][4], "gamepad", ""],
+            ["Gamepad 6K/7K Right 2", SaveData.GPbinds[1][5], "gamepad", ""],
             ["Reset All Keybinds","", "button", "includes keyboard Keybinds!"]
         ];
     
@@ -542,19 +542,19 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
         switch (daCat) //reminder to change this if new stuff is added to keybind options category
         {
             case "Keybinds": 
-                FlxG.save.data.binds = [
+                SaveData.binds = [
                     [curCategory[4][1], curCategory[5][1], curCategory[6][1], curCategory[7][1]],
                     [curCategory[19][1], curCategory[20][1], curCategory[21][1], curCategory[22][1], curCategory[23][1], curCategory[24][1]],
                     [curCategory[9][1], curCategory[10][1], curCategory[11][1], curCategory[12][1], curCategory[13][1], curCategory[14][1], curCategory[15][1], curCategory[16][1], curCategory[17][1]]
                 ];
             case "P2 Keybinds": 
-                FlxG.save.data.P2binds = [
+                SaveData.P2binds = [
                     [curCategory[0][1], curCategory[1][1], curCategory[2][1], curCategory[3][1]],
                     [curCategory[15][1], curCategory[16][1], curCategory[17][1], curCategory[18][1], curCategory[19][1], curCategory[20][1]],
                     [curCategory[5][1], curCategory[6][1], curCategory[7][1], curCategory[8][1], curCategory[9][1], curCategory[10][1], curCategory[11][1], curCategory[12][1], curCategory[13][1]]
                 ]; 
             case "Gamepad Binds": 
-                FlxG.save.data.GPbinds = [
+                SaveData.GPbinds = [
                     [curCategory[0][1], curCategory[1][1], curCategory[2][1], curCategory[3][1]],
                     [curCategory[15][1], curCategory[16][1], curCategory[17][1], curCategory[18][1], curCategory[19][1], curCategory[20][1]],
                     [curCategory[5][1], curCategory[6][1], curCategory[7][1], curCategory[8][1], curCategory[9][1], curCategory[10][1], curCategory[11][1], curCategory[12][1], curCategory[13][1]]
@@ -620,6 +620,7 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                     //stick da shit here
             }
         }
+        
 
         (cast (Lib.current.getChildAt(0), Main)).changeFPS(SaveData.fps);
     }

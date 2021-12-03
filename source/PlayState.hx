@@ -163,12 +163,7 @@ class PlayState extends MusicBeatState
 	private var combinedHealth:Float = 1; //dont mess with this using modcharts
 
 	//note stuff
-	public var P1notes:FlxTypedGroup<Note>; //bf
-	public var P2notes:FlxTypedGroup<Note>; //dad
-	public var P3notes:FlxTypedGroup<Note>; //gf (events notes pretty much lol)
 	public var unspawnNotes:Array<Note> = [];
-	public var noteSplashes:FlxTypedGroup<NoteSplash>;
-	public var P2noteSplashes:FlxTypedGroup<NoteSplash>;
 
 	public static var poisonDrain:Float = 0.075;
 	public static var drainNoteAmount:Float = 0.025;
@@ -207,61 +202,13 @@ class PlayState extends MusicBeatState
 	private var curSection:Int = 0; //current section
 	private var currentSection:SwagSection; //the current section again lol, but its actually the section not just a number
 
-	//static arrows
-	public static var strumLineNotes:StrumLineGroup = null;
-	public static var playerStrums:StrumLineGroup = null;
-	public static var cpuStrums:StrumLineGroup = null;
-	public static var gfStrums:StrumLineGroup = null;
+	public static var p1:Player = null;
+	public static var p2:Player = null;
+	public static var p3:Player = null;
 	//score and stats
 	public static var campaignScore:Int = 0;
 	public var ranksList:Array<String> = ["Skill Issue", "E", "D", "C", "B", "A", "S"]; //for score text
-
-	public var P1Stats = {
-		songScore : 0,
-		fc : true,
-		sicks : 0,
-		goods : 0,
-		bads : 0,
-		shits : 0,
-		misses : 0,
-		ghostmisses : 0,
-		totalNotesHit : 0,
-		accuracy : 0.0,
-		curRank : "None",
-		combo : 0,
-		highestCombo : 0,
-		nps : 0,
-		highestNps : 0,
-		health : 1.0,
-		poisonHits : 0,
-		scorelerp : 0,
-		acclerp : 0.0,
-		npsArray : []
-	};
-	public var P2Stats = {
-		songScore : 0,
-		fc : true,
-		sicks : 0,
-		goods : 0,
-		bads : 0,
-		shits : 0,
-		misses : 0,
-		ghostmisses : 0,
-		totalNotesHit : 0,
-		accuracy : 0.0,
-		curRank : "None",
-		combo : 0,
-		highestCombo : 0,
-		nps : 0,
-		highestNps : 0,
-		health : 1.0,
-		poisonHits : 0,
-		scorelerp : 0,
-		acclerp : 0.0,
-		npsArray : []
-	};
-
-
+	public var fcList:Array<String> = ["[Nice FC]", "[Awful FC]", "[SFC]", "[GFC]", "[BFC]", "[FC]", "[SDCB]", "[Pass]","youre just terrible"]; //fc shit
 	
 	//song stuff
 	private var generatedMusic:Bool = false;
@@ -284,10 +231,6 @@ class PlayState extends MusicBeatState
 
 	//camera shit
 	public var camHUD:FlxCamera;
-	public var camP1Notes:FlxCamera;
-	public var camP1NotesSplit:FlxCamera; //for splitscroll fuck you
-	public var camP2NotesSplit:FlxCamera;
-	public var camP2Notes:FlxCamera;
 	public var camOnTop:FlxCamera;
 	private var camGame:FlxCamera;
 
@@ -370,17 +313,12 @@ class PlayState extends MusicBeatState
 
 		songtext = PlayState.SONG.song + " - " + diffText;
 
-		noteSplashes = new FlxTypedGroup<NoteSplash>(); //note splash spawning before the song
-		var daSplash = new NoteSplash(100, 100, 0);
-		daSplash.alpha = 0;
-		noteSplashes.add(daSplash);
+		p1 = new Player(1);
+		p2 = new Player(0);
+		p3 = new Player(2); //p3 is gf
 
-		P2noteSplashes = new FlxTypedGroup<NoteSplash>(); //note splash spawning before the song
-		var P2daSplash = new NoteSplash(100, 100, 0);
-		P2daSplash.alpha = 0;
-		P2noteSplashes.add(P2daSplash);
-
-		resetStats();
+		p1.resetStats();
+		p2.resetStats();
 
 		beatCamZoom = 0.015;
 		beatCamHUD = 0.03;
@@ -391,14 +329,8 @@ class PlayState extends MusicBeatState
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
-		camP1Notes = new FlxCamera();
-		camP1Notes.bgColor.alpha = 0;
-		camP1NotesSplit = new FlxCamera();
-		camP1NotesSplit.bgColor.alpha = 0;
-		camP2NotesSplit = new FlxCamera();
-		camP2NotesSplit.bgColor.alpha = 0;
-		camP2Notes = new FlxCamera();
-		camP2Notes.bgColor.alpha = 0;
+		p1.createCams();
+		p2.createCams();
 		camOnTop = new FlxCamera();
 		camOnTop.bgColor.alpha = 0;
 
@@ -409,10 +341,8 @@ class PlayState extends MusicBeatState
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD);
-		FlxG.cameras.add(camP1Notes);
-		FlxG.cameras.add(camP1NotesSplit);
-		FlxG.cameras.add(camP2NotesSplit);
-		FlxG.cameras.add(camP2Notes);
+		p1.addCams();
+		p2.addCams();
 		FlxG.cameras.add(camOnTop);
 
 		FlxCamera.defaultCameras = [camGame];
@@ -439,25 +369,24 @@ class PlayState extends MusicBeatState
 		else
 			modeText = "";
 
+		//p1.downscrollCheck(SaveData.downscroll, SaveData.splitScroll); //didnt wanna work
+		//p2.downscrollCheck(SaveData.P2downscroll, SaveData.P2splitScroll);
+
 		if (SaveData.downscroll) //im not sure if this is the smartest or the stupidest way of doing downscroll
 		{
-			camP1Notes.flashSprite.scaleY *= -1;
-			camP1NotesSplit.flashSprite.scaleY *= -1;
+			p1.noteCam.flashSprite.scaleY *= -1;
+			p1.noteCamSplit.flashSprite.scaleY *= -1;
 		}	
 		if (SaveData.P2downscroll) //well it works lol
 		{
-			camP2Notes.flashSprite.scaleY *= -1;
-			camP2NotesSplit.flashSprite.scaleY *= -1;
+			p2.noteCam.flashSprite.scaleY *= -1;
+			p2.noteCamSplit.flashSprite.scaleY *= -1;
 		}
 
 		if (SaveData.splitScroll)
-			camP1NotesSplit.flashSprite.scaleY *= -1; //flip back to opposite
+			p1.noteCamSplit.flashSprite.scaleY *= -1; //flip back to opposite
 		if (SaveData.P2splitScroll)
-			camP2NotesSplit.flashSprite.scaleY *= -1;
-			
-
-		/*var sustainRect:Rectangle = new Rectangle(0, 0, FlxG.width, strumLine.y);
-		camP1Notes.flashSprite.scrollRect(sustainRect, sustainRect);*/
+			p2.noteCamSplit.flashSprite.scaleY *= -1;
 
 		if (SaveData.Hellchart)
 			SONG.mania = 5; //make 8k
@@ -793,15 +722,17 @@ class PlayState extends MusicBeatState
 
 		//strumLineNotes = new StrumLineGroup();
 		//add(strumLineNotes);
-		add(noteSplashes);
-		add(P2noteSplashes);
-		playerStrums = new StrumLineGroup(1);
-		cpuStrums = new StrumLineGroup(0);
-		gfStrums = new StrumLineGroup(2);
-		add(playerStrums);
-		add(cpuStrums);
+
+		p1.createStrums();
+		p2.createStrums();
+		p3.createStrums();
+		add(p1.strums.noteSplashes);
+		add(p2.strums.noteSplashes);
+
+		add(p1.strums);
+		add(p2.strums);
 		if (SONG.showGFStrums)
-			add(gfStrums);
+			add(p3.strums);
 
 
 		generateSong(SONG.song);
@@ -859,7 +790,7 @@ class PlayState extends MusicBeatState
 
 		if (!multiplayer)
 		{
-			healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), P1Stats,
+			healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), p1.Stats,
 			'health', 0, 2);
 		}
 		else
@@ -969,15 +900,8 @@ class PlayState extends MusicBeatState
 			P2scoreTxt.cameras = [camHUD];
 		}
 			
-		noteSplashes.cameras = [camP1Notes];
-		P2noteSplashes.cameras = [camP2Notes];
-		//strumLineNotes.cameras = [camP1Notes];
-		playerStrums.cameras = [camP1Notes];
-		cpuStrums.cameras = [camP2Notes];
-		//gfStrums.cameras = [camP3Notes];
-		P1notes.cameras = [camP1Notes];
-		P2notes.cameras = [camP2Notes];
-		//P3notes.cameras = [camP3Notes];
+		p1.setNoteCams();
+		p2.setNoteCams();
 		healthBar.cameras = [camHUD];
 		healthBarBG.cameras = [camHUD];
 		iconP1.cameras = [camHUD];
@@ -1061,48 +985,6 @@ class PlayState extends MusicBeatState
 				var waveEffectBG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 3, 2);
 				var waveEffectFG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 5, 2);
 		}
-	}
-
-	function resetStats():Void
-	{
-		P1Stats.songScore = 0;
-		P1Stats.fc = true;
-		P1Stats.sicks = 0;
-		P1Stats.goods = 0;
-		P1Stats.bads = 0;
-		P1Stats.shits = 0;
-		P1Stats.misses = 0;
-		P1Stats.ghostmisses = 0;
-		P1Stats.totalNotesHit = 0;
-		P1Stats.accuracy = 0;
-		P1Stats.curRank = "None";
-		P1Stats.combo = 0;
-		P1Stats.highestCombo = 0;
-		P1Stats.nps = 0;
-		P1Stats.highestNps = 0;
-		P1Stats.health = 1;
-		P1Stats.poisonHits = 0;
-		P1Stats.npsArray = [];
-
-		P2Stats.songScore = 0;
-		P2Stats.fc = true;
-		P2Stats.sicks = 0;
-		P2Stats.goods = 0;
-		P2Stats.bads = 0;
-		P2Stats.shits = 0;
-		P2Stats.misses = 0;
-		P2Stats.ghostmisses = 0;
-		P2Stats.totalNotesHit = 0;
-		P2Stats.accuracy = 0;
-		P2Stats.curRank = "None";
-		P2Stats.combo = 0;
-		P2Stats.highestCombo = 0;
-		P2Stats.nps = 0;
-		P2Stats.highestNps = 0;
-		P2Stats.health = 1;
-		P2Stats.poisonHits = 0;
-		P2Stats.npsArray = [];
-
 	}
 
 	function schoolIntro(?dialogueBox:DialogueBox):Void
@@ -1219,21 +1101,21 @@ class PlayState extends MusicBeatState
 
 		
 
-		var P1binds:Array<String> = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, mania);
-		var P2binds:Array<String> = CoolUtil.bindCheck(mania, false, FlxG.save.data.P2binds, mania);
+		var P1binds:Array<String> = CoolUtil.bindCheck(mania, false, SaveData.binds, mania);
+		var P2binds:Array<String> = CoolUtil.bindCheck(mania, false, SaveData.P2binds, mania);
 
 		if (multiplayer)
 		{
-			createKeybindText(playerStrums, P1binds, SaveData.downscroll);
-			createKeybindText(cpuStrums, P2binds, SaveData.P2downscroll);
+			createKeybindText(p1.strums, P1binds, SaveData.downscroll);
+			createKeybindText(p2.strums, P2binds, SaveData.P2downscroll);
 		}
 		else if (flipped)
 		{
-			createKeybindText(cpuStrums, P1binds, SaveData.P2downscroll);	
+			createKeybindText(p2.strums, P1binds, SaveData.P2downscroll);	
 		}
 		else
 		{
-			createKeybindText(playerStrums, P1binds, SaveData.downscroll);
+			createKeybindText(p1.strums, P1binds, SaveData.downscroll);
 		}
 
 		createCountdown();
@@ -1252,16 +1134,16 @@ class PlayState extends MusicBeatState
 		@:privateAccess
 		var key = FlxKey.toStringMap.get(evt.keyCode);
 
-		var binds:Array<String> = FlxG.save.data.binds[0];
+		var binds:Array<String> = SaveData.binds[0];
 		var data = -1;
 		var playernum:Int = 1;
 		
-		binds = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, p1Mania);
+		binds = CoolUtil.bindCheck(mania, false, SaveData.binds, p1Mania);
 		//data = CoolUtil.arrowKeyCheck(maniaToChange, evt.keyCode); //arrow keys are shit, just set them in keybinds, sorry to anyone who plays both wasd + arrow keys, might add alt keys at some point
 
 		var P2binds:Array<String> = [null,null,null,null]; //null so you cant misspress while not in multi
 		if (multiplayer) //so it only checks when in multi
-			P2binds = CoolUtil.bindCheck(mania, false, FlxG.save.data.P2binds, p2Mania);
+			P2binds = CoolUtil.bindCheck(mania, false, SaveData.P2binds, p2Mania);
 
 		for (i in 0...binds.length)//convert binds to key to data
 		{
@@ -1311,13 +1193,13 @@ class PlayState extends MusicBeatState
 		var key = FlxKey.toStringMap.get(evt.keyCode);
 		var data = -1;
 		var playernum:Int = 1;
-		var binds:Array<String> = FlxG.save.data.binds[0];
-		binds = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, p1Mania); //finally got rid of that fucking huge case statement, its still inside coolutil, but theres only 1, not like 4 lol
+		var binds:Array<String> = SaveData.binds[0];
+		binds = CoolUtil.bindCheck(mania, false, SaveData.binds, p1Mania); //finally got rid of that fucking huge case statement, its still inside coolutil, but theres only 1, not like 4 lol
 		//data = CoolUtil.arrowKeyCheck(maniaToChange, evt.keyCode);
 
 		var P2binds:Array<String> = [null,null,null,null]; //null so you cant misspress while not in multi
 		if (multiplayer) //so it only checks when in multi
-			P2binds = CoolUtil.bindCheck(mania, false, FlxG.save.data.P2binds, p2Mania);
+			P2binds = CoolUtil.bindCheck(mania, false, SaveData.P2binds, p2Mania);
 
 		for (i in 0...binds.length)//convert binds to key to data
 		{
@@ -1368,13 +1250,13 @@ class PlayState extends MusicBeatState
 		P2closestNotes = [];
 		if (multiplayer)
 		{
-			closestNotes = collectNotes(P1notes, true);
-			P2closestNotes = collectNotes(P2notes, false);
+			closestNotes = collectNotes(p1.strums.notes, true);
+			P2closestNotes = collectNotes(p2.strums.notes, false);
 		}
 		else if (flipped)
-			closestNotes = collectNotes(P2notes, false);
+			closestNotes = collectNotes(p2.strums.notes, false);
 		else
-			closestNotes = collectNotes(P1notes, true);
+			closestNotes = collectNotes(p1.strums.notes, true);
 		
 
 		closestNotes.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
@@ -1600,12 +1482,9 @@ class PlayState extends MusicBeatState
 
 		FlxG.sound.list.add(vocals);
 
-		P1notes = new FlxTypedGroup<Note>();
-		add(P1notes);
-		P2notes = new FlxTypedGroup<Note>();
-		add(P2notes);
-		P3notes = new FlxTypedGroup<Note>();
-		add(P3notes);
+		p1.addNotes();
+		p2.addNotes();
+		p3.addNotes();
 
 		generateNotes();
 
@@ -1635,25 +1514,25 @@ class PlayState extends MusicBeatState
 			switch (playernum)
 			{
 				case 0:
-					cpuStrums.add(babyArrow);
-					cpuStrums.curMania = mania;
+					p2.strums.add(babyArrow);
+					p2.strums.curMania = mania;
 					//if (PlayStateChangeables.bothSide)
 						//babyArrow.x -= 500;
 				case 1:
-					playerStrums.add(babyArrow);
-					playerStrums.curMania = mania;
+					p1.strums.add(babyArrow);
+					p1.strums.curMania = mania;
 				case 2: 
-					gfStrums.add(babyArrow);
+					p3.strums.add(babyArrow);
 			}
 
-			cpuStrums.forEach(function(spr:BabyArrow)
+			p2.strums.forEach(function(spr:BabyArrow)
 			{					
 				spr.centerOffsets();
 			});
 
 			if (SONG.showGFStrums)
 			{
-				gfStrums.forEach(function(spr:BabyArrow)
+				p3.strums.forEach(function(spr:BabyArrow)
 					{					
 						spr.centerOffsets();
 					});
@@ -1721,7 +1600,7 @@ class PlayState extends MusicBeatState
 	override public function onFocus():Void
 	{
 		#if desktop
-		if (P1Stats.health > 0 && !paused)
+		if (p1.Stats.health > 0 && !paused)
 		{
 			if (Conductor.songPosition > 0.0)
 			{
@@ -1740,7 +1619,7 @@ class PlayState extends MusicBeatState
 	override public function onFocusLost():Void
 	{
 		#if desktop
-		if (P1Stats.health > 0 && !paused)
+		if (p1.Stats.health > 0 && !paused)
 		{
 			DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconRPC);
 		}
@@ -1813,7 +1692,7 @@ class PlayState extends MusicBeatState
 				switch (strums)
 				{
 					case "player": 
-						call('P1NoteNowOnScreen', [daNote]);
+						call('P1NoteNowOnScreen', [daNote]); //TODO fix this shit it dont work
 					case "gf": 
 						call('P3NoteNowOnScreen', [daNote]);
 					default: 
@@ -1841,11 +1720,11 @@ class PlayState extends MusicBeatState
 		var StrumGroup:StrumLineGroup;
 		
 		if (strums == 'player') //playerStrums
-			StrumGroup = playerStrums;
+			StrumGroup = p1.strums;
 		else if (strums == 'gf')
-			StrumGroup = gfStrums;
+			StrumGroup = p3.strums;
 		else //cpuStrums
-			StrumGroup = cpuStrums;
+			StrumGroup = p2.strums;
 
 		strumNote = StrumGroup.members[Math.floor(Math.abs(daNote.noteData))];
 
@@ -1982,7 +1861,7 @@ class PlayState extends MusicBeatState
 			if (flipped)
 			{
 				call('P1CpuNoteHit', [daNote]);
-				playerStrums.forEach(function(spr:BabyArrow)
+				p1.strums.forEach(function(spr:BabyArrow)
 				{
 					if (Math.abs(noteData) == spr.ID)
 					{
@@ -1994,7 +1873,7 @@ class PlayState extends MusicBeatState
 			else
 			{
 				call('P2CpuNoteHit', [daNote]);
-				cpuStrums.forEach(function(spr:BabyArrow)
+				p2.strums.forEach(function(spr:BabyArrow)
 				{
 					if (Math.abs(noteData) == spr.ID)
 					{
@@ -2006,10 +1885,10 @@ class PlayState extends MusicBeatState
 
 			if (Note.noteTypeList[daNote.noteType] == "drain")
 			{
-				if ((drainNoteAmount * 2) > P1Stats.health)
-					P1Stats.health = drainNoteAmount * 2;
+				if ((drainNoteAmount * 2) > p1.Stats.health)
+					p1.Stats.health = drainNoteAmount * 2;
 				else 
-					P1Stats.health -= drainNoteAmount;
+					p1.Stats.health -= drainNoteAmount;
 			}
 
 			cpu.noteCamMovement = noteCamMovementShit(daNote.noteData, 0);
@@ -2070,7 +1949,7 @@ class PlayState extends MusicBeatState
 
 			if (SONG.showGFStrums)
 			{
-				gfStrums.forEach(function(spr:BabyArrow)
+				p3.strums.forEach(function(spr:BabyArrow)
 				{
 					if (Math.abs(noteData) == spr.ID)
 					{
@@ -2087,7 +1966,7 @@ class PlayState extends MusicBeatState
 			daNote.active = false;
 
 			daNote.kill();
-			P3notes.remove(daNote, true);
+			p3.strums.notes.remove(daNote, true);
 			daNote.destroy();
 		}
 	}
@@ -2168,18 +2047,18 @@ class PlayState extends MusicBeatState
 
 		if (legacyModcharts)
 		{
-			playerStrums.forEach(function(spr:BabyArrow) //these shitty
-				{
-					ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "X", currentBeat);
-					ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "Y", currentBeat);
-					ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "Angle", currentBeat);
-				});
-				cpuStrums.forEach(function(spr:BabyArrow)
-				{
-					ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "X", currentBeat);
-					ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "Y", currentBeat);
-					ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "Angle", currentBeat);
-				});
+			p1.strums.forEach(function(spr:BabyArrow) //these shitty
+			{
+				ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "X", currentBeat);
+				ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "Y", currentBeat);
+				ModchartUtil.CalculateArrowShit(spr, spr.curID, 1, "Angle", currentBeat);
+			});
+			p2.strums.forEach(function(spr:BabyArrow)
+			{
+				ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "X", currentBeat);
+				ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "Y", currentBeat);
+				ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "Angle", currentBeat);
+			});
 		}
 
 
@@ -2236,17 +2115,17 @@ class PlayState extends MusicBeatState
 
 		var iconOffset:Int = 26;
 
-		P1Stats.health = poisonHealthCheck(1, elapsed);
+		p1.Stats.health = poisonHealthCheck(1, elapsed);
 		if (multiplayer)
-			P2Stats.health = poisonHealthCheck(0, elapsed);
+			p2.Stats.health = poisonHealthCheck(0, elapsed);
 
-		if (P1Stats.health > 2)
-			P1Stats.health = 2;
+		if (p1.Stats.health > 2)
+			p1.Stats.health = 2;
 
-		if (P2Stats.health > 2)
-			P2Stats.health = 2;
+		if (p2.Stats.health > 2)
+			p2.Stats.health = 2;
 
-		combinedHealth = P1Stats.health - P2Stats.health;
+		combinedHealth = p1.Stats.health - p2.Stats.health;
 
 		if (combinedHealth > 2)
 			combinedHealth = 2;
@@ -2353,7 +2232,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (P1Stats.health <= healthToDieOn || P2Stats.health <= healthToDieOn)
+		if (p1.Stats.health <= healthToDieOn || p2.Stats.health <= healthToDieOn)
 		{
 			if (!rewindOnDeath)
 			{
@@ -2382,21 +2261,9 @@ class PlayState extends MusicBeatState
 
 		}
 
-		if (FlxG.keys.justPressed.ONE)
-			playerStrums.forEach(function(spr:BabyArrow)
-			{
-				spr.strumLineAngle += 5;
-			});
-
-		if (FlxG.keys.justPressed.TWO)
-			playerStrums.forEach(function(spr:BabyArrow)
-			{
-				spr.strumLineAngle -= 5;
-			});
-
 		if (generatedMusic)
 		{
-			P1notes.forEachAlive(function(daNote:Note)
+			p1.strums.notes.forEachAlive(function(daNote:Note)
 			{
 				NotePositionShit(daNote, "player");
 				if (flipped && !multiplayer)
@@ -2405,7 +2272,7 @@ class PlayState extends MusicBeatState
 					NoteMissDetection(daNote, "player", 1);
 					
 			});
-			P2notes.forEachAlive(function(daNote:Note)
+			p2.strums.notes.forEachAlive(function(daNote:Note)
 			{
 				NotePositionShit(daNote, "cpu");
 				if (multiplayer)
@@ -2415,7 +2282,7 @@ class PlayState extends MusicBeatState
 				else
 					NoteCpuHit(daNote, "cpu");
 			});
-			P3notes.forEachAlive(function(daNote:Note)
+			p3.strums.notes.forEachAlive(function(daNote:Note)
 			{
 				if (SONG.showGFStrums)
 					NotePositionShit(daNote, "gf");
@@ -2426,12 +2293,12 @@ class PlayState extends MusicBeatState
 
 		}
 		if (flipped && !multiplayer)
-			resetBabyArrowAnim(playerStrums);
+			resetBabyArrowAnim(p1.strums);
 		else if (!multiplayer)
-			resetBabyArrowAnim(cpuStrums);
+			resetBabyArrowAnim(p2.strums);
 
 		if (SONG.showGFStrums)
-			resetBabyArrowAnim(gfStrums);
+			resetBabyArrowAnim(p3.strums);
 
 
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
@@ -2465,13 +2332,13 @@ class PlayState extends MusicBeatState
 		if (SONG.validScore)
 		{
 			#if !switch
-			Highscore.saveScore(SONG.song, P1Stats.songScore, storyDifficulty);
+			Highscore.saveScore(SONG.song, p1.Stats.songScore, storyDifficulty);
 			#end
 		}
 
 		if (isStoryMode)
 		{
-			campaignScore += P1Stats.songScore;
+			campaignScore += p1.Stats.songScore;
 
 			storyPlaylist.remove(storyPlaylist[0]);
 
@@ -2839,13 +2706,13 @@ class PlayState extends MusicBeatState
 		{
 			if (multiplayer)
 			{
-				sustainHoldCheck(sustainsHeld, P1notes, true);
-				sustainHoldCheck(P2sustainsHeld, P2notes, false, 0);
+				sustainHoldCheck(sustainsHeld, p1.strums.notes, true);
+				sustainHoldCheck(P2sustainsHeld, p2.strums.notes, false, 0);
 			}
 			else if (flipped && !multiplayer)
-				sustainHoldCheck(sustainsHeld, P2notes, false);
+				sustainHoldCheck(sustainsHeld, p2.strums.notes, false);
 			else
-				sustainHoldCheck(sustainsHeld, P1notes, true);
+				sustainHoldCheck(sustainsHeld, p1.strums.notes, true);
 		}
 
 		if (player.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!keys.contains(true)))
@@ -2863,19 +2730,19 @@ class PlayState extends MusicBeatState
 		}
 		if (multiplayer)
 		{
-			strumPressCheck(playerStrums, keys);
-			strumPressCheck(cpuStrums, P2keys);
+			strumPressCheck(p1.strums, keys);
+			strumPressCheck(p2.strums, P2keys);
 		}
 		else if (flipped && !multiplayer)
-			strumPressCheck(cpuStrums, keys);
+			strumPressCheck(p2.strums, keys);
 		else
-			strumPressCheck(playerStrums, keys);
+			strumPressCheck(p1.strums, keys);
 
 	}
 
 	private function gamepadCheck(gamepad:FlxGamepad):Void
 	{
-		var binds:Array<String> = CoolUtil.bindCheck(mania, false, FlxG.save.data.GPbinds, p1Mania);
+		var binds:Array<String> = CoolUtil.bindCheck(mania, false, SaveData.GPbinds, p1Mania);
 		for (i in 0...binds.length) //im suprised this worked first try without any issues
 		{
 			var data = -1;
@@ -3064,11 +2931,9 @@ class PlayState extends MusicBeatState
 			else
 			{
 				note.rating = "sick";
-				if (!note.isSustainNote)
-				{
-					statsToUse.sicks++;
-					statsToUse.totalNotesHit++;
-				}
+				
+				statsToUse.sustainsHit++; //give acc from sustains
+				statsToUse.totalNotesHit++;
 
 			}
 			if ((!note.isSustainNote || SaveData.casual) && !note.badNoteType)
@@ -3112,7 +2977,7 @@ class PlayState extends MusicBeatState
 
 			if (flipped && !multiplayer)
 			{
-				cpuStrums.forEach(function(spr:BabyArrow)
+				p2.strums.forEach(function(spr:BabyArrow)
 				{
 					if (Math.abs(note.noteData) == spr.ID)
 					{
@@ -3125,7 +2990,7 @@ class PlayState extends MusicBeatState
 				switch (playernum)
 				{
 					case 0: 
-						cpuStrums.forEach(function(spr:BabyArrow)
+						p2.strums.forEach(function(spr:BabyArrow)
 						{
 							if (Math.abs(note.noteData) == spr.ID)
 							{
@@ -3133,7 +2998,7 @@ class PlayState extends MusicBeatState
 							}
 						});
 					case 1: 
-						playerStrums.forEach(function(spr:BabyArrow)
+						p1.strums.forEach(function(spr:BabyArrow)
 						{
 							if (Math.abs(note.noteData) == spr.ID)
 							{
@@ -3168,23 +3033,23 @@ class PlayState extends MusicBeatState
 	}
 	function doNoteSplash(noteX:Float, noteY:Float, nData:Int, playernum:Int = 1, cameraShit:Array<FlxCamera>, colorShit:Array<Float>)
 		{
-			var recycledNote = noteSplashes.recycle(NoteSplash);
+			var recycledNote = p1.strums.noteSplashes.recycle(NoteSplash);
 			var xPos:Float = 0;
 			var yPos:Float = 0;
-			xPos = playerStrums.members[nData].x;
-			yPos = playerStrums.members[nData].y;
+			xPos = p1.strums.members[nData].x;
+			yPos = p1.strums.members[nData].y;
 			if (playernum == 0 || (flipped && !multiplayer))
 			{
-				recycledNote = P2noteSplashes.recycle(NoteSplash);
-				xPos = cpuStrums.members[nData].x;
-				yPos = cpuStrums.members[nData].y;
+				recycledNote = p2.strums.noteSplashes.recycle(NoteSplash);
+				xPos = p2.strums.members[nData].x;
+				yPos = p2.strums.members[nData].y;
 			}
 
 			recycledNote.makeSplash(xPos, yPos, nData, playernum, cameraShit, colorShit);
 			if (playernum == 1)
-				noteSplashes.add(recycledNote);
+				p1.strums.noteSplashes.add(recycledNote);
 			else
-				P2noteSplashes.add(recycledNote);
+				p2.strums.noteSplashes.add(recycledNote);
 			
 		}
 
@@ -3209,11 +3074,11 @@ class PlayState extends MusicBeatState
 	{
 		daNote.kill();
 		if (strums == 'player')
-			P1notes.remove(daNote, true);
+			p1.strums.notes.remove(daNote, true);
 		else if (strums == "gf")
-			P3notes.remove(daNote, true);
+			p3.strums.notes.remove(daNote, true);
 		else
-			P2notes.remove(daNote, true);
+			p2.strums.notes.remove(daNote, true);
 		daNote.destroy();
 	}
 
@@ -3231,6 +3096,19 @@ class PlayState extends MusicBeatState
 			statsToUse.accuracy <= 100,
 		];
 
+		var fcShit:Array<Bool> = [
+			statsToUse.misses == 0 && Math.floor(statsToUse.accuracy) == 69,
+			statsToUse.misses == 0 && statsToUse.accuracy < 69,
+			statsToUse.misses == 0 && statsToUse.goods == 0 && statsToUse.bads == 0 && statsToUse.shits == 0,
+			statsToUse.misses == 0 && statsToUse.bads == 0 && statsToUse.shits == 0,
+			statsToUse.misses == 0 && statsToUse.shits == 0,
+			statsToUse.misses == 0,
+			statsToUse.misses <= 10,
+			statsToUse.misses > 10,
+			statsToUse.misses > 1000,
+			
+		];
+
 
 
 		
@@ -3239,8 +3117,16 @@ class PlayState extends MusicBeatState
 			if (accuracyToRank[i])
 			{
 				statsToUse.curRank = ranksList[i];
-				if(statsToUse.misses == 0 && !SaveData.botplay)
-					statsToUse.curRank += "(FC)";
+				var fcText = "";
+				for (i in 0...fcShit.length)
+				{
+					if (fcShit[i])
+					{
+						fcText = fcList[i];
+						break;
+					}
+				}
+				statsToUse.curRank += " " + fcText;
 
 				break;
 			}
@@ -3251,7 +3137,7 @@ class PlayState extends MusicBeatState
 	{
 		var statsToUse = getStats(playernum);
 
-		var notesAddedUp = statsToUse.sicks + (statsToUse.goods * 0.75) + (statsToUse.bads * 0.3) + (statsToUse.shits * 0.1);
+		var notesAddedUp = statsToUse.sustainsHit + statsToUse.sicks + (statsToUse.goods * 0.75) + (statsToUse.bads * 0.3) + (statsToUse.shits * 0.1);
 		statsToUse.accuracy = FlxMath.roundDecimal((notesAddedUp / statsToUse.totalNotesHit) * 100, 2);
 
 		updateRank(playernum);
@@ -3259,10 +3145,10 @@ class PlayState extends MusicBeatState
 
 	function getStats(playernum:Int = 1)
 	{
-		var stats = P1Stats;
+		var stats = p1.Stats;
 
 		if (playernum != 1 && multiplayer)
-			stats = P2Stats;
+			stats = p2.Stats;
 
 		return stats;
 	}
@@ -3378,7 +3264,7 @@ class PlayState extends MusicBeatState
 	{
 		if (mania == 2) //so it doesnt break the fucking game
 		{
-			var strums:StrumLineGroup = playerStrums;
+			var strums:StrumLineGroup = p1.strums;
 		
 			var scaleToCheck:Float = 1;
 			var bindsToUse:Array<String> = [];
@@ -3389,28 +3275,28 @@ class PlayState extends MusicBeatState
 				p1Mania = newMania;
 				Note.p1NoteScale = Note.noteScales[newMania];
 				scaleToCheck = Note.p1NoteScale;
-				strums = playerStrums;
+				strums = p1.strums;
 				if (!flipped && !multiplayer)
-					bindsToUse = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, p1Mania);
+					bindsToUse = CoolUtil.bindCheck(mania, false, SaveData.binds, p1Mania);
 				else 
 					showKeyBindText = false;
 
-				playerStrums.curMania = newMania;
+				p1.strums.curMania = newMania;
 			}
 			else
 			{
 				p2Mania = newMania;
 				Note.p2NoteScale = Note.noteScales[newMania];
 				scaleToCheck = Note.p2NoteScale;
-				strums = cpuStrums;
+				strums = p2.strums;
 				if (multiplayer)
-					bindsToUse = CoolUtil.bindCheck(mania, false, FlxG.save.data.P2binds, p2Mania);
+					bindsToUse = CoolUtil.bindCheck(mania, false, SaveData.P2binds, p2Mania);
 				else if (flipped)
-					bindsToUse = CoolUtil.bindCheck(mania, false, FlxG.save.data.binds, p1Mania);
+					bindsToUse = CoolUtil.bindCheck(mania, false, SaveData.binds, p1Mania);
 				else 
 					showKeyBindText = false;
 				downscroll = SaveData.P2downscroll;
-				cpuStrums.curMania = newMania;
+				p2.strums.curMania = newMania;
 			}
 	
 			strums.forEach(function(spr:BabyArrow)
@@ -3508,18 +3394,8 @@ class PlayState extends MusicBeatState
 			//camP2Notes.zoom = camHUD.zoom;
 			camOnTop.zoom = camHUD.zoom;
 		}
-		camP1Notes.x = camHUD.x; //so they match up when it moves, pretty much will just be for modcharts and shit
-		camP1Notes.y = camHUD.y;
-		camP1Notes.angle = camHUD.angle;
-		camP1NotesSplit.x = camP1Notes.x;
-		camP1NotesSplit.y = camP1Notes.y;
-		camP1NotesSplit.angle = camP1Notes.angle;
-		camP2NotesSplit.x = camP1Notes.x;
-		camP2NotesSplit.y = camP1Notes.y;
-		camP2NotesSplit.angle = camP1Notes.angle;
-		camP2Notes.x = camP1Notes.x;
-		camP2Notes.y = camP1Notes.y;
-		camP2Notes.angle = camP1Notes.angle;
+		p1.snapCams(camHUD);
+		p2.snapCams(camHUD);
 		camOnTop.x = camHUD.x;
 		camOnTop.y = camHUD.y;
 		camOnTop.angle = camHUD.angle;
@@ -3718,18 +3594,18 @@ class PlayState extends MusicBeatState
 			{
 				if (dunceNote.isGFNote)
 				{
-					//call('P3NoteSpawned', [dunceNote]); //laggy piece of shit
-					P3notes.add(dunceNote);
+					call('P3NoteSpawned', [dunceNote]);
+					p3.strums.notes.add(dunceNote);
 				}	
 				else if (dunceNote.mustPress)
 				{
-					//call('P1NoteSpawned', [dunceNote]);
-					P1notes.add(dunceNote);
+					call('P1NoteSpawned', [dunceNote]);
+					p1.strums.notes.add(dunceNote);
 				}
 				else if (!dunceNote.mustPress)
 				{
-					//call('P2NoteSpawned', [dunceNote]);
-					P2notes.add(dunceNote);
+					call('P2NoteSpawned', [dunceNote]);
+					p2.strums.notes.add(dunceNote);
 				}
 					
 			}
@@ -3817,15 +3693,16 @@ class PlayState extends MusicBeatState
 			switchMania(2, 0);
 			switchMania(2, 1);
 		}
-		resetStats();
+		p1.resetStats();
+		p2.resetStats();
 	}
 
 	function generateNotes():Void
 	{
 		unspawnNotes = [];
-		P1notes.clear();
-		P2notes.clear();
-		P3notes.clear();
+		p1.strums.notes.clear();
+		p2.strums.notes.clear();
+		p3.strums.notes.clear();
 
 		var songData = SONG;
 		var noteData:Array<SwagSection>;
@@ -4064,9 +3941,9 @@ class PlayState extends MusicBeatState
 		call("beatHit", [curBeat]);
 		if (generatedMusic)
 		{
-			P1notes.sort(FlxSort.byY, FlxSort.DESCENDING);
-			P2notes.sort(FlxSort.byY, FlxSort.DESCENDING);
-			P3notes.sort(FlxSort.byY, FlxSort.DESCENDING);
+			p1.strums.notes.sort(FlxSort.byY, FlxSort.DESCENDING);
+			p2.strums.notes.sort(FlxSort.byY, FlxSort.DESCENDING);
+			p3.strums.notes.sort(FlxSort.byY, FlxSort.DESCENDING);
 		}
 
 		StagePiece.daBeat = curBeat;
