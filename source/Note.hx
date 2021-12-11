@@ -100,6 +100,8 @@ class Note extends FlxSprite
 	public var curMania:Int = 0; //im watching you, you better not steal this fucking code
 	public var changesMania:Bool = false;
 
+	public static var ammoToMania:Array<Int> = [0, 6, 7, 8, 0, 3, 1, 4, 5, 2];
+
 	public static var noteScales:Array<Float> = [0.7, 0.6, 0.5, 0.65, 0.58, 0.55, 0.7, 0.7, 0.7];
 	public static var pixelNoteScales:Array<Float> = [1, 0.83, 0.7, 0.9, 0.8, 0.74, 1, 1, 1];
 	public static var noteWidths:Array<Float> = [112, 84, 66.5, 91, 77, 70, 140, 126, 119];
@@ -211,6 +213,9 @@ class Note extends FlxSprite
 	var charterMulti:Int = 0; //wtf was this used for again???
 	public var updated:Bool = true;
 	public var beingGrabbed:Bool = false;
+	public var highlighted:Bool = false;
+	public var copied:Bool = false;
+	public var section:Int = 0;
 
 
 	////////////////////////////////////////////////////////////
@@ -426,6 +431,11 @@ class Note extends FlxSprite
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		if (highlighted && inCharter)
+			color = FlxColor.BLUE;
+		else if (inCharter)
+			color = 0x00FFFFFF;
 
 		if ((animation.curAnim.name.endsWith('holdend') && prevNote.isSustainNote) && !inCharter)
 		{

@@ -1,0 +1,42 @@
+guess i should start doing this
+
+
+
+0.5 ///////////////////////////////////////////////
+
+- fixed sustains not appearing properly in chart editor
+
+- sustains in chart editor are now colored based on the note
+
+- hscript modchart support (uses actual haxe code so almost anything can be done)
+
+- added a song slider in the chart editor for easily getting around the song
+
+- you can now grab a note with right click in the chart editor to pull out a sustain from it (will appear when let go)
+
+- ctrl z,x,c,v,a,s support in chart editor
+
+- note quantization support (up to 6144th lol)
+
+- note quant snaps in chart editor (press Tab)
+
+- strumline angling and note incoming direction angling
+
+- support for extra characters (done by adding character names to an array with a modchart)
+
+- options to toggle gf strums in chart editor (kinda like how it works in applecore, strums will float above gf)
+
+
+code stuff most people wont care about
+
+- added a player class for reducing duplicated code
+
+- cleaned up keybind code
+
+- cleaned up the note color code a bit
+
+- now requires you to install some more libraries
+
+haxelib install hscript-ex
+
+//////////////////////////////////////////////////

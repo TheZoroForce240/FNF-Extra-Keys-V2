@@ -167,7 +167,7 @@ class CoolUtil
 						case 4: 
 							binds = [savedBinds[1][0], savedBinds[1][4], savedBinds[1][1], savedBinds[1][2], savedBinds[2][4], savedBinds[1][3], null, null, savedBinds[1][5]];
 						case 5: 
-							binds = [savedBinds[2][0], savedBinds[2][1], savedBinds[2][2], savedBinds[2][3], null, savedBinds[2][5], savedBinds[6][4], savedBinds[2][7], savedBinds[2][8]];
+							binds = savedBinds[2]; //doesnt really matter if you can sit hit space lol
 						case 6: 
 							binds = [null, null, null, null, savedBinds[2][4], null, null, null, null];
 						case 7: 

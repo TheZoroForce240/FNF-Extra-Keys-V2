@@ -74,6 +74,8 @@ import hscript.Expr;
 import hscript.Interp;
 import hscript.Parser;
 
+
+
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -128,7 +130,7 @@ class PlayState extends MusicBeatState
 	public static var regeneratingNotes:Bool = false;
 	static var rewindOnDeath = false;
 	public static var allowSpeedChanges:Bool = true;
-	public static var legacyModcharts:Bool = false; //id prefer to use new modcharts rather than shitty event notes
+	public var legacyModcharts:Bool = false; //id prefer to use new modcharts rather than shitty event notes
 
 	public static var StrumLineStartY:Float = 50;
 	public static var healthToDieOn:Float = 0;
@@ -157,6 +159,12 @@ class PlayState extends MusicBeatState
 	public static var gfDefaultPos:Array<Int> = [400, 130];
 	public static var bfDefaultCamOffset:Array<Int> = [-100, -100];
 	public static var dadDefaultCamOffset:Array<Int> = [150, 100];
+
+	public var extraCharactersList:Array<String> = [];
+	public static var extraCharacters:FlxTypedGroup<Boyfriend>;
+	public var p1ActiveCharacters:Array<String> = ["bf"];
+	public var p2ActiveCharacters:Array<String> = ["dad"];
+
 
 	var oppenentColors:Array<Array<Float>>; //oppenents arrow colors and assets
 	public var gfSpeed:Int = 1;
@@ -591,14 +599,33 @@ class PlayState extends MusicBeatState
 
 		gf = new Character(gfDefaultPos[0], gfDefaultPos[1], gfVersion);
 		gf.scrollFactor.set(0.95, 0.95);
-		var dadcharacter = SONG.player2;
-		var bfcharacter = SONG.player1;
+
+		extraCharacters = new FlxTypedGroup<Boyfriend>();
+		add(extraCharacters);
+
+		var dadcharacter:String = SONG.player2;
+		var bfcharacter:String = SONG.player1;
 
 		var characterList:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
 		if (!characterList.contains(dadcharacter)) //stop the fucking game from crashing when theres a character that doesnt exist
 			dadcharacter = "dad";
 		if (!characterList.contains(bfcharacter))
 			bfcharacter = "bf";
+
+		p1ActiveCharacters = [bfcharacter];
+		p2ActiveCharacters = [dadcharacter];
+
+		for (i in 0...extraCharactersList.length)
+		{
+			var character:Boyfriend = new Boyfriend(dadDefaultPos[0], dadDefaultPos[1], extraCharactersList[i], false, true);
+			var offset = character.posOffsets.get('pos');
+			if (character.posOffsets.exists('pos'))
+			{
+				character.x += offset[0];
+				character.y += offset[1];
+			}
+			extraCharacters.add(character);
+		}
 
 		var isbfPlayer = true;
 		var isdadPlayer = false;
@@ -1856,7 +1883,11 @@ class PlayState extends MusicBeatState
 				altAnim = '-alt';
 
 			if (!daNote.badNoteType)
+			{
 				cpu.playAnim('sing' + sDir[mania][noteData] + altAnim, true);
+				cpu.extraCharPlayAnim('sing' + sDir[mania][noteData] + altAnim, true);
+			}
+				
 
 			if (flipped)
 			{
@@ -2715,12 +2746,36 @@ class PlayState extends MusicBeatState
 				sustainHoldCheck(sustainsHeld, p1.strums.notes, true);
 		}
 
-		if (player.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!keys.contains(true)))
+		if (player.canSing)
 		{
-			if (player.animation.curAnim.name.startsWith('sing') && !player.animation.curAnim.name.endsWith('miss'))
-				player.dance();
+			if (player.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!keys.contains(true)))
+				{
+					if (player.animation.curAnim.name.startsWith('sing') && !player.animation.curAnim.name.endsWith('miss'))
+						player.dance();
+				}
 		}
-		if (multiplayer)
+
+		for (character in extraCharacters)
+		{
+			if (character.canSing && character.player1Side)
+			{
+				if (character.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!keys.contains(true)))
+				{
+					if (character.animation.curAnim.name.startsWith('sing') && !character.animation.curAnim.name.endsWith('miss'))
+						character.dance();
+				}
+			}
+
+			if (character.canSing && !character.player1Side && multiplayer)
+			{
+				if (character.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!P2keys.contains(true)))
+				{
+					if (character.animation.curAnim.name.startsWith('sing') && !character.animation.curAnim.name.endsWith('miss'))
+						character.dance();
+				}
+			}
+		}
+		if (multiplayer && player2.canSing)
 		{
 			if (player2.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!P2keys.contains(true)))
 				{
@@ -2830,12 +2885,14 @@ class PlayState extends MusicBeatState
 			{
 				call('P1NoteMiss', [daNote]);
 				shit.playAnim('sing' + sDir[mania][direction] + 'miss', true);
+				shit.extraCharPlayAnim('sing' + sDir[mania][direction] + 'miss', true);
 			}	
 			else
 			{
 				call('P2NoteMiss', [daNote]);
 				shit.color = 0x00303f97;
 				shit.playAnim('sing' + sDir[mania][direction], true);
+				shit.extraCharPlayAnim('sing' + sDir[mania][direction], true);
 			}
 
 			if (playernum != 1 && multiplayer)
@@ -2886,12 +2943,14 @@ class PlayState extends MusicBeatState
 			{
 				call('P1MissPress', [direction]);
 				shit.playAnim('sing' + sDir[mania][direction] + 'miss', true);
+				shit.extraCharPlayAnim('sing' + sDir[mania][direction] + 'miss', true);
 			}
 			else
 			{
 				call('P2MissPress', [direction]);
 				shit.color = 0x00303f97;
 				shit.playAnim('sing' + sDir[mania][direction], true);
+				shit.extraCharPlayAnim('sing' + sDir[mania][direction], true);
 			}
 
 			if (playernum != 1 && multiplayer)
@@ -2954,6 +3013,7 @@ class PlayState extends MusicBeatState
 				call('P1NoteHit', [note]);
 
 				player.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
+				player.extraCharPlayAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
 				player.holdTimer = 0;
 				player.noteCamMovement = noteCamMovementShit(note.noteData, 1);
 			}
@@ -2961,6 +3021,7 @@ class PlayState extends MusicBeatState
 			{
 				call('P2NoteHit', [note]);
 				player2.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
+				player2.extraCharPlayAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
 				player2.holdTimer = 0;
 				player2.noteCamMovement = noteCamMovementShit(note.noteData, 0);
 			}
@@ -3697,6 +3758,58 @@ class PlayState extends MusicBeatState
 		p2.resetStats();
 	}
 
+	public function updateCharacters():Void
+	{	
+		if (extraCharacters.length != 0)
+		{
+			for (character in extraCharacters)
+			{
+				if (p1ActiveCharacters.contains(character.curCharacter))
+				{
+					character.canSing = true;
+					character.player1Side = true;
+				}
+				else if (p2ActiveCharacters.contains(character.curCharacter))
+				{
+					character.canSing = true;
+					character.player1Side = false;
+				}	
+				else 
+					character.canSing = false;
+			}
+		}
+		if (!p1ActiveCharacters.contains(boyfriend.curCharacter)) //bf and dad are not a part of the group
+			boyfriend.canSing = false;
+		else 
+			boyfriend.canSing = true;
+
+		if (!p2ActiveCharacters.contains(dad.curCharacter))
+			dad.canSing = false;
+		else 
+			dad.canSing = true;
+	}
+	
+	
+	public function setCharacterNoteDatas(char:String, enable:Bool = true, datas:Array<Int>):Void
+	{
+		for (character in extraCharacters)
+		{
+			if (char == character.curCharacter)
+			{
+				character.singAllNoteDatas = enable;
+				character.noteDatasToSingOn = datas;
+				return;
+			}
+		}
+	}
+	public function resetCharacterNoteDatas():Void 
+	{
+		for (character in extraCharacters)
+		{
+			character.singAllNoteDatas = true;
+		}
+	}
+
 	function generateNotes():Void
 	{
 		unspawnNotes = [];
@@ -3965,6 +4078,12 @@ class PlayState extends MusicBeatState
 			// Dad doesnt interupt his own notes
 			if (currentSection.mustHitSection && !multiplayer)
 				cpu.dance();
+
+			for (character in extraCharacters)
+			{
+				if (!character.canSing)
+					character.dance();
+			}
 		}
 		wiggleShit.update(Conductor.crochet);
 
@@ -4003,6 +4122,11 @@ class PlayState extends MusicBeatState
 			if (!player2.animation.curAnim.name.startsWith("sing"))
 				player2.dance();
 
+		for (character in extraCharacters)
+		{
+			if (character.canSing && character.animation.curAnim.name.startsWith("sing"))
+				character.dance();
+		}
 
 		if (curBeat % 8 == 7 && curSong == 'Bopeebo')
 			boyfriend.playAnim('hey', true);
