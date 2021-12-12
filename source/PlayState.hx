@@ -170,6 +170,8 @@ class PlayState extends MusicBeatState
 	public var gfSpeed:Int = 1;
 	private var combinedHealth:Float = 1; //dont mess with this using modcharts
 
+	public var currentBeat:Float;
+
 	//note stuff
 	public var unspawnNotes:Array<Note> = [];
 
@@ -284,6 +286,8 @@ class PlayState extends MusicBeatState
 	public var player2:Boyfriend;
 	public var cpu:Boyfriend;
 	var centerHealthBar:Bool = false;
+
+	public var showStrumsOnStart:Bool = true;
 
 
 	#if desktop
@@ -566,38 +570,13 @@ class PlayState extends MusicBeatState
 				add(piece);
 			}
 		}
+		var characterList:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
+		var gfcharacter:String = SONG.gfVersion;
 
-		var gfVersion:String = ''; //apparently this caused the fucking stage issue wtffffffff
-		var checkGF:String = 'gf';
+		if (!characterList.contains(gfcharacter))
+			gfcharacter = "gf";
 
-		if (SONG.gfVersion == null) 
-		{
-			switch(storyWeek)
-			{
-				case 4: 
-					checkGF = 'gf-car';
-				case 5: 
-					checkGF = 'gf-christmas';
-				case 6: 
-					checkGF = 'gf-pixel';
-			}
-		} 
-		else
-			checkGF = SONG.gfVersion;
-
-		switch (checkGF)
-		{
-			case 'gf-car':
-				gfVersion = 'gf-car';
-			case 'gf-christmas':
-				gfVersion = 'gf-christmas';
-			case 'gf-pixel':
-				gfVersion = 'gf-pixel';
-			default:
-				gfVersion = 'gf';
-		}
-
-		gf = new Character(gfDefaultPos[0], gfDefaultPos[1], gfVersion);
+		gf = new Character(gfDefaultPos[0], gfDefaultPos[1], gfcharacter);
 		gf.scrollFactor.set(0.95, 0.95);
 
 		extraCharacters = new FlxTypedGroup<Boyfriend>();
@@ -606,7 +585,7 @@ class PlayState extends MusicBeatState
 		var dadcharacter:String = SONG.player2;
 		var bfcharacter:String = SONG.player1;
 
-		var characterList:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
+		
 		if (!characterList.contains(dadcharacter)) //stop the fucking game from crashing when theres a character that doesnt exist
 			dadcharacter = "dad";
 		if (!characterList.contains(bfcharacter))
@@ -994,6 +973,8 @@ class PlayState extends MusicBeatState
 
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN,handleInput);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, releaseInput);
+
+		call("onPlayStateCreated", []);
 
 		super.create();
 	}
@@ -1661,10 +1642,10 @@ class PlayState extends MusicBeatState
 		{
 			trace("synced vocals");
 			vocals.pause();
-	
-			FlxG.sound.music.play();
+			FlxG.sound.music.pause();
 			FlxG.sound.music.time = Conductor.songPosition;
 			vocals.time = FlxG.sound.music.time;
+			FlxG.sound.music.play();
 			vocals.play();
 	
 			updateSongMulti();
@@ -1935,10 +1916,8 @@ class PlayState extends MusicBeatState
 				daNote.active = false;
 				removeNote(daNote, strums);
 			}
-			else 
-			{
+			else
 				daNote.sustainHit = true;
-			}
 
 		}
 	}
@@ -2025,6 +2004,9 @@ class PlayState extends MusicBeatState
 		call("update", [elapsed]);
 
 		elapsedTime += elapsed;
+
+		if (FlxG.keys.justPressed.ONE)
+			resyncVocals();
 		
 		if (!allowSpeedChanges)
 			SongSpeedMultiplier = 1;
@@ -2074,7 +2056,7 @@ class PlayState extends MusicBeatState
 				updateSongMulti();
 		}	
 
-		var currentBeat = (Conductor.songPosition / 1000)*(SONG.bpm/60);
+		currentBeat = (Conductor.songPosition / 1000)*(SONG.bpm/60);
 
 		if (legacyModcharts)
 		{
@@ -3082,8 +3064,6 @@ class PlayState extends MusicBeatState
 					doNoteSplash(note.x, note.y, note.noteData, playernum, note.cameras, note.colorShit);
 				removeNote(note, strums);
 			}
-			else
-				note.sustainHit = true; //delay removal so clipping be workin
 
 			grace = true;
 			new FlxTimer().start(graceTimerCooldown, function(tmr:FlxTimer)
@@ -4040,7 +4020,7 @@ class PlayState extends MusicBeatState
 		call("stepHit", [curStep]);
 
 		var needToResync:Bool = (((FlxG.sound.music.time - vocals.time) >= 10) && vocals.playing);
-		if (!allowSpeedChanges)
+		if (!allowSpeedChanges || SongSpeedMultiplier == 1)
 			needToResync = false; //reduce lag from syncing
 
 		if (FlxG.sound.music.time > Conductor.songPosition + (20 * PlayState.SongSpeedMultiplier) || FlxG.sound.music.time < Conductor.songPosition - (20 * PlayState.SongSpeedMultiplier)
@@ -4143,6 +4123,11 @@ class PlayState extends MusicBeatState
 				if (curBeat % 4 == 0)
 					StagePiece.curLight = FlxG.random.int(0, 4);
 		}
+	}
+
+	public function changeCharacter(character:Boyfriend, changeTo:String)
+	{
+		character.loadCharacter(changeTo);
 	}
 
 

@@ -1,5 +1,6 @@
 package;
 
+import flixel.math.FlxPoint;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.animation.FlxBaseAnimation;
@@ -102,6 +103,7 @@ class Character extends FlxSprite
 	public var singAllNoteDatas:Bool = true;
 	public var noteDatasToSingOn:Array<Int> = [0,1,2,3,4,5,6,7,8];
 	public var player1Side:Bool = false;
+	var tex:FlxAtlasFrames;
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false, ?flip:Bool = false)
 	{
@@ -109,12 +111,191 @@ class Character extends FlxSprite
 
 		animOffsets = new Map<String, Array<Dynamic>>();
 		posOffsets = new Map<String, Array<Dynamic>>();
-		curCharacter = character;
+		
 		this.isPlayer = isPlayer;
 		this.flip = flip;
 
-		var tex:FlxAtlasFrames;
 		antialiasing = true;
+		loadCharacter(character);
+
+	}
+
+	override function update(elapsed:Float)
+	{
+		if (!isPlayer)
+			{
+				if (animation.curAnim.name.startsWith('sing'))
+				{
+					holdTimer += elapsed * PlayState.SongSpeedMultiplier;
+				}
+	
+				var dadVar:Float = 4;
+	
+				if (curCharacter == 'dad')
+					dadVar = 6.1;
+				if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
+				{
+					dance();
+					holdTimer = 0;
+				}
+			}
+		switch (curCharacter)
+		{
+			case 'gf':
+				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
+					playAnim('danceRight');
+		}
+
+		super.update(elapsed);
+	}
+
+	private var danced:Bool = false;
+
+	/**
+	 * FOR GF DANCING SHIT
+	 */
+	public function dance()
+	{
+		if (!debugMode)
+		{
+			switch (curCharacter)
+			{
+				case 'gf':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+
+				case 'gf-christmas':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+
+				case 'gf-car':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+				case 'gf-pixel':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+
+				case 'spooky':
+					danced = !danced;
+
+					if (danced)
+						playAnim('danceRight');
+					else
+						playAnim('danceLeft');
+				default:
+					playAnim('idle');
+			}
+		}
+	}
+
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
+	{
+		if (AnimName == "singNONE")
+			return;
+
+		animation.play(AnimName, Force, Reversed, Frame);
+		var daOffset = animOffsets.get(AnimName);
+		if (animOffsets.exists(AnimName))
+		{
+			offset.set(daOffset[0], daOffset[1]);
+			animation.curAnim.frameRate = Std.int(daOffset[2] * PlayState.SongSpeedMultiplier);
+		}
+		else
+			offset.set(0, 0);
+
+		if (curCharacter == 'gf')
+		{
+			if (AnimName == 'singLEFT')
+			{
+				danced = true;
+			}
+			else if (AnimName == 'singRIGHT')
+			{
+				danced = false;
+			}
+
+			if (AnimName == 'singUP' || AnimName == 'singDOWN')
+			{
+				danced = !danced;
+			}
+		}
+	}
+	public function extraCharPlayAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
+	{
+		if (PlayState.extraCharacters.length != 0) //hopefully wont break in places other than playState
+			{
+				for (i in PlayState.extraCharacters)
+				{
+					if (i.player1Side == this.isPlayer) //if both are same side
+					{
+						if (i.canSing)
+						{
+							i.animation.play(AnimName, Force, Reversed, Frame); //copied lol
+							var daOffset2 = i.animOffsets.get(AnimName);
+							if (i.animOffsets.exists(AnimName))
+							{
+								i.offset.set(daOffset2[0], daOffset2[1]);
+								i.animation.curAnim.frameRate = Std.int(daOffset2[2] * PlayState.SongSpeedMultiplier);
+							}
+							else
+								i.offset.set(0, 0);
+
+							if (AnimName.startsWith("sing"))
+								i.holdTimer = 0;
+						}
+					}
+				}
+			}
+	}
+
+	public function addOffset(name:String, x:Float = 0, y:Float = 0)
+	{
+		var defaultFrameRate = animation.getByName(name).frameRate;
+		animOffsets[name] = [x, y, defaultFrameRate];
+	}
+
+	public function addPosOffset(name:String, x:Float = 0, y:Float = 0)
+	{
+		posOffsets[name] = [x, y];
+	}
+
+	public function loadCharacter(char:String)
+	{
+		curCharacter = char;
+		animOffsets.clear();
+		posOffsets.clear();
+		flipX = false;
+		animation.destroyAnimations();
+		tex = null;
+		frames = null;
 
 		switch (curCharacter)
 		{
@@ -617,7 +798,7 @@ class Character extends FlxSprite
 				addPosOffset('pos', -500, 0);
 
 			default:  	///custom character shit
-				var imagePath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".png";
+				var imagePath = "assets/images/characters/" + curCharacter + "/image.png";
 				var imageGraphic:FlxGraphic;
 
 				if (CacheShit.images[imagePath] == null)
@@ -628,7 +809,7 @@ class Character extends FlxSprite
 				}
 				imageGraphic = CacheShit.images[imagePath];
 
-				var xmlPath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".xml";
+				var xmlPath = "assets/images/characters/" + curCharacter + "/image.xml";
 				var xml:String;
 
 				if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
@@ -709,196 +890,6 @@ class Character extends FlxSprite
 		if (flip)
 		{
 			flipX = !flipX;
-
-			// Doesn't flip for BF, since his are already in the right place???
-			if (!curCharacter.startsWith('bf'))
-			{
-				// var animArray
-				var oldRight = animation.getByName('singRIGHT').frames;
-				animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
-				animation.getByName('singLEFT').frames = oldRight;
-				var oldRightOffset = animOffsets['singRIGHT']; //finally fix the god damn offsets
-				animOffsets['singRIGHT'] = animOffsets['singLEFT'];
-				animOffsets['singLEFT'] = oldRightOffset;
-
-				// IF THEY HAVE MISS ANIMATIONS??
-				if (animation.getByName('singRIGHTmiss') != null)
-				{
-					var oldMiss = animation.getByName('singRIGHTmiss').frames;
-					animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
-					animation.getByName('singLEFTmiss').frames = oldMiss;
-					var oldMissOffset = animOffsets['singRIGHTmiss'];
-					animOffsets['singRIGHTmiss'] = animOffsets['singLEFTmiss'];
-					animOffsets['singLEFTmiss'] = oldMissOffset;
-				}
-			}
 		}
-	}
-
-	override function update(elapsed:Float)
-	{
-		if (!isPlayer)
-			{
-				if (animation.curAnim.name.startsWith('sing'))
-				{
-					holdTimer += elapsed * PlayState.SongSpeedMultiplier;
-				}
-	
-				var dadVar:Float = 4;
-	
-				if (curCharacter == 'dad')
-					dadVar = 6.1;
-				if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
-				{
-					dance();
-					holdTimer = 0;
-				}
-			}
-		switch (curCharacter)
-		{
-			case 'gf':
-				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
-					playAnim('danceRight');
-		}
-
-		super.update(elapsed);
-	}
-
-	private var danced:Bool = false;
-
-	/**
-	 * FOR GF DANCING SHIT
-	 */
-	public function dance()
-	{
-		if (!debugMode)
-		{
-			switch (curCharacter)
-			{
-				case 'gf':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'gf-christmas':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'gf-car':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-				case 'gf-pixel':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'spooky':
-					danced = !danced;
-
-					if (danced)
-						playAnim('danceRight');
-					else
-						playAnim('danceLeft');
-				default:
-					playAnim('idle');
-			}
-		}
-	}
-
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-	{
-		if (AnimName == "singNONE")
-			return;
-
-		animation.play(AnimName, Force, Reversed, Frame);
-		var daOffset = animOffsets.get(AnimName);
-		if (animOffsets.exists(AnimName))
-		{
-			offset.set(daOffset[0], daOffset[1]);
-			animation.curAnim.frameRate = Std.int(daOffset[2] * PlayState.SongSpeedMultiplier);
-		}
-		else
-			offset.set(0, 0);
-
-		if (curCharacter == 'gf')
-		{
-			if (AnimName == 'singLEFT')
-			{
-				danced = true;
-			}
-			else if (AnimName == 'singRIGHT')
-			{
-				danced = false;
-			}
-
-			if (AnimName == 'singUP' || AnimName == 'singDOWN')
-			{
-				danced = !danced;
-			}
-		}
-	}
-	public function extraCharPlayAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-	{
-		if (PlayState.extraCharacters.length != 0) //hopefully wont break in places other than playState
-			{
-				for (i in PlayState.extraCharacters)
-				{
-					if (i.player1Side == this.isPlayer) //if both are same side
-					{
-						if (i.canSing)
-						{
-							i.animation.play(AnimName, Force, Reversed, Frame); //copied lol
-							var daOffset2 = i.animOffsets.get(AnimName);
-							if (i.animOffsets.exists(AnimName))
-							{
-								i.offset.set(daOffset2[0], daOffset2[1]);
-								i.animation.curAnim.frameRate = Std.int(daOffset2[2] * PlayState.SongSpeedMultiplier);
-							}
-							else
-								i.offset.set(0, 0);
-
-							if (AnimName.startsWith("sing"))
-								i.holdTimer = 0;
-						}
-					}
-				}
-			}
-	}
-
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
-	{
-		var defaultFrameRate = animation.getByName(name).frameRate;
-		animOffsets[name] = [x, y, defaultFrameRate];
-	}
-
-	public function addPosOffset(name:String, x:Float = 0, y:Float = 0)
-	{
-		posOffsets[name] = [x, y];
 	}
 }

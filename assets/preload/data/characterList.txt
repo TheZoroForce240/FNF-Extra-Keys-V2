@@ -1,6 +1,5 @@
 bf
 dad
-gf
 spooky
 pico
 mom
@@ -16,3 +15,7 @@ senpai
 senpai-angry
 spirit
 test
+gf
+gf-car
+gf-christmas
+gf-pixel

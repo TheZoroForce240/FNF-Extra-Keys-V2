@@ -50,7 +50,7 @@ class AnimationDebug extends MusicBeatState
 			add(dad);
 
 			char = dad;
-			dad.flipX = false;
+			//dad.flipX = dad.flip;
 		}
 		else
 		{

@@ -36,6 +36,7 @@ import openfl.media.Sound;
 import openfl.net.FileReference;
 import openfl.utils.ByteArray;
 import flixel.addons.ui.FlxSlider;
+import flixel.addons.effects.chainable.FlxOutlineEffect;
 
 import lime.media.openal.AL;
 
@@ -157,6 +158,7 @@ class ChartingState extends MusicBeatState
 
 	override function create()
 	{
+
 		ChartingUtil.resetUndos();
 
         var pieceArray = ['stageBG', 'stageFront', 'stageCurtains'];
@@ -168,9 +170,6 @@ class ChartingState extends MusicBeatState
             add(piece);
 			piece.scrollFactor.set();
 		}
-		
-
-		
 
 		ColorPresets.resetColors();
 
@@ -445,7 +444,6 @@ class ChartingState extends MusicBeatState
 		stepperBPM.name = 'song_bpm';
 
 		var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
-		var gfVersions:Array<String> = CoolUtil.coolTextFile(Paths.txt('gfVersionList'));
 		var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
 
 		var p1DropDown = new FlxUIDropDownMenu(10, 120, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
@@ -464,9 +462,9 @@ class ChartingState extends MusicBeatState
 		p2DropDown.name = "p2";
 		var p2Label = new FlxText(10,150,64,'Player 2');
 
-		var gfDropDown = new FlxUIDropDownMenu(10, 220, FlxUIDropDownMenu.makeStrIdLabelArray(gfVersions, true), function(gfVersion:String)
+		var gfDropDown = new FlxUIDropDownMenu(10, 220, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(gfVersion:String)
 		{
-			_song.gfVersion = gfVersions[Std.parseInt(gfVersion)];
+			_song.gfVersion = characters[Std.parseInt(gfVersion)];
 		});
 		gfDropDown.selectedLabel = _song.gfVersion;
 		gfDropDown.name = "gf";
@@ -733,7 +731,7 @@ class ChartingState extends MusicBeatState
 			tutorialTxt.text = "Swaps which side the notes are\non";
 		}
 
-		check_mustHitSection = new FlxUICheckBox(10, 30, null, null, "must hit section", 100);
+		check_mustHitSection = new FlxUICheckBox(10, 30, null, null, "Must hit section", 100);
 		check_mustHitSection.name = 'check_mustHit';
 		check_mustHitSection.checked = true;
 		// _song.needsVoices = check_mustHit.checked;
@@ -1400,12 +1398,30 @@ class ChartingState extends MusicBeatState
 					saveLevel();
 				/*else if (FlxG.keys.justPressed.Y)
 					redo();*/ //disabled rn cuz it keeps forgetting the first undo
+				else if (FlxG.keys.justPressed.LEFT)
+					adjustNoteDatas(-1);
+				else if (FlxG.keys.justPressed.RIGHT)
+					adjustNoteDatas(1);
+				else if (FlxG.keys.justPressed.UP)
+					adjustNoteStep(-1);
+				else if (FlxG.keys.justPressed.DOWN)
+					adjustNoteStep(1);
+			}
+			else 
+			{
+				if (FlxG.keys.justPressed.RIGHT || FlxG.keys.justPressed.D && !FlxG.keys.pressed.CONTROL)
+					changeSection(curSection + shiftThing);
+				if (FlxG.keys.justPressed.LEFT || FlxG.keys.justPressed.A && !FlxG.keys.pressed.CONTROL)
+					changeSection(curSection - shiftThing);
 			}
 
-			if (FlxG.keys.justPressed.RIGHT || FlxG.keys.justPressed.D && !FlxG.keys.pressed.CONTROL)
-				changeSection(curSection + shiftThing);
-			if (FlxG.keys.justPressed.LEFT || FlxG.keys.justPressed.A && !FlxG.keys.pressed.CONTROL)
-				changeSection(curSection - shiftThing);
+
+
+
+			if (FlxG.keys.justPressed.DELETE) //delete highlighted notes
+				deleteHighlightedNotes();
+
+
 
 			if (FlxG.keys.justPressed.E)
 			{
@@ -1567,6 +1583,31 @@ class ChartingState extends MusicBeatState
 			});
 		}
 	}
+	function deleteHighlightedNotes():Void 
+	{
+		if (ChartingUtil.highlighedNotes.length > 0)
+		{
+			ChartingUtil.SaveUndo(_song);
+			for (note in ChartingUtil.highlighedNotes)
+			{
+				for(sec in _song.notes)
+				{
+					for (daNote in sec.sectionNotes)
+					{
+						if (daNote[0] == note[0] && daNote[1] == note[1])
+						{
+							sec.sectionNotes.remove(daNote);
+						}	
+					}
+				}
+			}
+			ChartingUtil.highlighedNotes = [];
+			updateStatus("Deleted all highlighted notes");
+			updateGrid();
+		}
+		else
+			updateStatus("Nothing to delete");
+	}
 	function copyNotes():Void
 	{
 		if (ChartingUtil.highlighedNotes.length > 0)
@@ -1574,6 +1615,8 @@ class ChartingState extends MusicBeatState
 			Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, ChartingUtil.highlighedNotes);
 			updateStatus("Copied notes to clipboard");
 		}
+		else 
+			updateStatus("Nothing to copy");
 	}
 	function cutNotes():Void 
 	{
@@ -1598,6 +1641,7 @@ class ChartingState extends MusicBeatState
 			ChartingUtil.highlighedNotes = [];
 			updateGrid();
 		}
+		updateStatus("Nothing to cut");
 	}
 	function pasteNotes():Void 
 	{
@@ -1663,7 +1707,65 @@ class ChartingState extends MusicBeatState
 		}
 		updateStatus("Pasted notes from clipboard");
 		updateGrid();
-
+	}
+	function adjustNoteDatas(change:Int = 0):Void //adjusts highlighted notes
+	{
+		if (ChartingUtil.highlighedNotes.length > 0)
+		{
+			ChartingUtil.SaveUndo(_song);
+			for (note in ChartingUtil.highlighedNotes)
+			{
+				for(sec in _song.notes)
+				{
+					for (daNote in sec.sectionNotes)
+					{
+						if (daNote[0] == note[0] && daNote[1] == note[1])
+						{
+							if ((note[1] + change) > -1 && (note[1] + change) < keyAmmo[_song.mania] * 2)
+							{
+								daNote[1] += change;
+								note[1] += change;
+							}
+						}
+					}
+				}
+			}
+			var left = change == -1;
+			updateStatus("Moved all highlighted notes to the " + (left ? "left" : "right"));
+			updateGrid();
+		}
+		else
+			updateStatus("No notes highlighted");
+	}
+	function adjustNoteStep(change:Int = 0):Void //adjusts highlighted notes
+	{
+		if (ChartingUtil.highlighedNotes.length > 0)
+		{
+			ChartingUtil.SaveUndo(_song);
+			for (note in ChartingUtil.highlighedNotes)
+			{
+				for(sec in _song.notes)
+				{
+					for (daNote in sec.sectionNotes)
+					{
+						if (daNote[0] == note[0] && daNote[1] == note[1])
+						{
+							if ((note[0] + (change * Conductor.stepCrochet)) >= sectionStartTime(curSection) &&
+								(note[0] + (change * Conductor.stepCrochet)) < sectionStartTime(curSection) + (Conductor.stepCrochet * _song.notes[curSection].lengthInSteps))
+							{
+								daNote[0] += change * Conductor.stepCrochet;
+								note[0] += change * Conductor.stepCrochet;
+							}
+						}
+					}
+				}
+			}
+			var up = change == -1;
+			updateStatus("Moved all highlighted notes " + (up ? "up" : "down"));
+			updateGrid();
+		}
+		else
+			updateStatus("No notes highlighted");
 	}
 	function resetHighlights():Void
 	{
@@ -2209,11 +2311,11 @@ class ChartingState extends MusicBeatState
 		note.noteType = daType;
 		note.speed = daSpeed;
 		note.velocityData = daVelocity;
-		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
-		note.updateHitbox();
 		note.rawNoteData = daNoteInfo;
 		note.playedSound = true;
 		note.updated = true;
+		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
+		note.updateHitbox();
 
 		switch (sectionType)
 		{

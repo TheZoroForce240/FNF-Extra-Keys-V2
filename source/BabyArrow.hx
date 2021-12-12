@@ -287,9 +287,12 @@ class BabyArrow extends FlxSprite
 
             if (player == 2)
             {
-                y = PlayState.gf.y - 200;
+                y = PlayState.gf.y - 300;
                 x = (PlayState.gf.x + (PlayState.gf.width / 2)) - (Note.noteWidths[0] * 2) + Note.noteWidths[0] * i;
             }
+
+            if (!PlayState.instance.showStrumsOnStart)
+                x += 4000; //hide da shit
 
             /*switch (i) //dumb center scroll i did for a video
             {
@@ -464,6 +467,12 @@ class BabyArrow extends FlxSprite
             lane.y = this.y - 300;
         }
         centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti) / 2);
+
+        if (whichPlayer == 2)
+        {
+            y = PlayState.gf.y - 200;
+            x = (PlayState.gf.x + (PlayState.gf.width / 2)) - (Note.noteWidths[0] * 2) + Note.noteWidths[0] * curID;
+        }
 
         
         if (inPlayState)

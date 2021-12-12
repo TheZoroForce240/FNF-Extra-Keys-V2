@@ -36,12 +36,11 @@ class Note extends FlxSprite
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
-	public var sustainHit:Bool = false;
 	public var prevNote:Note;
 	
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
-	public var isSustainEnd:Bool = false;
+	public var sustainHit:Bool = false;
 
 	public static var MaxNoteData:Int = 9; // :troll:
 
@@ -210,11 +209,9 @@ class Note extends FlxSprite
 	public var playedSound:Bool = true;
 	public var canPlaySound:Bool = true;
 	public var inCharter:Bool = false;
-	var charterMulti:Int = 0; //wtf was this used for again???
 	public var updated:Bool = true;
 	public var beingGrabbed:Bool = false;
 	public var highlighted:Bool = false;
-	public var copied:Bool = false;
 	public var section:Int = 0;
 
 
@@ -314,13 +311,7 @@ class Note extends FlxSprite
 
 		isGFNote = _gfNote;
 
-
-
-		
 		noteTypeCheck();
-
-		//curMania = mania;
-		//getCurMania();
 
 		if (!inCharter && SaveData.randomNotes)
 			noteData = FlxG.random.int(0, PlayState.keyAmmo[mania] - 1);
@@ -408,15 +399,6 @@ class Note extends FlxSprite
 
 		if (!isGFNote)
 			downscrollCheck();
-
-		/*var noteRect = new Rectangle(this.x, this.x, this.width, this.height);
-		var notePoint = new Point(this.x, this.y);
-		var tempBitmap = this.pixels.clone();
-		tempBitmap.applyFilter(this.pixels, noteRect, notePoint, new ShaderFilter(HSV.shader));
-		this.pixels = tempBitmap;
-		tempBitmap.dispose();*/ //fuck you you little bitch i just wanna use multiple shaders on a sprite without a fucking camera filter
-
-		//this.shader = [HSV.shader];
 		this.shader = HSV.shader;
 
 		if (normalNote && !isGFNote)
@@ -432,20 +414,10 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
-		if (highlighted && inCharter)
-			color = FlxColor.BLUE;
+		if (inCharter && highlighted)
+			color = 0x016BC5;
 		else if (inCharter)
-			color = 0x00FFFFFF;
-
-		if ((animation.curAnim.name.endsWith('holdend') && prevNote.isSustainNote) && !inCharter)
-		{
-			isSustainEnd = true;
-		}
-		else
-		{
-			isSustainEnd = false;
-		}	
-
+			color = 0xFFFFFFFF;
 
 		if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped) || (PlayState.multiplayer))
 		{
@@ -476,7 +448,7 @@ class Note extends FlxSprite
 				wasGoodHit = true;
 		}
 
-		if (sustainHit && strumTime - Conductor.songPosition < -300)
+		if (strumTime - Conductor.songPosition < -450 && !inCharter) //forcefully remove all notes past this point, also how all sutains are removed to fix clipping
 			deleteShit();
 
 		if (isGFNote)

@@ -84,6 +84,7 @@ class HscriptShit //funni modcharts
         interp.variables.set("loadScript", function () {});
         interp.variables.set("endScript", function () {});
 		interp.variables.set("startSong", function (song) {});
+        interp.variables.set("onPlayStateCreated", function () {});
         interp.variables.set("endSong", function () {});
 		interp.variables.set("update", function (elapsed) {});
 		interp.variables.set("stepHit", function(step) {});
