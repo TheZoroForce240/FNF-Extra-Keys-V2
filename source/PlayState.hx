@@ -131,6 +131,8 @@ class PlayState extends MusicBeatState
 	static var rewindOnDeath = false;
 	public static var allowSpeedChanges:Bool = true;
 	public var legacyModcharts:Bool = false; //id prefer to use new modcharts rather than shitty event notes
+	public static var characters:Bool = true;
+	public static var backgrounds:Bool = true;
 
 	public static var StrumLineStartY:Float = 50;
 	public static var healthToDieOn:Float = 0;
@@ -149,6 +151,7 @@ class PlayState extends MusicBeatState
 	/// modifier shit
 	public static var SongSpeedMultiplier:Float = 1;
 	public static var RandomSpeedChange:Bool = false;
+	public static var allowNoteTypes:Bool = true;
 
 	//characters
 	public static var dad:Boyfriend;
@@ -171,6 +174,8 @@ class PlayState extends MusicBeatState
 	private var combinedHealth:Float = 1; //dont mess with this using modcharts
 
 	public var currentBeat:Float;
+	public var overrideCam:Bool = false;
+	public var alignCams:Bool = true;
 
 	//note stuff
 	public var unspawnNotes:Array<Note> = [];
@@ -218,7 +223,7 @@ class PlayState extends MusicBeatState
 	//score and stats
 	public static var campaignScore:Int = 0;
 	public var ranksList:Array<String> = ["Skill Issue", "E", "D", "C", "B", "A", "S"]; //for score text
-	public var fcList:Array<String> = ["[Nice FC]", "[Awful FC]", "[SFC]", "[GFC]", "[BFC]", "[FC]", "[SDCB]", "[Pass]","youre just terrible"]; //fc shit
+	public var fcList:Array<String> = ["[Nice FC]", "[Awful FC]", "[SFC]", "[GFC]", "[FC]", "[FC]", "[SDCB]", "[Pass]","youre just terrible"]; //fc shit
 	
 	//song stuff
 	private var generatedMusic:Bool = false;
@@ -268,7 +273,7 @@ class PlayState extends MusicBeatState
 	public static var stageData:Array<Dynamic>;
 
 	//some extra random stuff i didnt know where to put
-	public var wiggleShit:WiggleEffect = new WiggleEffect();
+	
 	var grace:Bool = false;
 	var maniaChanged:Bool = false;
 
@@ -388,17 +393,27 @@ class PlayState extends MusicBeatState
 		{
 			p1.noteCam.flashSprite.scaleY *= -1;
 			p1.noteCamSplit.flashSprite.scaleY *= -1;
+			p1.noteCamsus.flashSprite.scaleY *= -1;
+			p1.noteCamSplitsus.flashSprite.scaleY *= -1;
 		}	
 		if (SaveData.P2downscroll) //well it works lol
 		{
 			p2.noteCam.flashSprite.scaleY *= -1;
 			p2.noteCamSplit.flashSprite.scaleY *= -1;
+			p2.noteCamsus.flashSprite.scaleY *= -1;
+			p2.noteCamSplitsus.flashSprite.scaleY *= -1;
 		}
-
 		if (SaveData.splitScroll)
+		{
 			p1.noteCamSplit.flashSprite.scaleY *= -1; //flip back to opposite
+			p1.noteCamSplitsus.flashSprite.scaleY *= -1;
+		}
 		if (SaveData.P2splitScroll)
+		{
 			p2.noteCamSplit.flashSprite.scaleY *= -1;
+			p2.noteCamSplitsus.flashSprite.scaleY *= -1;
+		}
+			
 
 		if (SaveData.Hellchart)
 			SONG.mania = 5; //make 8k
@@ -553,7 +568,7 @@ class PlayState extends MusicBeatState
 			stageOffsets = stageData[3];
 		}
 
-		if (!stageException)
+		if (!stageException && backgrounds)
 		{
 			for (i in 0...pieceArray.length) //x and y are optional and set in StagePiece.hx, so for loop can be used
 			{
@@ -576,6 +591,7 @@ class PlayState extends MusicBeatState
 		if (!characterList.contains(gfcharacter))
 			gfcharacter = "gf";
 
+
 		gf = new Character(gfDefaultPos[0], gfDefaultPos[1], gfcharacter);
 		gf.scrollFactor.set(0.95, 0.95);
 
@@ -594,17 +610,21 @@ class PlayState extends MusicBeatState
 		p1ActiveCharacters = [bfcharacter];
 		p2ActiveCharacters = [dadcharacter];
 
-		for (i in 0...extraCharactersList.length)
+		if (characters)
 		{
-			var character:Boyfriend = new Boyfriend(dadDefaultPos[0], dadDefaultPos[1], extraCharactersList[i], false, true);
-			var offset = character.posOffsets.get('pos');
-			if (character.posOffsets.exists('pos'))
-			{
-				character.x += offset[0];
-				character.y += offset[1];
-			}
-			extraCharacters.add(character);
+			for (i in 0...extraCharactersList.length)
+				{
+					var character:Boyfriend = new Boyfriend(dadDefaultPos[0], dadDefaultPos[1], extraCharactersList[i], false, true);
+					var offset = character.posOffsets.get('pos');
+					if (character.posOffsets.exists('pos'))
+					{
+						character.x += offset[0];
+						character.y += offset[1];
+					}
+					extraCharacters.add(character);
+				}
 		}
+
 
 		var isbfPlayer = true;
 		var isdadPlayer = false;
@@ -621,8 +641,10 @@ class PlayState extends MusicBeatState
 		}
 
 
+
 		dad = new Boyfriend(dadDefaultPos[0], dadDefaultPos[1], dadcharacter, isdadPlayer, false);
 		boyfriend = new Boyfriend(bfDefaultPos[0], bfDefaultPos[1], bfcharacter, isbfPlayer, true);
+
 
 		if (multiplayer)
 		{
@@ -708,14 +730,19 @@ class PlayState extends MusicBeatState
 				add(evilTrail);
 		}
 
-		add(gf);
+		if (characters)
+			add(gf);
 
 		// Shitty layering but whatev it works LOL
-		if (curStage == 'limo')
+		if (curStage == 'limo' && backgrounds)
 			add(limo);
 
-		add(dad);
-		add(boyfriend);
+		if (characters)
+		{
+			add(dad);
+			add(boyfriend);
+		}
+
 
 		var doof:DialogueBox = new DialogueBox(false, dialogue);
 		doof.scrollFactor.set();
@@ -1562,6 +1589,8 @@ class PlayState extends MusicBeatState
 		{
 			if (FlxG.sound.music != null)
 			{
+				FlxG.sound.music.volume = 0;
+				vocals.volume = 0;
 				FlxG.sound.music.pause();
 				vocals.pause();
 			}
@@ -1579,6 +1608,9 @@ class PlayState extends MusicBeatState
 		{
 			if (FlxG.sound.music != null && !startingSong)
 			{
+				FlxG.sound.music.volume = 1;
+				vocals.volume = 1;
+				resyncInst();
 				resyncVocals();
 			}
 
@@ -1642,14 +1674,23 @@ class PlayState extends MusicBeatState
 		{
 			trace("synced vocals");
 			vocals.pause();
-			FlxG.sound.music.pause();
-			FlxG.sound.music.time = Conductor.songPosition;
 			vocals.time = FlxG.sound.music.time;
-			FlxG.sound.music.play();
 			vocals.play();
 	
 			updateSongMulti();
 		}
+	}
+	function resyncInst():Void 
+	{
+		if (!endingSong)		
+		{
+			trace("synced Inst");
+			FlxG.sound.music.pause();
+			FlxG.sound.music.time = Conductor.songPosition;
+			FlxG.sound.music.play();
+			updateSongMulti();
+		}
+
 	}
 
 	function updateSongMulti():Void
@@ -2004,9 +2045,6 @@ class PlayState extends MusicBeatState
 		call("update", [elapsed]);
 
 		elapsedTime += elapsed;
-
-		if (FlxG.keys.justPressed.ONE)
-			resyncVocals();
 		
 		if (!allowSpeedChanges)
 			SongSpeedMultiplier = 1;
@@ -2053,7 +2091,10 @@ class PlayState extends MusicBeatState
 				}
 					
 			else if (FlxG.sound.music.playing && canPause && !endingSong)
+			{
 				updateSongMulti();
+			}
+				
 		}	
 
 		currentBeat = (Conductor.songPosition / 1000)*(SONG.bpm/60);
@@ -2073,13 +2114,6 @@ class PlayState extends MusicBeatState
 				ModchartUtil.CalculateArrowShit(spr, spr.curID, 0, "Angle", currentBeat);
 			});
 		}
-
-
-		/*var shit = defaultCamScaleX + 1 * Math.sin((currentBeat * 1) * Math.PI);
-		camP1Notes.setScale(shit, camP1Notes.scaleY);*/ //just messing around
-
-
-
 
 		if (controls.PAUSE && startedCountdown && canPause)
 		{
@@ -2189,6 +2223,12 @@ class PlayState extends MusicBeatState
 		else
 		{
 			Conductor.songPosition += (FlxG.elapsed * 1000) * SongSpeedMultiplier;
+			if (!endingSong)
+			{
+				if (Conductor.songPosition - FlxG.sound.music.time > 40 || Conductor.songPosition - FlxG.sound.music.time < -40)
+					resyncInst();
+			}
+
 
 			currentSection = SONG.notes[Std.int(curStep / 16)];
 
@@ -2208,13 +2248,16 @@ class PlayState extends MusicBeatState
 
 		if (generatedMusic && currentSection != null)
 		{
-
-			if (!currentSection.mustHitSection)
-				moveCamera(getCameraPos(0));
-			else if (currentSection.mustHitSection)
-				moveCamera(getCameraPos(1));
+			if (!overrideCam)
+			{
+				if (!currentSection.mustHitSection)
+					moveCamera(getCameraPos(0));
+				else if (currentSection.mustHitSection)
+					moveCamera(getCameraPos(1));
+			}
 		}
-		cameraZooming();
+		if (alignCams)
+			cameraZooming();
 		
 
 		FlxG.watch.addQuick("beatShit", curBeat);
@@ -2336,6 +2379,15 @@ class PlayState extends MusicBeatState
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, releaseInput);
 		call('endSong', []);
 		call('endScript', []);
+		#if cpp
+		@:privateAccess
+		{
+			lime.media.openal.AL.sourcef(FlxG.sound.music._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, 1); //reset back to 1
+			//if (SONG.needsVoices)
+			if (vocals.playing)
+				lime.media.openal.AL.sourcef(vocals._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, 1);
+		}
+		#end
 		canPause = false;
 		endingSong = true;
 		FlxG.sound.music.volume = 0;
@@ -3864,9 +3916,22 @@ class PlayState extends MusicBeatState
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 					else
 						oldNote = null;
-	
-					
-	
+
+					var makeNote:Bool = true;
+
+					if (!allowNoteTypes)
+					{
+						if (daType != 0 && daType != 5) //5 is alt anim, they are fine
+						{
+							switch (daType)
+							{
+								case 3 | 4 | 5 | 7 | 9: //make them regular notes
+									daType = 0;
+								default: 
+									makeNote = false;
+							}
+						}
+					}
 					var daSpeed = songNotes[4];
 	
 					var daVelocityData = songNotes[5];
@@ -3874,52 +3939,44 @@ class PlayState extends MusicBeatState
 					
 					daType = CoolUtil.songCompatCheck(daType); //checks songs from mods that also use the notetype variable name, which is not many lol
 	
-					var swagNote:Note = new Note(daStrumTime, daNoteData, daType, false, daSpeed, daVelocityData, false, false, gottaHitNote, null, oldNote);
-					swagNote.sustainLength = songNotes[2];
-					swagNote.scrollFactor.set(0, 0);
-					swagNote.startPos = calculateStrumtime(swagNote, daStrumTime);
-	
-					var susLength:Float = swagNote.sustainLength;
-	
-					susLength = susLength / Conductor.stepCrochet;
-					unspawnNotes.push(swagNote);
-
-					if (susLength != 0)
-						susLength++; //increase length of all sustains, so they dont look off in game
-
-					//susLength *= 2;
-	
-	
-	
-					for (susNote in 0...Math.floor(susLength))
+					if (makeNote)
 					{
-						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
-						var speedToUse = SongSpeed;
-						if (daSpeed != null || daSpeed > 1)
-							speedToUse = daSpeed;
-
-						var crocs = Conductor.stepCrochet; //crocs lol
+						var swagNote:Note = new Note(daStrumTime, daNoteData, daType, false, daSpeed, daVelocityData, false, false, gottaHitNote, null, oldNote);
+						swagNote.sustainLength = songNotes[2];
+						swagNote.scrollFactor.set(0, 0);
+						swagNote.startPos = calculateStrumtime(swagNote, daStrumTime);
+		
+						var susLength:Float = swagNote.sustainLength;
+		
+						susLength = susLength / Conductor.stepCrochet;
+						unspawnNotes.push(swagNote);
 	
-						
-						var susStrum = daStrumTime + (crocs * susNote) + (crocs / speedToUse / SongSpeedMultiplier);
-						if (rewinding)
-							susStrum = daStrumTime + (crocs * susNote) + (crocs / speedToUse);
-
-						var sustainNote:Note = new Note(susStrum, daNoteData, daType, true, daSpeed, daVelocityData, false, false, gottaHitNote, oldNote);
-						sustainNote.scrollFactor.set();
-						unspawnNotes.push(sustainNote);
-						sustainNote.startPos = calculateStrumtime(sustainNote, susStrum);
+						if (susLength != 0)
+							susLength++; //increase length of all sustains, so they dont look off in game
 	
-						if (sustainNote.mustPress)
+						//susLength *= 2;
+		
+						for (susNote in 0...Math.floor(susLength))
 						{
-							sustainNote.x += FlxG.width / 2; // general offset
+							oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
+							var speedToUse = SongSpeed;
+							if (daSpeed != null || daSpeed > 1)
+								speedToUse = daSpeed;
+	
+							var crocs = Conductor.stepCrochet; //crocs lol
+		
+							
+							var susStrum = daStrumTime + (crocs * susNote) + (crocs / speedToUse / SongSpeedMultiplier);
+							if (rewinding)
+								susStrum = daStrumTime + (crocs * susNote) + (crocs / speedToUse);
+	
+							var sustainNote:Note = new Note(susStrum, daNoteData, daType, true, daSpeed, daVelocityData, false, false, gottaHitNote, oldNote);
+							sustainNote.scrollFactor.set();
+							unspawnNotes.push(sustainNote);
+							sustainNote.startPos = calculateStrumtime(sustainNote, susStrum);
 						}
 					}
-	
-					if (swagNote.mustPress)
-					{
-						swagNote.x += FlxG.width / 2; // general offset
-					}
+
 				}
 				else if (songNotes[1] >= -4) //for gf notes (also in case notedata is less than -3)
 				{
@@ -3975,14 +4032,7 @@ class PlayState extends MusicBeatState
 						unspawnNotes.push(sustainNote);
 						sustainNote.startPos = calculateStrumtime(sustainNote, susStrum);
 					}
-	
 
-					swagNote.x += FlxG.width / 2; // general offset
-
-					/*if (swagNote.eventData[0] == "Change P1 Mania" && swagNote.eventData != null)
-						Conductor.mapManiaChange(swagNote, 1);
-					else if (swagNote.eventData[0] == "Change P2 Mania" && swagNote.eventData != null)
-						Conductor.mapManiaChange(swagNote, 0);*/
 					if (swagNote.eventData[0] == "Change P1 Mania" && swagNote.eventData != null)
 					{
 						prevP1NoteMania = curP1NoteMania;
@@ -4019,13 +4069,18 @@ class PlayState extends MusicBeatState
 		super.stepHit();
 		call("stepHit", [curStep]);
 
+		updateCharacters();
+
 		var needToResync:Bool = (((FlxG.sound.music.time - vocals.time) >= 10) && vocals.playing);
 		if (!allowSpeedChanges || SongSpeedMultiplier == 1)
 			needToResync = false; //reduce lag from syncing
 
-		if (FlxG.sound.music.time > Conductor.songPosition + (20 * PlayState.SongSpeedMultiplier) || FlxG.sound.music.time < Conductor.songPosition - (20 * PlayState.SongSpeedMultiplier)
+		if (FlxG.sound.music.time > vocals.time + (20 * PlayState.SongSpeedMultiplier) || vocals.time < Conductor.songPosition - (20 * PlayState.SongSpeedMultiplier)
 			|| needToResync)
+		{
 			resyncVocals();
+		}
+			
 	}
 
 	override function beatHit()
@@ -4065,8 +4120,8 @@ class PlayState extends MusicBeatState
 					character.dance();
 			}
 		}
-		wiggleShit.update(Conductor.crochet);
-
+		p1.wiggleShit.update(Conductor.crochet);
+		p2.wiggleShit.update(Conductor.crochet);
 		// HARDCODING FOR MILF ZOOMS!
 		if (curSong.toLowerCase() == 'milf' && curBeat >= 168 && curBeat < 200 && camZooming && FlxG.camera.zoom < 1.35)
 		{
@@ -4127,7 +4182,13 @@ class PlayState extends MusicBeatState
 
 	public function changeCharacter(character:Boyfriend, changeTo:String)
 	{
+		if (p1ActiveCharacters.contains(character.curCharacter))
+			p1ActiveCharacters.push(changeTo); //so character can sing when changing, dont have to do it manually
+		if (p2ActiveCharacters.contains(character.curCharacter))
+			p2ActiveCharacters.push(changeTo);
+
 		character.loadCharacter(changeTo);
+		
 	}
 
 

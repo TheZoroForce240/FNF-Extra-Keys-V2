@@ -19,7 +19,7 @@ using StringTools;
 import sys.io.File;
 import sys.FileSystem;
 #end
-import Shaders;
+import WiggleEffect.WiggleEffectType;
 
 
 class HscriptShit //funni modcharts
@@ -110,7 +110,7 @@ class HscriptShit //funni modcharts
         interp.variables.set("Note", Note);
         interp.variables.set("BabyArrow", BabyArrow);
         interp.variables.set("StrumLineGroup", StrumLineGroup);
-        interp.variables.set("math", Math);
+        interp.variables.set("Math", Math);
         interp.variables.set("FlxG", FlxG); //plz dont do bad thing with this, you have too much power
         interp.variables.set("FlxMath", FlxMath);
         interp.variables.set("FlxAngle", FlxAngle);
@@ -124,10 +124,14 @@ class HscriptShit //funni modcharts
         interp.variables.set("StringTools", StringTools);
         interp.variables.set("curStep", 0);
         interp.variables.set("curBeat", 0);
+        interp.variables.set("stepCrochet", Conductor.stepCrochet);
+        interp.variables.set("crochet", Conductor.crochet);
+        interp.variables.set("bpm", Conductor.bpm);
         interp.variables.set("HealthIcon", HealthIcon);
         interp.variables.set("NoteSplash", NoteSplash);
         interp.variables.set("Std", Std);
         interp.variables.set("Paths", Paths);
+        interp.variables.set("WiggleEffect", WiggleEffect);
         interp.variables.set("CoolUtil", CoolUtil);
         interp.variables.set("CacheShit", CacheShit); //not sure about this one, you could clear the cache i guess
         /*interp.variables.set("P1Health", PlayState.instance.P1Stats.health); //apparently these dont wanna work, can access directly through playstate though

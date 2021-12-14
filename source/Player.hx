@@ -3,6 +3,9 @@ package;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxG;
 import flixel.FlxCamera;
+import openfl.filters.ShaderFilter;
+import Shaders;
+import WiggleEffect.WiggleEffectType;
 
 /*
 has most things that are duplicated for each player (strum groups, stats, cameras for downscroll, etc),
@@ -12,6 +15,7 @@ class Player
 {
 
     public var strums:StrumLineGroup = null;
+    public var wiggleShit:WiggleEffect = new WiggleEffect();
 
     public var Stats = {
 		songScore : 0,
@@ -40,6 +44,8 @@ class Player
     public var playernum:Int;
     public var noteCam:FlxCamera;
 	public var noteCamSplit:FlxCamera; //splitscroll fuck you
+    public var noteCamsus:FlxCamera;    //so i can have wiggle sustains
+	public var noteCamSplitsus:FlxCamera; 
     public var char:Boyfriend;
     public var isCpu:Bool = true;
 
@@ -55,11 +61,24 @@ class Player
 		noteCam.bgColor.alpha = 0;
 		noteCamSplit = new FlxCamera();
 		noteCamSplit.bgColor.alpha = 0;
+
+        noteCamsus = new FlxCamera();
+		noteCamsus.bgColor.alpha = 0;
+		noteCamSplitsus = new FlxCamera();
+		noteCamSplitsus.bgColor.alpha = 0;
     }
     public function addCams()
     {
         FlxG.cameras.add(noteCam);
 		FlxG.cameras.add(noteCamSplit);
+        FlxG.cameras.add(noteCamsus);
+		FlxG.cameras.add(noteCamSplitsus);
+        noteCamsus.setFilters([new ShaderFilter(wiggleShit.shader)]);
+        noteCamSplitsus.setFilters([new ShaderFilter(wiggleShit.shader)]);
+
+        /*wiggleShit.effectType = WiggleEffectType.DREAMY;
+        wiggleShit.waveSpeed = 1;
+        wiggleShit.waveFrequency = 5;*/
     }
     public function resetStats()
     {
@@ -118,6 +137,12 @@ class Player
         noteCamSplit.x = camHUD.x;
 		noteCamSplit.y = camHUD.y;
 		noteCamSplit.angle = camHUD.angle;
+        noteCamsus.x = camHUD.x;
+		noteCamsus.y = camHUD.y;
+		noteCamsus.angle = camHUD.angle;
+        noteCamSplitsus.x = camHUD.x;
+		noteCamSplitsus.y = camHUD.y;
+		noteCamSplitsus.angle = camHUD.angle;
     }
 
 

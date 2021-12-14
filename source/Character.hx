@@ -116,7 +116,14 @@ class Character extends FlxSprite
 		this.flip = flip;
 
 		antialiasing = true;
-		loadCharacter(character);
+		if (PlayState.characters)
+			loadCharacter(character);
+		else 
+		{
+			makeGraphic(1,1); //bf become cube
+			visible = false;
+		}
+			
 
 	}
 
@@ -219,6 +226,12 @@ class Character extends FlxSprite
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
 		if (AnimName == "singNONE")
+			return;
+
+		if (AnimName.startsWith("sing") && !canSing)
+			return;
+
+		if (!PlayState.characters)
 			return;
 
 		animation.play(AnimName, Force, Reversed, Frame);

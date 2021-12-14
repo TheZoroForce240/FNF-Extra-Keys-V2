@@ -452,7 +452,7 @@ class StagePiece extends FlxSprite
 
 				    var json:PieceFile = cast Json.parse(rawJson);
 
-                    var imagePath = "assets/images/customStagePieces/" + part + "/" + part + ".png";
+                    var imagePath = "assets/images/customStagePieces/" + part + "/image.png";
                     var imageGraphic:FlxGraphic;
 
                     if (CacheShit.images[imagePath] == null)
@@ -468,7 +468,7 @@ class StagePiece extends FlxSprite
 
                     if (json.isAnimated)
                     {
-                        var xmlPath = "assets/images/customStagePieces/" + part + "/" + part + ".xml";
+                        var xmlPath = "assets/images/customStagePieces/" + part + "/image.xml";
                         var xml:String;
     
                         if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
@@ -583,8 +583,6 @@ class StagePiece extends FlxSprite
                             trainFrameTiming = 0;
                         }
                     }
-
-
 
             super.update(elapsed);
 

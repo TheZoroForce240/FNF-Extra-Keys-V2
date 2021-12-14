@@ -9,7 +9,7 @@ import openfl.Lib;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.util.FlxTimer;
 
-class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu from kade engine, just wanted something simple, also a substate, so we got mid song options, kade engine is doing that now lol
+class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for each option/category
 {
     var curSelected:Int = 0;
     var waitingForInput:Bool = false;
@@ -405,7 +405,9 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["FPS Cap", SaveData.fps, "slider", "Turn up for more frames"],
             ["Note Quantization", SaveData.noteQuant, "toggle", "Notes are colored based on the beat\nNote: disables note customization"],
             ["Camera Movements on Note Hits", SaveData.noteMovements, "toggle", "the thing that every mod does now"],
-            ["Scale Speed with Mania", SaveData.speedScaling, "toggle", "Scales down the speed based on note scale \n(so the same scroll speed should feel mostly the same for every mania)"]
+            ["Scale Speed with Mania", SaveData.speedScaling, "toggle", "Scales down the speed based on note scale \n(so the same scroll speed should feel mostly the same for every mania)"],
+            ["Enable Characters", PlayState.characters, "toggle", "(resets on restart)"],
+            ["Enable Backgrounds", PlayState.backgrounds, "toggle", "(resets on restart)"]
         ];
     
         keybinds = [
@@ -493,7 +495,8 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
             ["Hellchart", SaveData.Hellchart, "toggle", "oh fuck it gets worse"],
             ["Play As Oppenent", SaveData.flip, "toggle", "figure it out lol"],
             ["Song Speed Multi", PlayState.SongSpeedMultiplier, "slider", "change the song speed"],
-            ["Random Speed Change", PlayState.RandomSpeedChange, "toggle", "randomly change the speed"]
+            ["Random Speed Change", PlayState.RandomSpeedChange, "toggle", "randomly change the speed"],
+            ["Allow Note Types", PlayState.allowNoteTypes, "toggle", "enables note types"]
         ];
 
         switch (daCat)
@@ -615,6 +618,12 @@ class QuickOptions extends MusicBeatSubstate //kinda based on the keybind menu f
                     PlayState.SongSpeedMultiplier = curCategory[i][1]; 
                 case "Random Speed Change":
                     PlayState.RandomSpeedChange = curCategory[i][1]; 
+                case "Allow Note Types":
+                    PlayState.allowNoteTypes = curCategory[i][1]; 
+                case "Enable Characters":
+                    PlayState.characters = curCategory[i][1]; 
+                case "Enable Backgrounds":
+                    PlayState.backgrounds = curCategory[i][1]; 
 ////////////////////////////////////////////////////////////////////////////////////// stick ur custom options here
                 case "your option": 
                     //stick da shit here

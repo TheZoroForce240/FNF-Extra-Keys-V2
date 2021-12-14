@@ -80,8 +80,8 @@ class ChartingState extends MusicBeatState
 
 	var curRenderedNotes:FlxTypedGroup<Note>;
 	var curRenderedSustains:FlxTypedGroup<CharterSustain>;
-	var curRenderedTypes:FlxTypedGroup<FlxSprite>; //old system i used for note types, i figred out how to make them show properly, so now this is just used for displaying an alt note
-	var curRenderedSpeed:FlxTypedGroup<FlxSprite>; //for displaying the text of note speed, so you know its different
+	var curRenderedTypes:FlxTypedGroup<FlxText>; //old system i used for note types, i figred out how to make them show properly, so now this is just used for displaying an alt note
+	var curRenderedSpeed:FlxTypedGroup<FlxText>; //for displaying the text of note speed, so you know its different
 
 	var gridBG:FlxSprite; //might reduce the amount of these at some point
 	var gridBGAbove:FlxSprite;
@@ -201,8 +201,8 @@ class ChartingState extends MusicBeatState
 
 		curRenderedNotes = new FlxTypedGroup<Note>();
 		curRenderedSustains = new FlxTypedGroup<CharterSustain>();
-		curRenderedTypes = new FlxTypedGroup<FlxSprite>();
-		curRenderedSpeed = new FlxTypedGroup<FlxSprite>();
+		curRenderedTypes = new FlxTypedGroup<FlxText>();
+		curRenderedSpeed = new FlxTypedGroup<FlxText>();
 
 
 		if (PlayState.SONG != null)
@@ -2134,6 +2134,14 @@ class ChartingState extends MusicBeatState
 	function updateGrid():Void
 	{
 		curRenderedSustains.clear();
+		curRenderedSpeed.forEach(function(spr:FlxText)
+		{
+			spr.destroy();
+		});
+		curRenderedTypes.forEach(function(spr:FlxText)
+		{
+			spr.destroy();
+		});
 		curRenderedTypes.clear();
 		curRenderedSpeed.clear();
 

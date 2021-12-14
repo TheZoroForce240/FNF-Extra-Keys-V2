@@ -366,10 +366,16 @@ class Note extends FlxSprite
 					&& !inCharter && SaveData.splitScroll)
 				{
 					this.cameras = [PlayState.p1.noteCamSplit];
+					if (isSustainNote)
+						this.cameras = [PlayState.p1.noteCamSplitsus];
 					split = true;
 				}	
 				else
+				{
 					this.cameras = [PlayState.p1.noteCam];
+					if (isSustainNote)
+						this.cameras = [PlayState.p1.noteCamsus];
+				}
 			}
 			else if (!mustPress && !inCharter)
 			{
@@ -377,10 +383,17 @@ class Note extends FlxSprite
 					&& !inCharter && SaveData.P2splitScroll)
 				{
 					this.cameras = [PlayState.p2.noteCamSplit];
+					if (isSustainNote)
+						this.cameras = [PlayState.p2.noteCamSplitsus];
 					split = true;
 				}
 				else
+				{
 					this.cameras = [PlayState.p2.noteCam];
+					if (isSustainNote)
+						this.cameras = [PlayState.p2.noteCamsus];
+				}
+					
 			}
 		}
 
