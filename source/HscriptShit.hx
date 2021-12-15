@@ -14,6 +14,8 @@ import openfl.utils.Assets as OpenFlAssets;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
+import flixel.addons.effects.FlxTrail;
+import flixel.addons.effects.FlxTrailArea;
 using StringTools;
 #if sys
 import sys.io.File;
@@ -104,6 +106,7 @@ class HscriptShit //funni modcharts
         interp.variables.set("P1NoteNowOnScreen", function (note:Note) {}); //when you can see them on screen
         interp.variables.set("P2NoteNowOnScreen", function (note:Note) {});
         interp.variables.set("P3NoteNowOnScreen", function (note:Note) {});
+        interp.variables.set("characterMade", function (character:Character) {});
 
         interp.variables.set("instance", PlayState.instance); //dont think this works but who cares
         interp.variables.set("PlayState", PlayState);
@@ -133,6 +136,7 @@ class HscriptShit //funni modcharts
         interp.variables.set("Paths", Paths);
         interp.variables.set("WiggleEffect", WiggleEffect);
         interp.variables.set("CoolUtil", CoolUtil);
+        interp.variables.set("FlxTrail", FlxTrail);
         interp.variables.set("CacheShit", CacheShit); //not sure about this one, you could clear the cache i guess
         /*interp.variables.set("P1Health", PlayState.instance.P1Stats.health); //apparently these dont wanna work, can access directly through playstate though
         interp.variables.set("StrumLineStartY", PlayState.StrumLineStartY);

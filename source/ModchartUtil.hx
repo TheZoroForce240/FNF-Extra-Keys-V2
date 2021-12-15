@@ -31,8 +31,8 @@ class EventList
         ["Change P1 Mania", "Type the new Mania Value.\n(WARNING: the song mania HAS to be set to 9k to work!)"],
         ["Change P2 Mania", "Type the new Mania Value.\n(WARNING: the song mania HAS to be set to 9k to work!)"],
         ["Change Camera Beats", "Type in Cam Zoom amount, Hud Zoom amount, and how often it zooms(in beats)\nSeperate Each value with a comma, no Spaces."],
-        ["Change Current Active BF Characters", "For multiple Characters, type in the character names with no Caps, seperate each name with a comma, no Spaces."],
-        ["Change Current Active Dad Characters", "For multiple Characters, type in the character names with no Caps, seperate each name with a comma, no Spaces."]
+        ["P1 Cam Shake on Note Hit", "Type in the shake intensity, then the duration\nSeperate each value with a commma, no spaces."],
+        ["P2 Cam Shake on Note Hit", "Type in the shake intensity, then the duration\nSeperate each value with a commma, no spaces."]
     ];
 
     public static var noteMovementsPresets:Array<Array<String>> = [
@@ -105,6 +105,12 @@ class EventList
                 PlayState.beatCamZoom = Std.parseFloat(split[0]);
                 PlayState.beatCamHUD = Std.parseFloat(split[1]);
                 PlayState.beatCamHowOften = Std.parseInt(split[2]);
+            case "P1 Cam Shake on Note Hit": 
+                var split:Array<String> = data.split(",");
+                ModchartUtil.P1CamShake = [Std.parseFloat(split[0]), Std.parseFloat(split[1])];
+            case "P2 Cam Shake on Note Hit": 
+                var split:Array<String> = data.split(",");
+                ModchartUtil.P2CamShake = [Std.parseFloat(split[0]), Std.parseFloat(split[1])];
             default: 
                 daNote.eventWasValid = false;
         }
@@ -117,10 +123,25 @@ class ModchartUtil
     public static var playerStrumsInfo:Array<String> = ["", "", ""];
     public static var cpuStrumsInfo:Array<String> = ["", "", ""];
 
-    public static var camHudInfo:Array<String> = ["", "", ""];
-    public static var camGameInfo:Array<String> = ["", "", ""];
+    public static var P1CamShake:Array<Float> = [0, 0];
+    public static var P2CamShake:Array<Float> = [0, 0];
 
     public static var interp:Interp = new Interp();
+
+    public static function getCharacter(charactername):Boyfriend
+    {
+        if (PlayState.dad.curCharacter == charactername)
+            return PlayState.dad;
+        else if (PlayState.boyfriend.curCharacter == charactername)
+            return PlayState.boyfriend;
+        for (character in PlayState.extraCharacters)
+        {
+            if (character.curCharacter == charactername)
+                return character;
+        }
+
+        return null;
+    }
 
     // epic modchart like effects using events instead of lua
 

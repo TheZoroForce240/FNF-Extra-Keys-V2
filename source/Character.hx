@@ -223,13 +223,19 @@ class Character extends FlxSprite
 		}
 	}
 
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0, noteData:Int = 0):Void
 	{
 		if (AnimName == "singNONE")
 			return;
 
-		if (AnimName.startsWith("sing") && !canSing)
-			return;
+		if (AnimName.startsWith("sing"))
+		{
+			if (!canSing)
+				return;
+			else if (!singAllNoteDatas && !noteDatasToSingOn.contains(noteData))
+				return;
+		}
+			
 
 		if (!PlayState.characters)
 			return;
@@ -260,33 +266,6 @@ class Character extends FlxSprite
 				danced = !danced;
 			}
 		}
-	}
-	public function extraCharPlayAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-	{
-		if (PlayState.extraCharacters.length != 0) //hopefully wont break in places other than playState
-			{
-				for (i in PlayState.extraCharacters)
-				{
-					if (i.player1Side == this.isPlayer) //if both are same side
-					{
-						if (i.canSing)
-						{
-							i.animation.play(AnimName, Force, Reversed, Frame); //copied lol
-							var daOffset2 = i.animOffsets.get(AnimName);
-							if (i.animOffsets.exists(AnimName))
-							{
-								i.offset.set(daOffset2[0], daOffset2[1]);
-								i.animation.curAnim.frameRate = Std.int(daOffset2[2] * PlayState.SongSpeedMultiplier);
-							}
-							else
-								i.offset.set(0, 0);
-
-							if (AnimName.startsWith("sing"))
-								i.holdTimer = 0;
-						}
-					}
-				}
-			}
 	}
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)

@@ -432,6 +432,8 @@ class PlayState extends MusicBeatState
 
 		ModchartUtil.playerStrumsInfo = ["", "", ""];
 		ModchartUtil.cpuStrumsInfo = ["", "", ""];
+		ModchartUtil.P1CamShake = [0,0];
+		ModchartUtil.P2CamShake = [0,0];
 
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial');
@@ -621,7 +623,9 @@ class PlayState extends MusicBeatState
 						character.x += offset[0];
 						character.y += offset[1];
 					}
+					call("characterMade", [character]);
 					extraCharacters.add(character);
+
 				}
 		}
 
@@ -1689,6 +1693,8 @@ class PlayState extends MusicBeatState
 			FlxG.sound.music.time = Conductor.songPosition;
 			FlxG.sound.music.play();
 			updateSongMulti();
+
+			resyncVocals(); //sync vocals at same time
 		}
 
 	}
@@ -1906,8 +1912,15 @@ class PlayState extends MusicBeatState
 
 			if (!daNote.badNoteType)
 			{
-				cpu.playAnim('sing' + sDir[mania][noteData] + altAnim, true);
-				cpu.extraCharPlayAnim('sing' + sDir[mania][noteData] + altAnim, true);
+				cpu.playAnim('sing' + sDir[mania][noteData] + altAnim, true, false, 0, noteData);
+				for (character in extraCharacters)
+				{
+					if ((character.canSing && !character.player1Side && !flipped) || (flipped && character.canSing && character.player1Side))
+					{
+						character.playAnim('sing' + sDir[mania][noteData] + altAnim, true, false, 0, noteData);
+						character.holdTimer = 0;			
+					}
+				}
 			}
 				
 
@@ -1922,6 +1935,8 @@ class PlayState extends MusicBeatState
 							spr.playAnim('confirm', true, spr.ID, daNote.colorShit);
 					}
 				});
+				if (ModchartUtil.P1CamShake[0] != 0)
+					FlxG.camera.shake(ModchartUtil.P1CamShake[0], ModchartUtil.P1CamShake[1]);
 			}
 			else
 			{
@@ -1934,6 +1949,8 @@ class PlayState extends MusicBeatState
 							spr.playAnim('confirm', true, spr.ID, daNote.colorShit);
 					}
 				});
+				if (ModchartUtil.P2CamShake[0] != 0)
+					FlxG.camera.shake(ModchartUtil.P2CamShake[0], ModchartUtil.P2CamShake[1]);
 			}
 
 			if (Note.noteTypeList[daNote.noteType] == "drain")
@@ -2225,7 +2242,7 @@ class PlayState extends MusicBeatState
 			Conductor.songPosition += (FlxG.elapsed * 1000) * SongSpeedMultiplier;
 			if (!endingSong)
 			{
-				if (Conductor.songPosition - FlxG.sound.music.time > 40 || Conductor.songPosition - FlxG.sound.music.time < -40)
+				if (Conductor.songPosition - FlxG.sound.music.time > (20 * PlayState.SongSpeedMultiplier) || Conductor.songPosition - FlxG.sound.music.time < (-20 * PlayState.SongSpeedMultiplier))
 					resyncInst();
 			}
 
@@ -2791,18 +2808,18 @@ class PlayState extends MusicBeatState
 
 		for (character in extraCharacters)
 		{
-			if (character.canSing && character.player1Side)
+			if (character.player1Side)
 			{
-				if (character.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!keys.contains(true)))
+				if (character.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!keys.contains(true) || !character.canSing))
 				{
 					if (character.animation.curAnim.name.startsWith('sing') && !character.animation.curAnim.name.endsWith('miss'))
 						character.dance();
 				}
 			}
 
-			if (character.canSing && !character.player1Side && multiplayer)
+			if (!character.player1Side && multiplayer)
 			{
-				if (character.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!P2keys.contains(true)))
+				if (character.holdTimer > Conductor.stepCrochet * 4 * 0.001 && (!P2keys.contains(true) || !character.canSing))
 				{
 					if (character.animation.curAnim.name.startsWith('sing') && !character.animation.curAnim.name.endsWith('miss'))
 						character.dance();
@@ -2915,18 +2932,59 @@ class PlayState extends MusicBeatState
 			statsToUse.songScore -= 10;
 
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+
+			var missAnim = 'sing' + sDir[mania][direction] + 'miss';
+
 			if (daNote.mustPress)
 			{
 				call('P1NoteMiss', [daNote]);
-				shit.playAnim('sing' + sDir[mania][direction] + 'miss', true);
-				shit.extraCharPlayAnim('sing' + sDir[mania][direction] + 'miss', true);
+				if (shit.animOffsets.exists(missAnim)) //assume an offset exists????
+					shit.playAnim(missAnim, true, false, 0, direction);
+				else 
+				{
+					shit.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
+					shit.color = 0x00303f97;
+				}
+				for (character in extraCharacters)
+				{
+					if (character.canSing && character.player1Side)
+					{
+						if (character.animOffsets.exists(missAnim))
+							character.playAnim(missAnim, true, false, 0, direction);
+						else 
+						{
+							character.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
+							character.color = 0x00303f97;
+						}
+							
+					}
+				}
 			}	
 			else
 			{
 				call('P2NoteMiss', [daNote]);
-				shit.color = 0x00303f97;
-				shit.playAnim('sing' + sDir[mania][direction], true);
-				shit.extraCharPlayAnim('sing' + sDir[mania][direction], true);
+				if (shit.animOffsets.exists(missAnim)) //assume an offset exists????
+					shit.playAnim(missAnim, true, false, 0, direction);
+				else 
+				{
+					shit.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
+					shit.color = 0x00303f97;
+				}
+				
+				for (character in extraCharacters)
+				{
+					if (character.canSing && !character.player1Side)
+					{
+						if (character.animOffsets.exists(missAnim))
+							character.playAnim(missAnim, true, false, 0, direction);
+						else 
+						{
+							character.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
+							character.color = 0x00303f97;
+						}
+							
+					}
+				}
 			}
 
 			if (playernum != 1 && multiplayer)
@@ -2942,6 +3000,10 @@ class PlayState extends MusicBeatState
 			{
 				shit.stunned = false;
 				shit.color = 0x00FFFFFF;
+				for (character in extraCharacters)
+				{
+					character.color = 0x00FFFFFF;
+				}
 			});
 
 		}
@@ -2973,18 +3035,60 @@ class PlayState extends MusicBeatState
 			statsToUse.songScore -= 10;
 
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+
+			var missAnim = 'sing' + sDir[mania][direction] + 'miss';
+
 			if (playernum == 1 && !flipped)
 			{
 				call('P1MissPress', [direction]);
-				shit.playAnim('sing' + sDir[mania][direction] + 'miss', true);
-				shit.extraCharPlayAnim('sing' + sDir[mania][direction] + 'miss', true);
+				if (shit.animOffsets.exists(missAnim)) //assume an offset exists????
+					shit.playAnim(missAnim, true, false, 0, direction);
+				else 
+				{
+					shit.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
+					shit.color = 0x00303f97;
+				}
+				for (character in extraCharacters)
+				{
+					if (character.canSing && character.player1Side)
+					{
+						if (character.animOffsets.exists(missAnim))
+							character.playAnim(missAnim, true, false, 0, direction);
+						else 
+						{
+							character.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
+							character.color = 0x00303f97;
+						}
+							
+					}
+				}
 			}
 			else
 			{
 				call('P2MissPress', [direction]);
-				shit.color = 0x00303f97;
-				shit.playAnim('sing' + sDir[mania][direction], true);
-				shit.extraCharPlayAnim('sing' + sDir[mania][direction], true);
+				
+				if (shit.animOffsets.exists(missAnim)) //assume an offset exists????
+					shit.playAnim(missAnim, true, false, 0, direction);
+				else 
+				{
+					shit.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
+					shit.color = 0x00303f97;
+				}
+				
+				for (character in extraCharacters)
+				{
+					if (character.canSing && !character.player1Side)
+					{
+						if (character.animOffsets.exists(missAnim))
+							character.playAnim(missAnim, true, false, 0, direction);
+						else 
+						{
+							character.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
+							character.color = 0x00303f97;
+						}
+							
+					}
+				}
 			}
 
 			if (playernum != 1 && multiplayer)
@@ -3000,6 +3104,10 @@ class PlayState extends MusicBeatState
 			{
 				shit.stunned = false;
 				shit.color = 0x00FFFFFF;
+				for (character in extraCharacters)
+				{
+					character.color = 0x00FFFFFF;
+				}
 			});
 
 		}
@@ -3046,18 +3154,50 @@ class PlayState extends MusicBeatState
 			{
 				call('P1NoteHit', [note]);
 
-				player.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
-				player.extraCharPlayAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
-				player.holdTimer = 0;
+				if (player.canSing)
+				{
+					player.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true, false, 0, note.noteData);
+					player.holdTimer = 0;
+				}
+				for (character in extraCharacters)
+				{
+					if (character.canSing && character.player1Side)
+					{
+						character.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true, false, 0, note.noteData);
+						character.holdTimer = 0;
+					}
+				}
 				player.noteCamMovement = noteCamMovementShit(note.noteData, 1);
+				if (!flipped)
+				{
+					if (ModchartUtil.P1CamShake[0] != 0)
+						FlxG.camera.shake(ModchartUtil.P1CamShake[0], ModchartUtil.P1CamShake[1]);
+				}
+				else
+				{
+					if (ModchartUtil.P2CamShake[0] != 0)
+						FlxG.camera.shake(ModchartUtil.P2CamShake[0], ModchartUtil.P2CamShake[1]);
+				}
 			}
 			else
 			{
 				call('P2NoteHit', [note]);
-				player2.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
-				player2.extraCharPlayAnim('sing' + sDir[mania][note.noteData] + altAnim, true);
-				player2.holdTimer = 0;
+				if (player2.canSing)
+				{
+					player2.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true, false, 0, note.noteData);
+					player2.holdTimer = 0;
+				}
+				for (character in extraCharacters)
+				{
+					if (character.canSing && !character.player1Side)
+					{
+						character.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true, false, 0, note.noteData);
+						character.holdTimer = 0;
+					}
+				}
 				player2.noteCamMovement = noteCamMovementShit(note.noteData, 0);
+				if (ModchartUtil.P2CamShake[0] != 0)
+					FlxG.camera.shake(ModchartUtil.P2CamShake[0], ModchartUtil.P2CamShake[1]);
 			}
 
 			var timeWasHit:Float = Conductor.songPosition;
@@ -3429,14 +3569,25 @@ class PlayState extends MusicBeatState
 		var pos:Array<Float> = [0, 0];
 		if (playernum == 0)
 		{
-			var camOffset = dad.posOffsets.get('cam'); //offset in character.hx
-			if (dad.posOffsets.exists('cam'))
+			var characterToSnapTo = dad;
+			for (character in extraCharacters)
 			{
-				pos = [dad.getMidpoint().x + camOffset[0] + dad.noteCamMovement[0], 
-				dad.getMidpoint().y + camOffset[1] + dad.noteCamMovement[1]];
+				if (character.canSing && !character.player1Side)
+				{
+					characterToSnapTo = character;
+					break;
+				}
+			}
+
+
+			var camOffset = characterToSnapTo.posOffsets.get('cam'); //offset in character.hx
+			if (characterToSnapTo.posOffsets.exists('cam'))
+			{
+				pos = [characterToSnapTo.getMidpoint().x + camOffset[0] + dad.noteCamMovement[0], 
+				characterToSnapTo.getMidpoint().y + camOffset[1] + dad.noteCamMovement[1]];
 			}
 			else
-				pos = [dad.getMidpoint().x + dadDefaultCamOffset[0] + dad.noteCamMovement[0], dad.getMidpoint().y - dadDefaultCamOffset[1] + dad.noteCamMovement[1]];
+				pos = [characterToSnapTo.getMidpoint().x + dadDefaultCamOffset[0] + dad.noteCamMovement[0], characterToSnapTo.getMidpoint().y - dadDefaultCamOffset[1] + dad.noteCamMovement[1]];
 
 			if (dad.curCharacter == 'mom')
 				vocals.volume = 1;
@@ -3446,6 +3597,16 @@ class PlayState extends MusicBeatState
 		}
 		else
 		{
+			var characterToSnapTo = boyfriend;
+			for (character in extraCharacters)
+			{
+				if (character.canSing && character.player1Side)
+				{
+					characterToSnapTo = character;
+					break;
+				}
+			}
+
 			var yoffset:Float = bfDefaultCamOffset[1];
 			var xoffset:Float = bfDefaultCamOffset[0];
 			switch (curStage)
@@ -3459,8 +3620,8 @@ class PlayState extends MusicBeatState
 					yoffset = -200;
 			}
 
-			pos = [boyfriend.getMidpoint().x + xoffset + boyfriend.noteCamMovement[0], 
-			boyfriend.getMidpoint().y + yoffset + boyfriend.noteCamMovement[1]];
+			pos = [characterToSnapTo.getMidpoint().x + xoffset + boyfriend.noteCamMovement[0], 
+			characterToSnapTo.getMidpoint().y + yoffset + boyfriend.noteCamMovement[1]];
 
 			if (SONG.song.toLowerCase() == 'tutorial')
 				FlxTween.tween(FlxG.camera, {zoom: 1}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
@@ -3779,6 +3940,8 @@ class PlayState extends MusicBeatState
 
 		ModchartUtil.playerStrumsInfo = ["x", "y", "defaultAngle"];
     	ModchartUtil.cpuStrumsInfo = ["x", "y", "defaultAngle"];
+		ModchartUtil.P1CamShake = [0,0];
+		ModchartUtil.P2CamShake = [0,0];
 
 
 		if (mania == 2)
@@ -3800,11 +3963,13 @@ class PlayState extends MusicBeatState
 				{
 					character.canSing = true;
 					character.player1Side = true;
+					character.isPlayer = true;
 				}
 				else if (p2ActiveCharacters.contains(character.curCharacter))
 				{
 					character.canSing = true;
 					character.player1Side = false;
+					character.isPlayer = false;
 				}	
 				else 
 					character.canSing = false;
@@ -3833,6 +3998,18 @@ class PlayState extends MusicBeatState
 				return;
 			}
 		}
+		if (char == dad.curCharacter)
+		{
+			dad.singAllNoteDatas = enable;
+			dad.noteDatasToSingOn = datas;
+			return;
+		}
+		else if (char == boyfriend.curCharacter)
+		{
+			boyfriend.singAllNoteDatas = enable;
+			boyfriend.noteDatasToSingOn = datas;
+			return;
+		}
 	}
 	public function resetCharacterNoteDatas():Void 
 	{
@@ -3840,6 +4017,8 @@ class PlayState extends MusicBeatState
 		{
 			character.singAllNoteDatas = true;
 		}
+		boyfriend.singAllNoteDatas = true;
+		dad.singAllNoteDatas = true;
 	}
 
 	function generateNotes():Void
@@ -4119,9 +4298,11 @@ class PlayState extends MusicBeatState
 				if (!character.canSing)
 					character.dance();
 			}
+			if (!dad.canSing)
+				dad.dance();
+			if (!boyfriend.canSing)
+				boyfriend.dance();
 		}
-		p1.wiggleShit.update(Conductor.crochet);
-		p2.wiggleShit.update(Conductor.crochet);
 		// HARDCODING FOR MILF ZOOMS!
 		if (curSong.toLowerCase() == 'milf' && curBeat >= 168 && curBeat < 200 && camZooming && FlxG.camera.zoom < 1.35)
 		{
@@ -4159,7 +4340,8 @@ class PlayState extends MusicBeatState
 
 		for (character in extraCharacters)
 		{
-			if (character.canSing && character.animation.curAnim.name.startsWith("sing"))
+			if ((!character.animation.curAnim.name.startsWith("sing") && character.player1Side) || 
+				((!character.animation.curAnim.name.startsWith("sing") && !character.player1Side && multiplayer)))
 				character.dance();
 		}
 
