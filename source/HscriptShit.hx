@@ -8,6 +8,7 @@ import hscript.Interp;
 import hscript.Parser;
 import hscript.ParserEx;
 import hscript.InterpEx;
+import flixel.FlxSprite;
 import flixel.math.FlxAngle;
 import flixel.math.FlxMath;
 import openfl.utils.Assets as OpenFlAssets;
@@ -107,6 +108,8 @@ class HscriptShit //funni modcharts
         interp.variables.set("P2NoteNowOnScreen", function (note:Note) {});
         interp.variables.set("P3NoteNowOnScreen", function (note:Note) {});
         interp.variables.set("characterMade", function (character:Character) {});
+        interp.variables.set("onManiaChange", function (mania:Int) {});
+        interp.variables.set("onStrumsGenerated", function (strums:StrumLineGroup) {});
 
         interp.variables.set("instance", PlayState.instance); //dont think this works but who cares
         interp.variables.set("PlayState", PlayState);
@@ -123,6 +126,7 @@ class HscriptShit //funni modcharts
         interp.variables.set("Boyfriend", Boyfriend);
         interp.variables.set("FlxEase", FlxEase);
         interp.variables.set("FlxTween", FlxTween);
+        interp.variables.set("FlxSprite", FlxSprite);
         interp.variables.set("FlxTimer", FlxTimer);
         interp.variables.set("StringTools", StringTools);
         interp.variables.set("curStep", 0);

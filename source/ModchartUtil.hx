@@ -130,6 +130,10 @@ class ModchartUtil
 
     public static function getCharacter(charactername):Boyfriend
     {
+        if (!PlayState.characters)
+            return PlayState.boyfriend; //prevent crashes with extra characters when chracters are disabled
+
+
         if (PlayState.dad.curCharacter == charactername)
             return PlayState.dad;
         else if (PlayState.boyfriend.curCharacter == charactername)

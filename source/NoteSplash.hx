@@ -60,7 +60,7 @@ class NoteSplash extends FlxSprite
 			animation.play(newColors[Std.int(colorShiz[3])] + ' splash', true);
 		}
 
-		animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
+		animation.curAnim.frameRate = Std.int((24 + FlxG.random.int(-2, 2)) * PlayState.SongSpeedMultiplier);
 		setGraphicSize(Std.int(Note.noteWidths[maniaToUse] * 4.5));
         updateHitbox();
 

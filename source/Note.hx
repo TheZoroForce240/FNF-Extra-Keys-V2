@@ -344,9 +344,14 @@ class Note extends FlxSprite
 		scaleToUse = noteScales[curMania];
 
 		if (!isGFNote)
+		{
 			pathToUse = Std.int(colorShit[3]);
+			if (Note.usingQuant)
+				pathToUse = 4;
+		}
+			
 
-		if (SaveData.middlescroll && !_mustPress && !inCharter)
+		if (SaveData.middlescroll && !_mustPress && !inCharter && !isGFNote)
 			scaleMulti = 0.55;
 
 		if (inCharter)
@@ -414,7 +419,7 @@ class Note extends FlxSprite
 			downscrollCheck();
 		this.shader = HSV.shader;
 
-		if (normalNote && !isGFNote)
+		if (normalNote)
 		{
 			HSV.hue = colorShit[0];
 			HSV.saturation = colorShit[1];

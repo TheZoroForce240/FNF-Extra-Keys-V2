@@ -30,11 +30,19 @@ typedef OffsetFile =
 	var aa:Bool;
 	var arrowColorShit:ArrowColors;
 	var healthBar:RGB;
+	var useExtraSpritesheets:Bool;
+	var otherSheetAnims:Array<AnimsOnOtherSheets>;
 }
 typedef OtherOffsetShit = 
 {
 	var type:String;
 	var offsets:Array<Int>;
+}
+
+typedef AnimsOnOtherSheets = 
+{
+	var animName:String;
+	var charNameForSpritesheet:String;
 }
 
 typedef AnimOffsetShit = 
@@ -44,6 +52,7 @@ typedef AnimOffsetShit =
 	var offsets:Array<Int>;
 	var frameRate:Int;
 	var loop:Bool;
+	
 }
 
 typedef ArrowColors = 
@@ -74,6 +83,7 @@ class Character extends FlxSprite
 
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = 'bf';
+	public var curGraphic:String = 'bf'; //for extra spritesheets????? auto switch character based on animation???
 
 	public var holdTimer:Float = 0;
 
@@ -105,6 +115,9 @@ class Character extends FlxSprite
 	public var player1Side:Bool = false;
 	var tex:FlxAtlasFrames;
 
+	public var useExtraSpritesheets:Bool = false;
+	public var otherSheetAnims:Array<Dynamic> = [];
+
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false, ?flip:Bool = false)
 	{
 		super(x, y);
@@ -120,11 +133,17 @@ class Character extends FlxSprite
 			loadCharacter(character);
 		else 
 		{
+			curCharacter = character;
+			curGraphic = character;
 			makeGraphic(1,1); //bf become cube
 			visible = false;
+			animation.add("idle", [0]);
+			animation.add("singLEFT", [0]);
+			animation.add("singRIGHT", [0]);
+			animation.add("singDOWN", [0]);
+			animation.add("singUP", [0]);
+			dance();
 		}
-			
-
 	}
 
 	override function update(elapsed:Float)
@@ -136,11 +155,7 @@ class Character extends FlxSprite
 					holdTimer += elapsed * PlayState.SongSpeedMultiplier;
 				}
 	
-				var dadVar:Float = 4;
-	
-				if (curCharacter == 'dad')
-					dadVar = 6.1;
-				if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
+				if (holdTimer >= Conductor.stepCrochet * animTime * 0.001)
 				{
 					dance();
 					holdTimer = 0;
@@ -163,6 +178,9 @@ class Character extends FlxSprite
 	 */
 	public function dance()
 	{
+		if (!PlayState.characters)
+			return;
+
 		if (!debugMode)
 		{
 			switch (curCharacter)
@@ -235,10 +253,12 @@ class Character extends FlxSprite
 			else if (!singAllNoteDatas && !noteDatasToSingOn.contains(noteData))
 				return;
 		}
-			
 
 		if (!PlayState.characters)
 			return;
+
+		if (animation.getByName(AnimName) == null)
+			checkAnimation(AnimName);
 
 		animation.play(AnimName, Force, Reversed, Frame);
 		var daOffset = animOffsets.get(AnimName);
@@ -271,7 +291,8 @@ class Character extends FlxSprite
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)
 	{
 		var defaultFrameRate = animation.getByName(name).frameRate;
-		animOffsets[name] = [x, y, defaultFrameRate];
+		var fuck:Array<Dynamic> = [x, y, defaultFrameRate, curGraphic];
+		animOffsets[name] = fuck;
 	}
 
 	public function addPosOffset(name:String, x:Float = 0, y:Float = 0)
@@ -279,17 +300,46 @@ class Character extends FlxSprite
 		posOffsets[name] = [x, y];
 	}
 
-	public function loadCharacter(char:String)
+
+	public function checkAnimation(AnimName:String)
 	{
-		curCharacter = char;
-		animOffsets.clear();
-		posOffsets.clear();
-		flipX = false;
+		//trace(otherSheetAnims);
+		var foundSheet:Bool = false;
+		for (i in 0...otherSheetAnims.length)
+		{
+			if (otherSheetAnims[i][0] == AnimName) //haha funni switch character
+			{
+				trace("found anim name");
+				if (otherSheetAnims[i][1] != curGraphic)
+					loadCharacter(otherSheetAnims[i][1], false);
+				foundSheet = true;
+				break;
+			}
+		}
+	}
+
+	public function loadCharacter(char:String, reset:Bool = true)
+	{
+
+		if (!PlayState.characters)
+			return;
+
+		if (reset)
+		{
+			curCharacter = char;
+			animOffsets.clear();
+			posOffsets.clear();
+			flipX = false;
+			
+		}
 		animation.destroyAnimations();
 		tex = null;
 		frames = null;
+		curGraphic = char;
 
-		switch (curCharacter)
+		trace("loading character: " + curGraphic);
+
+		switch (curGraphic)
 		{
 			case 'gf':
 				// GIRLFRIEND CODE
@@ -544,7 +594,7 @@ class Character extends FlxSprite
 				addPosOffset('startCam', 600, 0);
 
 			case 'bf':
-				var tex = Paths.getSparrowAtlas('BOYFRIEND');
+				tex = Paths.getSparrowAtlas('BOYFRIEND');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
 				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -583,7 +633,7 @@ class Character extends FlxSprite
 				flipX = true;
 
 			case 'bf-christmas':
-				var tex = Paths.getSparrowAtlas('christmas/bfChristmas', 'week5');
+				tex = Paths.getSparrowAtlas('christmas/bfChristmas', 'week5');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
 				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -611,7 +661,7 @@ class Character extends FlxSprite
 
 				flipX = true;
 			case 'bf-car':
-				var tex = Paths.getSparrowAtlas('bfCar', 'week4');
+				tex = Paths.getSparrowAtlas('bfCar', 'week4');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
 				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -790,7 +840,7 @@ class Character extends FlxSprite
 				addPosOffset('pos', -500, 0);
 
 			default:  	///custom character shit
-				var imagePath = "assets/images/characters/" + curCharacter + "/image.png";
+				var imagePath = "assets/images/characters/" + curGraphic + "/image.png";
 				var imageGraphic:FlxGraphic;
 
 				if (CacheShit.images[imagePath] == null)
@@ -801,7 +851,7 @@ class Character extends FlxSprite
 				}
 				imageGraphic = CacheShit.images[imagePath];
 
-				var xmlPath = "assets/images/characters/" + curCharacter + "/image.xml";
+				var xmlPath = "assets/images/characters/" + curGraphic + "/image.xml";
 				var xml:String;
 
 				if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
@@ -817,13 +867,13 @@ class Character extends FlxSprite
 				}
 					
 
-				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml); //todo set up the packer things with txts i think idk why tf youd use one just use an xml
+				tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml); //todo set up the packer things with txts i think idk why tf youd use one just use an xml
 				frames = tex;
 
 				#if sys
-				var rawJson = File.getContent(Paths.imageJson("characters/" + curCharacter + "/offsets"));
+				var rawJson = File.getContent(Paths.imageJson("characters/" + curGraphic + "/offsets"));
 				#else
-				var rawJson = Assets.getText(Paths.imageJson("characters/" + curCharacter + "/offsets"));
+				var rawJson = Assets.getText(Paths.imageJson("characters/" + curGraphic + "/offsets"));
 				#end
 				var json:OffsetFile = cast Json.parse(rawJson);
 
@@ -849,8 +899,28 @@ class Character extends FlxSprite
 
 						animation.addByPrefix(animname, xmlname, fps, loop);
 						addOffset(animname, offsets[0], offsets[1]);
+						if (reset)
+							otherSheetAnims.push([animname, curCharacter]);
 					}
 				}
+				if (reset)
+				{
+					if (json.useExtraSpritesheets)
+					{
+						useExtraSpritesheets = json.useExtraSpritesheets;
+						if (json.otherSheetAnims != null && json.otherSheetAnims.length != 0)
+						{
+							for (i in json.otherSheetAnims)
+							{
+								var animName:String = i.animName;
+								var charName:String = i.charNameForSpritesheet;
+								trace("adding extra sheet anim");
+								otherSheetAnims.push([animName, charName]);
+							}
+						}
+					}
+				}
+
 				flip = json.flip;
 				setGraphicSize(Std.int(this.width * json.scale));
 				scrollFactor.set(json.scrollFactor[0], json.scrollFactor[1]);
@@ -877,7 +947,8 @@ class Character extends FlxSprite
 
 		}
 
-		dance();
+		if (reset)
+			dance();
 
 		if (flip)
 		{

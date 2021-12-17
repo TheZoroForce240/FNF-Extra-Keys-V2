@@ -253,15 +253,21 @@ class BabyArrow extends FlxSprite
 
             if (!PlayState.isStoryMode && isPlayState)
             {
-                y -= 10;
-                alpha = 0;
-                FlxTween.tween(this, {y: y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
-                if (lane != null)
+                if (PlayState.instance.showStrumsOnStart)
                 {
-                    lane.alpha = 0;
-                    FlxTween.tween(lane, {alpha: SaveData.laneOpacity}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
-                }    
+                    y -= 10;
+                    alpha = 0;
+                    FlxTween.tween(this, {y: y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
+                    if (lane != null)
+                    {
+                        lane.alpha = 0;
+                        FlxTween.tween(lane, {alpha: SaveData.laneOpacity}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
+                    } 
+                }
             }
+            if (isPlayState)
+                if (!PlayState.instance.showStrumsOnStart)
+                    alpha = 0;
 
             if (SaveData.splitScroll && player == 1)
             {
@@ -291,8 +297,7 @@ class BabyArrow extends FlxSprite
                 x = (PlayState.gf.x + (PlayState.gf.width / 2)) - (Note.noteWidths[0] * 2) + Note.noteWidths[0] * i;
             }
 
-            if (!PlayState.instance.showStrumsOnStart)
-                x += 4000; //hide da shit
+
 
             /*switch (i) //dumb center scroll i did for a video
             {
@@ -328,9 +333,21 @@ class BabyArrow extends FlxSprite
 
 
     }
+    public function showStrum()
+    {
+        y -= 10;
+        alpha = 0;
+        FlxTween.tween(this, {y: y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((curID * 4) / PlayState.keyAmmo[curMania]))});
+        if (lane != null)
+        {
+            lane.alpha = 0;
+            FlxTween.tween(lane, {alpha: SaveData.laneOpacity}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((curID * 4) / PlayState.keyAmmo[curMania]))});
+        } 
+    }
     public function playAnim(anim:String, ?force:Bool = false, id:Int, colorShit:Array<Float>)
     {
         animation.play(anim, force);
+        animation.curAnim.frameRate = Std.int(24 * PlayState.SongSpeedMultiplier);
         centerOffsets();  
         if (animation.curAnim.name == 'static')
         {
