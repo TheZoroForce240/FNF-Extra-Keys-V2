@@ -27,6 +27,23 @@ import haxe.format.JsonParser;
 
 using StringTools;
 
+typedef Stages = 
+{
+	var stageList:Array<StageFile>;
+}
+typedef StageFile = 
+{
+	var name:String;
+	var camZoom:Float;
+	var pieceArray:Array<String>;
+	var offsets:Array<StageOffset>;
+}
+typedef StageOffset = 
+{
+	var type:String;
+	var offsets:Array<Int>;
+}
+
 typedef PieceFile = 
 {
 	var position:Array<Float>; //regular stuff
@@ -41,9 +58,6 @@ typedef PieceFile =
 
     var isDanceable:Bool; //mainly for background bopping sprites
     var animToPlayOnDance:String;
-
-    //var animChangeEvents:Array<AnimChanges>; //extra stuff you can do
-    //var posChangeEvents:Array<PosChanges>;  //will add these later
 }
 
 typedef PieceAnims = 
@@ -52,30 +66,6 @@ typedef PieceAnims =
 	var xmlname:String;
 	var frameRate:Int;
 	var loop:Bool;
-}
-
-typedef AnimChanges = 
-{
-    var step:Int;
-    var animToPlay:String;
-}
-typedef PosChanges = 
-{
-    var step:Int;
-    var pos:Array<Float>;
-    var angle:Float;
-
-    var songSpecific:Bool;
-    var songsToPlayEvent:Array<String>;
-
-    var useTween:Bool;
-    var tweenData:Array<TweenShit>;
-}
-
-typedef TweenShit = 
-{
-    var time:Float;
-    var ease:FlxEase;
 }
 
 class StagePiece extends FlxSprite
@@ -101,14 +91,17 @@ class StagePiece extends FlxSprite
     var startedMoving:Bool = false;
     var trainSound:FlxSound;
 
-    public var hasEvents:Bool = false;
+    public var danceAnim:String = "Bop";
+    public var debugMode:Bool = false;
 
-    var danceAnim:String = "Bop";
 
-	public function new(x:Float = 0, y:Float = 0, ?piece:String = "stageFront")
+
+    public var animFrameRates:Map<String, Int>; //funni speed up
+	public function new(x:Float = 0, y:Float = 0, ?piece:String = "stageFront", ?_debugMode:Bool = false)
         {
             super(x, y); //x and y are optional, so epic for loop can be used
-
+            animFrameRates = new Map<String, Int>();
+            debugMode = _debugMode;
 
             var tex:FlxAtlasFrames;
             part = piece;
@@ -146,9 +139,9 @@ class StagePiece extends FlxSprite
                     frames = tex;
                     newx = -200;
                     newy = -100;
-					animation.addByPrefix('idle', 'halloweem bg0');
-					animation.addByPrefix('lightning', 'halloweem bg lightning strike', 24, false);
-					animation.play('idle');
+					addAnimFromPrefix('idle', 'halloweem bg0');
+					addAnimFromPrefix('lightning', 'halloweem bg lightning strike', 24, false);
+					playAnim('idle');
                 /////////////////////////////////////////////////////// week 3
 
                 case "phillyBG": 
@@ -233,16 +226,16 @@ class StagePiece extends FlxSprite
                     frames = tex;
                     newx = -200;
                     newy = 480;
-                    animation.addByPrefix('drive', "background limo pink", 24);
+                    addAnimFromPrefix('drive', "background limo pink", 24);
 					scrollFactor.set(0.4, 0.4);
-                    animation.play('drive');
+                    playAnim('drive');
                 case 'bgDancer': 
                     danceable = true;
                     tex = Paths.getSparrowAtlas("limo/limoDancer", 'week4');
                     frames = tex;
-                    animation.addByIndices('danceLeft', 'bg dancer sketch PINK', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
-		            animation.addByIndices('danceRight', 'bg dancer sketch PINK', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
-		            animation.play('danceLeft');
+                    addAnimFromIndices('danceLeft', 'bg dancer sketch PINK', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
+		            addAnimFromIndices('danceRight', 'bg dancer sketch PINK', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
+		            playAnim('danceLeft');
                     newy = 80;
                     newx = 130;
                     scrollFactor.set(0.4, 0.4);
@@ -256,8 +249,8 @@ class StagePiece extends FlxSprite
                     frames = tex;
                     newx = -120;
                     newy = 550;
-                    animation.addByPrefix('drive', "Limo stage", 24);
-					animation.play('drive');
+                    addAnimFromPrefix('drive', "Limo stage", 24);
+					playAnim('drive');
                 case 'fastCar': 
                     danceable = true;
                     loadGraphic(Paths.image('limo/fastCarLol', 'week4'));
@@ -279,7 +272,7 @@ class StagePiece extends FlxSprite
                     frames = tex;
                     newx = -240;
                     newy = -90;
-                    animation.addByPrefix('bop', "Upper Crowd Bob", 24, false);
+                    addAnimFromPrefix('bop', "Upper Crowd Bob", 24, false);
 					scrollFactor.set(0.33, 0.33);
 					setGraphicSize(Std.int(width * 0.85));
 					updateHitbox();
@@ -302,7 +295,7 @@ class StagePiece extends FlxSprite
                     frames = tex;
                     newx = -300;
                     newy = 140;
-                    animation.addByPrefix('bop', 'Bottom Level Boppers', 24, false);
+                    addAnimFromPrefix('bop', 'Bottom Level Boppers', 24, false);
 					scrollFactor.set(0.9, 0.9);
 					setGraphicSize(Std.int(width * 1));
 					updateHitbox();
@@ -370,7 +363,7 @@ class StagePiece extends FlxSprite
                     tex = Paths.getPackerAtlas('weeb/weebTrees', 'week6');
                     frames = tex;
                     animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
-                    animation.play('treeLoop');
+                    playAnim('treeLoop');
                     scrollFactor.set(0.85, 0.85);
                     newx = -380;
                     newy = -800;
@@ -381,8 +374,8 @@ class StagePiece extends FlxSprite
                 case 'school-treeLeaves': 
                     tex = Paths.getSparrowAtlas('weeb/petals', 'week6');
                     frames = tex;
-                    animation.addByPrefix('leaves', 'PETALS ALL', 24, true);
-		            animation.play('leaves');
+                    addAnimFromPrefix('leaves', 'PETALS ALL', 24, true);
+		            playAnim('leaves');
 		            scrollFactor.set(0.85, 0.85);
                     newy = -40;
                     antialiasing = false;
@@ -392,9 +385,9 @@ class StagePiece extends FlxSprite
                 case 'bgGirls': 
                     tex = Paths.getSparrowAtlas('weeb/bgFreaks', 'week6');
                     frames = tex;
-                    animation.addByIndices('danceLeft', 'BG girls group', CoolUtil.numberArray(14), "", 24, false);
-                    animation.addByIndices('danceRight', 'BG girls group', CoolUtil.numberArray(30, 15), "", 24, false);
-                    animation.play('danceLeft');
+                    addAnimFromIndices('danceLeft', 'BG girls group', CoolUtil.numberArray(14), "", 24, false);
+                    addAnimFromIndices('danceRight', 'BG girls group', CoolUtil.numberArray(30, 15), "", 24, false);
+                    playAnim('danceLeft');
                     newx = -100;
                     newy = 190;
                     scrollFactor.set(0.9, 0.9);
@@ -412,8 +405,8 @@ class StagePiece extends FlxSprite
                     frames = tex;
                     newx = 400;
                     newy = 200;
-                    animation.addByPrefix('idle', 'background 2', 24);
-                    animation.play('idle');
+                    addAnimFromPrefix('idle', 'background 2', 24);
+                    playAnim('idle');
                     scrollFactor.set(0.8, 0.9);
                     scale.set(6, 6);
                     antialiasing = false;
@@ -432,8 +425,8 @@ class StagePiece extends FlxSprite
                     frames = tex;
                     newx = 400;
                     newy = 200;
-                    animation.addByPrefix('idle', 'background 2', 24); //set the animations here
-                    animation.play('idle');
+                    addAnimFromPrefix('idle', 'background 2', 24); //set the animations here
+                    playAnim('idle');
                     scrollFactor.set(0.8, 0.9);
                     scale.set(6, 6);
                     danceable = false; //danceble means it can do something every beat, set this in dance()
@@ -495,7 +488,7 @@ class StagePiece extends FlxSprite
                                 var fps:Int = i.frameRate;
                                 var loop:Bool = i.loop;
         
-                                animation.addByPrefix(animname, xmlname, fps, loop);
+                                addAnimFromPrefix(animname, xmlname, fps, loop);
                             }
                             animation.play(json.animToPlay); 
                         }
@@ -521,8 +514,8 @@ class StagePiece extends FlxSprite
 
     public function getScared():Void //only for week 6 bg girls
         {
-            animation.addByIndices('danceLeft', 'BG fangirls dissuaded', CoolUtil.numberArray(14), "", 24, false);
-            animation.addByIndices('danceRight', 'BG fangirls dissuaded', CoolUtil.numberArray(30, 15), "", 24, false);
+            addAnimFromIndices('danceLeft', 'BG fangirls dissuaded', CoolUtil.numberArray(14), "", 24, false);
+            addAnimFromIndices('danceRight', 'BG fangirls dissuaded', CoolUtil.numberArray(30, 15), "", 24, false);
             dance();
         }
 
@@ -538,12 +531,12 @@ class StagePiece extends FlxSprite
                         danceDir = !danceDir;
     
                         if (danceDir)
-                            animation.play('danceRight', true);
+                            playAnim('danceRight', true);
                         else
-                            animation.play('danceLeft', true);
+                            playAnim('danceLeft', true);
 
                     case 'mallSanta' | 'mallUpperBoppers' | 'mallBottomBoppers': 
-                        animation.play("bop", true);
+                        playAnim("bop", true);
                     case 'fastCar': 
                         if (FlxG.random.bool(10) && fastCarCanDrive)
                             fastCarDrive();
@@ -563,12 +556,29 @@ class StagePiece extends FlxSprite
                                 trainStart();
                             }
                     default: 
-                        animation.play(danceAnim, true);
+                        playAnim(danceAnim, true);
 
 
                 }
             }  
         }
+    public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
+    {
+        animation.play(AnimName, Force, Reversed, Frame);
+        if (animFrameRates[AnimName] != null)
+            animation.curAnim.frameRate = Std.int(animFrameRates[AnimName] * PlayState.SongSpeedMultiplier);
+    }
+    public function addAnimFromPrefix(name:String, prefix:String, fps:Int = 30, looped:Bool = true, xflip:Bool = false, yflip:Bool = false)
+    {
+        animation.addByPrefix(name, prefix, fps, looped, xflip, yflip);
+        animFrameRates[name] = fps;
+    }
+
+    public function addAnimFromIndices(name:String, prefix:String, indices:Array<Int>, postfix:String, fps:Int = 30, looped:Bool = true, xflip:Bool = false, yflip:Bool = false)
+    {
+        animation.addByIndices(name, prefix, indices, postfix, fps, looped, xflip, yflip);
+        animFrameRates[name] = fps;
+    }
 
     override function update(elapsed:Float)
         {
@@ -591,7 +601,7 @@ class StagePiece extends FlxSprite
     function lightningStrikeShit():Void //for week 2
         {
             FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
-            animation.play('lightning');
+            playAnim('lightning');
             lightningStrikeBeat = daBeat;
             lightningOffset = FlxG.random.int(8, 24);
             PlayState.boyfriend.playAnim('scared', true);
@@ -612,7 +622,7 @@ class StagePiece extends FlxSprite
 
 		velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 		fastCarCanDrive = false;
-		new FlxTimer().start(2, function(tmr:FlxTimer)
+		new FlxTimer().start(2 * PlayState.SongSpeedMultiplier, function(tmr:FlxTimer)
 		{
 			resetFastCar();
 		});
@@ -722,28 +732,23 @@ class StagePiece extends FlxSprite
     
                     daStage = stage;
                     #if sys
-                    var rawJson = File.getContent("assets/data/customStages.json");
+                    var rawJson = File.getContent("assets/data/stages/" + stage + ".json");
                     #else
-                    var rawJson = Assets.getText("assets/data/customStages.json");
+                    var rawJson = Assets.getText("assets/data/stages/" + stage + ".json");
                     #end
-                    var json:PlayState.Stages = cast Json.parse(rawJson);
+                    var json:StageFile = cast Json.parse(rawJson);
     
-                    if (json.stageList.length != 0)
-                        for (i in json.stageList)
-                            if (i.name == stage)
-                            {
-                                pieces = i.pieceArray;
-                                zoom = i.camZoom;
-    
-                                if (i.offsets.length != 0)
-                                    for (ii in i.offsets)
-                                    {
-                                        var type:String = ii.type;
-                                        var offsets:Array<Int> = ii.offsets; 
-                                        addStageOffset(type, offsets[0], offsets[1], offsetMap);
-                                    }
-                                break;
-                            }
+
+                    pieces = json.pieceArray;
+                    zoom = json.camZoom;
+
+                    if (json.offsets.length != 0)
+                        for (ii in json.offsets)
+                        {
+                            var type:String = ii.type;
+                            var offsets:Array<Int> = ii.offsets; 
+                            addStageOffset(type, offsets[0], offsets[1], offsetMap);
+                        }
     
             }
             PlayState.stageData = [pieces, daStage, zoom, offsetMap];

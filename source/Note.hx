@@ -319,6 +319,7 @@ class Note extends FlxSprite
 		if (isSustainNote && prevNote != null)
 			noteData = prevNote.noteData;
 
+		
 		if (!_mustPress)
 		{
 			if (strumTime >= PlayState.lastP2mChange)
@@ -335,6 +336,10 @@ class Note extends FlxSprite
 				curMania = PlayState.prevP1NoteMania;
 			colorShit = SaveData.noteColors[BabyArrow.colorFromData[mania][noteData]];
 		}
+		if (mania != 2) //mania changes only allowed on 9k
+			curMania = mania;
+
+
 		if (Note.usingQuant)
             colorShit = [0,0,0,4];
 
@@ -457,6 +462,8 @@ class Note extends FlxSprite
 			}
 			if (strumTime - Conductor.songPosition < lateHitTiming && !wasGoodHit)
 				tooLate = true;
+			else 
+				tooLate = false;
 		}
 		else
 		{

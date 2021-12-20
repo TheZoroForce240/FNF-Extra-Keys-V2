@@ -149,18 +149,18 @@ class Character extends FlxSprite
 	override function update(elapsed:Float)
 	{
 		if (!isPlayer)
+		{
+			if (animation.curAnim.name.startsWith('sing'))
 			{
-				if (animation.curAnim.name.startsWith('sing'))
-				{
-					holdTimer += elapsed * PlayState.SongSpeedMultiplier;
-				}
-	
-				if (holdTimer >= Conductor.stepCrochet * animTime * 0.001)
-				{
-					dance();
-					holdTimer = 0;
-				}
+				holdTimer += elapsed * PlayState.SongSpeedMultiplier;
 			}
+
+			if (holdTimer >= Conductor.stepCrochet * animTime * 0.001)
+			{
+				dance();
+				holdTimer = 0;
+			}
+		}
 		switch (curCharacter)
 		{
 			case 'gf':
@@ -252,6 +252,8 @@ class Character extends FlxSprite
 				return;
 			else if (!singAllNoteDatas && !noteDatasToSingOn.contains(noteData))
 				return;
+			else 
+				holdTimer = 0;
 		}
 
 		if (!PlayState.characters)

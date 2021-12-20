@@ -260,7 +260,7 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
             curCategory[curSelected][1] = 60;
         else if (curCategory[curSelected][1] > 300 && curCategory[curSelected][0] == "FPS Cap")
             curCategory[curSelected][1] = 300;
-        else if (curCategory[curSelected][1] <= 0.1 && curCategory[curSelected][0] == "Song Speed Multi") //need to figure out a better way to do this, TODO
+        else if (curCategory[curSelected][1] <= 0 && curCategory[curSelected][0] == "Song Speed Multi") //need to figure out a better way to do this, TODO
             curCategory[curSelected][1] = 0.1;
         else if (curCategory[curSelected][1] > 10 && curCategory[curSelected][0] == "Song Speed Multi")
             curCategory[curSelected][1] = 10;

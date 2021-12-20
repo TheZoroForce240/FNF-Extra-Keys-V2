@@ -81,29 +81,13 @@ import sys.io.File;
 import sys.FileSystem;
 #end
 import flash.media.Sound;
+import StagePiece.Stages;
 
 using StringTools;
 
 //for anyone looking though the code,
 //sorry if i put capitals at the start of variables/functions, i can't be bothered to change it, 
 //i would prefer to keep consistancy, its mainly with P2 variables though
-
-typedef Stages = 
-{
-	var stageList:Array<StageFile>;
-}
-typedef StageFile = 
-{
-	var name:String;
-	var camZoom:Float;
-	var pieceArray:Array<String>;
-	var offsets:Array<StageOffset>;
-}
-typedef StageOffset = 
-{
-	var type:String;
-	var offsets:Array<Int>;
-}
 
 
 class PlayState extends MusicBeatState
@@ -152,6 +136,7 @@ class PlayState extends MusicBeatState
 	public static var SongSpeedMultiplier:Float = 1;
 	public static var RandomSpeedChange:Bool = false;
 	public static var allowNoteTypes:Bool = true;
+
 
 	//characters
 	public static var dad:Boyfriend;
@@ -350,6 +335,10 @@ class PlayState extends MusicBeatState
 		p2.createCams();
 		camOnTop = new FlxCamera();
 		camOnTop.bgColor.alpha = 0;
+
+		
+
+
 
 
 
@@ -1690,7 +1679,7 @@ class PlayState extends MusicBeatState
 
 	function resyncVocals():Void
 	{
-		if (!endingSong)
+		if (!endingSong && !rewinding)
 		{
 			trace("synced vocals");
 			FlxG.sound.music.pause();
@@ -1936,7 +1925,7 @@ class PlayState extends MusicBeatState
 					if ((character.canSing && !character.player1Side && !flipped) || (flipped && character.canSing && character.player1Side))
 					{
 						character.playAnim('sing' + sDir[mania][noteData] + altAnim, true, false, 0, noteData);
-						character.holdTimer = 0;			
+						//character.holdTimer = 0;			
 					}
 				}
 			}
@@ -1981,8 +1970,8 @@ class PlayState extends MusicBeatState
 
 			cpu.noteCamMovement = noteCamMovementShit(daNote.noteData, 0);
 
-			if (!daNote.badNoteType)
-				cpu.holdTimer = 0;
+			//if (!daNote.badNoteType)
+				//cpu.holdTimer = 0;
 
 			if (SONG.needsVoices)
 				vocals.volume = 1;
@@ -2030,7 +2019,7 @@ class PlayState extends MusicBeatState
 			if (!daNote.eventWasValid)
 			{
 				gf.playAnim('sing' + sDir[mania][noteData] + altAnim, true);
-				gf.holdTimer = 0;
+				//gf.holdTimer = 0;
 			}
 
 			if (SONG.showGFStrums)
@@ -2103,6 +2092,7 @@ class PlayState extends MusicBeatState
 				Conductor.songPosition = 0;
 				Conductor.songPosition -= Conductor.crochet * 5;
 				createCountdown(true);
+				resyncInst();
 			}
 		}
 		
@@ -2117,13 +2107,28 @@ class PlayState extends MusicBeatState
 		if (generatedMusic)
 		{
 			if (songStarted && !endingSong)
-				if (songLength - Conductor.songPosition <= 0) ///yooo it works pog
+			{
+				if (songLength - Conductor.songPosition <= 200) ///yooo it works pog
 				{
 					//resyncVocals();
 
 					endingSong = true;
 					endSong();
 				}
+				if (songLength - Conductor.songPosition <= 2000) //near the end, get ready for to end
+				{
+					if (!nearEndOfSong)
+					{
+						nearEndOfSong = true;
+						new FlxTimer().start(2.5, function(tmr:FlxTimer) //forcefully end if it loops
+						{
+							endingSong = true;
+							endSong();
+						});
+					}
+				}
+			}
+
 					
 			else if (FlxG.sound.music.playing && canPause && !endingSong)
 			{
@@ -2438,6 +2443,8 @@ class PlayState extends MusicBeatState
 				transIn = FlxTransitionableState.defaultTransIn;
 				transOut = FlxTransitionableState.defaultTransOut;
 
+
+
 				FlxG.switchState(new StoryMenuState());
 
 				// if ()
@@ -2495,6 +2502,7 @@ class PlayState extends MusicBeatState
 	}
 
 	var endingSong:Bool = false;
+	var nearEndOfSong:Bool = false;
 
 	public function createCountdown(rewinded:Bool = false)
 	{
@@ -2691,17 +2699,17 @@ class PlayState extends MusicBeatState
 		rating.screenCenter();
 		rating.x = coolText.x - 40;
 		rating.y -= 60;
-		rating.acceleration.y = 550;
-		rating.velocity.y -= FlxG.random.int(140, 175);
-		rating.velocity.x -= FlxG.random.int(0, 10);
+		rating.acceleration.y = 550 * SongSpeedMultiplier;
+		rating.velocity.y -= FlxG.random.int(140, 175) * SongSpeedMultiplier;
+		rating.velocity.x -= FlxG.random.int(0, 10) * SongSpeedMultiplier;
 
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'combo' + pixelShitPart2));
 		comboSpr.screenCenter();
 		comboSpr.x = coolText.x;
-		comboSpr.acceleration.y = 600;
-		comboSpr.velocity.y -= 150;
+		comboSpr.acceleration.y = 600 * SongSpeedMultiplier;
+		comboSpr.velocity.y -= 150 * SongSpeedMultiplier;
 
-		comboSpr.velocity.x += FlxG.random.int(1, 10);
+		comboSpr.velocity.x += FlxG.random.int(1, 10) * SongSpeedMultiplier;
 		add(rating);
 
 		if (!curStage.startsWith('school'))
@@ -2745,14 +2753,14 @@ class PlayState extends MusicBeatState
 			}
 			numScore.updateHitbox();
 
-			numScore.acceleration.y = FlxG.random.int(200, 300);
-			numScore.velocity.y -= FlxG.random.int(140, 160);
-			numScore.velocity.x = FlxG.random.float(-5, 5);
+			numScore.acceleration.y = FlxG.random.int(200, 300) * SongSpeedMultiplier;
+			numScore.velocity.y -= FlxG.random.int(140, 160) * SongSpeedMultiplier;
+			numScore.velocity.x = FlxG.random.float(-5, 5) * SongSpeedMultiplier;
 
 			if (daCombo >= 10 || daCombo == 0)
 				add(numScore);
 
-			FlxTween.tween(numScore, {alpha: 0}, 0.2, {
+			FlxTween.tween(numScore, {alpha: 0}, 0.2 / SongSpeedMultiplier, {
 				onComplete: function(tween:FlxTween)
 				{
 					numScore.destroy();
@@ -2770,11 +2778,11 @@ class PlayState extends MusicBeatState
 		coolText.text = Std.string(seperatedScore);
 		// add(coolText);
 
-		FlxTween.tween(rating, {alpha: 0}, 0.2, {
+		FlxTween.tween(rating, {alpha: 0}, 0.2 / SongSpeedMultiplier, {
 			startDelay: Conductor.crochet * 0.001
 		});
 
-		FlxTween.tween(comboSpr, {alpha: 0}, 0.2, {
+		FlxTween.tween(comboSpr, {alpha: 0}, 0.2 / SongSpeedMultiplier, {
 			onComplete: function(tween:FlxTween)
 			{
 				coolText.destroy();
@@ -2937,7 +2945,8 @@ class PlayState extends MusicBeatState
 				else 
 				{
 					shit.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
-					shit.color = 0x00303f97;
+					if (shit.canSing)
+						shit.color = 0x00303f97;
 				}
 				for (character in extraCharacters)
 				{
@@ -2962,7 +2971,8 @@ class PlayState extends MusicBeatState
 				else 
 				{
 					shit.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
-					shit.color = 0x00303f97;
+					if (shit.canSing)
+						shit.color = 0x00303f97;
 				}
 				
 				for (character in extraCharacters)
@@ -2990,7 +3000,7 @@ class PlayState extends MusicBeatState
 
 
 			// get stunned for 5 seconds
-			new FlxTimer().start(5 / 60, function(tmr:FlxTimer)
+			new FlxTimer().start((5 / 60) / SongSpeedMultiplier, function(tmr:FlxTimer)
 			{
 				shit.stunned = false;
 				shit.color = 0x00FFFFFF;
@@ -3040,7 +3050,8 @@ class PlayState extends MusicBeatState
 				else 
 				{
 					shit.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
-					shit.color = 0x00303f97;
+					if (shit.canSing)
+						shit.color = 0x00303f97;
 				}
 				for (character in extraCharacters)
 				{
@@ -3066,7 +3077,8 @@ class PlayState extends MusicBeatState
 				else 
 				{
 					shit.playAnim('sing' + sDir[mania][direction], true, false, 0, direction);
-					shit.color = 0x00303f97;
+					if (shit.canSing)
+						shit.color = 0x00303f97;
 				}
 				
 				for (character in extraCharacters)
@@ -3094,7 +3106,7 @@ class PlayState extends MusicBeatState
 
 
 			// get stunned for 5 seconds
-			new FlxTimer().start(5 / 60, function(tmr:FlxTimer)
+			new FlxTimer().start((5 / 60) / SongSpeedMultiplier, function(tmr:FlxTimer)
 			{
 				shit.stunned = false;
 				shit.color = 0x00FFFFFF;
@@ -3151,14 +3163,14 @@ class PlayState extends MusicBeatState
 				if (player.canSing)
 				{
 					player.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true, false, 0, note.noteData);
-					player.holdTimer = 0;
+					//player.holdTimer = 0;
 				}
 				for (character in extraCharacters)
 				{
-					if (character.canSing && character.player1Side)
+					if (character.canSing && (flipped ? !character.player1Side : character.player1Side))
 					{
 						character.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true, false, 0, note.noteData);
-						character.holdTimer = 0;
+						//character.holdTimer = 0;
 					}
 				}
 				player.noteCamMovement = noteCamMovementShit(note.noteData, 1);
@@ -3179,14 +3191,14 @@ class PlayState extends MusicBeatState
 				if (player2.canSing)
 				{
 					player2.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true, false, 0, note.noteData);
-					player2.holdTimer = 0;
+					//player2.holdTimer = 0;
 				}
 				for (character in extraCharacters)
 				{
 					if (character.canSing && !character.player1Side)
 					{
 						character.playAnim('sing' + sDir[mania][note.noteData] + altAnim, true, false, 0, note.noteData);
-						character.holdTimer = 0;
+						//character.holdTimer = 0;
 					}
 				}
 				player2.noteCamMovement = noteCamMovementShit(note.noteData, 0);
@@ -3252,7 +3264,7 @@ class PlayState extends MusicBeatState
 			}
 
 			grace = true;
-			new FlxTimer().start(graceTimerCooldown, function(tmr:FlxTimer)
+			new FlxTimer().start(graceTimerCooldown / SongSpeedMultiplier, function(tmr:FlxTimer)
 			{
 				grace = false;
 			});
@@ -3879,6 +3891,8 @@ class PlayState extends MusicBeatState
 			var ting = FlxMath.lerp(SongSpeedMultiplier,num, tween.percent);
 			if (ting != 0) //divide by 0 is a verry bad
 				SongSpeedMultiplier = ting; //why cant i just tween a variable
+
+			FlxG.sound.music.time = Conductor.songPosition;
 		}});
 		var staticLinesNum = FlxG.random.int(3, 5);
 		for (i in 0...staticLinesNum)
@@ -3900,6 +3914,7 @@ class PlayState extends MusicBeatState
 				{
 					line.destroy();
 					Conductor.recalculateTimings();
+					resyncInst();
 				}
 			});
 		}
