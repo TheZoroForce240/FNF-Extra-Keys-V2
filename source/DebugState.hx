@@ -142,7 +142,7 @@ class DebugState extends MusicBeatState
                 case "Character Debug": 
                     LoadingState.loadAndSwitchState(new AnimationDebug(curCharacter));
                 case "Stage Debug": 
-                    LoadingState.loadAndSwitchState(new StageDebug(curStage));
+                    LoadingState.loadAndSwitchState(new StageDebug(curStage, curCharacter));
                 case "Chart Editor": 
                     #if sys
                     Main.editor = true;

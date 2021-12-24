@@ -411,6 +411,15 @@ class ChartingState extends MusicBeatState
 			tutorialTxt.text = "Save the Chart as a .json";
 		}
 
+		var compatSaveButton:FlxButton = new FlxButton(110, 30, "Compatibility Save", function()
+		{
+			saveLevel(true);
+		});
+		compatSaveButton.onOver.callback = function()
+		{
+			tutorialTxt.text = "Save the Chart as a .json\nWithout events, note types, speed\n and velocity changes.";
+		}
+
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + saveButton.width + 10, saveButton.y, "Reload Audio", function()
 		{
 			loadSong(_song.song);
@@ -486,6 +495,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(check_voices);
 
 		tab_group_song.add(saveButton);
+		tab_group_song.add(compatSaveButton);
 		tab_group_song.add(reloadSong);
 		tab_group_song.add(reloadSongJson);
 		tab_group_song.add(loadAutosaveBtn);
@@ -2597,11 +2607,54 @@ class ChartingState extends MusicBeatState
 		FlxG.save.flush();
 	}
 
-	private function saveLevel()
+	function cleanChart(chart:SwagSong)
+	{
+		for (sections in chart.notes)
+		{
+			for (danote in sections.sectionNotes)
+			{
+				if (danote[1] < 0) //remove event notes in the left grid
+					sections.sectionNotes.remove(danote);
+
+				if (danote[0] < 0)
+					sections.sectionNotes.remove(danote);
+
+				danote[3] = null;
+				danote[4] = null;
+				danote[5] = null;
+				danote[6] = null;
+
+			}
+		}
+
+
+		return chart;
+	}
+
+	private function saveLevel(compatibilityMode:Bool = false)
 	{
 		var json = {
 			"song": _song
 		};
+
+		if (compatibilityMode)
+		{
+			var shit = Json.stringify({ //doin this so it doesnt act as a reference
+				"song": _song
+			});
+			var thing:SwagSong = Song.parseJSONshit(shit);
+
+			for (i in 0...25)
+			{								//so sometimes it would miss random notes, loop it to be sure its all gone
+				thing = cleanChart(thing); //do it 25 times to be 100% sure it works
+			}								//upped to 25 cuz i dont trust it
+
+			json = {
+				"song": thing
+			};
+		}
+
+
 
 		var data:String = Json.stringify(json, "\t");
 

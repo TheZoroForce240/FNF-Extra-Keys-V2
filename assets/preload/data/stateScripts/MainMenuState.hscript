@@ -1,0 +1,168 @@
+
+//testin to see if this is a good idea or not
+var menuItems = [];
+var camFollow;
+var magenta;
+var XOffset = 0;
+var selectedSomethin = false;
+var curSelected = 0;
+
+//typed groups dont wanna fucking work ok 
+//fine il use an array instead
+
+function loadScript() /*as soon as the script exists, good for changing varibles at the start (if savedata or static var, make sure to change it back after!!!!!)*/
+{
+    var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
+    bg.scrollFactor.x = 0;
+    bg.scrollFactor.y = 0.18;
+    bg.setGraphicSize(Std.int(bg.width * 1.1));
+    bg.updateHitbox();
+    bg.screenCenter();
+    bg.antialiasing = true;
+    add(bg);
+
+    camFollow = new FlxObject(0, 0, 1, 1);
+    add(camFollow);
+
+    magenta = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
+    magenta.scrollFactor.x = 0;
+    magenta.scrollFactor.y = 0.18;
+    magenta.setGraphicSize(Std.int(magenta.width * 1.1));
+    magenta.updateHitbox();
+    magenta.screenCenter();
+    magenta.visible = false;
+    magenta.antialiasing = true;
+    magenta.color = 0xFFfd719b;
+    add(magenta);
+    // magenta.scrollFactor.set();
+
+    var tex = Paths.getSparrowAtlas('mainmenu/FNF_main_menu_assets');
+
+    for (i in 0...MainMenuState.optionShit.length)
+    {
+        var menuItem:FlxSprite = new FlxSprite(0, 60 + (i * 160));
+        menuItem.frames = tex;
+        menuItem.animation.addByPrefix('idle', MainMenuState.optionShit[i] + " basic", 24);
+        menuItem.animation.addByPrefix('selected', MainMenuState.optionShit[i] + " white", 24);
+        menuItem.animation.play('idle');
+        menuItem.ID = i;
+        menuItem.screenCenter(X);
+        menuItems.push(menuItem);
+        add(menuItem);
+        menuItem.scrollFactor.set();
+        menuItem.antialiasing = true;
+    }
+
+    FlxG.camera.follow(camFollow, null, 0.06);
+
+    var versionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, Application.current.meta.get('version'), 12);
+    versionShit.scrollFactor.set();
+    versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+    add(versionShit);
+
+}
+
+function update(elapsed) //every frame
+{
+    if (!selectedSomethin)
+    {
+        if (Controls.UP_P)
+        {
+            FlxG.sound.play(Paths.sound('scrollMenu'));
+            changeItem(-1);
+        }
+
+        if (Controls.DOWN_P)
+        {
+            FlxG.sound.play(Paths.sound('scrollMenu'));
+            changeItem(1);
+        }
+
+        if (Controls.BACK)
+        {
+            FlxG.switchState(new TitleState());
+        }
+
+        if (Controls.ACCEPT)
+        {
+            if (MainMenuState.optionShit[curSelected] == 'donate')
+            {
+                FlxG.openURL('https://ninja-muffin24.itch.io/funkin');
+            }
+            else
+            {
+                selectedSomethin = true;
+                FlxG.sound.play(Paths.sound('confirmMenu'));
+
+                FlxFlicker.flicker(magenta, 1.1, 0.15, false);
+
+                for (i in 0...menuItems.length)
+                {
+                    if (curSelected != menuItems[i].ID)
+                    {
+                        FlxTween.tween(menuItems[i], {alpha: 0}, 0.4, {
+                            ease: FlxEase.quadOut,
+                            onComplete: function(twn:FlxTween)
+                            {
+                                menuItems[i].kill();
+                            }
+                        });
+                    }
+                    else
+                    {
+                        FlxFlicker.flicker(menuItems[i], 1, 0.06, false, false, function(flick:FlxFlicker)
+                        {
+                            var daChoice:String = MainMenuState.optionShit[curSelected];
+
+                            switch (daChoice)
+                            {
+                                case 'story mode':
+                                    FlxG.switchState(new StoryMenuState());
+                                    trace("Story Menu Selected");
+                                case 'freeplay':
+                                    FlxG.switchState(new FreeplayState());
+
+                                    trace("Freeplay Menu Selected");
+
+                                case 'options':
+                                    LoadingState.loadAndSwitchState(new CustomizationState());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (i in 0...menuItems.length)
+    {
+        menuItems[i].x = (FlxG.width / 2) - (spr.width / 2) + XOffset;
+    }
+}
+function onStateCreated()
+{
+    changeItem(0);
+}
+
+function changeItem(huh)
+{
+    curSelected += huh;
+
+    if (curSelected >= menuItems.length)
+        curSelected = 0;
+    if (curSelected < 0)
+        curSelected = menuItems.length - 1;
+
+    for (i in 0...menuItems.length)
+    {
+        menuItems[i].animation.play('idle');
+
+        if (menuItems[i].ID == curSelected)
+        {
+            menuItems[i].animation.play('selected');
+            camFollow.setPosition(menuItems[i].getGraphicMidpoint().x, menuItems[i].getGraphicMidpoint().y);
+        }
+
+        menuItems[i].updateHitbox();
+    }
+}

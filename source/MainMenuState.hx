@@ -19,6 +19,9 @@ import io.newgrounds.NG;
 import lime.app.Application;
 import flixel.util.FlxTimer;
 import flixel.FlxSubState;
+import hscript.Expr;
+import hscript.Interp;
+import hscript.Parser;
 
 #if sys
 import sys.io.File;
@@ -30,11 +33,14 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
+	
+
 	var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
 
 	public static var songText:FlxText;
+
 
 	#if !switch
 	public static var optionShit:Array<String> = ['story mode', 'freeplay', 'donate', 'options'];
@@ -49,8 +55,18 @@ class MainMenuState extends MusicBeatState
 
 	public static var curSong:String = "Freaky Menu";
 
+	/*public var script:HscriptShit;
+	public static var instance:MainMenuState;
+
+	public function call(tfisthis:String, shitToGoIn:Array<Dynamic>)
+	{
+		if (script.enabled)
+			script.call(tfisthis, shitToGoIn);
+	}*/
+
 	override function create()
 	{
+		//instance = this;
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
@@ -69,6 +85,8 @@ class MainMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 
+		//script = new HscriptShit("assets/data/stateScripts/MainMenuState.hscript"); //heheheha
+		//call("loadScript", []);
 		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
 		bg.scrollFactor.x = 0;
 		bg.scrollFactor.y = 0.18;
@@ -121,13 +139,14 @@ class MainMenuState extends MusicBeatState
 
 		// NG.core.calls.event.logEvent('swag').send();
 		SaveData.keyBindCheck();
-
+		//call("onStateCreated", []);
 		changeItem();
 
 		super.create();
 	}
 
 	var selectedSomethin:Bool = false;
+	
 
 	override function update(elapsed:Float)
 	{
@@ -145,9 +164,7 @@ class MainMenuState extends MusicBeatState
 			FlxG.switchState(new DebugState());
 		}
 
-
-
-
+		//call("update", [elapsed]);
 		if (!selectedSomethin)
 		{
 			if (controls.UP_P)
@@ -233,8 +250,8 @@ class MainMenuState extends MusicBeatState
 		{
 			spr.x = (FlxG.width / 2) - (spr.width / 2) + XOffset;
 		});
-	}
 
+	}
 	function changeItem(huh:Int = 0)
 	{
 		curSelected += huh;
@@ -257,6 +274,7 @@ class MainMenuState extends MusicBeatState
 			spr.updateHitbox();
 		});
 	}
+
 
 	public static function musicShit():Void
 	{

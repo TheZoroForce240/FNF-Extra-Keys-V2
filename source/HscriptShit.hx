@@ -1,5 +1,10 @@
 package;
 
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.effects.FlxFlicker;
+import flixel.system.FlxSound;
+import flixel.text.FlxText;
+import Controls.Control;
 import openfl.utils.Function;
 import lime.utils.Assets;
 import flixel.FlxG;
@@ -9,6 +14,8 @@ import hscript.Parser;
 import hscript.ParserEx;
 import hscript.InterpEx;
 import flixel.FlxSprite;
+import flixel.FlxObject;
+import flixel.FlxBasic;
 import flixel.math.FlxAngle;
 import flixel.math.FlxMath;
 import openfl.utils.Assets as OpenFlAssets;
@@ -18,6 +25,7 @@ import flixel.util.FlxTimer;
 import flixel.addons.effects.FlxTrail;
 import flixel.addons.effects.FlxTrailArea;
 using StringTools;
+import lime.app.Application;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -31,9 +39,8 @@ class HscriptShit //funni modcharts
     public var enabled:Bool = false;
     var script:Expr;
 
-    public function new (song:String)
+    public function new (path:String)
     {
-        var path = "assets/data/charts/" + song + "/script.hscript";
         #if sys
 		if (FileSystem.exists(path))
 		{
@@ -77,6 +84,10 @@ class HscriptShit //funni modcharts
 		#else
 		var rawCode = Assets.getText(path);
 		#end
+        parser.allowTypes = true;
+        parser.allowMetadata = true;
+        parser.allowJSON = true;
+        parser.resumeErrors = true;
         script = parser.parseString(rawCode); //load da shit
         interp = new Interp();       
         //trace(script);
@@ -87,7 +98,8 @@ class HscriptShit //funni modcharts
         interp.variables.set("loadScript", function () {});
         interp.variables.set("endScript", function () {});
 		interp.variables.set("startSong", function (song) {});
-        interp.variables.set("onPlayStateCreated", function () {});
+        interp.variables.set("onPlayStateCreated", function () {}); //left this here cuz i used it before, just use onStateCreated
+        interp.variables.set("onStateCreated", function () {});
         interp.variables.set("endSong", function () {});
 		interp.variables.set("update", function (elapsed) {});
 		interp.variables.set("stepHit", function(step) {});
@@ -142,6 +154,29 @@ class HscriptShit //funni modcharts
         interp.variables.set("CoolUtil", CoolUtil);
         interp.variables.set("FlxTrail", FlxTrail);
         interp.variables.set("CacheShit", CacheShit); //not sure about this one, you could clear the cache i guess
+        interp.variables.set("MainMenuState", MainMenuState);
+        interp.variables.set("Controls", Controls);
+        interp.variables.set("FlxText", FlxText);
+        interp.variables.set("FlxSound", FlxSound);
+        interp.variables.set("FlxFlicker", FlxFlicker);
+        interp.variables.set("FlxTypedGroup", FlxTypedGroup);
+        interp.variables.set("Main", Main);
+        interp.variables.set("TitleState", TitleState);
+        interp.variables.set("ColorPresets", ColorPresets);
+        interp.variables.set("SaveData", SaveData);
+        interp.variables.set("Application", Application);
+
+
+
+        interp.variables.set("add", function(obj:FlxBasic) 
+        {
+            FlxG.state.add(obj);
+        });
+        interp.variables.set("remove", function(obj:FlxBasic) 
+        {
+            FlxG.state.remove(obj);
+        });
+
         /*interp.variables.set("P1Health", PlayState.instance.P1Stats.health); //apparently these dont wanna work, can access directly through playstate though
         interp.variables.set("StrumLineStartY", PlayState.StrumLineStartY);
         interp.variables.set("playerStrums", PlayState.playerStrums);

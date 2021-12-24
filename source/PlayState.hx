@@ -305,7 +305,7 @@ class PlayState extends MusicBeatState
 			FlxG.sound.music.stop();
 
 		var songLowercase = PlayState.SONG.song.toLowerCase();
-		modchartScript = new HscriptShit(songLowercase);
+		modchartScript = new HscriptShit("assets/data/charts/" + songLowercase + "/script.hscript");
 		trace ("file loaded = " + modchartScript.enabled);
 		call("loadScript", []);
 
@@ -675,13 +675,10 @@ class PlayState extends MusicBeatState
 			boyfriend.x += bfOffset[0];
 			boyfriend.y += bfOffset[1];
 		}
-
-
-		//stage offsets are above inside the case statement for stages
-
+		
 		var stupidArray:Array<String> = ['dad', 'bf', 'gf'];
 		var stupidCharArray:Array<Dynamic> = [dad, boyfriend, gf];
-		//stage offsets (uses a for loop)
+		//stage offsets
 		for (i in 0...stupidArray.length)
 		{
 			var offset = stageOffsets.get(stupidArray[i]);
@@ -998,6 +995,7 @@ class PlayState extends MusicBeatState
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, releaseInput);
 
 		call("onPlayStateCreated", []);
+		call("onStateCreated", []);
 
 		super.create();
 	}
@@ -1333,7 +1331,15 @@ class PlayState extends MusicBeatState
 						goodNoteHit(shitNote, playernum);
 
 					if (hittableNotes.length > 2 && SaveData.casual) //literally all you need to allow you to spam though impossiblely hard jacks
-						goodNoteHit(shitNote, playernum);
+					{
+						var notesThatCanBeHit = hittableNotes.length;
+						for (i in 0...Std.int(notesThatCanBeHit / 2))
+						{
+							goodNoteHit(hittableNotes[i], playernum);
+						}
+						
+					}
+						
 				}
 
 			}
@@ -1801,19 +1807,23 @@ class PlayState extends MusicBeatState
 		{
 			strumNote.angle = strumNote.strumLineAngle + 90;
 		}
+
+
+
 		noteAngle = strumNote.angle;
 
-		var anglething = noteAngle;
-		if (!Note.followAngle)
-			anglething = 0; //so i can turn it off to reduce lag
-		
+		var anglething = daNote.incomingAngle;
 
+		if (Note.followAngle)
+		{
+			anglething = strumNote.angle - 90;
+		}
 
 		var calculatedStrumtime = calculateStrumtime(daNote, Conductor.songPosition);
 		var notePos:FlxPoint;
 		var noteCurPos = daNote.startPos - calculatedStrumtime;
-																	//+90 so notes come from the correct angle
-		notePos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, anglething - 90); //this is easier than i thought
+																	//-90 so notes come from the correct angle
+		notePos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, anglething); //this is easier than i thought
 
 		//susPos = FlxAngle.getCartesianCoords(0.45 * noteCurPos, noteAngle + 90);
 		
@@ -1847,7 +1857,11 @@ class PlayState extends MusicBeatState
 						
 
 		daNote.visible = noteVisible;
-		daNote.angle = noteAngle;
+		daNote.angle = daNote.incomingAngle + 90;
+		if (Note.followAngle)
+		{
+			daNote.angle = noteAngle;
+		}
 		
 
 		if (isSustainNote)

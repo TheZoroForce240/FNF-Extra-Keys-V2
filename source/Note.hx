@@ -83,6 +83,7 @@ class Note extends FlxSprite
 	public var lateHitTiming = -hitTiming;
 	public static var followAngle:Bool = false;
 	public static var StrumLinefollowAngle:Bool = false;
+	public var incomingAngle:Float = -90;
 
 	////////////////////////////////////////////////////////////
 
@@ -897,26 +898,56 @@ class Note extends FlxSprite
 
 	public function clipSustain(clipTo:FlxPoint)
 	{
-		var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
+		
 		//var notepos = new FlxPoint(this.x, this.y);
 		//var rad = clipTo.distanceTo(notepos);
 		//var rectshit = FlxAngle.getPolarCoords((clipTo.x - this.x) / scale.x, (clipTo.y - this.y) / scale.y);
 		//var rectPos = FlxAngle.getCartesianCoords(rectshit., angle + 90);
 		//fuckYouRect.y = (clipTo.y - rectPos.y) / scale.y;
-		
-		if ((angle % 360 > 180 || angle % 360 < -180) && followAngle)
+		var angleshit = incomingAngle % 360;
+
+		if (followAngle)
 		{
-			fuckYouRect = new FlxRect(0,0, this.frameWidth * 2, this.frameHeight * 2); //TODO find a way to clip based on angle
+			angleshit = angle % 360;
+		}
+
+		var up = (angleshit <= 315 && angleshit >= 225);
+		var left = (angleshit <= 225 && angleshit >= 135);
+		var right = (angleshit <= 45 && angleshit >= 315);
+		var down = (angleshit <= 135 && angleshit >= 45);
+
+
+		if (down)
+		{
+			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
+			fuckYouRect = new FlxRect(0,0, this.frameWidth * 2, this.frameHeight * 2);
 			fuckYouRect.height = ((clipTo.y - y) / scale.y);
 			fuckYouRect.y = this.frameHeight - fuckYouRect.height;
+			clipRect = fuckYouRect;
 		}
-		else
+		else if (left)
 		{
+			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
+			fuckYouRect.x = ((clipTo.x - x) / scale.y);
+			fuckYouRect.height -= fuckYouRect.x;
+			clipRect = fuckYouRect;
+		}
+		else if (right)
+		{
+			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
+			fuckYouRect.x = ((clipTo.x - x) / scale.y);
+			fuckYouRect.height -= fuckYouRect.x;
+			clipRect = fuckYouRect;
+		}
+		else //default to regular clipping i guess lol 
+		{
+			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
 			fuckYouRect.y = ((clipTo.y - y) / scale.y);
 			fuckYouRect.height -= fuckYouRect.y;
+			clipRect = fuckYouRect;
 		}
 			
-		clipRect = fuckYouRect;
+		
 
 		//clipTo - (y + offset.y * scale.y)
 	}
