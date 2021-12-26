@@ -147,6 +147,44 @@ class ModchartUtil
         return null;
     }
 
+    public static function getNoteFromID(id)
+    {
+        for (i in PlayState.instance.unspawnNotes)
+            if (i.ID == id)
+                return i;
+        for (i in PlayState.p1.strums.notes)
+            if (i.ID == id)
+                return i;
+        for (i in PlayState.p2.strums.notes)
+            if (i.ID == id)
+                return i;
+        for (i in PlayState.p3.strums.notes)
+            if (i.ID == id)
+                return i;
+        
+        return null;
+    }
+    public static function getStagePiece(piecename)
+    {
+        for (i in PlayState.instance.StagePiecesBEHIND)
+            if (i.part == piecename)
+                return i;
+        for (i in PlayState.instance.StagePiecesGF)
+            if (i.part == piecename)
+                return i;
+        for (i in PlayState.instance.StagePiecesDAD)
+            if (i.part == piecename)
+                return i;
+        for (i in PlayState.instance.StagePiecesBF)
+            if (i.part == piecename)
+                return i;
+        for (i in PlayState.instance.StagePiecesFRONT)
+            if (i.part == piecename)
+                return i;
+        
+        return null;
+    }
+
     // epic modchart like effects using events instead of lua
 
 	////////////////////////////////////////////////////////////////

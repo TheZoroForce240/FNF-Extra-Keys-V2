@@ -945,6 +945,7 @@ class Character extends FlxSprite
 
 				var color = json.healthBar;
 				healthColors = [color.red, color.green, color.blue];
+				
 					
 
 		}
@@ -956,5 +957,56 @@ class Character extends FlxSprite
 		{
 			flipX = !flipX;
 		}
+	}
+
+
+
+	function autoGenerateAnims():Void //auto animation shit, no auto offsets though obviously
+	{
+		if (animation.getByName('idle') != null)
+		{
+			var animName = findAnimName('idle');
+			if (animName != "")
+				animation.addByPrefix('idle', animName, 24, false);
+		}
+		if (animation.getByName('singLEFT') != null)
+		{
+			var animName = findAnimName('left');
+			if (animName != "")
+				animation.addByPrefix('singLEFT', animName, 24, false);
+		}
+		if (animation.getByName('singUP') != null)
+		{
+			var animName = findAnimName('up');
+			if (animName != "")
+				animation.addByPrefix('singUP', animName, 24, false);
+		}
+		if (animation.getByName('singDOWN') != null)
+		{
+			var animName = findAnimName('down');
+			if (animName != "")
+				animation.addByPrefix('singDOWN', animName, 24, false);
+		}
+		if (animation.getByName('singRIGHT') != null)
+		{
+			var animName = findAnimName('right');
+			if (animName != "")
+				animation.addByPrefix('singRIGHT', animName, 24, false);
+		}
+		
+	}
+
+	function findAnimName(name:String)
+	{
+		for (frame in this.frames.frames)
+		{
+			if (frame.name != null)
+			{
+				var fname = frame.name.toLowerCase();
+				if (fname.contains(name.toLowerCase()))
+					return frame.name;
+			}
+		}
+		return "";
 	}
 }

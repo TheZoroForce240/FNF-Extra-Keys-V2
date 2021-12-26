@@ -69,6 +69,15 @@ typedef PieceAnims =
 	var loop:Bool;
 }
 
+enum PieceLayer
+{
+    BEHIND;
+    GF;
+    DAD;
+    BF;
+    FRONT;
+}
+
 class StagePiece extends FlxSprite
 {
     public var part:String = "stageFront";
@@ -99,6 +108,8 @@ class StagePiece extends FlxSprite
     public var anims:Array<PieceAnims> = [];
 
     public var startAnim:String = "Bop";
+
+    public var pieceLayer:PieceLayer = BEHIND;
 
     public var animFrameRates:Map<String, Int>; //funni speed up
     var tex:FlxAtlasFrames;
@@ -269,6 +280,7 @@ class StagePiece extends FlxSprite
                 newy = 550;
                 addAnimFromPrefix('drive', "Limo stage", 24);
                 playAnim('drive');
+                pieceLayer = GF;
             case 'fastCar': 
                 danceable = true;
                 loadGraphic(Paths.image('limo/fastCarLol', 'week4'));
@@ -753,7 +765,7 @@ class StagePiece extends FlxSprite
                     daStage = 'limo';
                     zoom = 0.90;
                     offsetMap['bf'] = [260, -220];
-                    pieces = ['limoSkyBG', 'limoBG', 'bgDancer', 'bgDancer', 'bgDancer', 'bgDancer', 'bgDancer', 'fastCar'];
+                    pieces = ['limoSkyBG', 'limoBG', 'bgDancer', 'bgDancer', 'bgDancer', 'bgDancer', 'bgDancer', 'fastCar', 'limo'];
                 /////////////////////////////////////////////////////////////////////
                 case 'mall':
                     daStage = 'mall';

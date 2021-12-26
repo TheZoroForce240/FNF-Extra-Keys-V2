@@ -57,9 +57,13 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
         add(infoText);
         infoText.scrollFactor.set();
 
+        var warning = new FlxText(10, 10, 0, "Warning: Some settings require the song to be restarted!!!!");
+        warning.setFormat("VCR OSD Mono", 28, FlxColor.WHITE, RIGHT, OUTLINE, FlxColor.BLACK);
+        warning.scrollFactor.set();
+        add(warning);
+
         createText();
 
-        trace(daLARGEText.x);
 
         cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 
@@ -375,7 +379,7 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
         //make sure you dont mess up your commas lol
         categories = [
             ["Gameplay", "", "cat"],
-            ["Scrolls", "", "cat"],
+            ["Scrolls", "", "button"],
             ["Misc", "", "cat"],
             ["Keybinds", "", "cat"],
             ["P2 Keybinds", "", "cat"],
@@ -392,14 +396,7 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
             ["Multiplayer", SaveData.multiplayer, "toggle", "Turn on to play with a friend locally\n(or just play both side because you have no friends)"],
             ["Strumtime Offset", SaveData.offset, "slider", "offset notes to match your audio delay"]
         ];
-    
-        scrolls = [
-            ["P1 Downscroll", SaveData.downscroll, "toggle", "Flip Da Notes"],
-            ["P2 Downscroll", SaveData.P2downscroll, "toggle", "Flip Da Notes but for the second guy"],
-            ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"],
-            ["P1 Splitscroll", SaveData.splitScroll, "toggle", "Both Upscroll and downscroll (change normal downscroll setting to switch the side thats flipped)"],
-            ["P2 Splitscroll", SaveData.P2splitScroll, "toggle", "Both Upscroll and downscroll (change normal downscroll setting to switch the side thats flipped)"]
-        ];
+
         misc = [ 
             ["Note Splash", SaveData.noteSplash, "toggle", "Turn on the funni effect when hitting sicks"],
             ["FPS Cap", SaveData.fps, "slider", "Turn up for more frames"],
@@ -496,7 +493,9 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
             ["Play As Oppenent", SaveData.flip, "toggle", "figure it out lol"],
             ["Song Speed Multi", PlayState.SongSpeedMultiplier, "slider", "change the song speed"],
             ["Random Speed Change", PlayState.RandomSpeedChange, "toggle", "randomly change the speed"],
-            ["Allow Note Types", PlayState.allowNoteTypes, "toggle", "enables note types"]
+            ["Allow Note Types", PlayState.allowNoteTypes, "toggle", "enables note types"],
+            ["Random Note Incoming Angles", PlayState.randomNoteAngles, "toggle", "pain"],
+            ["Rainbow Notes", PlayState.rainbowNotes, "toggle", "Rainbow Road"]
         ];
 
         switch (daCat)
@@ -620,6 +619,10 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
                     PlayState.RandomSpeedChange = curCategory[i][1]; 
                 case "Allow Note Types":
                     PlayState.allowNoteTypes = curCategory[i][1]; 
+                case "Random Note Incoming Angles":
+                    PlayState.randomNoteAngles = curCategory[i][1]; 
+                case "Rainbow Notes":
+                    PlayState.rainbowNotes = curCategory[i][1]; 
                 case "Enable Characters":
                     PlayState.characters = curCategory[i][1]; 
                 case "Enable Backgrounds":

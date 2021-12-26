@@ -48,28 +48,6 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
 
     var health:Float = 1;
 
-    public var P1Stats = {
-		songScore : 0,
-		fc : true,
-		sicks : 0,
-		goods : 0,
-		bads : 0,
-		shits : 0,
-		misses : 0,
-		ghostmisses : 0,
-		totalNotesHit : 0,
-		accuracy : 0.0,
-		curRank : "None",
-		combo : 0,
-		highestCombo : 0,
-		nps : 0,
-		highestNps : 0,
-		health : 1.0,
-		poisonHits : 0,
-		scorelerp : 0,
-		acclerp : 0.0
-	};
-
 	override function create()
     {	
         reloadOptions();
@@ -94,8 +72,6 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
         infoText.scrollFactor.set();
         createHud();
         createText();
-
-        trace(daLARGEText.x);
 
         cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 
@@ -176,90 +152,6 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
             curCategory[curSelected][1] = 0.1;
         else if (curCategory[curSelected][1] > 1 && curCategory[curSelected][0] == "Hud Opacity")
             curCategory[curSelected][1] = 1;
-
-        P1Stats.scorelerp = Math.floor(FlxMath.lerp(P1Stats.scorelerp, P1Stats.songScore, 0.4)); //funni lerp
-		P1Stats.acclerp = FlxMath.roundDecimal(FlxMath.lerp(P1Stats.acclerp, P1Stats.accuracy, 0.4), 2);
-
-		if (Math.abs(P1Stats.scorelerp - P1Stats.songScore) <= 10)
-			P1Stats.scorelerp = P1Stats.songScore;
-
-		if ((P1Stats.acclerp - P1Stats.accuracy) <= 0.05)
-			P1Stats.acclerp = P1Stats.accuracy;
-
-		var score = "Score:" + P1Stats.scorelerp;
-		var rank = "Rank: " + P1Stats.curRank;
-		var acc = "Accuracy: " + P1Stats.acclerp + "%";
-		var miss = "Misses: " + P1Stats.misses;
-
-		var timeLeft = 10000 - 1000;
-		var time:Date = Date.fromTime(timeLeft);
-		var mins = time.getMinutes();
-		var secs = time.getSeconds();
-		var multitext:String = "(x" + FlxMath.roundDecimal(PlayState.SongSpeedMultiplier, 2) + ")";
-		if (PlayState.SongSpeedMultiplier == 1)
-			multitext = "";
-		var time = "";
-		if (secs < 10) //so it looks right
-			time = " - " + mins + ":" + "0" + secs; 
-		else
-			time = " - " + mins + ":" + secs; 
-
-		var sick = "Sicks: " + P1Stats.sicks;
-		var good = "Goods: " + P1Stats.goods;
-		var bad = "Bads: " + P1Stats.bads;
-		var shit = "Shits: " + P1Stats.shits;
-		var ghost = "Ghost Misses: " + P1Stats.ghostmisses;
-		var comb = "Combo: " + P1Stats.combo;
-		var highestcomb = "Highest Combo: " + P1Stats.highestCombo;
-		var nps = "NPS: " + P1Stats.nps;
-		var highestnps = "Highest NPS: " + P1Stats.highestNps;
-		var hp = "Health: " + Math.round(healthBar.percent) + "%";
-
-
-
-
-		var listOShit = [score, rank, acc, miss, "", "", sick, good, bad, shit, ghost, comb, highestcomb, nps, highestnps, hp];
-
-
-        scoreTxt.text = "";
-        timeText.text = "";
-        for (i in 0...SaveData.enabledHudSections.length)
-        {
-            if (SaveData.enabledHudSections[i] == true)
-            {
-                if (i == 4 || i == 5) //timer/songname text
-                {
-                    if (i == 4)
-                    {
-                        timeText.text += songtext + multitext;
-                        if (!SaveData.enabledHudSections[5])
-                            timeText.text += modeText; //add mode text if no timer
-                    }
-                    else if (i == 5)
-                    {
-                        timeText.text += time;
-                        if (SaveData.enabledHudSections[4])
-                            timeText.text += modeText; //add mode text after timer
-                    }
-                }
-                else 
-                {
-                    if ((i == 6 || i == 11) && SaveData.hudPos == "Default")
-                        scoreTxt.text += "\n";
-
-                    if (SaveData.hudPos != "Default")
-                        scoreTxt.text += "\n";
-                    else
-                        scoreTxt.text += "|";
-
-                    scoreTxt.text += listOShit[i];
-
-                    if (SaveData.hudPos == "Default")
-                        scoreTxt.text += "|";
-
-                }
-            }
-        }
         
     }
 
@@ -369,29 +261,9 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
     {
         //haha copy pasted lol
         categories = [
-            ["Score Hud Position", SaveData.hudPos, "mode"],
-            ["Song Name/Time Hud Position", SaveData.songhudPos, "mode"],
-            ["Score", SaveData.enabledHudSections[0], "toggle"],
-            ["Rank", SaveData.enabledHudSections[1], "toggle"],
-            ["Accuracy", SaveData.enabledHudSections[2], "toggle"],
-            ["Misses", SaveData.enabledHudSections[3], "toggle"],
-            ["Song Name", SaveData.enabledHudSections[4], "toggle"],
-            ["Timer", SaveData.enabledHudSections[5], "toggle"],
-            ["", "", "cat", ""],
-            ["Sicks", SaveData.enabledHudSections[6], "toggle"],
-            ["Goods", SaveData.enabledHudSections[7], "toggle"],
-            ["Bads", SaveData.enabledHudSections[8], "toggle"],
-            ["Shits", SaveData.enabledHudSections[9], "toggle"],
-            ["Ghost Misses",SaveData.enabledHudSections[10], "toggle"],
-            ["Combo", SaveData.enabledHudSections[11], "toggle"],
-            ["Highest Combo", SaveData.enabledHudSections[12], "toggle"],
-            ["NPS", SaveData.enabledHudSections[13], "toggle"],
-            ["Highest NPS", SaveData.enabledHudSections[14], "toggle"],
-            ["", "", ""],
-            ["Arrow Lanes/backing", SaveData.arrowLanes, "mode"],
-            ["Lane Opacity", SaveData.laneOpacity, "slider"],
-            ["Health Bar Position", SaveData.hpBarPos, "mode", "Auto-Centers if P1 scroll is not the same as P2 scroll"],
-            ["Hud Opacity", SaveData.hudOpacity, "slider"],
+            ["P1 Flip", SaveData.downscroll, "toggle", "Flip Da Notes"],
+            ["P2 Flip", SaveData.P2downscroll, "toggle", "Flip Da Notes but for the second guy"],
+            ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"]
         ];
         //name, savedata, type of option, info
         
@@ -407,51 +279,6 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
             {
                 case "Random Speed Change":
                     PlayState.RandomSpeedChange = curCategory[i][1]; 
-
-                case "Score Hud Position":
-                    SaveData.hudPos = curCategory[i][1]; 
-                case "Song Name/Time Hud Position":
-                    SaveData.songhudPos = curCategory[i][1]; 
-                case "Health Bar Position":
-                    SaveData.hpBarPos = curCategory[i][1]; 
-                case "Hud Opacity":
-                    SaveData.hudOpacity = curCategory[i][1]; 
-                case "Score":
-                    SaveData.enabledHudSections[0] = curCategory[i][1]; 
-                case "Rank":
-                    SaveData.enabledHudSections[1] = curCategory[i][1]; 
-                case "Accuracy":
-                    SaveData.enabledHudSections[2] = curCategory[i][1]; 
-                case "Misses":
-                    SaveData.enabledHudSections[3] = curCategory[i][1]; 
-                case "Song Name":
-                    SaveData.enabledHudSections[4] = curCategory[i][1]; 
-                case "Timer":
-                    SaveData.enabledHudSections[5] = curCategory[i][1]; 
-                case "Sicks":
-                    SaveData.enabledHudSections[6] = curCategory[i][1]; 
-                case "Goods":
-                    SaveData.enabledHudSections[7] = curCategory[i][1]; 
-                case "Bads":
-                    SaveData.enabledHudSections[8] = curCategory[i][1]; 
-                case "Shits":
-                    SaveData.enabledHudSections[9] = curCategory[i][1]; 
-                case "Ghost Misses":
-                    SaveData.enabledHudSections[10] = curCategory[i][1]; 
-                case "Combo":
-                    SaveData.enabledHudSections[11] = curCategory[i][1]; 
-                case "Highest Combo":
-                    SaveData.enabledHudSections[12] = curCategory[i][1]; 
-                case "NPS":
-                    SaveData.enabledHudSections[13] = curCategory[i][1]; 
-                case "Highest NPS":
-                    SaveData.enabledHudSections[14] = curCategory[i][1]; 
-                case "Health Percentage":
-                    SaveData.enabledHudSections[15] = curCategory[i][1]; 
-                case "Arrow Lanes/backing":
-                    SaveData.arrowLanes = curCategory[i][1]; 
-                case "Lane Opacity": 
-                    SaveData.laneOpacity = curCategory[i][1]; 
             }
         }
     }

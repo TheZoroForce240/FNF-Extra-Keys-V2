@@ -43,9 +43,7 @@ class Player
 
     public var playernum:Int;
     public var noteCam:FlxCamera;
-	public var noteCamSplit:FlxCamera; //splitscroll fuck you
     public var noteCamsus:FlxCamera;    //so i can have wiggle sustains
-	public var noteCamSplitsus:FlxCamera; 
     public var char:Boyfriend;
     public var isCpu:Bool = true;
 
@@ -59,22 +57,15 @@ class Player
     {
         noteCam = new FlxCamera();
 		noteCam.bgColor.alpha = 0;
-		noteCamSplit = new FlxCamera();
-		noteCamSplit.bgColor.alpha = 0;
 
         noteCamsus = new FlxCamera();
 		noteCamsus.bgColor.alpha = 0;
-		noteCamSplitsus = new FlxCamera();
-		noteCamSplitsus.bgColor.alpha = 0;
     }
     public function addCams()
     {
         FlxG.cameras.add(noteCam);
-		FlxG.cameras.add(noteCamSplit);
         FlxG.cameras.add(noteCamsus);
-		FlxG.cameras.add(noteCamSplitsus);
         noteCamsus.setFilters([new ShaderFilter(wiggleShit.shader)]);
-        noteCamSplitsus.setFilters([new ShaderFilter(wiggleShit.shader)]);
 
         /*wiggleShit.effectType = WiggleEffectType.DREAMY;
         wiggleShit.waveSpeed = 1;
@@ -103,15 +94,12 @@ class Player
 		Stats.npsArray = [];
     }
 
-    public function downscrollCheck(downscroll:Bool, splitScroll:Bool)
+    public function downscrollCheck(downscroll:Bool)
     {
         if (downscroll)
         {
             noteCam.flashSprite.scaleY *= 1;
-            noteCamSplit.flashSprite.scaleY *= 1;
         }
-        if (splitScroll)
-            noteCamSplit.flashSprite.scaleY *= 1; //flip back to opposite
     }
 
     public function createStrums()
@@ -134,15 +122,9 @@ class Player
         noteCam.x = camHUD.x; //so they match up when it moves, pretty much will just be for modcharts and shit
 		noteCam.y = camHUD.y;
 		noteCam.angle = camHUD.angle;
-        noteCamSplit.x = camHUD.x;
-		noteCamSplit.y = camHUD.y;
-		noteCamSplit.angle = camHUD.angle;
         noteCamsus.x = camHUD.x;
 		noteCamsus.y = camHUD.y;
 		noteCamsus.angle = camHUD.angle;
-        noteCamSplitsus.x = camHUD.x;
-		noteCamSplitsus.y = camHUD.y;
-		noteCamSplitsus.angle = camHUD.angle;
     }
 
 

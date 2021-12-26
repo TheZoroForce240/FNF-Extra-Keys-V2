@@ -78,6 +78,7 @@ class BabyArrow extends FlxSprite
     public var colorShiz:Array<Float>;
     var pathToUse:Int = 0;
     public var scaleMulti:Float = 1;
+    public var widthMulti:Float = 1;
     public var curMania:Int = 0;
 
     public var defaultX:Float = 0;
@@ -135,8 +136,13 @@ class BabyArrow extends FlxSprite
 
 
         stylelol = style;
+
+
+        widthMulti = SaveData.noteWidthMulti;
+        scaleMulti = SaveData.noteScaleMulti;
+
         if (SaveData.middlescroll && player == 0)
-            scaleMulti = 0.55;
+            scaleMulti *= 0.55;
 
         
         var color = Note.frameN[maniaToUse][i];
@@ -168,7 +174,7 @@ class BabyArrow extends FlxSprite
 
         if (isPlayState && (player == 1 || (player == 0 && PlayState.multiplayer || PlayState.flipped)) && SaveData.arrowLanes != "Off")
         {
-            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[maniaToUse]), Std.int(FlxG.height * 2), flxcolorToUse);
+            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[maniaToUse] * widthMulti), Std.int(FlxG.height * 2), flxcolorToUse);
             PlayState.instance.add(lane);
             lane.cameras = [PlayState.instance.camHUD];
             lane.alpha = SaveData.laneOpacity;
@@ -196,7 +202,7 @@ class BabyArrow extends FlxSprite
 
                 defaultWidth = width;
                 setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelNoteScales[maniaToUse] * scaleMulti));
-                x += Note.noteWidths[maniaToUse] * i * scaleMulti; 
+                x += Note.noteWidths[maniaToUse] * i * scaleMulti * widthMulti; 
                 updateHitbox();
                 antialiasing = false;
                 animation.add('static', [colorFromData[maniaToUse][i]]);
@@ -218,7 +224,7 @@ class BabyArrow extends FlxSprite
                 antialiasing = true;
                 defaultWidth = width;
                 setGraphicSize(Std.int(width * Note.noteScales[maniaToUse] * scaleMulti));
-                x += Note.noteWidths[maniaToUse] * i * scaleMulti; 
+                x += Note.noteWidths[maniaToUse] * i * scaleMulti * widthMulti; 
 
                 animation.addByPrefix('static', 'arrow' + dir);
                 animation.addByPrefix('pressed', color + ' press', 24, false);
@@ -247,7 +253,7 @@ class BabyArrow extends FlxSprite
 			animation.play('static');
 			x += 50;
             if (SaveData.middlescroll && player == 1 && isPlayState)
-			    x += ((FlxG.width / 2) * 0.5) + (Note.noteWidths[maniaToUse] / 2);
+			    x += ((FlxG.width / 2) * 0.5) + ((Note.noteWidths[maniaToUse] * widthMulti) / 2);
             else 
                 x += ((FlxG.width / 2) * player);
 
@@ -271,23 +277,11 @@ class BabyArrow extends FlxSprite
 
             if (SaveData.splitScroll && player == 1)
             {
-                if (i >= (PlayState.keyAmmo[maniaToUse] / 2) && isPlayState)
-                {
-                    this.cameras = [PlayState.p1.noteCamSplit];
-                    scale.y *= -1;
-                }
-                else
-                    this.cameras = [PlayState.p1.noteCam];
+                this.cameras = [PlayState.p1.noteCam];
             }
             else if (SaveData.P2splitScroll && player == 0)
             {
-                if (i >= (PlayState.keyAmmo[maniaToUse] / 2) && isPlayState)
-                {
-                    this.cameras = [PlayState.p2.noteCamSplit];
-                    scale.y *= -1;
-                }
-                else
-                    this.cameras = [PlayState.p2.noteCam];
+                this.cameras = [PlayState.p2.noteCam];
             }
 
 
@@ -427,7 +421,7 @@ class BabyArrow extends FlxSprite
         }            
         else
         {
-            spr.x += Note.noteWidths[newMania] * maniaSwitchPositions[newMania][spr.ID] * scaleMulti;
+            spr.x += Note.noteWidths[newMania] * maniaSwitchPositions[newMania][spr.ID] * scaleMulti * widthMulti;
             curID = maniaSwitchPositions[newMania][spr.ID];
         }
 
@@ -436,7 +430,7 @@ class BabyArrow extends FlxSprite
             
         spr.x += 50;
         if (SaveData.middlescroll && player == 1)
-            spr.x += ((FlxG.width / 2) * 0.5) + (Note.noteWidths[newMania] / 2);
+            spr.x += ((FlxG.width / 2) * 0.5) + ((Note.noteWidths[newMania] * widthMulti) / 2);
         else 
             spr.x += ((FlxG.width / 2) * player);
 
@@ -444,29 +438,17 @@ class BabyArrow extends FlxSprite
 
         if (SaveData.splitScroll && player == 1)
         {
-            if (curID >= (PlayState.keyAmmo[curMania] / 2))
-            {
-                this.cameras = [PlayState.p1.noteCamSplit];
-                scale.y *= -1;
-            }
-            else
-                this.cameras = [PlayState.p1.noteCam];
+            this.cameras = [PlayState.p1.noteCam];
         }
         else if (SaveData.P2splitScroll && player == 0)
         {
-            if (curID >= (PlayState.keyAmmo[curMania] / 2))
-            {
-                this.cameras = [PlayState.p2.noteCamSplit];
-                scale.y *= -1;
-            }
-            else
-                this.cameras = [PlayState.p2.noteCam];
+            this.cameras = [PlayState.p2.noteCam];
         }
 
         if ((player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
         {
             PlayState.instance.remove(lane);
-            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[curMania]), Std.int(FlxG.height * 2), flxcolorToUse);
+            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[curMania] * widthMulti), Std.int(FlxG.height * 2), flxcolorToUse);
             PlayState.instance.add(lane);
             lane.cameras = [PlayState.instance.camHUD];
             lane.alpha = SaveData.laneOpacity;
@@ -483,7 +465,7 @@ class BabyArrow extends FlxSprite
             lane.x = this.x + laneOffset[curMania];
             lane.y = this.y - 300;
         }
-        centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti) / 2);
+        centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2);
 
         if (whichPlayer == 2)
         {

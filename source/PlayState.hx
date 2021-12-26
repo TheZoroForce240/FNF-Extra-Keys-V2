@@ -136,6 +136,8 @@ class PlayState extends MusicBeatState
 	public static var SongSpeedMultiplier:Float = 1;
 	public static var RandomSpeedChange:Bool = false;
 	public static var allowNoteTypes:Bool = true;
+	public static var randomNoteAngles:Bool = false;
+	public static var rainbowNotes:Bool = false;
 
 
 	//characters
@@ -250,10 +252,13 @@ class PlayState extends MusicBeatState
 	var inCutscene:Bool = false;
 
 	//stages
-	public var dancingStagePieces:FlxTypedGroup<StagePiece>; //for stage pieces that bop/dance/whatever every beat, no need for a variable/hx
+	public var StagePiecesBEHIND:FlxTypedGroup<StagePiece>; 
+	public var StagePiecesGF:FlxTypedGroup<StagePiece>;
+	public var StagePiecesDAD:FlxTypedGroup<StagePiece>;
+	public var StagePiecesBF:FlxTypedGroup<StagePiece>;
+	public var StagePiecesFRONT:FlxTypedGroup<StagePiece>;
 	var stageException:Bool = false; //just used for week 6 stage, because of its weird set graphic size shit, oh wait i fixed it right
 	var stageOffsets:Map<String, Array<Dynamic>>;
-	public var limo:StagePiece; //for the shitty layering
 	var pieceArray = [];
 	public static var stageData:Array<Dynamic>;
 
@@ -331,6 +336,7 @@ class PlayState extends MusicBeatState
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
+		camHUD.alpha = SaveData.hudOpacity;
 		p1.createCams();
 		p2.createCams();
 		camOnTop = new FlxCamera();
@@ -381,26 +387,12 @@ class PlayState extends MusicBeatState
 		if (SaveData.downscroll) //im not sure if this is the smartest or the stupidest way of doing downscroll
 		{
 			p1.noteCam.flashSprite.scaleY *= -1;
-			p1.noteCamSplit.flashSprite.scaleY *= -1;
 			p1.noteCamsus.flashSprite.scaleY *= -1;
-			p1.noteCamSplitsus.flashSprite.scaleY *= -1;
 		}	
 		if (SaveData.P2downscroll) //well it works lol
 		{
 			p2.noteCam.flashSprite.scaleY *= -1;
-			p2.noteCamSplit.flashSprite.scaleY *= -1;
 			p2.noteCamsus.flashSprite.scaleY *= -1;
-			p2.noteCamSplitsus.flashSprite.scaleY *= -1;
-		}
-		if (SaveData.splitScroll)
-		{
-			p1.noteCamSplit.flashSprite.scaleY *= -1; //flip back to opposite
-			p1.noteCamSplitsus.flashSprite.scaleY *= -1;
-		}
-		if (SaveData.P2splitScroll)
-		{
-			p2.noteCamSplit.flashSprite.scaleY *= -1;
-			p2.noteCamSplitsus.flashSprite.scaleY *= -1;
 		}
 			
 
@@ -506,8 +498,8 @@ class PlayState extends MusicBeatState
 		DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconRPC);
 		#end
 
-		dancingStagePieces = new FlxTypedGroup<StagePiece>();
-		add(dancingStagePieces);
+		StagePiecesBEHIND = new FlxTypedGroup<StagePiece>();
+		add(StagePiecesBEHIND);
 
 		stageOffsets = new Map<String, Array<Dynamic>>();
 
@@ -559,23 +551,7 @@ class PlayState extends MusicBeatState
 			stageOffsets = stageData[3];
 		}
 
-		if (!stageException && backgrounds)
-		{
-			for (i in 0...pieceArray.length) //x and y are optional and set in StagePiece.hx, so for loop can be used
-			{
-				var piece:StagePiece = new StagePiece(0, 0, pieceArray[i]);
-				if (piece.danceable)
-					dancingStagePieces.add(piece);
 
-
-				if (pieceArray[i] == 'bgDancer')
-					piece.x += (370 * (i - 2));
-				
-				piece.x += piece.newx;
-				piece.y += piece.newy;
-				add(piece);
-			}
-		}
 		var characterList:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
 		var gfcharacter:String = SONG.gfVersion;
 
@@ -727,13 +703,47 @@ class PlayState extends MusicBeatState
 			add(gf);
 
 		// Shitty layering but whatev it works LOL
-		if (curStage == 'limo' && backgrounds)
-			add(limo);
+		StagePiecesGF = new FlxTypedGroup<StagePiece>();
+		add(StagePiecesGF);
 
 		if (characters)
 		{
 			add(dad);
+			StagePiecesDAD = new FlxTypedGroup<StagePiece>();
+			add(StagePiecesDAD);
 			add(boyfriend);
+			StagePiecesBF = new FlxTypedGroup<StagePiece>();
+			add(StagePiecesBF);
+		}
+		StagePiecesFRONT = new FlxTypedGroup<StagePiece>();
+		add(StagePiecesFRONT);
+
+		if (!stageException && backgrounds)
+		{
+			for (i in 0...pieceArray.length) //x and y are optional and set in StagePiece.hx, so for loop can be used
+			{
+				var piece:StagePiece = new StagePiece(0, 0, pieceArray[i]);
+				
+				if (pieceArray[i] == 'bgDancer')
+					piece.x += (370 * (i - 2));
+				
+				piece.x += piece.newx;
+				piece.y += piece.newy;
+				switch (piece.pieceLayer)
+				{
+					case BEHIND:
+						StagePiecesBEHIND.add(piece);
+					case GF:
+						StagePiecesGF.add(piece);
+					case DAD:
+						StagePiecesDAD.add(piece);
+					case BF:
+						StagePiecesBF.add(piece);
+					case FRONT:
+						StagePiecesFRONT.add(piece);
+				}
+				
+			}
 		}
 
 
@@ -1006,10 +1016,6 @@ class PlayState extends MusicBeatState
 	{
 		switch(stage)
 		{
-			case "limo": 
-				limo = new StagePiece(0, 0, 'limo'); //for the shitty layering
-				limo.x += limo.newx;
-				limo.y += limo.newy;
 			case "schoolEvil": 
 				var waveEffectBG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 3, 2);
 				var waveEffectFG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 5, 2);
@@ -1735,11 +1741,23 @@ class PlayState extends MusicBeatState
 
 	function calculateStrumtime(daNote:Note, Strumtime:Float) //for note velocity shit, used andromeda engine as a guide for this https://github-dotcom.gateway.web.tr/nebulazorua/andromeda-engine
 	{
-		var ChangeTime:Float = (daNote.strumTime - daNote.velocityChangeTime);
+		var ChangeTime:Float = daNote.strumTime;
+		if (daNote.velocityData != null)
+		{
+			ChangeTime = (daNote.strumTime - daNote.velocityData.ChangeTime);
+			if (daNote.velocityData.UseSpecificStrumTime)
+				ChangeTime = daNote.velocityData.ChangeTime;
+		}	
+
+
 		var StrumDiff = (Strumtime - ChangeTime);
 		var Multi:Float = 1;
-		if (Strumtime >= ChangeTime)
-			Multi = daNote.speedMulti;
+		if (daNote.velocityData != null)
+		{
+			if (Strumtime >= ChangeTime)
+				Multi = daNote.velocityData.SpeedMulti;
+		}
+
 
 		var pos = ChangeTime * daNote.speed;
 		pos += StrumDiff * (daNote.speed * Multi);
@@ -1846,6 +1864,12 @@ class PlayState extends MusicBeatState
 
 					daNote.clipSustain(middleOfNote);
 				}*/
+		daNote.visible = noteVisible;
+		daNote.angle = daNote.incomingAngle + 90;
+		if (Note.followAngle)
+		{
+			daNote.angle = noteAngle;
+		}
 
 		var holdingSustain:Bool = sustainsHeld[noteData] || (multiplayer && strums == "cpu" && P2sustainsHeld[noteData]);
 
@@ -1856,12 +1880,7 @@ class PlayState extends MusicBeatState
 		//if (daNote.y + daNote.offset.y * daNote.scale.y <= middleOfNote)
 						
 
-		daNote.visible = noteVisible;
-		daNote.angle = daNote.incomingAngle + 90;
-		if (Note.followAngle)
-		{
-			daNote.angle = noteAngle;
-		}
+
 		
 
 		if (isSustainNote)
@@ -4058,6 +4077,7 @@ class PlayState extends MusicBeatState
 		noteData = songData.notes;
 
 		var hellChartDataConvert = [0,2,4,6,1,3,5,7];
+		var noteIDs = 0;
 
 		var daBeats:Int = 0; // Not exactly representative of 'daBeats' lol, just how much it has looped
 		for (section in noteData)
@@ -4157,7 +4177,9 @@ class PlayState extends MusicBeatState
 	
 						if (susLength != 0)
 							susLength++; //increase length of all sustains, so they dont look off in game
-	
+
+						swagNote.ID = noteIDs;
+						noteIDs++;
 						//susLength *= 2;
 		
 						for (susNote in 0...Math.floor(susLength))
@@ -4178,9 +4200,12 @@ class PlayState extends MusicBeatState
 							sustainNote.scrollFactor.set();
 							unspawnNotes.push(sustainNote);
 							sustainNote.startPos = calculateStrumtime(sustainNote, susStrum);
+							sustainNote.ID = noteIDs;
+							noteIDs++;
 						}
+						
 					}
-
+					
 				}
 				else if (songNotes[1] >= -4) //for gf notes (also in case notedata is less than -3)
 				{
@@ -4299,7 +4324,15 @@ class PlayState extends MusicBeatState
 		}
 
 		StagePiece.daBeat = curBeat;
-		for (piece in dancingStagePieces.members)
+		for (piece in StagePiecesBEHIND.members)
+			piece.dance();
+		for (piece in StagePiecesGF.members)
+			piece.dance();
+		for (piece in StagePiecesDAD.members)
+			piece.dance();
+		for (piece in StagePiecesBF.members)
+			piece.dance();
+		for (piece in StagePiecesFRONT.members)
 			piece.dance();
 
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, hudThing, OUTLINE, FlxColor.BLACK);

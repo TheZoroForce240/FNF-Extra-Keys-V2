@@ -1,5 +1,7 @@
 package;
 
+import flixel.input.keyboard.FlxKeyboard;
+import flixel.input.keyboard.FlxKey;
 import flixel.addons.ui.FlxUIGroup;
 import Note.CharterSustain;
 import Conductor.BPMChangeEvent;
@@ -101,6 +103,8 @@ class ChartingState extends MusicBeatState
 
 	var typingShit:FlxInputText;
 	var eventTypingShit:FlxInputText;
+	var strumTimeTypingShit:FlxInputText;
+	var velChangeTypingShit:FlxInputText;
 	/*
 	 * WILL BE THE CURRENT / LAST PLACED NOTE
 	**/
@@ -130,6 +134,7 @@ class ChartingState extends MusicBeatState
 	var curNoteSpeed:Float = 1;
 	var curNoteVelocity:Float = 1;
 	var curNoteVelocityTime:Float = 0;
+	var curVelcityToggleShit:Bool = false;
 
 	var curEventData:Array<String> = ["none", ""];
 	var curEventInfo:String = "";
@@ -147,14 +152,43 @@ class ChartingState extends MusicBeatState
 	var characterList:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
 
 	var hitSound:FlxSound;
-	//var pitches:Array<Float> = [1.5, 0.5, 1, 2, 0.7, 1.6, 2.3, 0.3, 1.2]; //kinda just picked random ones
 
 	var snaps:Array<Float> = [1, 2, 3/4, 4, 6, 8, 12, 16, 32, 64, 96, 128, 192];
 	var curSnap:Int = 0;
 
 	var statusText:FlxText;
 
-	var tutorialText = "(L Clk) Place/Delete a note.\n\n(Shift) unsnap from Grid, \n(TAB) change the current snap.\n\n(CTRL + L Clk) a note to select it.\n\n(Q/E) extend a note's sustain length\n(R Clk + Hold) pull the sustain\nlength of a note to your mouse.\n\n(W/S or Scroll) move the strumline.\n\n(<-/-> or A/D) Change Current Section.\n\n(Space) Pause/Play the Song.\n\n(Hold Z/X) Draw Tool, autoplaces\nnotes wherever your mouse is.\n(X deletes instead)"; //because
+	var tutorialText = 
+	"(L Clk) Place/Delete a note.
+	(Shift) unsnap from Grid,
+	(TAB) change the current snap.\nHold Shift to go back a snap.
+	(CTRL + L Clk) a note to select it.
+	(Q/E) extend a note's sustain length
+	(R Clk + Hold) pull the sustain\nlength of a note to your mouse.
+	(W/S or Scroll) move the strumline.
+	(<-/-> or A/D) Change Current Section.
+	(Space) Pause/Play the Song.
+	(Hold Z/X) Draw Tool, autoplaces\nnotes wherever your mouse is.\n(X deletes instead)";
+
+	var page2Text = 
+	"(Hold C + L Clk) Highlight a note
+	(CTRL + Arr Keys) Move\nHighlighted Notes
+	(CTRL + A) Highlight whole section
+	(DELETE) Remove Highlighted Notes
+	(CTRL + C) Copy highlighted notes\nto the clipboard. (yes they actually go\nto your clipboard, note that it\ndoesn't copy speed, velocity\nchanges or events)
+	(CTRL + X) Same as copy but removes\nnotes upon copying.
+	(CTRL + V) Paste notes from Clipboard.\n(pastes from top to bottom)
+	(CTRL + Z) Undo
+	(CTRL + Y) Redo (disabled temporaraly)
+	(CTRL + S) Save Chart";
+
+	var page3Text = 
+	"(CAPS LOCK) Real Time Charting Mode,\nplace notes as the song plays
+	Left Side:\nD,F,SPACE,J,K (4/5k)\nS,D,F,SPACE,H,J,K (6/7k)\nA,S,D,F,SPACE,H,J,K,L (8/9k)
+	Right Side:\nE,R,B,U,I (4/5k)\nW,E,R,B,U,I,O (6/7k)\nQ,W,E,R,B,Y,U,I,O (8/9k)
+	This Mode disables other Controls!!!!\nSnaps affect note placements!!!";
+
+	var realTimeCharting:Bool = false;
 
 	override function create()
 	{
@@ -318,7 +352,7 @@ class ChartingState extends MusicBeatState
 		add(dummyArrow);
 
 		var tabs = [
-			{name: "Info", label: 'Info'},
+			{name: "Controls", label: 'Controls'},
 			{name: "Song", label: 'Song'},
 			{name: "Section", label: 'Section'},
 			{name: "Note", label: 'Note'},
@@ -343,8 +377,6 @@ class ChartingState extends MusicBeatState
 		addEventUI();
 		addInfoUI();
 
-		UI_box.selected_tab = 2;
-
 		add(curRenderedNotes);
 		add(curRenderedSustains);
 		add(curRenderedTypes);
@@ -360,6 +392,33 @@ class ChartingState extends MusicBeatState
 		{
 			vocals.time = FlxG.sound.music.time;
 			var shit = Std.int(FlxG.sound.music.time / (Conductor.crochet * 4)); //TODO uhh make this work properly with bpm changes or somethin
+
+			if (Conductor.bpmChangeMap.length > 0)
+			{
+				var foundSection:Bool = false;
+				var sec:Int = 1;
+				var lastSecStartTime:Float = 0;
+				while(!foundSection)
+				{	
+					var secStartTime = sectionStartTime(sec);
+					if (FlxG.sound.music.time >= lastSecStartTime && FlxG.sound.music.time <= secStartTime)
+					{
+						shit = sec;
+						foundSection = true;
+					}
+					else if (secStartTime >= FlxG.sound.music.length)
+					{
+						shit = 0;
+						foundSection = true;
+					}
+					sec++;
+					lastSecStartTime = secStartTime;
+				}
+			}
+
+
+
+
 			changeSection(shit);
 		};
 
@@ -368,12 +427,56 @@ class ChartingState extends MusicBeatState
 	function addInfoUI():Void
 	{
 
-		var infoShit:FlxText = new FlxText(10, 50, 10000, "", 8);
+		var infoShit:FlxText = new FlxText(10, 10, 10000, "", 8);
 		infoShit.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		infoShit.text = tutorialText;
+
+		var currentPage = 0;
+
+		
+		function getPage(page:Int):String 
+		{
+			switch (page)
+			{
+				case 0: 
+					return tutorialText;
+				case 1: 
+					return page2Text;
+				case 2: 
+					return page3Text;
+				default: 
+					return tutorialText;
+			}
+		}
+
+		var nextPage:FlxButton = new FlxButton(210, 350, "Next Page", function()
+		{
+			currentPage++;
+			if (currentPage > 2)
+				currentPage = 0;
+			if (currentPage < 0)
+				currentPage = 2;
+
+			infoShit.text = getPage(currentPage);
+		});
+
+		var prevPage:FlxButton = new FlxButton(10, 350, "Previous Page", function()
+		{
+			currentPage--;
+			if (currentPage > 2)
+				currentPage = 0;
+			if (currentPage < 0)
+				currentPage = 2;
+
+			infoShit.text = getPage(currentPage);
+		});
+
+
 		var tab_group_info = new FlxUI(null, UI_box);
-		tab_group_info.name = "Info";
+		tab_group_info.name = "Controls";
 		tab_group_info.add(infoShit);
+		tab_group_info.add(nextPage);
+		tab_group_info.add(prevPage);
 
 		UI_box.addGroup(tab_group_info);
 	}
@@ -780,6 +883,8 @@ class ChartingState extends MusicBeatState
 
 	var velocityLabel:FlxText;
 	var velocityTimeLabel:FlxText;
+
+	var check_velStrum:FlxUICheckBox;
 	function addNoteUI():Void
 	{
 		var tab_group_note = new FlxUI(null, UI_box);
@@ -807,16 +912,24 @@ class ChartingState extends MusicBeatState
 
 		velocityLabel = new FlxText(200, 125, 64, "Velocity Speed Multi: " + curNoteVelocity + "x" + " (WIP)");
 
-		stepperNoteVelocityTime = new FlxUINumericStepper(200, 155, 10, curNoteVelocityTime, 0, 5000, 0);
-		stepperNoteVelocityTime.value = curNoteVelocityTime;
-		stepperNoteVelocityTime.name = 'note_velocity_time';
+		velocityTimeLabel = new FlxText(10, 175, 100, "Velocity Change Time");
 
-		velocityTimeLabel = new FlxText(200, 175, 64, "Velocity Change Time: -" + curNoteVelocityTime + " (WIP)");
+		var strumLabel = new FlxText(10, 120, 100, "Strumtime");
 
-		var applyLength:FlxButton = new FlxButton(100, 10, 'Apply');
+		var applyLength:FlxButton = new FlxButton(100, 10, 'Apply', function()
+		{
+			if (curSelectedNote != null)
+			{
+				curSelectedNote[0] = Std.parseFloat(strumTimeTypingShit.text);
+				curSelectedNote[2] = stepperSusLength.value;
+				curSelectedNote[3] = stepperNoteTypes.value;
+				curSelectedNote[4] = stepperNoteSpeed.value;
+				curSelectedNote[5] = [stepperNoteVelocity.value, Std.parseFloat(velChangeTypingShit.text), check_velStrum.checked];
+			}
+		});
 		applyLength.onOver.callback = function()
 		{
-			tutorialTxt.text = "Applies the sustain length\nchanged though the stepper to\nthe currently selected note.";
+			tutorialTxt.text = "Applies the things in this menu\nto the currently selected note";
 		}
 
 		var ammolabel = new FlxText(10,35,100,'Amount of Keys');
@@ -824,6 +937,23 @@ class ChartingState extends MusicBeatState
 		var stepperMania:FlxUINumericStepper = new FlxUINumericStepper(10, 50, 1, 4, 1, 9, 1);
 		stepperMania.value = keyAmmo[_song.mania];
 		stepperMania.name = 'mania';
+
+		var strumTimeShit = new FlxUIInputText(10, 140, 150, "", 8);
+		strumTimeShit.filterMode = 3;
+		strumTimeTypingShit = strumTimeShit;
+		strumTimeShit.name = "StrumTime";
+
+		var velChangeShit = new FlxUIInputText(10, 200, 150, "", 8);
+		velChangeShit.filterMode = 3;
+		velChangeTypingShit = velChangeShit;
+		velChangeShit.name = "changeTime";
+
+		check_velStrum = new FlxUICheckBox(10, 230, null, null, "Use Specific Strumtime for Velocity Change", 200);
+		check_velStrum.name = 'check_velStrum';
+		check_velStrum.callback = function()
+		{
+			curVelcityToggleShit = check_velStrum.checked;
+		}
 
 		var typelabel = new FlxText(100,35,64,'Note Types');
 		
@@ -837,11 +967,15 @@ class ChartingState extends MusicBeatState
 		tab_group_note.add(stepperMania);
 		tab_group_note.add(speedLabel);
 		tab_group_note.add(stepperNoteSpeed);
+		tab_group_note.add(strumLabel);
 
-		tab_group_note.add(stepperNoteVelocity);
+		tab_group_note.add(strumTimeShit);
+		tab_group_note.add(velChangeShit);
+		tab_group_note.add(check_velStrum);
+
 		tab_group_note.add(velocityLabel);
 
-		tab_group_note.add(stepperNoteVelocityTime);
+		tab_group_note.add(stepperNoteVelocity);
 		tab_group_note.add(velocityTimeLabel);
 
 		UI_box.addGroup(tab_group_note);
@@ -973,11 +1107,15 @@ class ChartingState extends MusicBeatState
 		var daPos:Float = 0;
 		for (i in 0...section)
 		{
-			if (_song.notes[i].changeBPM)
+			if (_song.notes[i] != null)
 			{
-				if (_song.notes[i].bpm > 0) //no bad bad divide by 0
-					daBPM = _song.notes[i].bpm;
+				if (_song.notes[i].changeBPM)
+				{
+					if (_song.notes[i].bpm > 0) //no bad bad divide by 0
+						daBPM = _song.notes[i].bpm;
+				}
 			}
+
 			daPos += 4 * (1000 * 60 / daBPM);
 		}
 		return daPos;
@@ -995,7 +1133,6 @@ class ChartingState extends MusicBeatState
 		typeChangeLabel.text = noteTypes[Std.int(stepperNoteTypes.value)] + ' notes';
 		speedLabel.text = "Speed: " + stepperNoteSpeed.value;
 		velocityLabel.text = "Velocity: " + stepperNoteVelocity.value + "x";
-		velocityTimeLabel.text = "Velocity Time: -" + stepperNoteVelocityTime.value;
 		curStep = recalculateSteps();
 
 		dadcharacter = _song.player2;
@@ -1065,6 +1202,11 @@ class ChartingState extends MusicBeatState
 		Conductor.songPosition = FlxG.sound.music.time;
 		_song.song = typingShit.text;
 		curEventData[1] = eventTypingShit.text;
+		if (curSelectedNote != null)
+		{
+			curSelectedNote[0] = Std.parseFloat(strumTimeTypingShit.text);
+		}
+		curNoteVelocityTime = Std.parseFloat(velChangeTypingShit.text);
 		eventInfoLabel.text = "Current Event Info:\n" + curEventInfo;
 
 		if (statusText.alpha > 0.13)
@@ -1351,171 +1493,203 @@ class ChartingState extends MusicBeatState
 		}
 
 
-
-		if (FlxG.keys.justPressed.TAB)
-		{
-			if (FlxG.keys.pressed.SHIFT)
-			{
-				UI_box.selected_tab -= 1;
-				if (UI_box.selected_tab < 0)
-					UI_box.selected_tab = 2;
-			}
-			else
-			{
-				UI_box.selected_tab += 1;
-				if (UI_box.selected_tab >= 3)
-					UI_box.selected_tab = 0;
-			}
-		}
-
 		var shiftThing:Int = 1;
 		if (FlxG.keys.pressed.SHIFT)
 			shiftThing = 4;
 
 		if (!typingShit.hasFocus && !eventTypingShit.hasFocus) //so you cant do shit on accident when typing
 		{
-			if ((FlxG.keys.justPressed.X || FlxG.keys.justPressed.Z) && !FlxG.keys.pressed.CONTROL)
-				ChartingUtil.SaveUndo(_song); //save just before drawing
-
-			if (FlxG.keys.pressed.Z && !FlxG.keys.pressed.CONTROL)
-				if (!FlxG.mouse.overlaps(curRenderedNotes))
-					if (isDaMouseInGrid)
-						if (!FlxG.keys.pressed.CONTROL) //stop crashing
-							addNote(whichSectionYouIn); //allows you to draw notes by holding left click
-	
-			if (FlxG.keys.pressed.X && !FlxG.keys.pressed.CONTROL)
-				if (FlxG.mouse.overlaps(curRenderedNotes))
-					if (isDaMouseInGrid)
-						curRenderedNotes.forEach(function(note:Note)
-						{
-							if (FlxG.mouse.overlaps(note))
-								deleteNote(note, whichSectionYouIn); //mass deletion of notes
-						});
-
-			if (FlxG.keys.pressed.CONTROL)
+			if (FlxG.keys.justPressed.CAPSLOCK)
 			{
-				if (FlxG.keys.justPressed.Z)
-					undo();
-				else if (FlxG.keys.justPressed.X)
-					cutNotes();
-				else if (FlxG.keys.justPressed.C)
-					copyNotes();
-				else if (FlxG.keys.justPressed.V)
-					pasteNotes();
-				else if (FlxG.keys.justPressed.A)
-					highlightNotesInSection();
-				else if (FlxG.keys.justPressed.S)
-					saveLevel();
-				/*else if (FlxG.keys.justPressed.Y)
-					redo();*/ //disabled rn cuz it keeps forgetting the first undo
-				else if (FlxG.keys.justPressed.LEFT)
-					adjustNoteDatas(-1);
-				else if (FlxG.keys.justPressed.RIGHT)
-					adjustNoteDatas(1);
-				else if (FlxG.keys.justPressed.UP)
-					adjustNoteStep(-1);
-				else if (FlxG.keys.justPressed.DOWN)
-					adjustNoteStep(1);
-			}
-			else 
-			{
-				if (FlxG.keys.justPressed.RIGHT || FlxG.keys.justPressed.D && !FlxG.keys.pressed.CONTROL)
-					changeSection(curSection + shiftThing);
-				if (FlxG.keys.justPressed.LEFT || FlxG.keys.justPressed.A && !FlxG.keys.pressed.CONTROL)
-					changeSection(curSection - shiftThing);
-			}
-
-
-
-
-			if (FlxG.keys.justPressed.DELETE) //delete highlighted notes
-				deleteHighlightedNotes();
-
-
-
-			if (FlxG.keys.justPressed.E)
-			{
-				changeNoteSustain(Conductor.stepCrochet);
-			}
-			if (FlxG.keys.justPressed.Q)
-			{
-				changeNoteSustain(-Conductor.stepCrochet);
-			}
-			if (FlxG.keys.justPressed.SPACE)
-			{
-				if (FlxG.sound.music.playing)
-				{
-					FlxG.sound.music.pause();
-					vocals.pause();
-				}
-				else
-				{
-					vocals.play();
-					FlxG.sound.music.play();
-				}
-			}
-
-			if (FlxG.keys.justPressed.R)
-			{
-				if (FlxG.keys.pressed.SHIFT)
-					resetSection(true);
-				else
-					resetSection();
-			}
-
-			if (FlxG.mouse.wheel != 0)
-			{
-				FlxG.sound.music.pause();
-				vocals.pause();
-
-				FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet * 0.4);
-				vocals.time = FlxG.sound.music.time;
-			}
-			if (FlxG.keys.justPressed.ESCAPE)
-			{
-				autosaveSong();
-				FlxG.switchState(new DebugState());
+				realTimeCharting = !realTimeCharting;
+				updateStatus("Toggled real time charting");
 			}
 				
 
-			if (!FlxG.keys.pressed.SHIFT)
+			if (!realTimeCharting)
 			{
-				if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
+				if ((FlxG.keys.justPressed.X || FlxG.keys.justPressed.Z) && !FlxG.keys.pressed.CONTROL)
+					ChartingUtil.SaveUndo(_song); //save just before drawing
+	
+				if (FlxG.keys.pressed.Z && !FlxG.keys.pressed.CONTROL)
+					if (!FlxG.mouse.overlaps(curRenderedNotes))
+						if (isDaMouseInGrid)
+							if (!FlxG.keys.pressed.CONTROL) //stop crashing
+								addNote(whichSectionYouIn); //allows you to draw notes by holding left click
+		
+				if (FlxG.keys.pressed.X && !FlxG.keys.pressed.CONTROL)
+					if (FlxG.mouse.overlaps(curRenderedNotes))
+						if (isDaMouseInGrid)
+							curRenderedNotes.forEach(function(note:Note)
+							{
+								if (FlxG.mouse.overlaps(note))
+									deleteNote(note, whichSectionYouIn); //mass deletion of notes
+							});
+	
+				if (FlxG.keys.pressed.CONTROL)
+				{
+					if (FlxG.keys.justPressed.Z)
+						undo();
+					else if (FlxG.keys.justPressed.X)
+						cutNotes();
+					else if (FlxG.keys.justPressed.C)
+						copyNotes();
+					else if (FlxG.keys.justPressed.V)
+						pasteNotes();
+					else if (FlxG.keys.justPressed.A)
+						highlightNotesInSection();
+					else if (FlxG.keys.justPressed.S)
+						saveLevel();
+					/*else if (FlxG.keys.justPressed.Y)
+						redo();*/ //disabled rn cuz it keeps forgetting the first undo
+					else if (FlxG.keys.justPressed.LEFT)
+						adjustNoteDatas(-1);
+					else if (FlxG.keys.justPressed.RIGHT)
+						adjustNoteDatas(1);
+					else if (FlxG.keys.justPressed.UP)
+						adjustNoteStep(-1);
+					else if (FlxG.keys.justPressed.DOWN)
+						adjustNoteStep(1);
+				}
+				else 
+				{
+					if (FlxG.keys.justPressed.RIGHT || FlxG.keys.justPressed.D && !FlxG.keys.pressed.CONTROL)
+						changeSection(curSection + shiftThing);
+					if (FlxG.keys.justPressed.LEFT || FlxG.keys.justPressed.A && !FlxG.keys.pressed.CONTROL)
+						changeSection(curSection - shiftThing);
+				}
+	
+	
+	
+	
+				if (FlxG.keys.justPressed.DELETE) //delete highlighted notes
+					deleteHighlightedNotes();
+	
+	
+	
+				if (FlxG.keys.justPressed.E)
+				{
+					changeNoteSustain(Conductor.stepCrochet);
+				}
+				if (FlxG.keys.justPressed.Q)
+				{
+					changeNoteSustain(-Conductor.stepCrochet);
+				}
+				if (FlxG.keys.justPressed.SPACE)
+				{
+					if (FlxG.sound.music.playing)
+					{
+						FlxG.sound.music.pause();
+						vocals.pause();
+					}
+					else
+					{
+						vocals.play();
+						FlxG.sound.music.play();
+					}
+				}
+	
+				if (FlxG.keys.justPressed.R)
+				{
+					if (FlxG.keys.pressed.SHIFT)
+						resetSection(true);
+					else
+						resetSection();
+				}
+	
+				if (FlxG.mouse.wheel != 0)
 				{
 					FlxG.sound.music.pause();
 					vocals.pause();
-
-					var daTime:Float = 700 * FlxG.elapsed;
-
-					if (FlxG.keys.pressed.W)
-					{
-						FlxG.sound.music.time -= daTime;
-					}
-					else
-						FlxG.sound.music.time += daTime;
-
+	
+					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet * 0.4);
 					vocals.time = FlxG.sound.music.time;
 				}
-			}
-			else
-			{
-				if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.S)
+				if (FlxG.keys.justPressed.ESCAPE)
 				{
-					FlxG.sound.music.pause();
-					vocals.pause();
-
-					var daTime:Float = Conductor.stepCrochet * 2;
-
-					if (FlxG.keys.justPressed.W)
+					autosaveSong();
+					FlxG.switchState(new DebugState());
+				}
+					
+	
+				if (!FlxG.keys.pressed.SHIFT)
+				{
+					if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
 					{
-						FlxG.sound.music.time -= daTime;
+						FlxG.sound.music.pause();
+						vocals.pause();
+	
+						var daTime:Float = 700 * FlxG.elapsed;
+	
+						if (FlxG.keys.pressed.W)
+						{
+							FlxG.sound.music.time -= daTime;
+						}
+						else
+							FlxG.sound.music.time += daTime;
+	
+						vocals.time = FlxG.sound.music.time;
 					}
-					else
-						FlxG.sound.music.time += daTime;
-
-					vocals.time = FlxG.sound.music.time;
+				}
+				else
+				{
+					if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.S)
+					{
+						FlxG.sound.music.pause();
+						vocals.pause();
+	
+						var daTime:Float = Conductor.stepCrochet * 2;
+	
+						if (FlxG.keys.justPressed.W)
+						{
+							FlxG.sound.music.time -= daTime;
+						}
+						else
+							FlxG.sound.music.time += daTime;
+	
+						vocals.time = FlxG.sound.music.time;
+					}
 				}
 			}
+			else 
+			{
+				if (FlxG.keys.justPressed.ANY)
+				{
+					var controlsList = [
+						["D", "F", "J", "K", "E", "R", "U", "I"],
+						["S", "D", "F", "J", "K", "L", "W", "E", "R", "Y", "U", "I"],
+						["A", "S", "D", "F", "SPACE", "H", "J", "K", "L", "Q", "W", "E", "R", "B", "Y", "U", "I", "O"],
+						["D", "F", "SPACE", "J", "K", "E", "R", "B", "U", "I"],
+						["S", "D", "F", "SPACE", "J", "K", "L", "W", "E", "R", "B", "Y", "U", "I"],
+						["A", "S", "D", "F", "H", "J", "K", "L", "Q", "W", "E", "R", "Y", "U", "I", "O"],
+						["SPACE", "B",],
+						["D","K", "E", "I"],
+						["D","SPACE","K", "E", "B","I"]
+					];
+
+					var controls = controlsList[_song.mania];
+
+					for (i in 0...controls.length)
+					{
+						var data = -1;
+						var input = FlxKey.fromString(controls[i]);
+						if (FlxG.keys.checkStatus(input, JUST_PRESSED))
+						{
+							data = i;
+							if (data != -1 && !FlxG.keys.pressed.CONTROL)
+							{
+								addNoteFromKey(data);
+							}
+						}
+					}
+
+
+
+					
+				}
+			}
+
+			
 		}
 
 		labelsCheck();
@@ -2127,7 +2301,8 @@ class ChartingState extends MusicBeatState
 			if (curSelectedNote[5] != null)
 			{
 				stepperNoteVelocity.value = curSelectedNote[5][0];
-				stepperNoteVelocityTime.value = curSelectedNote[5][1];
+				velChangeTypingShit.text = curSelectedNote[5][1];
+				check_velStrum.checked = curSelectedNote[5][2];
 			}
 			if (curSelectedNote[6] != null)
 			{
@@ -2136,7 +2311,7 @@ class ChartingState extends MusicBeatState
 				eventDropDown.selectedLabel = curEventData[0];
 				eventTypingShit.text = curEventData[1];
 			}
-
+			strumTimeTypingShit.text = curSelectedNote[0];
 		}
 
 	}
@@ -2328,7 +2503,26 @@ class ChartingState extends MusicBeatState
 		note.sustainLength = daSus;
 		note.noteType = daType;
 		note.speed = daSpeed;
-		note.velocityData = daVelocity;
+		if (daVelocity != null)
+		{
+			if (daVelocity.length > 2)
+			{
+				note.velocityData = {
+					SpeedMulti: daVelocity[0],
+					ChangeTime: daVelocity[1],
+					UseSpecificStrumTime: daVelocity[2]
+				};
+			}
+			else //back compat
+			{
+				note.velocityData = {
+					SpeedMulti: daVelocity[0],
+					ChangeTime: daVelocity[1],
+					UseSpecificStrumTime: false
+				};
+			}
+		}
+
 		note.rawNoteData = daNoteInfo;
 		note.playedSound = true;
 		note.updated = true;
@@ -2502,10 +2696,12 @@ class ChartingState extends MusicBeatState
 		noteType = Std.int(stepperNoteTypes.value);
 		var noteSpeed:Float = 1;
 		noteSpeed = stepperNoteSpeed.value;
-		var noteVelocity:Array<Float> = [1, 0];
-		noteVelocity = [stepperNoteVelocity.value, stepperNoteVelocityTime.value];
+		var noteVelocity:Array<Dynamic> = [1, 0, false];
+		noteVelocity = [stepperNoteVelocity.value, curNoteVelocityTime, check_velStrum.checked];
 		var eventData:Array<String> = ["none", ""];
 		eventData = [curEventData[0], curEventData[1]];
+		if (noteData >= 0)
+			eventData = null;
 		//trace(eventData);
 
 		if (_song.mania == 2 || _song.mania == 5)
@@ -2526,6 +2722,38 @@ class ChartingState extends MusicBeatState
 
 		//trace(noteStrum);
 		//trace(curSection);
+		updateStatus("Added Note");
+
+		updateGrid();
+		updateNoteUI();
+	}
+
+	private function addNoteFromKey(data:Int):Void
+	{
+		resetHighlights();
+
+		var strumY = Math.floor(strumLine.y / (GRID_SIZE / snaps[curSnap])) * (GRID_SIZE / snaps[curSnap]);
+
+		var noteStrum = getStrumTime(strumY) + sectionStartTime(curSection);
+		var noteData = Math.floor(data);
+			
+		var noteSus = 0;
+		var noteType = 0;
+		noteType = Std.int(stepperNoteTypes.value);
+		var noteSpeed:Float = 1;
+		noteSpeed = stepperNoteSpeed.value;
+		var noteVelocity:Array<Float> = [1, 0];
+		noteVelocity = [stepperNoteVelocity.value, stepperNoteVelocityTime.value];
+		var eventData:Array<String> = ["none", ""];
+		eventData = [curEventData[0], curEventData[1]];
+		if (noteData >= 0)
+			eventData = null;
+
+		middleSection.sectionNotes.push([noteStrum, noteData, noteSus, noteType, noteSpeed, noteVelocity, eventData]);
+
+		if (FlxG.keys.pressed.CONTROL)
+			middleSection.sectionNotes.push([noteStrum, (noteData -18), noteSus, noteType, noteSpeed, noteVelocity, eventData]);
+
 		updateStatus("Added Note");
 
 		updateGrid();

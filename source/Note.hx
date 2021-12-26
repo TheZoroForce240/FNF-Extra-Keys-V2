@@ -23,6 +23,13 @@ import openfl.geom.Point;
 
 using StringTools;
 
+typedef VelChange = 
+{
+	var SpeedMulti:Float;
+	var ChangeTime:Float;
+	var UseSpecificStrumTime:Bool;
+}
+
 class Note extends FlxSprite
 {
 	////////////////////////////////////////////////////////////
@@ -97,11 +104,10 @@ class Note extends FlxSprite
 	public static var pixelnoteScale:Float;
 	public static var tooMuch:Float = 30;
 	public var scaleToUse:Float = 1;
-	public var curMania:Int = 0; //im watching you, you better not steal this fucking code
+	public var curMania:Int = 0; 
 	public var changesMania:Bool = false;
 
 	public static var ammoToMania:Array<Int> = [0, 6, 7, 8, 0, 3, 1, 4, 5, 2];
-
 	public static var noteScales:Array<Float> = [0.7, 0.6, 0.5, 0.65, 0.58, 0.55, 0.7, 0.7, 0.7];
 	public static var pixelNoteScales:Array<Float> = [1, 0.83, 0.7, 0.9, 0.8, 0.74, 1, 1, 1];
 	public static var noteWidths:Array<Float> = [112, 84, 66.5, 91, 77, 70, 140, 126, 119];
@@ -162,7 +168,7 @@ class Note extends FlxSprite
 	public var colorShit:Array<Float>;
 	var pathToUse:Int = 0;
 
-	public static var pixelAssetPaths:Array<Array<String>> = [ //for noteTypes, epic code cleanup
+	public static var pixelAssetPaths:Array<Array<String>> = [ //for noteTypes, code cleanup
 		['noteassets/pixel/arrows-pixels', 'noteassets/pixel/arrowEnds'],
 		['noteassets/pixel/firenotes/arrows-pixels', 'noteassets/pixel/firenotes/arrowEnds'],
 		['noteassets/pixel/halo/arrows-pixels', 'noteassets/pixel/halo/arrowEnds'],
@@ -178,24 +184,11 @@ class Note extends FlxSprite
 	////////////////////////////////////////////////////////////
 
 	public var speed:Float = 1; //note speed and velocity shit
-	public var velocityData:Array<Float>;
+	public var velocityData:VelChange;
 	public var speedMulti:Float = 1;
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
 	public var curAlpha:Float = 1;
-	public var split:Bool = false; //split scroll fixing graphic flip shit
-	public static var splitFlip:Array<Array<Bool>> = [
-		[false, false, true, true, false, false, false, false, false],
-		[false, true, false, false, false, true, false, false, true],
-		[false, false, false, false, false, true, true, true, true],
-		[false, false, true, true, false, false, false, false, false],
-		[false, true, false, false, false, true, false, false, true],
-		[false, false, false, false, false, true, true, true, true],
-		[false, false, false, true, false, false, false, false, false],
-		[false, false, false, true, false, false, false, false, false],
-		[false, false, false, true, false, false, false, false, false],
-	];
-	public var beenFlipped:Bool = false;
 
 	////////////////////////////////////////////////////////////
 
@@ -215,7 +208,6 @@ class Note extends FlxSprite
 	public var highlighted:Bool = false;
 	public var section:Int = 0;
 
-
 	////////////////////////////////////////////////////////////
 
 	//note quantization stuff
@@ -231,11 +223,15 @@ class Note extends FlxSprite
 	//terrible idea, pc almost exploded playing bopeebo
 
 	//var StrumGroup:StrumLineGroup; //i think this can cause lag
+	public var beenFlipped:Bool = false;
 
 	///////////////////////////////////////////////////////////
 
-	public function new(strumTime:Float, _noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Float>, ?charter = false, ?_gfNote, ?_mustPress:Bool = false, ?_eventData:Array<String>, ?prevNote:Note)
+	public function new(strumTime:Float, _noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Dynamic>, ?charter = false, ?_gfNote, ?_mustPress:Bool = false, ?_eventData:Array<String>, ?prevNote:Note)
 	{
+		StrumLinefollowAngle = false;
+		followAngle = false;
+
 		usingQuant = SaveData.noteQuant;
 
 		swagWidth = 160 * 0.7;
@@ -269,7 +265,27 @@ class Note extends FlxSprite
 		this.prevNote = prevNote; 
 		isSustainNote = sustainNote;
 
-		velocityData = _velocityData;
+		if (_velocityData != null)
+		{
+			if (_velocityData.length > 2)
+			{
+				velocityData = {
+					SpeedMulti: _velocityData[0],
+					ChangeTime: _velocityData[1],
+					UseSpecificStrumTime: _velocityData[2]
+				};
+			}
+			else //back compat
+			{
+				velocityData = {
+					SpeedMulti: _velocityData[0],
+					ChangeTime: _velocityData[1],
+					UseSpecificStrumTime: false
+				};
+			}
+		}
+
+
 		mustPress = _mustPress;
 		inCharter = charter;
 		if (_eventData != null)
@@ -277,17 +293,27 @@ class Note extends FlxSprite
 			eventData = _eventData;
 		}
 
-		if (SaveData.randomNoteSpeed)
-			speed = FlxMath.roundDecimal(FlxG.random.float(2.2, 3.8), 2);
+		if (!inCharter)
+		{
+			if (SaveData.randomNoteSpeed)
+				speed = FlxMath.roundDecimal(FlxG.random.float(2.2, 3.8), 2);
+	
+			if (SaveData.speedScaling)
+				speed = FlxMath.roundDecimal((speed / 0.7) * (noteScale * scaleMulti), 2); //adjusts speed based on note size, i should make this an option at some point
+	
+	
+			if (!PlayState.rewinding)
+				speed = FlxMath.roundDecimal(speed / PlayState.SongSpeedMultiplier, 2);
+			else
+				speed = FlxMath.roundDecimal(speed, 2);
 
-		if (SaveData.speedScaling)
-			speed = FlxMath.roundDecimal((speed / 0.7) * (noteScale * scaleMulti), 2); //adjusts speed based on note size, i should make this an option at some point
+			if (PlayState.randomNoteAngles)
+			{
+				incomingAngle = FlxG.random.int(0, 360);
+			}
+		}
 
 
-		if (!PlayState.rewinding)
-			speed = FlxMath.roundDecimal(speed / PlayState.SongSpeedMultiplier, 2);
-		else
-			speed = FlxMath.roundDecimal(speed, 2);
 				
 		if (Main.editor)
 			this.strumTime = strumTime;
@@ -297,11 +323,6 @@ class Note extends FlxSprite
 		if (this.strumTime < 0 )
 			this.strumTime = 0;
 
-		if (velocityData != null)
-		{
-			speedMulti = _velocityData[0];
-			velocityChangeTime = _velocityData[1];
-		}
 		if (SaveData.randomNoteVelocity)
 		{
 			speedMulti = FlxMath.roundDecimal(FlxG.random.float(0.5, 2.5), 2);
@@ -373,38 +394,15 @@ class Note extends FlxSprite
 		{
 			if (mustPress && !inCharter)
 			{
-				if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
-					&& !inCharter && SaveData.splitScroll)
-				{
-					this.cameras = [PlayState.p1.noteCamSplit];
-					if (isSustainNote)
-						this.cameras = [PlayState.p1.noteCamSplitsus];
-					split = true;
-				}	
-				else
-				{
-					this.cameras = [PlayState.p1.noteCam];
-					if (isSustainNote)
-						this.cameras = [PlayState.p1.noteCamsus];
-				}
+				this.cameras = [PlayState.p1.noteCam];
+				if (isSustainNote)
+					this.cameras = [PlayState.p1.noteCamsus];
 			}
 			else if (!mustPress && !inCharter)
 			{
-				if (((splitFlip[curMania][this.noteData] && mania == 2) || (this.noteData >= (PlayState.keyAmmo[curMania] / 2) && mania != 2))
-					&& !inCharter && SaveData.P2splitScroll)
-				{
-					this.cameras = [PlayState.p2.noteCamSplit];
-					if (isSustainNote)
-						this.cameras = [PlayState.p2.noteCamSplitsus];
-					split = true;
-				}
-				else
-				{
-					this.cameras = [PlayState.p2.noteCam];
-					if (isSustainNote)
-						this.cameras = [PlayState.p2.noteCamsus];
-				}
-					
+				this.cameras = [PlayState.p2.noteCam];
+				if (isSustainNote)
+					this.cameras = [PlayState.p2.noteCamsus];			
 			}
 		}
 
@@ -443,58 +441,68 @@ class Note extends FlxSprite
 		else if (inCharter)
 			color = 0xFFFFFFFF;
 
-		if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped) || (PlayState.multiplayer))
+		if (!inCharter)
 		{
-			if (badNoteType)
+			if (PlayState.rainbowNotes)
 			{
-				if (strumTime - Conductor.songPosition <= (100 * Conductor.timeScale)
-					&& strumTime - Conductor.songPosition >= (-50 * Conductor.timeScale))
-					canBeHit = true;
+				HSV.hue += (0.1 * elapsed);
+				HSV.update();
+			}
+			if ((mustPress && !PlayState.flipped) || (!mustPress && PlayState.flipped) || (PlayState.multiplayer))
+			{
+				if (badNoteType)
+				{
+					if (strumTime - Conductor.songPosition <= (100 * Conductor.timeScale)
+						&& strumTime - Conductor.songPosition >= (-50 * Conductor.timeScale))
+						canBeHit = true;
+					else
+						canBeHit = false;	
+				}
 				else
-					canBeHit = false;	
+				{
+					if (strumTime - Conductor.songPosition <= (earlyHitTiming * Conductor.timeScale)
+						&& strumTime - Conductor.songPosition >= (lateHitTiming * Conductor.timeScale))
+						canBeHit = true;
+					else
+						canBeHit = false;
+				}
+				if (strumTime - Conductor.songPosition < lateHitTiming && !wasGoodHit)
+					tooLate = true;
+				else 
+					tooLate = false;
 			}
 			else
 			{
-				if (strumTime - Conductor.songPosition <= (earlyHitTiming * Conductor.timeScale)
-					&& strumTime - Conductor.songPosition >= (lateHitTiming * Conductor.timeScale))
-					canBeHit = true;
-				else
-					canBeHit = false;
+				canBeHit = false;
+	
+				if (strumTime <= Conductor.songPosition && !badNoteType)
+					wasGoodHit = true;
 			}
-			if (strumTime - Conductor.songPosition < lateHitTiming && !wasGoodHit)
-				tooLate = true;
-			else 
-				tooLate = false;
+	
+			if (strumTime - Conductor.songPosition < -450 && !inCharter) //forcefully remove all notes past this point, also how all sutains are removed to fix clipping
+				deleteShit();
+	
+			if (isGFNote)
+				if (strumTime <= Conductor.songPosition)
+					wasGoodHit = true;
+			else if (badNoteType)
+				if (strumTime - Conductor.songPosition < -300) //so note types go past the strumline before removed
+					wasGoodHit = true;
+	
+			/*if (!changedVelocityScale)
+				if (speedMulti != 0 || speedMulti != 1)
+					if ((strumTime - velocityChangeTime) <= Conductor.songPosition)
+							fixSustains();*/
+					
+	
+			if (tooLate && !wasGoodHit)
+			{
+				if (alpha > 0.3)
+					alpha = 0.3;
+			}
 		}
-		else
-		{
-			canBeHit = false;
 
-			if (strumTime <= Conductor.songPosition && !badNoteType)
-				wasGoodHit = true;
-		}
 
-		if (strumTime - Conductor.songPosition < -450 && !inCharter) //forcefully remove all notes past this point, also how all sutains are removed to fix clipping
-			deleteShit();
-
-		if (isGFNote)
-			if (strumTime <= Conductor.songPosition)
-				wasGoodHit = true;
-		else if (badNoteType)
-			if (strumTime - Conductor.songPosition < -300) //so note types go past the strumline before removed
-				wasGoodHit = true;
-
-		/*if (!changedVelocityScale)
-			if (speedMulti != 0 || speedMulti != 1)
-				if ((strumTime - velocityChangeTime) <= Conductor.songPosition)
-						fixSustains();*/
-				
-
-		if (tooLate && !wasGoodHit)
-		{
-			if (alpha > 0.3)
-				alpha = 0.3;
-		}
 	}
 
 	function deleteShit():Void
@@ -522,6 +530,9 @@ class Note extends FlxSprite
 
 	function loadNote():Void
 	{
+		frames = null;
+		animation.destroyAnimations();
+
 		switch (style)
 		{
 			case 'pixel':
@@ -605,6 +616,7 @@ class Note extends FlxSprite
 		velocityChangeTime = prevNote.velocityChangeTime;
 		noteScore * 0.2;
 		curAlpha = 0.6;
+		incomingAngle = prevNote.incomingAngle;
 
 		sustainXOffset = (((37 / 0.7) * scaleToUse) * scaleMulti);
 
@@ -650,18 +662,10 @@ class Note extends FlxSprite
 			(SaveData.P2downscroll && !mustPress && !isSustainNote)) && 
 			!inCharter)
 		{
-			if (!split)
-			{
-				beenFlipped = true;
-				scale.y *= -1;
-			}
-				
+			scale.y *= -1;	
+			beenFlipped = true;			
 		}
-		else if (split && !isSustainNote)
-		{
-			scale.y *= -1;
-			beenFlipped = true;
-		}		
+	
 	}
 
 	function quantCheck():Void 
@@ -669,8 +673,22 @@ class Note extends FlxSprite
 		if (usingQuant && !isSustainNote)
 			{
 				pathToUse = 4; //use red notes
+
+				var time = strumTime;
+
+				if (Conductor.bpmChangeMap.length > 0)
+				{
+					for (bpmchange in Conductor.bpmChangeMap) //doesnt work il fix it later
+					{
+						if (strumTime >= bpmchange.songTime)
+						{
+							time -= bpmchange.songTime;
+						}
+					}
+				}
+
 			
-				var beat = Math.round((strumTime / (Conductor.stepCrochet * 4)) * 48); //TODO set up for da bpm changes
+				var beat = Math.round((time / (Conductor.stepCrochet * 4)) * 48);
 				for (i in 0...beats.length)
 				{
 					if (beat % (192 / beats[i]) == 0)
@@ -898,17 +916,16 @@ class Note extends FlxSprite
 
 	public function clipSustain(clipTo:FlxPoint)
 	{
-		
 		//var notepos = new FlxPoint(this.x, this.y);
 		//var rad = clipTo.distanceTo(notepos);
 		//var rectshit = FlxAngle.getPolarCoords((clipTo.x - this.x) / scale.x, (clipTo.y - this.y) / scale.y);
 		//var rectPos = FlxAngle.getCartesianCoords(rectshit., angle + 90);
 		//fuckYouRect.y = (clipTo.y - rectPos.y) / scale.y;
-		var angleshit = incomingAngle % 360;
+		var angleshit = ((incomingAngle % 360) + 360) % 360; //do mod twice to make negative numbers positive
 
 		if (followAngle)
 		{
-			angleshit = angle % 360;
+			angleshit = (((angle - 90) % 360) + 360) % 360;
 		}
 
 		var up = (angleshit <= 315 && angleshit >= 225);
@@ -917,42 +934,30 @@ class Note extends FlxSprite
 		var down = (angleshit <= 135 && angleshit >= 45);
 
 
-		if (down)
-		{
-			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
-			fuckYouRect = new FlxRect(0,0, this.frameWidth * 2, this.frameHeight * 2);
-			fuckYouRect.height = ((clipTo.y - y) / scale.y);
-			fuckYouRect.y = this.frameHeight - fuckYouRect.height;
-			clipRect = fuckYouRect;
-		}
-		else if (left)
-		{
-			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
-			fuckYouRect.x = ((clipTo.x - x) / scale.y);
-			fuckYouRect.height -= fuckYouRect.x;
-			clipRect = fuckYouRect;
-		}
-		else if (right)
-		{
-			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
-			fuckYouRect.x = ((clipTo.x - x) / scale.y);
-			fuckYouRect.height -= fuckYouRect.x;
-			clipRect = fuckYouRect;
-		}
-		else //default to regular clipping i guess lol 
+		if (up) //regular clipping
 		{
 			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
 			fuckYouRect.y = ((clipTo.y - y) / scale.y);
 			fuckYouRect.height -= fuckYouRect.y;
 			clipRect = fuckYouRect;
 		}
-			
-		
-
-		//clipTo - (y + offset.y * scale.y)
+		else if (down) 
+		{
+			if (this.y > clipTo.y) //temp workaround while i figure out proper clipping
+				this.visible = false;
+		}
+		else if (left)
+		{
+			if (this.x < clipTo.x)
+				this.visible = false;
+		}
+		else if (right)
+		{
+			if (this.x > clipTo.x)
+				this.visible = false;
+		}
 	}
 }
-
 
 class CharterSustain extends FlxSprite //so i can do the grabbing thing
 {

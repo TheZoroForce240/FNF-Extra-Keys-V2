@@ -50,6 +50,7 @@ class SaveData
 
     public static var arrowLanes:String = "Off";
     public static var laneOpacity:Float = 0.2;
+    public static var hudOpacity:Float = 1;
     public static var noteQuant:Bool = false;
 
     public static var splitScroll:Bool = false; 
@@ -87,6 +88,10 @@ class SaveData
         ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "X", "A", "B"],
         ["DPAD_LEFT", "DPAD_DOWN", "DPAD_UP", "DPAD_RIGHT", "LEFT_TRIGGER", "X", "A", "Y", "B"]
     ];
+
+
+    public static var noteScaleMulti:Float = 1;
+    public static var noteWidthMulti:Float = 1;
 
 
     public static function saveDataCheck()
@@ -158,8 +163,11 @@ class SaveData
         if (FlxG.save.data.arrowLanes == null)
             FlxG.save.data.arrowLanes = "Off";
 
-        if (FlxG.save.data.laneOpacity == null)
-            FlxG.save.data.laneOpacity = 0.2;
+        if (FlxG.save.data.hudOpacity == null)
+            FlxG.save.data.hudOpacity = 0.2;
+
+        if (FlxG.save.data.hpBarOpacity == null)
+            FlxG.save.data.hpBarOpacity = 0.2;
 
         if (FlxG.save.data.splitScroll == null)
 			FlxG.save.data.splitScroll = false;
@@ -211,6 +219,7 @@ class SaveData
         FlxG.save.data.enabledHudSections = enabledHudSections;
         FlxG.save.data.arrowLanes = arrowLanes;
         FlxG.save.data.laneOpacity = laneOpacity;
+        FlxG.save.data.hudOpacity = hudOpacity;
         FlxG.save.data.splitScroll = splitScroll;
         FlxG.save.data.P2splitScroll = P2splitScroll;
         FlxG.save.data.offset = offset;
@@ -250,6 +259,7 @@ class SaveData
 
         arrowLanes = FlxG.save.data.arrowLanes;
         laneOpacity = FlxG.save.data.laneOpacity;
+        hudOpacity = FlxG.save.data.hudOpacity;
         splitScroll = FlxG.save.data.splitScroll;
         P2splitScroll = FlxG.save.data.P2splitScroll;
         offset = FlxG.save.data.offset;
