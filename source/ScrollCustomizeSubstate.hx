@@ -11,7 +11,7 @@ import flixel.util.FlxTimer;
 import flixel.ui.FlxBar;
 import flixel.math.FlxMath;
 
-class HUDCustomizeSubstate extends MusicBeatSubstate
+class ScrollCustomizeSubstate extends MusicBeatSubstate
 {
     var curSelected:Int = 0;
     var waitingForInput:Bool = false;

@@ -12,7 +12,8 @@ function stepHit(step) //every step (happens 4 times per beat, best place to put
         case 64: 
             phase1 = false;
             phase2 = true;
-            Note.StrumLinefollowAngle = true;
+            PlayState.p1.modifiers.StrumLinefollowAngle = true;
+            PlayState.p2.modifiers.StrumLinefollowAngle = true;
             tweenP1StrumAngle(0);
             tweenP2StrumAngle(-180);
             PlayState.instance.alignCams = false;
@@ -24,14 +25,9 @@ function stepHit(step) //every step (happens 4 times per beat, best place to put
             tweenP1StrumAngle(-180);
             tweenP2StrumAngle(0);
         case 160: 
-            for (i in 0...PlayState.p1.strums.length)
-            {
-                FlxTween.tween(PlayState.p1.strums.members[i], {strumLineAngle: -90}, (Conductor.stepCrochet / 1000) * 32, {ease: FlxEase.circIn});
-            }
-            for (i in 0...PlayState.p2.strums.length)
-            {
-                FlxTween.tween(PlayState.p2.strums.members[i], {strumLineAngle: -90}, (Conductor.stepCrochet / 1000) * 32, {ease: FlxEase.circIn});
-            }
+            FlxTween.tween(PlayState.p1.modifiers, {scrollAngle: 0}, (Conductor.stepCrochet / 1000) * 32, {ease: FlxEase.circIn});
+            FlxTween.tween(PlayState.p2.modifiers, {scrollAngle: 0}, (Conductor.stepCrochet / 1000) * 32, {ease: FlxEase.circIn});
+            
         case 192: 
             phase2 = false;
             phase3 = true;
@@ -40,9 +36,12 @@ function stepHit(step) //every step (happens 4 times per beat, best place to put
             phase3 = false;
             tweenStrumAngle(-90);
         case 256: 
+            PlayState.p1.modifiers.StrumLinefollowAngle = false;
+            PlayState.p2.modifiers.StrumLinefollowAngle = false;
             phase3 = false;
             phase4 = true;
-            Note.StrumLinefollowAngle = false;
+            PlayState.p1.modifiers.incomingAngleIsStrumAngle = true;
+            PlayState.p2.modifiers.incomingAngleIsStrumAngle = true;
 
             FlxTween.tween(PlayState.p1.strums.members[0], {angle: 20}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
             FlxTween.tween(PlayState.p1.strums.members[1], {angle: 40}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
@@ -235,29 +234,17 @@ function beatHit(beat) //every beat
 
 function tweenStrumAngle(fuck)
 {
-    for (i in 0...PlayState.p1.strums.length)
-    {
-        FlxTween.tween(PlayState.p1.strums.members[i], {strumLineAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
-    }
-    for (i in 0...PlayState.p2.strums.length)
-    {
-        FlxTween.tween(PlayState.p2.strums.members[i], {strumLineAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
-    }
+    FlxTween.tween(PlayState.p1.modifiers, {scrollAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+    FlxTween.tween(PlayState.p2.modifiers, {scrollAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
 }
 
 function tweenP1StrumAngle(fuck)
 {
-    for (i in 0...PlayState.p1.strums.length)
-    {
-        FlxTween.tween(PlayState.p1.strums.members[i], {strumLineAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
-    }
+    FlxTween.tween(PlayState.p1.modifiers, {scrollAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
 }
 function tweenP2StrumAngle(fuck)
 {
-    for (i in 0...PlayState.p2.strums.length)
-    {
-        FlxTween.tween(PlayState.p2.strums.members[i], {strumLineAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
-    }
+    FlxTween.tween(PlayState.p2.modifiers, {scrollAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
 }
 
 function tweenStrumX(fuck)
@@ -268,36 +255,24 @@ function tweenStrumX(fuck)
 function tweenNoteCams(fuck)
 {
     FlxTween.tween(PlayState.p1.noteCam, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p1.noteCamSplit, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
     FlxTween.tween(PlayState.p1.noteCamsus, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p1.noteCamSplitsus, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
     FlxTween.tween(PlayState.p2.noteCam, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p2.noteCamSplit, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
     FlxTween.tween(PlayState.p2.noteCamsus, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p2.noteCamSplitsus, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
 }
 
 function flipScroll()
 {
     FlxTween.tween(PlayState.p1.noteCam.flashSprite, {scaleY: -PlayState.p1.noteCam.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p1.noteCamSplit.flashSprite, {scaleY: -PlayState.p1.noteCamSplit.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
     FlxTween.tween(PlayState.p1.noteCamsus.flashSprite, {scaleY: -PlayState.p1.noteCamsus.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p1.noteCamSplitsus.flashSprite, {scaleY: -PlayState.p1.noteCamSplitsus.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
     FlxTween.tween(PlayState.p2.noteCam.flashSprite, {scaleY: -PlayState.p2.noteCam.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p2.noteCamSplit.flashSprite, {scaleY: -PlayState.p2.noteCamSplit.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
     FlxTween.tween(PlayState.p2.noteCamsus.flashSprite, {scaleY: -PlayState.p2.noteCamsus.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p2.noteCamSplitsus.flashSprite, {scaleY: -PlayState.p2.noteCamSplitsus.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
 }
 function flipSides()
 {
     FlxTween.tween(PlayState.p1.noteCam.flashSprite, {scaleX: -PlayState.p1.noteCam.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p1.noteCamSplit.flashSprite, {scaleX: -PlayState.p1.noteCamSplit.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
     FlxTween.tween(PlayState.p1.noteCamsus.flashSprite, {scaleX: -PlayState.p1.noteCamsus.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p1.noteCamSplitsus.flashSprite, {scaleX: -PlayState.p1.noteCamSplitsus.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
     FlxTween.tween(PlayState.p2.noteCam.flashSprite, {scaleX: -PlayState.p2.noteCam.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p2.noteCamSplit.flashSprite, {scaleX: -PlayState.p2.noteCamSplit.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
     FlxTween.tween(PlayState.p2.noteCamsus.flashSprite, {scaleX: -PlayState.p2.noteCamsus.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
-    FlxTween.tween(PlayState.p2.noteCamSplitsus.flashSprite, {scaleX: -PlayState.p2.noteCamSplitsus.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
 }
 
 
@@ -355,13 +330,9 @@ function P1NoteHit(note)
             case 1: 
                 YShit = 50;
         }
-        for (i in 0...PlayState.p1.strums.length)
-        {
-            var arrow = PlayState.p1.strums.members[i];
-            var xtogoto = arrow.defaultX;
-            var ytogoto = arrow.defaultY;
-            FlxTween.tween(PlayState.p1.strums.members[i], {x: xtogoto + XShit, y: ytogoto + YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
-        }
+
+        FlxTween.tween(PlayState.p1.modifiers, {xOffset: XShit, yOffset: YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+        
     }
 
 }
@@ -384,13 +355,9 @@ function P2NoteHit(note) //for multi/play as oppenent
             case 1: 
                 YShit = 50;
         }
-        for (i in 0...PlayState.p2.strums.length)
-        {
-            var arrow = PlayState.p2.strums.members[i];
-            var xtogoto = arrow.defaultX;
-            var ytogoto = arrow.defaultY;
-            FlxTween.tween(PlayState.p2.strums.members[i], {x: xtogoto + XShit, y: ytogoto + YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
-        }
+
+        FlxTween.tween(PlayState.p2.modifiers, {xOffset: XShit, yOffset: YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+        
     }
 }
 ///////////////////////////////////
@@ -431,13 +398,8 @@ function P1CpuNoteHit(note) //for play as oppenent
             case 1: 
                 YShit = 50;
         }
-        for (i in 0...PlayState.p1.strums.length)
-        {
-            var arrow = PlayState.p1.strums.members[i];
-            var xtogoto = arrow.defaultX;
-            var ytogoto = arrow.defaultY;
-            FlxTween.tween(PlayState.p1.strums.members[i], {x: xtogoto + XShit, y: ytogoto + YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
-        }
+
+        FlxTween.tween(PlayState.p1.modifiers, {xOffset: XShit, yOffset: YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
     }
 }
 function P2CpuNoteHit(note)
@@ -459,13 +421,8 @@ function P2CpuNoteHit(note)
             case 1: 
                 YShit = 50;
         }
-        for (i in 0...PlayState.p2.strums.length)
-        {
-            var arrow = PlayState.p2.strums.members[i];
-            var xtogoto = arrow.defaultX;
-            var ytogoto = arrow.defaultY;
-            FlxTween.tween(PlayState.p2.strums.members[i], {x: xtogoto + XShit, y: ytogoto + YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
-        }
+
+        FlxTween.tween(PlayState.p2.modifiers, {xOffset: XShit, yOffset: YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
     }
 }
 function P3CpuNoteHit(note) //event notes

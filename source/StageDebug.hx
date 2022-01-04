@@ -2,6 +2,7 @@ package;
 
 
 
+import openfl.filters.ShaderFilter;
 import flixel.ui.FlxButton;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -29,7 +30,9 @@ import flixel.addons.ui.FlxUIDropDownMenu;
 import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
+import openfl.filters.ShaderFilter;
 using StringTools;
+import Shaders;
 
 import openfl.desktop.Clipboard;
 

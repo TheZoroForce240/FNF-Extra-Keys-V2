@@ -44,7 +44,8 @@ class Note extends FlxSprite
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
 	public var prevNote:Note;
-	
+	public var parentNote:Note;
+
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
 	public var sustainHit:Bool = false;
@@ -189,6 +190,7 @@ class Note extends FlxSprite
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
 	public var curAlpha:Float = 1;
+	public var noteDataToFollow:Int = 0;
 
 	////////////////////////////////////////////////////////////
 
@@ -224,10 +226,11 @@ class Note extends FlxSprite
 
 	//var StrumGroup:StrumLineGroup; //i think this can cause lag
 	public var beenFlipped:Bool = false;
+	public var curPos:Float = 0;
 
 	///////////////////////////////////////////////////////////
 
-	public function new(strumTime:Float, _noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Dynamic>, ?charter = false, ?_gfNote, ?_mustPress:Bool = false, ?_eventData:Array<String>, ?prevNote:Note)
+	public function new(strumTime:Float, _noteData:Int, ?noteType:Int = 0, ?sustainNote:Bool = false, ?_speed:Float = 1, ?_velocityData:Array<Dynamic>, ?charter = false, ?_gfNote, ?_mustPress:Bool = false, ?_eventData:Array<String>, ?prevNote:Note, ?parent:Note)
 	{
 		StrumLinefollowAngle = false;
 		followAngle = false;
@@ -262,8 +265,11 @@ class Note extends FlxSprite
 		if (prevNote == null)
 			prevNote = this;
 		this.noteType = noteType;
-		this.prevNote = prevNote; 
+		this.prevNote = prevNote;
 		isSustainNote = sustainNote;
+		
+		if (isSustainNote)
+			this.parentNote = parent;
 
 		if (_velocityData != null)
 		{
@@ -284,7 +290,6 @@ class Note extends FlxSprite
 				};
 			}
 		}
-
 
 		mustPress = _mustPress;
 		inCharter = charter;
@@ -340,6 +345,8 @@ class Note extends FlxSprite
 
 		if (isSustainNote && prevNote != null)
 			noteData = prevNote.noteData;
+
+		noteDataToFollow = noteData;
 
 		
 		if (!_mustPress)
@@ -478,6 +485,7 @@ class Note extends FlxSprite
 				if (strumTime <= Conductor.songPosition && !badNoteType)
 					wasGoodHit = true;
 			}
+			var timeToDelete = -450;
 	
 			if (strumTime - Conductor.songPosition < -450 && !inCharter) //forcefully remove all notes past this point, also how all sutains are removed to fix clipping
 				deleteShit();
@@ -512,6 +520,7 @@ class Note extends FlxSprite
 			strums = "player";
 		if (isGFNote)
 			strums = "gf";
+
 
 		PlayState.instance.removeNote(this, strums);
 	}
@@ -921,6 +930,7 @@ class Note extends FlxSprite
 		//var rectshit = FlxAngle.getPolarCoords((clipTo.x - this.x) / scale.x, (clipTo.y - this.y) / scale.y);
 		//var rectPos = FlxAngle.getCartesianCoords(rectshit., angle + 90);
 		//fuckYouRect.y = (clipTo.y - rectPos.y) / scale.y;
+
 		var angleshit = ((incomingAngle % 360) + 360) % 360; //do mod twice to make negative numbers positive
 
 		if (followAngle)
@@ -941,20 +951,10 @@ class Note extends FlxSprite
 			fuckYouRect.height -= fuckYouRect.y;
 			clipRect = fuckYouRect;
 		}
-		else if (down) 
+		else 
 		{
-			if (this.y > clipTo.y) //temp workaround while i figure out proper clipping
-				this.visible = false;
-		}
-		else if (left)
-		{
-			if (this.x < clipTo.x)
-				this.visible = false;
-		}
-		else if (right)
-		{
-			if (this.x > clipTo.x)
-				this.visible = false;
+			if (strumTime + Conductor.stepCrochet <= Conductor.songPosition)
+				visible = false; //dumb workaround while i figure out angled clipping
 		}
 	}
 }

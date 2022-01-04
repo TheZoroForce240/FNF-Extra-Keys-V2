@@ -20,20 +20,15 @@ class EventList
 {
     public static var Events:Array<Array<String>> = [
         ["none", "none"],
-        ["Move P1 Notes X", "Type in a calculation for the movement\nor select a preset."],
-        ["Move P1 Notes Y", "Type in a calculation for the movement\nor select a preset."],
-        ["Move P1 Notes Angle", "Type in a calculation for the movement\nor select a preset."],
-        ["Stop All P1 Movements", ""],
-        ["Move P2 Notes X", "Type in a calculation for the movement\nor select a preset."],
-        ["Move P2 Notes Y", "Type in a calculation for the movement\nor select a preset."],
-        ["Move P2 Notes Angle", "Type in a calculation for the movement\nor select a preset."],
-        ["Stop All P2 Movements", ""],
         ["Change P1 Mania", "Type the new Mania Value.\n(WARNING: the song mania HAS to be set to 9k to work!)"],
         ["Change P2 Mania", "Type the new Mania Value.\n(WARNING: the song mania HAS to be set to 9k to work!)"],
         ["Change Camera Beats", "Type in Cam Zoom amount, Hud Zoom amount, and how often it zooms(in beats)\nSeperate Each value with a comma, no Spaces."],
         ["P1 Cam Shake on Note Hit", "Type in the shake intensity, then the duration\nSeperate each value with a commma, no spaces."],
-        ["P2 Cam Shake on Note Hit", "Type in the shake intensity, then the duration\nSeperate each value with a commma, no spaces."]
-    ];
+        ["P2 Cam Shake on Note Hit", "Type in the shake intensity, then the duration\nSeperate each value with a commma, no spaces."],
+        ["Change P1 Modifier", "Type in the modifier name, then add a comma and\n type in the value of the modifier, no spaces btw"],
+        ["Change P2 Modifier", "Type in the modifier name, then add a comma and\n type in the value of the modifier, no spaces btw"],
+        ["Change P3 Modifier", "Type in the modifier name, then add a comma and\n type in the value of the modifier, no spaces btw\nOnly works if gf strums are enabled."]
+        ];
 
     public static var noteMovementsPresets:Array<Array<String>> = [
         ["Wiggle Notes X", "x + 32 * math.sin((currentBeat * 1) + i + 1)"],
@@ -111,6 +106,44 @@ class EventList
             case "P2 Cam Shake on Note Hit": 
                 var split:Array<String> = data.split(",");
                 ModchartUtil.P2CamShake = [Std.parseFloat(split[0]), Std.parseFloat(split[1])];
+            case "Change P1 Modifier": 
+                var split:Array<String> = data.split(",");
+                var value:Dynamic = 0.0;
+                if (split[1] == "false")
+                    value = false;
+                else if (split[1] == "true")
+                    value = true;
+                else
+                    value = Std.parseFloat(split[1]); //assume its a float??? i think floats will work with ints if there are any
+                 
+                if (ModchartUtil.modifierList.contains(split[0]))
+                    ModchartUtil.changeModifier(split[0], value, 1);
+            case "Change P2 Modifier": 
+                var split:Array<String> = data.split(",");
+                var value:Dynamic = 0.0;
+                if (split[1] == "false")
+                    value = false;
+                else if (split[1] == "true")
+                    value = true;
+                else
+                    value = Std.parseFloat(split[1]);
+                    
+                if (ModchartUtil.modifierList.contains(split[0]))
+                    ModchartUtil.changeModifier(split[0], value, 0);
+
+            case "Change P3 Modifier": 
+                var split:Array<String> = data.split(",");
+                var value:Dynamic = 0.0;
+                if (split[1] == "false")
+                    value = false;
+                else if (split[1] == "true")
+                    value = true;
+                else
+                    value = Std.parseFloat(split[1]);
+                    
+                if (ModchartUtil.modifierList.contains(split[0]))
+                    ModchartUtil.changeModifier(split[0], value, 2);
+                
             default: 
                 daNote.eventWasValid = false;
         }
@@ -128,7 +161,8 @@ class ModchartUtil
 
     public static var interp:Interp = new Interp();
 
-    public static function getCharacter(charactername):Boyfriend
+    //helper functions
+    public static function getCharacter(charactername):Boyfriend    
     {
         if (!PlayState.characters)
             return PlayState.boyfriend; //prevent crashes with extra characters when chracters are disabled
@@ -146,7 +180,6 @@ class ModchartUtil
 
         return null;
     }
-
     public static function getNoteFromID(id)
     {
         for (i in PlayState.instance.unspawnNotes)
@@ -185,30 +218,180 @@ class ModchartUtil
         return null;
     }
 
-    // epic modchart like effects using events instead of lua
 
-	////////////////////////////////////////////////////////////////
 
-    /*public static function ChangeArrowY(i:BabyArrow, Y:Float = 0)
-        i.y = Y;
-    public static function ChangeArrowX(i:BabyArrow, X:Float = 0)
-        i.x = X;
-    public static function ChangeArrowAngle(i:BabyArrow, Angle:Float = 0)
-        i.angle = Angle;
-    public static function ChangeArrowAlpha(i:BabyArrow, Alpha:Float = 0)
-        i.alpha = Alpha;
 
-    public static function resetArrowY(i:BabyArrow, Time:Float = 0.1)
-        FlxTween.tween(i, {y: i.defaultY}, Time);
-    public static function resetArrowX(i:BabyArrow, Time:Float = 0.1)
-        FlxTween.tween(i, {x: i.defaultX}, Time);
-    public static function resetArrowAngle(i:BabyArrow, Time:Float = 0.1)
-        FlxTween.tween(i, {angle: i.defaultAngle}, Time);
-    public static function resetArrowPos(i:BabyArrow, Time:Float = 0.1) //reset x and y
-        FlxTween.tween(i, {y: i.defaultY, x: i.defaultX}, Time);
-    public static function resetArrow(i:BabyArrow, Time:Float = 0.1) 
-        FlxTween.tween(i, {y: i.defaultY, x: i.defaultX, angle: i.defaultAngle}, Time);*/
 
+
+
+
+
+
+
+    //alright here the modifier shit
+    //modifier struct is in player.hx btw
+    public static function getModif(playernum:Int)
+    {
+        switch(playernum)
+        {
+            case 0: 
+                return PlayState.p2.modifiers;
+            case 1: 
+                return PlayState.p1.modifiers;
+            case 2: 
+                return PlayState.p3.modifiers;
+            default: 
+                return PlayState.p1.modifiers;
+        }
+    }
+    public static function getModifValues(playernum:Int)
+        {
+            switch(playernum)
+            {
+                case 0: 
+                    return PlayState.p2.modifValues;
+                case 1: 
+                    return PlayState.p1.modifValues;
+                case 2: 
+                    return PlayState.p3.modifValues;
+                default: 
+                    return PlayState.p1.modifValues;
+            }
+        }
+
+
+    public static function strumOffset(playernum:Int, noteData:Int, curMania:Int)
+    {
+        var xPos:Float = 0;
+        var yPos:Float = 0;
+        var ang:Float = 0;
+        var modif = getModif(playernum);
+
+        var modifValues = getModifValues(playernum);
+
+        if (modif.twist != 0)
+        {
+            if (noteData < PlayState.keyAmmo[curMania])
+                xPos += Note.noteWidths[curMania] * modif.twist;
+            else 
+                xPos -= Note.noteWidths[curMania] * modif.twist;
+        }
+
+        xPos += modif.xOffset;
+        yPos += modif.yOffset;
+
+
+        var noteDataOffsetx = Reflect.getProperty(modifValues, "xOffset" + noteData);
+        var noteDataOffsety = Reflect.getProperty(modifValues, "yOffset" + noteData);
+        var noteDataOffsetz = Reflect.getProperty(modifValues, "zOffset" + noteData);
+        xPos += noteDataOffsetx;
+        yPos += noteDataOffsety;
+        ang += noteDataOffsetz;
+        
+        //manual modifiers
+        if (modif.sinWaveX[0] != 0)
+            xPos += sinWave(modif.sinWaveX[0], modif.sinWaveX[1], noteData);
+        if (modif.sinWaveY[0] != 0)
+            yPos += sinWave(modif.sinWaveY[0], modif.sinWaveY[1], noteData);
+        if (modif.cosWaveX[0] != 0)
+            xPos += cosWave(modif.cosWaveX[0], modif.cosWaveX[1], noteData);
+        if (modif.cosWaveY[0] != 0)
+            yPos += cosWave(modif.cosWaveY[0], modif.cosWaveY[1], noteData);
+
+        if (modif.sinMoveX[0] != 0)
+            xPos += sinMove(modif.sinMoveX[0], modif.sinMoveX[1]);
+        if (modif.sinMoveY[0] != 0)
+            yPos += sinMove(modif.sinMoveY[0], modif.sinMoveY[1]);
+        if (modif.cosMoveX[0] != 0)
+            xPos += cosMove(modif.cosMoveX[0], modif.cosMoveX[1]);
+        if (modif.cosMoveY[0] != 0)
+            yPos += cosMove(modif.cosMoveY[0], modif.cosMoveY[1]);
+
+        if (modif.swing != 0)
+        {
+            yPos += cosMove(modif.cosMoveY[0], modif.cosMoveY[1]);
+        }
+
+        if (modif.dislocated != 0)
+        {
+            yPos += (0 + 25 * Math.cos(modif.dislocated * noteData));
+            xPos += (0 + 25 * Math.sin(modif.dislocated * noteData));
+        }
+        if (modif.chaos != 0)
+        {
+            yPos += (0 + (25*modif.chaos) * Math.cos(PlayState.instance.currentBeat * (noteData + 1) *(25*modif.chaos)));
+            xPos += (0 + (25*modif.chaos) * Math.sin(PlayState.instance.currentBeat * (noteData + 1) *(25*modif.chaos)));
+            ang += (0 + (25*modif.chaos) * Math.sin(PlayState.instance.currentBeat * (noteData + 1) *(25*modif.chaos)));
+        }
+        if (modif.spin != 0)
+            ang += 0 + 180 * Math.cos(PlayState.instance.currentBeat * (noteData + 1) * modif.spin);
+
+        if (modif.press != 0)
+        {
+            var pressoffset:Array<Float> = Reflect.getProperty(modifValues, "pressOffset" + noteData);
+            //trace(pressoffset + " " + noteData);
+            xPos += pressoffset[0];
+            yPos += pressoffset[1];
+            ang += pressoffset[2];
+        }
+
+        var bopoffset:Array<Float> = Reflect.getProperty(modifValues, "bopOffset" + noteData);
+        xPos += bopoffset[0];
+        yPos += bopoffset[1];
+        ang += bopoffset[2];
+
+        /*if (modif.clutter != 0)
+        {
+            xPos += ;
+        }*/
+            
+        return [xPos,yPos,ang];
+    }
+
+    public static function sinWave(range:Float, speed:Float, noteData:Int)
+        return 0 + range * Math.sin(PlayState.instance.currentBeat * speed * (noteData + 1));
+    public static function cosWave(range:Float, speed:Float, noteData:Int)
+        return 0 + range * Math.cos(PlayState.instance.currentBeat * speed * (noteData + 1));
+
+    public static function sinMove(range:Float, speed:Float)
+        return 0 + range * Math.sin(PlayState.instance.currentBeat * speed * Math.PI);
+    public static function cosMove(range:Float, speed:Float)
+        return 0 + range * Math.cos(PlayState.instance.currentBeat * speed * Math.PI);
+
+
+    public static function noteModifierShit(daNote:Note, playernum:Int)
+    {
+        var modif = getModif(playernum);
+
+        if (modif.ghostNotes != 0)
+        {
+            if (daNote.curPos <= Conductor.stepCrochet * modif.ghostNotes)
+                daNote.alpha = FlxMath.remapToRange(daNote.curPos, 0, Conductor.stepCrochet * modif.ghostNotes, 0, 1);
+        }
+        else if (modif.inverseGhostNotes != 0)
+        {
+            daNote.alpha = 0;
+            if (daNote.curPos <= Conductor.stepCrochet * modif.inverseGhostNotes)
+                daNote.alpha = FlxMath.remapToRange(daNote.curPos, 0, Conductor.stepCrochet * modif.inverseGhostNotes, 1, 0) * daNote.curAlpha;
+        }
+
+
+        if (modif.strumsFollowNotes != 0)
+        {
+            daNote.y = FlxMath.remapToRange(daNote.strumTime % (Conductor.stepCrochet * (32 * modif.strumsFollowNotes)), 0, Conductor.stepCrochet * (32 * modif.strumsFollowNotes), 0, FlxG.height * 2);
+            if (daNote.y > FlxG.height)
+                daNote.y = FlxMath.remapToRange(daNote.y, 0, FlxG.height, FlxG.height, 0) + FlxG.height;
+
+            daNote.y -= Note.noteWidths[daNote.curMania] / 2;
+
+            if (daNote.strumTime >= Conductor.songPosition + (Conductor.stepCrochet * 12))
+                daNote.alpha = 0.1 * daNote.curAlpha;
+        }
+    }
+    
+
+
+    //old shit i dont use anymore but still exists because
     public static function CalculateArrowShit(i:BabyArrow, ID:Int, strumnum:Int = 1, thingToCalculate:String = "X", beat:Float)
     {
         var CalculatedShit:Float = 0;
@@ -271,7 +454,7 @@ class ModchartUtil
         }
     }
 
-    function getEase(ease:String = '')
+    public static function getEase(ease:String = '')
     {
         switch (ease.toLowerCase())
         {
@@ -350,6 +533,66 @@ class ModchartUtil
             default: 
                 return FlxEase.linear;
         }
+    }
+
+
+
+    public static var modifierList = [
+        "yOffset",
+        "xOffset",
+        "StrumLinefollowAngle",
+        "incomingAngleIsStrumAngle",
+        "scrollAngle",
+        "sinWaveX",
+        "sinWaveY",
+        "cosWaveX",
+        "cosWaveY",
+        "sinMoveX",
+        "sinMoveY",
+        "cosMoveX",
+        "cosMoveY",
+        "noteAlpha",
+        "strumAlpha",
+        "twist",
+        "spin",
+        "ghostNotes",
+        "inverseGhostNotes",
+        "drugged",
+        "scramble",
+        "strumsFollowNotes",
+        "swing",
+        "dislocated",
+        "chaos",
+        "clutter",
+        "bop",
+        "press",
+        "jumpy"
+    ];
+
+    public static function changeModifier(name:String, value:Dynamic, playernum:Int)
+    {
+        var modif = getModif(playernum);
+        Reflect.setProperty(modif, name, value);
+    }
+
+    public static function changeModifierValue(name:String, value:Dynamic, playernum:Int)
+    {
+        var modif = getModifValues(playernum);
+        Reflect.setProperty(modif, name, value);
+    }
+
+    public static function getModifierValue(name:String, playernum:Int)
+    {
+        var modif = getModif(playernum);
+        //trace(name + Reflect.getProperty(modif, name));
+        return Reflect.getProperty(modif, name);
+    }
+
+    public static function getModifierValuesValue(name:String, playernum:Int) //value of a value what the fuck are my variable names
+    {
+        var modif = getModifValues(playernum);
+        //trace(name + Reflect.getProperty(modif, name));
+        return Reflect.getProperty(modif, name);
     }
 
 }

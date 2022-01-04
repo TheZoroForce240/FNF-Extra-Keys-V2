@@ -1,6 +1,7 @@
 package;
 
 
+import flixel.effects.FlxFlicker;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
@@ -33,6 +34,8 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
     var inCat:Bool = false;
     var curCategory:Array<Dynamic>; //actual category
     var daCat:String = "";
+
+    var warning:FlxText;
 	override function create()
     {	
         reloadOptions();
@@ -57,9 +60,10 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
         add(infoText);
         infoText.scrollFactor.set();
 
-        var warning = new FlxText(10, 10, 0, "Warning: Some settings require the song to be restarted!!!!");
-        warning.setFormat("VCR OSD Mono", 28, FlxColor.WHITE, RIGHT, OUTLINE, FlxColor.BLACK);
+        warning = new FlxText(10, 10, 0, "Warning: Some settings require the song to be restarted!!!!");
+        warning.setFormat("VCR OSD Mono", 16, FlxColor.RED, RIGHT, OUTLINE, FlxColor.BLACK);
         warning.scrollFactor.set();
+        warning.visible = false;
         add(warning);
 
         createText();
@@ -379,7 +383,7 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
         //make sure you dont mess up your commas lol
         categories = [
             ["Gameplay", "", "cat"],
-            ["Scrolls", "", "button"],
+            ["Scrolls", "", "cat"],
             ["Misc", "", "cat"],
             ["Keybinds", "", "cat"],
             ["P2 Keybinds", "", "cat"],
@@ -387,6 +391,12 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
             ["Customize HUD", "", "button"],
             ["Song Modifiers", "", "cat"]
             
+        ];
+
+        scrolls = [
+            ["P1 Downscroll", SaveData.downscroll, "toggle", "Flip Da Notes"],
+            ["P2 Downscroll", SaveData.P2downscroll, "toggle", "Flip Da Notes but for the second guy"],
+            ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"]
         ];
         //name, savedata, type of option, info
         gameplay = [ 
@@ -632,6 +642,8 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
                     //stick da shit here
             }
         }
+
+        FlxFlicker.flicker(warning, 1.5, 0.3, false);
         
 
         (cast (Lib.current.getChildAt(0), Main)).changeFPS(SaveData.fps);

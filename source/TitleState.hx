@@ -251,6 +251,12 @@ class TitleState extends MusicBeatState
 			FlxG.fullscreen = !FlxG.fullscreen;
 		}
 
+		if (FlxG.keys.justPressed.FIVE)
+			{
+				rewindAudio();
+			}
+
+
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
 
 		#if mobile
@@ -419,5 +425,15 @@ class TitleState extends MusicBeatState
 			remove(credGroup);
 			skippedIntro = true;
 		}
+	}
+
+	function rewindAudio():Void 
+	{
+		#if cpp
+		@:privateAccess
+		{
+			lime.media.openal.AL.sourcef(FlxG.sound.music._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, 1.3);
+		}
+		#end	
 	}
 }

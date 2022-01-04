@@ -108,6 +108,9 @@ class BabyArrow extends FlxSprite
 
         inPlayState = isPlayState;
 
+        this.ID = i;
+        this.curID = i;
+
         if (player == 2)
             maniaToUse = 0;
 
@@ -144,8 +147,125 @@ class BabyArrow extends FlxSprite
         if (SaveData.middlescroll && player == 0)
             scaleMulti *= 0.55;
 
+        createLane();
+        loadStrum(pathList[pathToUse]);
+
+        this.shader = HSV.shader;
         
-        var color = Note.frameN[maniaToUse][i];
+
+        setupStrum();
+        positionStrum();
+
+
+
+
+
+            /*switch (i) //dumb center scroll i did for a video
+            {
+                case 0: 
+                    angle -= 270;
+                case 1: 
+                    y += Note.swagWidth;
+                case 2: 
+                    x -= Note.swagWidth;
+                    y -= Note.swagWidth;
+                    angle -= 180;
+                case 3: 
+                    x -= Note.swagWidth;
+                    angle -= 90;
+                
+            }
+            y += Note.swagWidth * 2;
+            x += 50;*/
+
+
+            //y += 200;
+            //lane.angle = this.angle;
+
+
+
+            
+
+
+    }
+    public function positionStrum():Void 
+    {
+        this.x = 50;
+        x += Note.noteWidths[curMania] * curID * scaleMulti * widthMulti; 
+        switch (curMania)
+        {
+            case 2:
+                x -= Note.tooMuch;
+        }
+        if (SaveData.middlescroll && whichPlayer == 1)
+            x += ((FlxG.width / 2) * 0.5) + ((Note.noteWidths[curMania] * widthMulti) / 2);
+        else 
+            x += ((FlxG.width / 2) * whichPlayer);
+
+        if (whichPlayer == 2)
+        {
+            y = PlayState.gf.y - 300;
+            x = (PlayState.gf.x + (PlayState.gf.width / 2)) - (Note.noteWidths[0] * 2) + Note.noteWidths[0] * curID;
+        }
+
+        defaultX = this.x;
+        defaultY = this.y;
+        defaultAngle = this.angle;
+
+        if (lane != null)
+        {
+            lane.x = this.x + laneOffset[curMania];
+            lane.y = this.y - 300;
+        }
+
+        centerOfArrow = new FlxPoint(this.getGraphicMidpoint().x, this.getGraphicMidpoint().y);
+    }
+
+    private function setupStrum():Void 
+    {
+        if (whichPlayer != 2)
+            scrollFactor.set();
+        else 
+            scrollFactor.set(PlayState.gf.scrollFactor.x, PlayState.gf.scrollFactor.y); //gf notes same scroll as gf
+
+        if ((SaveData.downscroll && whichPlayer == 1) || (SaveData.P2downscroll && whichPlayer == 0))
+        {
+            scale.y *= -1;
+        }
+
+        
+
+        if (!PlayState.isStoryMode && inPlayState)
+        {
+            if (PlayState.instance.showStrumsOnStart)
+            {
+                y -= 10;
+                alpha = 0;
+                FlxTween.tween(this, {y: y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((curID * 4) / PlayState.keyAmmo[curMania]))});
+                if (lane != null)
+                {
+                    lane.alpha = 0;
+                    FlxTween.tween(lane, {alpha: SaveData.laneOpacity}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((curID * 4) / PlayState.keyAmmo[curMania]))});
+                } 
+            }
+        }
+        if (inPlayState)
+            if (!PlayState.instance.showStrumsOnStart)
+                alpha = 0;
+
+        if (SaveData.splitScroll && whichPlayer == 1)
+        {
+            this.cameras = [PlayState.p1.noteCam];
+        }
+        else if (SaveData.P2splitScroll && whichPlayer == 0)
+        {
+            this.cameras = [PlayState.p2.noteCam];
+        }
+    }
+
+    function createLane():Void 
+    {
+        var color = Note.frameN[curMania][curID];
         if (SaveData.arrowLanes == "Colored")
         {
             switch (color)
@@ -172,18 +292,23 @@ class BabyArrow extends FlxSprite
         }
 
 
-        if (isPlayState && (player == 1 || (player == 0 && PlayState.multiplayer || PlayState.flipped)) && SaveData.arrowLanes != "Off")
+        if (inPlayState && (whichPlayer == 1 || (whichPlayer == 0 && PlayState.multiplayer || PlayState.flipped)) && SaveData.arrowLanes != "Off")
         {
-            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[maniaToUse] * widthMulti), Std.int(FlxG.height * 2), flxcolorToUse);
+            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[curMania] * widthMulti), Std.int(FlxG.height * 2), flxcolorToUse);
             PlayState.instance.add(lane);
             lane.cameras = [PlayState.instance.camHUD];
             lane.alpha = SaveData.laneOpacity;
         }
-            
+    }
 
-        
+    public function loadStrum(path:String) //so you can change sprite mid song
+    {
+        frames = null;
+        animation.destroyAnimations();
 
-        switch (style)
+        var color = Note.frameN[PlayState.SONG.mania][ID];
+
+        switch (stylelol)
         {
             case 'pixel':
                 loadGraphic(Paths.image('noteassets/pixel/arrows-pixels'), true, 17, 17);
@@ -201,21 +326,16 @@ class BabyArrow extends FlxSprite
                 animation.add('dark', [17]);
 
                 defaultWidth = width;
-                setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelNoteScales[maniaToUse] * scaleMulti));
-                x += Note.noteWidths[maniaToUse] * i * scaleMulti * widthMulti; 
+                setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelNoteScales[curMania] * scaleMulti));
                 updateHitbox();
                 antialiasing = false;
-                animation.add('static', [colorFromData[maniaToUse][i]]);
-                animation.add('pressed', [colorFromData[maniaToUse][i] + 9, colorFromData[maniaToUse][i] + 18], 12, false);
-                animation.add('confirm', [colorFromData[maniaToUse][i] + 27, colorFromData[maniaToUse][i] + 36], 24, false);
+                animation.add('static', [colorFromData[PlayState.SONG.mania][ID]]);
+                animation.add('pressed', [colorFromData[PlayState.SONG.mania][ID] + 9, colorFromData[PlayState.SONG.mania][ID] + 18], 12, false);
+                animation.add('confirm', [colorFromData[PlayState.SONG.mania][ID] + 27, colorFromData[PlayState.SONG.mania][ID] + 36], 24, false);
 
             default:
-
-                var dir = dirArray[maniaToUse][i];
-                
-
-
-                frames = Paths.getSparrowAtlas(pathList[pathToUse]);
+                var dir = dirArray[PlayState.SONG.mania][ID];
+                frames = Paths.getSparrowAtlas(path);
                 animation.addByPrefix('green', 'arrowUP');
                 animation.addByPrefix('blue', 'arrowDOWN');
                 animation.addByPrefix('purple', 'arrowLEFT');
@@ -223,110 +343,17 @@ class BabyArrow extends FlxSprite
 
                 antialiasing = true;
                 defaultWidth = width;
-                setGraphicSize(Std.int(width * Note.noteScales[maniaToUse] * scaleMulti));
-                x += Note.noteWidths[maniaToUse] * i * scaleMulti * widthMulti; 
+                setGraphicSize(Std.int(width * Note.noteScales[curMania] * scaleMulti));
 
                 animation.addByPrefix('static', 'arrow' + dir);
                 animation.addByPrefix('pressed', color + ' press', 24, false);
                 animation.addByPrefix('confirm', color + ' confirm', 24, false);
-			}
-
-            this.shader = HSV.shader;
-
-            switch (maniaToUse)
-            {
-                case 2:
-                    x -= Note.tooMuch;
-            }
-
-			updateHitbox();
-            if (player != 2)
-			    scrollFactor.set();
-            else 
-                scrollFactor.set(PlayState.gf.scrollFactor.x, PlayState.gf.scrollFactor.y); //gf notes same scroll as gf
-
-			if ((SaveData.downscroll && player == 1) || (SaveData.P2downscroll && player == 0))
-            {
-                scale.y *= -1;
-            }
-
-			animation.play('static');
-			x += 50;
-            if (SaveData.middlescroll && player == 1 && isPlayState)
-			    x += ((FlxG.width / 2) * 0.5) + ((Note.noteWidths[maniaToUse] * widthMulti) / 2);
-            else 
-                x += ((FlxG.width / 2) * player);
-
-            if (!PlayState.isStoryMode && isPlayState)
-            {
-                if (PlayState.instance.showStrumsOnStart)
-                {
-                    y -= 10;
-                    alpha = 0;
-                    FlxTween.tween(this, {y: y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
-                    if (lane != null)
-                    {
-                        lane.alpha = 0;
-                        FlxTween.tween(lane, {alpha: SaveData.laneOpacity}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[maniaToUse]))});
-                    } 
-                }
-            }
-            if (isPlayState)
-                if (!PlayState.instance.showStrumsOnStart)
-                    alpha = 0;
-
-            if (SaveData.splitScroll && player == 1)
-            {
-                this.cameras = [PlayState.p1.noteCam];
-            }
-            else if (SaveData.P2splitScroll && player == 0)
-            {
-                this.cameras = [PlayState.p2.noteCam];
-            }
-
-
-            if (player == 2)
-            {
-                y = PlayState.gf.y - 300;
-                x = (PlayState.gf.x + (PlayState.gf.width / 2)) - (Note.noteWidths[0] * 2) + Note.noteWidths[0] * i;
-            }
-
-
-
-            /*switch (i) //dumb center scroll i did for a video
-            {
-                case 0: 
-                    angle -= 270;
-                case 1: 
-                    y += Note.swagWidth;
-                case 2: 
-                    x -= Note.swagWidth;
-                    y -= Note.swagWidth;
-                    angle -= 180;
-                case 3: 
-                    x -= Note.swagWidth;
-                    angle -= 90;
-                
-            }
-            y += Note.swagWidth * 2;
-            x += 50;*/
-
-            if (lane != null)
-            {
-                lane.x = this.x + laneOffset[maniaToUse];
-                lane.y = this.y - 300;
-            }
-            //y += 200;
-            //lane.angle = this.angle;
-
-            defaultX = this.x;
-            defaultY = this.y;
-            defaultAngle = this.angle;
-
-            centerOfArrow = new FlxPoint(this.getGraphicMidpoint().x, this.getGraphicMidpoint().y);
-
-
+                updateHitbox();
+		}
+        animation.play('static');
     }
+
+
     public function showStrum()
     {
         y -= 10;
@@ -368,6 +395,7 @@ class BabyArrow extends FlxSprite
             if (whichPlayer == 2)
                 scaleToUse = Note.noteScales[0];
 
+            centerOrigin();
             updateHitbox();
             offset.x = frameWidth / 2;
             offset.y = frameHeight / 2;
@@ -406,7 +434,7 @@ class BabyArrow extends FlxSprite
     public function moveKeyPositions(spr:FlxSprite, newMania:Int, player:Int):Void 
     {
         spr.x = 0;
-        spr.alpha = 1;
+        spr.visible = true;
 
         if ((SaveData.downscroll && player == 1) || (SaveData.P2downscroll && player == 0))
         {
@@ -415,7 +443,7 @@ class BabyArrow extends FlxSprite
         
         if (maniaSwitchPositions[newMania][spr.ID] == "alpha0")
         {
-            spr.alpha = 0;
+            spr.visible = false; //changed it visible rather than alpha so it doesnt interfere with modifiers
             curID = 10;
             spr.x += 2000; //make it offscreen to not fuck with the arrow lanes
         }            
@@ -476,21 +504,62 @@ class BabyArrow extends FlxSprite
         
         if (inPlayState)
         {
-            var StrumGroup:StrumLineGroup;
+            var StrumGroup:StrumLineGroup = PlayState.p1.strums;
+            var modif = PlayState.p1.modifiers;
 
             if (whichPlayer == 1) //playerStrums
-                StrumGroup = PlayState.p1.strums;
-            else if (whichPlayer == 2)
-                StrumGroup = PlayState.p3.strums;
-            else //cpuStrums
-                StrumGroup = PlayState.p2.strums;
-
-            if (Note.StrumLinefollowAngle)
             {
-                var distanceToCenter = StrumGroup.strumLineCenter.x - defaultX;
-                var strumPos = FlxAngle.getCartesianCoords(distanceToCenter, strumLineAngle + 90);
-                this.setPosition(StrumGroup.strumLineCenter.x - strumPos.x, StrumGroup.strumLineCenter.y - strumPos.y);
+                StrumGroup = PlayState.p1.strums;
+                modif = PlayState.p1.modifiers;
             }
+            else if (whichPlayer == 2)
+            {
+                StrumGroup = PlayState.p3.strums;
+                modif = PlayState.p3.modifiers;
+            }	
+            else
+            {
+                StrumGroup = PlayState.p2.strums;
+                modif = PlayState.p2.modifiers;
+            }
+
+            if (this.curID == 10) //from mania changes
+                return;
+
+            this.strumLineAngle = modif.scrollAngle;
+
+            var distanceToCenter = StrumGroup.strumLineCenter.x - defaultX;
+            var strumPos = FlxAngle.getCartesianCoords(distanceToCenter, strumLineAngle + 90);
+            this.setPosition(StrumGroup.strumLineCenter.x - strumPos.x, StrumGroup.strumLineCenter.y - strumPos.y);
+            this.angle = 0;
+
+            if (modif.StrumLinefollowAngle)
+                this.angle = this.strumLineAngle + 90;
+            var strumOffset = ModchartUtil.strumOffset(whichPlayer, curID, curMania);
+
+            this.x += strumOffset[0];
+            this.y += strumOffset[1];
+            this.angle += strumOffset[2];
+
+            this.alpha = modif.strumAlpha;
+            this.scrollFactor.set(modif.strumScrollFactor[0], modif.strumScrollFactor[1]); //can change scroll factor because funi
+
+            if (modif.boundStrums)
+            {
+                x = (x + FlxG.width) % FlxG.width;
+                y = (y + FlxG.height) % FlxG.height;
+            }
+
+            if (modif.strumsFollowNotes != 0)
+            {
+                y = FlxMath.remapToRange(Conductor.songPosition % (Conductor.stepCrochet * (32 * modif.strumsFollowNotes)), 0, Conductor.stepCrochet * (32 * modif.strumsFollowNotes), 0, FlxG.height * 2);
+                if (y > FlxG.height)
+                    y = FlxMath.remapToRange(y, 0, FlxG.height, FlxG.height, 0) + FlxG.height;
+
+                y -= Note.noteWidths[curMania] / 2;
+            }
+
+
 
         }
 

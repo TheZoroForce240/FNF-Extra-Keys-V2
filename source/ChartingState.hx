@@ -649,7 +649,7 @@ class ChartingState extends MusicBeatState
 		var EventInputText = new FlxUIInputText(10, 150, 260, curEventData[1], 8);
 		eventTypingShit = EventInputText;
 
-		var presetsList:Array<String> = [];
+		/*var presetsList:Array<String> = [];
 		for (i in 0...EventList.noteMovementsPresets.length)
 			presetsList.push(EventList.noteMovementsPresets[i][0]);
 		var presetData:Array<String> = [];
@@ -659,14 +659,14 @@ class ChartingState extends MusicBeatState
 		{
 			eventTypingShit.text = presetData[Std.parseInt(event)];
 		});
-		PresetDropDown.name = "presets";
+		PresetDropDown.name = "presets";*/
 
 		var eventListLabel = new FlxText(10,80,64,'Event List', 8);
-		var presetListLabel = new FlxText(10,180,64,'Presets', 12);
-		tab_group_event.add(PresetDropDown);
+		//var presetListLabel = new FlxText(10,180,64,'Presets', 12);
+		//tab_group_event.add(PresetDropDown);
 		tab_group_event.add(eventListLabel);
 		tab_group_event.add(EventInputText);
-		tab_group_event.add(presetListLabel);
+		//tab_group_event.add(presetListLabel);
 		tab_group_event.add(eventDropDown);
 		tab_group_event.add(eventInfoLabel);
 		tab_group_event.add(reminderLabel);
@@ -2700,8 +2700,6 @@ class ChartingState extends MusicBeatState
 		noteVelocity = [stepperNoteVelocity.value, curNoteVelocityTime, check_velStrum.checked];
 		var eventData:Array<String> = ["none", ""];
 		eventData = [curEventData[0], curEventData[1]];
-		if (noteData >= 0)
-			eventData = null;
 		//trace(eventData);
 
 		if (_song.mania == 2 || _song.mania == 5)
