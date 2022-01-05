@@ -139,6 +139,8 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
 
         FlxCamera.defaultCameras = [camGame];
 
+        QuickOptions.midSong = false;
+
 		if (SaveData.downscroll) 
 		{
 			camNotes.flashSprite.scaleY *= -1; //easy downscroll lol
@@ -291,7 +293,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                             infoText.text = "--Keybinds--\nClick a Note to edit its Keybind.\nFeel Free to test keybinds.\nPress BACKSPACE to Reset Keybinds.\nPress TAB to Change Selected Player\nSelected Player: P" + selectedPlayer + "\nPress ESC to go Back.\nPress 1-9 to Change amount of keys.";
                         case 1: 
                             for (ii in grpNotes.members)
-                                FlxTween.tween(ii, {x: 150}, 1, {ease: FlxEase.elasticInOut});
+                                FlxTween.tween(ii, {x: 150}, 1, {ease: FlxEase.cubeInOut});
                             curMenu = 'notes';
                             infoText.text = "--Note Customization--\nClick a Note to Select it.\nUse the Sliders to Change colors, \nand other options to change extra attributes.\nPress ESC to go Back.\nPress 1-9 to Change amount of keys.";
                         case 2: 
@@ -306,7 +308,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                     }
                     if (i != 2)
                         for (ii in grpMenuList.members)
-                            FlxTween.tween(ii, {x: 2000}, 1, {ease: FlxEase.elasticInOut});  //moves the menu text to the side
+                            FlxTween.tween(ii, {x: 2000}, 1, {ease: FlxEase.cubeInOut});  //moves the menu text to the side
                 }
             }
             for (i in 0...NotesList.length)
@@ -393,11 +395,11 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
                     infoText.text = "--Options--\nClick an option to enter that menu.\nFeel Free to test keybinds.\nPress ESC to go Back.\nPress 1-9 to Change amount of keys.";
                     waitingForInput = false;
                     for (i in grpMenuList.members)
-                        FlxTween.tween(i, {x: 150}, 1, {ease: FlxEase.elasticInOut});  //tweeeeeeeeeeeeeeeeeeeeens
+                        FlxTween.tween(i, {x: 150}, 1, {ease: FlxEase.cubeInOut});  //tweeeeeeeeeeeeeeeeeeeeens
                     for (i in grpNotes.members)
-                        FlxTween.tween(i, {x: 2000}, 1, {ease: FlxEase.elasticInOut});  
+                        FlxTween.tween(i, {x: 2000}, 1, {ease: FlxEase.cubeInOut});  
                     for (i in grpSettings.members)
-                        FlxTween.tween(i, {x: 2000}, 1, {ease: FlxEase.elasticInOut});  
+                        FlxTween.tween(i, {x: 2000}, 1, {ease: FlxEase.cubeInOut});  
                 }
             }
             if (FlxG.mouse.overlaps(notes.members[curSelectedNote]) && FlxG.mouse.justPressed && curMenu == 'keybinds')
@@ -507,7 +509,7 @@ class CustomizationState extends MusicBeatState //i literally copied like half o
             item.y = 350;
         }
         updateColors();
-        FlxTween.tween(notes.members[curSelectedNote], {y: 320}, 0.2, {ease: FlxEase.expoInOut});
+        FlxTween.tween(notes.members[curSelectedNote], {y: 320}, 0.2, {ease: FlxEase.cubeInOut});
         selectedNote.animation.play(Note.frameN[maniaToChange][curSelectedNote] + 'Scroll');
 
         hue = SaveData.noteColors[BabyArrow.colorFromData[maniaToChange][curSelectedNote]][0];

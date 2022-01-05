@@ -53,6 +53,8 @@ class FreeplayState extends MusicBeatState
 
 		var initSonglist = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
 
+		QuickOptions.midSong = false;
+
 		#if !sys
 		useAutoDiffSystem = false;
 		#end

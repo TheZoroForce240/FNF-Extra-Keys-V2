@@ -306,7 +306,7 @@ class BabyArrow extends FlxSprite
         frames = null;
         animation.destroyAnimations();
 
-        var color = Note.frameN[PlayState.SONG.mania][ID];
+        var color = Note.frameN[curMania][this.ID];
 
         switch (stylelol)
         {
@@ -329,12 +329,12 @@ class BabyArrow extends FlxSprite
                 setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelNoteScales[curMania] * scaleMulti));
                 updateHitbox();
                 antialiasing = false;
-                animation.add('static', [colorFromData[PlayState.SONG.mania][ID]]);
-                animation.add('pressed', [colorFromData[PlayState.SONG.mania][ID] + 9, colorFromData[PlayState.SONG.mania][ID] + 18], 12, false);
-                animation.add('confirm', [colorFromData[PlayState.SONG.mania][ID] + 27, colorFromData[PlayState.SONG.mania][ID] + 36], 24, false);
+                animation.add('static', [colorFromData[curMania][ID]]);
+                animation.add('pressed', [colorFromData[curMania][ID] + 9, colorFromData[curMania][ID] + 18], 12, false);
+                animation.add('confirm', [colorFromData[curMania][ID] + 27, colorFromData[curMania][ID] + 36], 24, false);
 
             default:
-                var dir = dirArray[PlayState.SONG.mania][ID];
+                var dir = dirArray[curMania][ID];
                 frames = Paths.getSparrowAtlas(path);
                 animation.addByPrefix('green', 'arrowUP');
                 animation.addByPrefix('blue', 'arrowDOWN');

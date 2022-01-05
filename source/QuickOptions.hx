@@ -36,6 +36,9 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
     var daCat:String = "";
 
     var warning:FlxText;
+
+    public static var midSong:Bool = false;
+
 	override function create()
     {	
         reloadOptions();
@@ -395,26 +398,26 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
 
         scrolls = [
             ["P1 Downscroll", SaveData.downscroll, "toggle", "Flip Da Notes"],
-            ["P2 Downscroll", SaveData.P2downscroll, "toggle", "Flip Da Notes but for the second guy"],
+            ["P2 Downscroll", SaveData.P2downscroll, "toggle", "Flip Da Notes but for the oppenent/other player"],
             ["Middlescroll", SaveData.middlescroll, "toggle", "Center your Notes"]
         ];
         //name, savedata, type of option, info
         gameplay = [ 
             ["Ghost Tapping", SaveData.ghost, "toggle", "Turning on this means you dont miss when misspressing a note"],
-            ["Scroll Speed", SaveData.ScrollSpeed, "slider", "Change the default scroll speed (does not include notes changed by the chart)"],
+            ["Scroll Speed", SaveData.ScrollSpeed, "slider", "Change the default scroll speed (does not include notes changed by the chart)\n1 = default speed."],
             ["Casual Mode", SaveData.casual, "toggle", "More Spammable Input, Heal from Sustains and no health loss from bad accuracy"],
             ["Multiplayer", SaveData.multiplayer, "toggle", "Turn on to play with a friend locally\n(or just play both side because you have no friends)"],
-            ["Strumtime Offset", SaveData.offset, "slider", "offset notes to match your audio delay"]
+            ["Strumtime Offset", SaveData.offset, "slider", "Offset notes to match your audio delay"]
         ];
 
         misc = [ 
-            ["Note Splash", SaveData.noteSplash, "toggle", "Turn on the funni effect when hitting sicks"],
-            ["FPS Cap", SaveData.fps, "slider", "Turn up for more frames"],
+            ["Note Splash", SaveData.noteSplash, "toggle", "Enables the splash effect when hitting sicks"],
+            ["FPS Cap", SaveData.fps, "slider", "(game is more stable at 60)"],
             ["Note Quantization", SaveData.noteQuant, "toggle", "Notes are colored based on the beat\nNote: disables note customization"],
             ["Camera Movements on Note Hits", SaveData.noteMovements, "toggle", "the thing that every mod does now"],
             ["Scale Speed with Mania", SaveData.speedScaling, "toggle", "Scales down the speed based on note scale \n(so the same scroll speed should feel mostly the same for every mania)"],
-            ["Enable Characters", PlayState.characters, "toggle", "(resets on restart)"],
-            ["Enable Backgrounds", PlayState.backgrounds, "toggle", "(resets on restart)"]
+            ["Enable Characters", PlayState.characters, "toggle", "(this resets on restart)"],
+            ["Enable Backgrounds", PlayState.backgrounds, "toggle", "(this resets on restart)"]
         ];
     
         keybinds = [
@@ -496,16 +499,15 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
         ];
     
         randomization = [
-            ["Randomize Notes", SaveData.randomNotes, "toggle", "what else do you think it does"],
-            ["Randomize Note Speed", SaveData.randomNoteSpeed, "toggle", "yes pain"],
-            ["Randomize Note Velocity", SaveData.randomNoteVelocity, "toggle", "now its even worse"],
-            ["Hellchart", SaveData.Hellchart, "toggle", "oh fuck it gets worse"],
-            ["Play As Oppenent", SaveData.flip, "toggle", "figure it out lol"],
-            ["Song Speed Multi", PlayState.SongSpeedMultiplier, "slider", "change the song speed"],
-            ["Random Speed Change", PlayState.RandomSpeedChange, "toggle", "randomly change the speed"],
-            ["Allow Note Types", PlayState.allowNoteTypes, "toggle", "enables note types"],
-            ["Random Note Incoming Angles", PlayState.randomNoteAngles, "toggle", "pain"],
-            ["Rainbow Notes", PlayState.rainbowNotes, "toggle", "Rainbow Road"]
+            ["Randomize Notes", SaveData.randomNotes, "toggle", "Randomizes note positions"],
+            ["Randomize Note Speed", SaveData.randomNoteSpeed, "toggle", "Each Note has a different scroll speed"],
+            ["Randomize Note Velocity", SaveData.randomNoteVelocity, "toggle", "Each Note will change speed at a random time"],
+            ["Hellchart", SaveData.Hellchart, "toggle", "Turns any song into 8k and you play both sides"],
+            ["Play As Oppenent", SaveData.flip, "toggle", "You play as the oppenent"],
+            ["Song Speed Multi", PlayState.SongSpeedMultiplier, "slider", "Change the song speed"],
+            ["Random Speed Change", PlayState.RandomSpeedChange, "toggle", "Speed will randomly change throughout the song"],
+            ["Allow Note Types", PlayState.allowNoteTypes, "toggle", "Enables note types"],
+            ["Random Note Incoming Angles", PlayState.randomNoteAngles, "toggle", "Each note will come at a different angle, kinda unfair tbh"]
         ];
 
         switch (daCat)
@@ -643,7 +645,8 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
             }
         }
 
-        FlxFlicker.flicker(warning, 1.5, 0.3, false);
+        if (midSong)
+            FlxFlicker.flicker(warning, 5, 0.3, false);
         
 
         (cast (Lib.current.getChildAt(0), Main)).changeFPS(SaveData.fps);
