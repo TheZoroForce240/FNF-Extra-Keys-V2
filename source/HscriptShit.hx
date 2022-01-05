@@ -45,7 +45,7 @@ class HscriptShit //funni modcharts
     public function new (path:String)
     {
         #if sys
-		if (FileSystem.exists(path))
+		if (FileSystem.exists(path) && PlayState.modcharts)
 		{
             loadScript(path);
             enabled = true;

@@ -415,9 +415,10 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
             ["FPS Cap", SaveData.fps, "slider", "(game is more stable at 60)"],
             ["Note Quantization", SaveData.noteQuant, "toggle", "Notes are colored based on the beat\nNote: disables note customization"],
             ["Camera Movements on Note Hits", SaveData.noteMovements, "toggle", "the thing that every mod does now"],
-            ["Scale Speed with Mania", SaveData.speedScaling, "toggle", "Scales down the speed based on note scale \n(so the same scroll speed should feel mostly the same for every mania)"],
-            ["Enable Characters", PlayState.characters, "toggle", "(this resets on restart)"],
-            ["Enable Backgrounds", PlayState.backgrounds, "toggle", "(this resets on restart)"]
+            ["Scale Speed with Mania", SaveData.speedScaling, "toggle", "Scales down the speed based on note scale \n(so the same scroll speed should feel mostly the same for every mania)\nWon't work with mania changes."],
+            ["Characters", PlayState.characters, "toggle", "(this resets on restart)"],
+            ["Backgrounds", PlayState.backgrounds, "toggle", "(this resets on restart)"],
+            ["Modcharts", PlayState.modcharts, "toggle", "Disabling modcharts could break some mods.\n(this resets on restart)"]
         ];
     
         keybinds = [
@@ -635,10 +636,12 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
                     PlayState.randomNoteAngles = curCategory[i][1]; 
                 case "Rainbow Notes":
                     PlayState.rainbowNotes = curCategory[i][1]; 
-                case "Enable Characters":
+                case "Characters":
                     PlayState.characters = curCategory[i][1]; 
-                case "Enable Backgrounds":
+                case "Backgrounds":
                     PlayState.backgrounds = curCategory[i][1]; 
+                case "Modcharts":
+                    PlayState.modcharts = curCategory[i][1]; 
 ////////////////////////////////////////////////////////////////////////////////////// stick ur custom options here
                 case "your option": 
                     //stick da shit here

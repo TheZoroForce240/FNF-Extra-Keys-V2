@@ -121,6 +121,7 @@ class PlayState extends MusicBeatState
 	public var legacyModcharts:Bool = false; //id prefer to use new modcharts rather than shitty event notes
 	public static var characters:Bool = true;
 	public static var backgrounds:Bool = true;
+	public static var modcharts:Bool = true;
 
 	public static var StrumLineStartY:Float = 50;
 	public static var healthToDieOn:Float = 0;
