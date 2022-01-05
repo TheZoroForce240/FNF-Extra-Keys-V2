@@ -28,7 +28,7 @@ class NoteSplash extends FlxSprite
 		}
 		antialiasing = true;
 		updateHitbox();
-		makeSplash(nX, nY, color, 1, [PlayState.p1.noteCam], [0,0,0,0]);
+		makeSplash(nX, nY, color, 1, [PlayState.p1.noteCams[0]], [0,0,0,0]);
 		this.shader = HSV.shader;
 		
 	}

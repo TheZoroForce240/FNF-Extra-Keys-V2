@@ -156,6 +156,9 @@ class PlayState extends MusicBeatState
 	public static var bfDefaultCamOffset:Array<Int> = [-100, -100];
 	public static var dadDefaultCamOffset:Array<Int> = [150, 100];
 
+
+	public var modchartStorage:FlxTypedGroup<Dynamic>;
+
 	public var extraCharactersList:Array<String> = [];
 	public static var extraCharacters:FlxTypedGroup<Boyfriend>;
 	public var p1ActiveCharacters:Array<String> = ["bf"];
@@ -165,6 +168,7 @@ class PlayState extends MusicBeatState
 	var oppenentColors:Array<Array<Float>>; //oppenents arrow colors and assets
 	public var gfSpeed:Int = 1;
 	private var combinedHealth:Float = 1; //dont mess with this using modcharts
+	private var missSounds:Array<FlxSound> = [];
 
 	public var currentBeat:Float;
 	public var overrideCam:Bool = false;
@@ -305,6 +309,9 @@ class PlayState extends MusicBeatState
 		if (modchartScript.enabled)
 			modchartScript.call(tfisthis, shitToGoIn); //because
 	}
+
+	public var amountOfNoteCams = 1; //for funni effects, make sure the change this in loadScript(), otherwise it wont work and will prob crash
+
 	override public function create()
 	{
 		instance = this;
@@ -332,6 +339,20 @@ class PlayState extends MusicBeatState
 
 		p1.resetStats();
 		p2.resetStats();
+
+		for (i in 0...3)
+		{
+			var missSound = new FlxSound().loadEmbedded(Paths.sound('missnote' + (i + 1)));
+			FlxG.sound.list.add(missSound);
+			missSounds.push(missSound);
+
+			missSound.onComplete = function()
+			{
+				missSound.volume = 0;
+				missSound.stop();
+			}
+		}
+
 
 		beatCamZoom = 0.015;
 		beatCamHUD = 0.03;
@@ -386,13 +407,19 @@ class PlayState extends MusicBeatState
 
 		if (SaveData.downscroll) //im not sure if this is the smartest or the stupidest way of doing downscroll
 		{
-			p1.noteCam.flashSprite.scaleY *= -1;
-			p1.noteCamsus.flashSprite.scaleY *= -1;
+			for (i in 0...amountOfNoteCams)
+			{
+				p1.noteCams[i].flashSprite.scaleY *= -1;
+				p1.noteCamsSus[i].flashSprite.scaleY *= -1;
+			}
 		}	
 		if (SaveData.P2downscroll) //well it works lol
 		{
-			p2.noteCam.flashSprite.scaleY *= -1;
-			p2.noteCamsus.flashSprite.scaleY *= -1;
+			for (i in 0...amountOfNoteCams)
+			{
+				p2.noteCams[i].flashSprite.scaleY *= -1;
+				p2.noteCamsSus[i].flashSprite.scaleY *= -1;
+			}
 		}
 			
 
@@ -717,6 +744,8 @@ class PlayState extends MusicBeatState
 		}
 		StagePiecesFRONT = new FlxTypedGroup<StagePiece>();
 		add(StagePiecesFRONT);
+
+		modchartStorage = new FlxTypedGroup<Dynamic>();
 
 		if (!stageException && backgrounds)
 		{
@@ -2457,6 +2486,10 @@ class PlayState extends MusicBeatState
 				gamepadCheck(gamepad);
 			keyShit();
 		}
+
+		PlayState.p1.updateCams();
+		PlayState.p2.updateCams();
+		PlayState.p3.updateCams();
 			
 
 		/*#if debug
@@ -2985,7 +3018,7 @@ class PlayState extends MusicBeatState
 
 			statsToUse.songScore -= 10;
 
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+			playMissSound(FlxG.random.int(0,2));
 
 			var missAnim = 'sing' + sDir[mania][direction] + 'miss';
 
@@ -3090,7 +3123,7 @@ class PlayState extends MusicBeatState
 
 			statsToUse.songScore -= 10;
 
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+			playMissSound(FlxG.random.int(0,2));
 
 			var missAnim = 'sing' + sDir[mania][direction] + 'miss';
 
@@ -4639,6 +4672,14 @@ class PlayState extends MusicBeatState
         }, ease: easeToUse, onComplete: function(tween:FlxTween) {
             ModchartUtil.changeModifier(modifToChange, modifValue, playernum);
         }});
+	}
+
+	private function playMissSound(n:Int)
+	{
+		trace("playing miss sound: " + n);
+		trace(missSounds.length);
+		missSounds[n].play();
+		missSounds[n].volume = FlxG.random.float(0.1, 0.2);
 	}
 
 

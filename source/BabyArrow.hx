@@ -255,11 +255,11 @@ class BabyArrow extends FlxSprite
 
         if (SaveData.splitScroll && whichPlayer == 1)
         {
-            this.cameras = [PlayState.p1.noteCam];
+            this.cameras = PlayState.p1.getNoteCams();
         }
         else if (SaveData.P2splitScroll && whichPlayer == 0)
         {
-            this.cameras = [PlayState.p2.noteCam];
+            this.cameras = PlayState.p2.getNoteCams();
         }
     }
 
@@ -466,11 +466,11 @@ class BabyArrow extends FlxSprite
 
         if (SaveData.splitScroll && player == 1)
         {
-            this.cameras = [PlayState.p1.noteCam];
+            this.cameras = PlayState.p1.getNoteCams();
         }
         else if (SaveData.P2splitScroll && player == 0)
         {
-            this.cameras = [PlayState.p2.noteCam];
+            this.cameras = PlayState.p2.getNoteCams();
         }
 
         if ((player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")

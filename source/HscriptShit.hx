@@ -31,6 +31,9 @@ import sys.io.File;
 import sys.FileSystem;
 #end
 import WiggleEffect.WiggleEffectType;
+import openfl.filters.ShaderFilter;
+import Shaders.HSVEffect;
+import Shaders.HSVShader;
 
 
 class HscriptShit //funni modcharts
@@ -165,6 +168,9 @@ class HscriptShit //funni modcharts
         interp.variables.set("ColorPresets", ColorPresets);
         interp.variables.set("SaveData", SaveData);
         interp.variables.set("Application", Application);
+        interp.variables.set("ShaderFilter", ShaderFilter);
+        interp.variables.set("HSVEffect", HSVEffect);
+        interp.variables.set("HSVShader", HSVShader);
 
 
 

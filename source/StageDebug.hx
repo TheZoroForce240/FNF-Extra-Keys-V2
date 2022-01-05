@@ -142,6 +142,9 @@ class StageDebug extends MusicBeatState
         FlxCamera.defaultCameras = [camGame];
 
 
+        //camGame.setFilters([new ShaderFilter(rayShit.shader)]);
+
+
         var piecetabs = [
 			{name: "Piece", label: 'Piece'},
 			{name: "Anims", label: 'Anims'}
@@ -358,6 +361,9 @@ class StageDebug extends MusicBeatState
 
         Stage_UI.addGroup(tab_group_stage);
     }
+
+    var rayx = 0;
+    var rayy = 0;
 
     override function update(elapsed:Float)
     {

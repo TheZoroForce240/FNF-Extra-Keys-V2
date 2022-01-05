@@ -106,7 +106,6 @@ class TitleState extends MusicBeatState
 		if (FlxG.save.data.volume != null)
 			FlxG.sound.volume = FlxG.save.data.volume;
 
-
 	}
 
 	var logoBl:FlxSprite;
@@ -353,7 +352,9 @@ class TitleState extends MusicBeatState
 	{
 		super.beatHit();
 
-		logoBl.animation.play('bump');
+		if (logoBl != null)
+			logoBl.animation.play('bump');
+
 		danceLeft = !danceLeft;
 
 		if (danceLeft)

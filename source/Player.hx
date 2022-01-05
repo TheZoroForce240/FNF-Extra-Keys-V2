@@ -149,8 +149,8 @@ class Player
     }
 
     public var playernum:Int;
-    public var noteCam:FlxCamera;
-    public var noteCamsus:FlxCamera;    //so i can have wiggle sustains
+    public var noteCams:Array<FlxCamera> = [];
+    public var noteCamsSus:Array<FlxCamera> = [];    //so i can have wiggle sustains
     public var char:Boyfriend;
     public var isCpu:Bool = true;
 
@@ -158,21 +158,45 @@ class Player
     {
         playernum = player;
     }
+	public function updateCams()
+    {
+        for (i in 0...PlayState.instance.amountOfNoteCams)
+        {
+            if (noteCamsSus[i] != null) //stop crashing
+            {
+                noteCamsSus[i].x = noteCams[i].x; //so sustain cam is always in same place as regaulr note cam
+                noteCamsSus[i].y = noteCams[i].y;
+                noteCamsSus[i].angle = noteCams[i].angle;
+            }
 
+        }
+    }
 
     public function createCams()
     {
-        noteCam = new FlxCamera();
-		noteCam.bgColor.alpha = 0;
+        for (i in 0...PlayState.instance.amountOfNoteCams)
+        {
+            var noteCam = new FlxCamera();
+            noteCam.bgColor.alpha = 0;
+            noteCams.push(noteCam);
 
-        noteCamsus = new FlxCamera();
-		noteCamsus.bgColor.alpha = 0;
+            var noteCamSus = new FlxCamera();
+            noteCamSus.bgColor.alpha = 0;
+            noteCamsSus.push(noteCamSus);
+        }
+
     }
     public function addCams()
     {
-        FlxG.cameras.add(noteCam);
-        FlxG.cameras.add(noteCamsus);
-        noteCamsus.setFilters([new ShaderFilter(wiggleShit.shader)]);
+        for (i in 0...PlayState.instance.amountOfNoteCams)
+        {
+            FlxG.cameras.add(noteCams[i]);
+            FlxG.cameras.add(noteCamsSus[i]);
+
+            noteCamsSus[i].setFilters([new ShaderFilter(wiggleShit.shader)]);
+        }
+
+        
     }
     public function resetStats()
     {
@@ -199,10 +223,7 @@ class Player
 
     public function downscrollCheck(downscroll:Bool)
     {
-        if (downscroll)
-        {
-            noteCam.flashSprite.scaleY *= 1;
-        }
+
     }
 
     public function createStrums()
@@ -211,9 +232,15 @@ class Player
     }
     public function setNoteCams()
     {
-        strums.noteSplashes.cameras = [noteCam];
-        strums.cameras = [noteCam];
-        strums.notes.cameras = [noteCam];
+        strums.noteSplashes.cameras = [];
+        strums.cameras = [];
+        strums.notes.cameras = [];
+        for (i in 0...PlayState.instance.amountOfNoteCams)
+        {
+            strums.noteSplashes.cameras.push(noteCams[i]);
+            strums.cameras.push(noteCams[i]);
+            strums.notes.cameras.push(noteCams[i]);
+        }
     }
     public function addNotes()
     {
@@ -222,12 +249,30 @@ class Player
     }
     public function snapCams(camHUD:FlxCamera)
     {
-        noteCam.x = camHUD.x; //so they match up when it moves, pretty much will just be for modcharts and shit
-		noteCam.y = camHUD.y;
-		noteCam.angle = camHUD.angle;
-        noteCamsus.x = camHUD.x;
-		noteCamsus.y = camHUD.y;
-		noteCamsus.angle = camHUD.angle;
+        for (i in 0...PlayState.instance.amountOfNoteCams)
+        {
+            noteCams[i].x = camHUD.x; //so they match up when it moves, pretty much will just be for modcharts and shit
+            noteCams[i].y = camHUD.y;
+            noteCams[i].angle = camHUD.angle;
+            noteCamsSus[i].x = camHUD.x; //so they match up when it moves, pretty much will just be for modcharts and shit
+            noteCamsSus[i].y = camHUD.y;
+            noteCamsSus[i].angle = camHUD.angle;
+        }
+    }
+    public function getNoteCams(sus:Bool = false)
+    {
+        var cams:Array<FlxCamera> = [];
+        if (!sus)
+        {
+            for (i in 0...PlayState.instance.amountOfNoteCams)
+                cams.push(noteCams[i]);
+        }
+        else
+        {
+            for (i in 0...PlayState.instance.amountOfNoteCams)
+                cams.push(noteCamsSus[i]);
+        }
+        return cams;
     }
 
     public function tweenModifier(modifToChange:String, modifValue:Dynamic, ease:String = "cubeInOut", ?time:Float)

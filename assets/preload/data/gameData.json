@@ -154,7 +154,7 @@
         "badTiming": 0.55,
         "goodTiming": 0.3,
         "healthFromAnyHit": 0.02,
-        "healthFromRating": [0.07, 0.035, -0.07, -0.15],
+        "healthFromRating": [0.03, 0.015, -0.07, -0.15],
         "healthLossFromMiss": 0.15,
         "healthLossFromSustainMiss": 0.03,
         "healthLossFromMissPress": 0.04,

@@ -401,15 +401,15 @@ class Note extends FlxSprite
 		{
 			if (mustPress && !inCharter)
 			{
-				this.cameras = [PlayState.p1.noteCam];
+				this.cameras = PlayState.p1.getNoteCams();
 				if (isSustainNote)
-					this.cameras = [PlayState.p1.noteCamsus];
+					this.cameras = PlayState.p1.getNoteCams(true);
 			}
 			else if (!mustPress && !inCharter)
 			{
-				this.cameras = [PlayState.p2.noteCam];
+				this.cameras = PlayState.p2.getNoteCams();
 				if (isSustainNote)
-					this.cameras = [PlayState.p2.noteCamsus];			
+					this.cameras = PlayState.p2.getNoteCams(true);			
 			}
 		}
 
