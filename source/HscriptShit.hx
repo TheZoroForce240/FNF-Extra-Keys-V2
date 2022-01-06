@@ -34,7 +34,8 @@ import WiggleEffect.WiggleEffectType;
 import openfl.filters.ShaderFilter;
 import Shaders.HSVEffect;
 import Shaders.HSVShader;
-
+import Shaders.RayMarchEffect;
+import Shaders.RayMarchShader;
 
 class HscriptShit //funni modcharts
 {
@@ -125,6 +126,8 @@ class HscriptShit //funni modcharts
         interp.variables.set("characterMade", function (character:Character) {});
         interp.variables.set("onManiaChange", function (mania:Int) {});
         interp.variables.set("onStrumsGenerated", function (strums:StrumLineGroup) {});
+        interp.variables.set("StrumOffsets", function (strum:BabyArrow) {});
+        interp.variables.set("NoteOffsets", function (note:Note) {});
 
         interp.variables.set("instance", PlayState.instance); //dont think this works but who cares
         interp.variables.set("PlayState", PlayState);
@@ -171,6 +174,8 @@ class HscriptShit //funni modcharts
         interp.variables.set("ShaderFilter", ShaderFilter);
         interp.variables.set("HSVEffect", HSVEffect);
         interp.variables.set("HSVShader", HSVShader);
+        interp.variables.set("RayMarchEffect", RayMarchEffect);
+        interp.variables.set("RayMarchShader", RayMarchShader);
 
 
 

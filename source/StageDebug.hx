@@ -72,6 +72,8 @@ class StageDebug extends MusicBeatState
     public static var instance:StageDebug;
     var dadCharacter:String = "dad";
 
+    var rayShit:RayMarchEffect = new RayMarchEffect();
+
     public function new(daStage:String = 'stage', _dad:String = "dad")
     {
         super();
@@ -142,7 +144,7 @@ class StageDebug extends MusicBeatState
         FlxCamera.defaultCameras = [camGame];
 
 
-        //camGame.setFilters([new ShaderFilter(rayShit.shader)]);
+        camGame.setFilters([new ShaderFilter(rayShit.shader)]);
 
 
         var piecetabs = [
@@ -362,8 +364,8 @@ class StageDebug extends MusicBeatState
         Stage_UI.addGroup(tab_group_stage);
     }
 
-    var rayx = 0;
-    var rayy = 0;
+    var rayx:Float = 0;
+    var rayy:Float = 0;
 
     override function update(elapsed:Float)
     {
@@ -379,6 +381,21 @@ class StageDebug extends MusicBeatState
             pieceText.text += "Layer Number: " + selectedPiece.layerNumber.text + "\n";
         }
         updateShit();
+
+        if (FlxG.keys.justPressed.U)
+            rayx += 1;
+        if (FlxG.keys.justPressed.I)
+            rayx -= 1;
+
+        if (FlxG.keys.justPressed.O)
+            rayy += 1;
+        if (FlxG.keys.justPressed.P)
+            rayy -= 1;
+
+        rayShit.x = rayx;
+        rayShit.y = rayy;
+        rayShit.setPoint();
+        rayShit.update();
 
 
         if (!typing.hasFocus)

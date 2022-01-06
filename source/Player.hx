@@ -76,6 +76,7 @@ class Player
         drugged : 0.0, //sin wave on note incoming angles
         scramble : 0.0, //notes follow the wrong strum note, doesnt change the input you have to press to hit the note
         strumsFollowNotes : 0.0, //instead of notes falling onto strums, strums move into the notes, value affects speed, smaller = faster
+        overlap : 0.0, //overlaps p2 strums over p1, only works when used on p2
 
         //ideas for these are from my friend death1nsurance
         swing : 0.0, // notes move up and down
@@ -167,6 +168,7 @@ class Player
                 noteCamsSus[i].x = noteCams[i].x; //so sustain cam is always in same place as regaulr note cam
                 noteCamsSus[i].y = noteCams[i].y;
                 noteCamsSus[i].angle = noteCams[i].angle;
+                noteCamsSus[i].zoom = noteCams[i].zoom;
             }
 
         }
@@ -342,6 +344,7 @@ class Player
             drugged : 0.0, //sin wave on note incoming angles
             scramble : 0.0, //notes follow the wrong strum note, doesnt change the input you have to press to hit the note 
             strumsFollowNotes : 0.0,
+            overlap : 0.0,
     
             //ideas for these are from my friend death1nsurance
             swing : 0.0, // notes move up and down

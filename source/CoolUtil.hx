@@ -67,25 +67,30 @@ class CoolUtil
 			
 			for (file in diffs)
 			{
-				if (!file.endsWith(".json")) //get rid of non json files
-					diffs.remove(file);
-				else if (file.endsWith("-easy.json")) //add easy first
+				if (!file.contains(".hscript") && file.endsWith(".json")) //fuck you
 				{
-					easy = file;
+					if (!file.endsWith(".json")) //get rid of non json files
+						diffs.remove(file);
+					else if (file.endsWith("-easy.json")) //add easy first
+					{
+						easy = file;
+					}
+					else if (file.endsWith(song + ".json")) //add normal
+					{
+						normal = file;
+					}
+					else if (file.endsWith("-hard.json")) //add hard
+					{
+						hard = file;
+					}
+					else
+					{
+						extra.push(file);
+						extraCount++;
+					}
 				}
-				else if (file.endsWith(song + ".json")) //add normal
-				{
-					normal = file;
-				}
-				else if (file.endsWith("-hard.json")) //add hard
-				{
-					hard = file;
-				}
-				else
-				{
-					extra.push(file);
-					extraCount++;
-				}
+
+				
 			}
 			var textDiffs:Array<String> = [];
 			if (easy != "")

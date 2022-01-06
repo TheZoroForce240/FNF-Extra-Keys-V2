@@ -561,6 +561,21 @@ class BabyArrow extends FlxSprite
 
 
 
+            PlayState.instance.call("StrumOffsets", [this]);
+
+
+            if (whichPlayer == 0)
+            {
+                if (modif.overlap != 0)
+                {
+                    x = FlxMath.remapToRange(modif.overlap, 0, 1, this.x, PlayState.p1.strums.members[this.curID].x);
+                    y = FlxMath.remapToRange(modif.overlap, 0, 1, this.x, PlayState.p1.strums.members[this.curID].y);
+                    angle = FlxMath.remapToRange(modif.overlap, 0, 1, this.x, PlayState.p1.strums.members[this.curID].angle);
+                }
+            }
+
+
+
         }
 
     }

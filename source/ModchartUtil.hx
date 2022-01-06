@@ -560,6 +560,7 @@ class ModchartUtil
         "drugged",
         "scramble",
         "strumsFollowNotes",
+        "overlap",
         "swing",
         "dislocated",
         "chaos",

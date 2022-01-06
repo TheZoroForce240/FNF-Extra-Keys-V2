@@ -158,7 +158,7 @@ class PlayState extends MusicBeatState
 	public static var dadDefaultCamOffset:Array<Int> = [150, 100];
 
 
-	public var modchartStorage:FlxTypedGroup<Dynamic>;
+	public var modchartStorage:Map<String, Dynamic>;
 
 	public var extraCharactersList:Array<String> = [];
 	public static var extraCharacters:FlxTypedGroup<Boyfriend>;
@@ -645,7 +645,6 @@ class PlayState extends MusicBeatState
 		call("characterMade", [boyfriend]);
 		call("characterMade", [gf]);
 
-
 		if (multiplayer)
 		{
 			player = boyfriend;
@@ -746,7 +745,7 @@ class PlayState extends MusicBeatState
 		StagePiecesFRONT = new FlxTypedGroup<StagePiece>();
 		add(StagePiecesFRONT);
 
-		modchartStorage = new FlxTypedGroup<Dynamic>();
+		modchartStorage = new Map<String, Dynamic>();
 
 		if (!stageException && backgrounds)
 		{
@@ -1959,6 +1958,9 @@ class PlayState extends MusicBeatState
 			//bruh i made a whole menu just to help fix and it doesnt even match up wtf
 			//ok so i halfed what it said on the offset menu and it worked correctly, this games confuses me so much
 		}
+
+
+		call("NoteOffsets", [daNote]);
 	}
 
 	function NoteMissDetection(daNote:Note, strums:String, playernum:Int = 1)

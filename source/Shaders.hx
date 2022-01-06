@@ -86,10 +86,13 @@ class RayMarchEffect
     }
 
     public function setPoint(){
-        shader.ShaderPointShit.value = [x, y];
+        shader.ShaderPointShit.value = [x*(Math.PI/180), y*(Math.PI/180)];
     }
 }
 //il get this to work at some point lol
+
+//shader from here: https://www.shadertoy.com/view/WtGXDD
+
 class RayMarchShader extends FlxShader
 {
     @:glFragmentSource('
@@ -128,7 +131,7 @@ class RayMarchShader extends FlxShader
 
 
     float GetDist(vec3 p) {
-        float d = sdBox(p, vec3(flixel_texture2D(bitmap, openfl_TextureCoordv).xyz));
+        float d = sdBox(p, vec3(1));
         
         return d;
     }
@@ -170,30 +173,36 @@ class RayMarchShader extends FlxShader
 
     void main()
     {
-        vec2 uv = openfl_TextureCoordv.xy;
-        vec2 m = ShaderPointShit.xy/iResolution.xy;
+        vec2 uv = openfl_TextureCoordv / 2; //divide by 2 fixes half screen bug?????????????? it looks a little fucked though
+        //vec2 m = ShaderPointShit.xy/iResolution.xy;
 
-        vec3 ro = vec3(0, 0, 0);
-        ro.yz *= Rot(-m.y*3.14+1.);
-        ro.xz *= Rot(-m.x*6.2831);
+        vec3 ro = vec3(0, 0, -3);
+        ro.yz *= Rot(ShaderPointShit.x);
+        ro.xz *= Rot(ShaderPointShit.y);
         
         vec3 rd = GetRayDir(uv, ro, vec3(0,0.,0), 1.);
-        vec3 col = vec3(0);
+        vec4 col = vec4(0);
     
         float d = RayMarch(ro, rd);
 
         if(d<MAX_DIST) {
             vec3 p = ro + rd * d;
-            vec3 n = GetNormal(p);
-            vec3 r = reflect(rd, n);
+            //vec3 n = GetNormal(p);
+            //vec3 r = reflect(rd, n);
 
-            float dif = dot(n, normalize(vec3(1,2,3)))*.5+.5;
-            col = vec3(dif);
+            //float dif = dot(n, normalize(vec3(1,2,3)))*.5+.5;
+            //uv = vec2(n.x,n.y);
+
+            //why tf does only half the screen appear??????????
+
+            uv = vec2(p.x,p.y);
+            col = flixel_texture2D(bitmap, uv); //shadertoy to haxe bullshit i dont understand
         }
         
-        col = pow(col, vec3(.4545));	// gamma correction
+        //col = pow(col, vec4(.4545));	// gamma correction
+        // makes the colour look fuckin weird
         
-        gl_FragColor = vec4(col,1.0);
+        gl_FragColor = col;
     }')
     public function new()
         {

@@ -83,27 +83,32 @@ class FreeplayState extends MusicBeatState
 					
 					for (file in diffs)
 					{
-						if (!file.endsWith(".json")) //get rid of non json files
-							diffs.remove(file);
-						else if (file.endsWith("-easy.json")) //add easy first
+						if (!file.contains(".hscript") && file.endsWith(".json")) //fuck you
 						{
-							easy = file;
+							if (!file.endsWith(".json")) //get rid of non json files
+								diffs.remove(file);
+							else if (file.endsWith("-easy.json")) //add easy first
+							{
+								easy = file;
+							}
+							else if (file.endsWith(data[0].toLowerCase() + ".json")) //add normal
+							{
+								normal = file;
+							}
+							else if (file.endsWith("-hard.json")) //add hard
+							{
+								hard = file;
+							}
+							else if (file.endsWith(".json"))
+							{
+								var text:String = StringTools.replace(file, data[0].toLowerCase() + "-", "");
+								var fixedText:String = StringTools.replace(text,".json", "");
+								extra.push(fixedText.toUpperCase());
+								extraCount++;
+							}
 						}
-						else if (file.endsWith(data[0].toLowerCase() + ".json")) //add normal
-						{
-							normal = file;
-						}
-						else if (file.endsWith("-hard.json")) //add hard
-						{
-							hard = file;
-						}
-						else if (file.endsWith(".json"))
-						{
-							var text:String = StringTools.replace(file, data[0].toLowerCase() + "-", "");
-							var fixedText:String = StringTools.replace(text,".json", "");
-							extra.push(fixedText.toUpperCase());
-							extraCount++;
-						}
+
+
 					}
 	
 					if (easy != "") //me trying to figure out how to sort the diffs in correct order :(
@@ -447,8 +452,12 @@ class FreeplayState extends MusicBeatState
 		#end
 
 		diffText.text = diffTextArrays[curSelected][curDifficulty];
-		ratingsText.text = "P1 Rating: " + ratingArray[curSelected][curDifficulty][0];
-		p2ratingsText.text = "P2 Rating: " + ratingArray[curSelected][curDifficulty][1];
+		if (ratingArray[curSelected][curDifficulty] != null)
+		{
+			ratingsText.text = "P1 Rating: " + ratingArray[curSelected][curDifficulty][0];
+			p2ratingsText.text = "P2 Rating: " + ratingArray[curSelected][curDifficulty][1];
+		}
+
 	}
 
 	function changeSelection(change:Int = 0)
