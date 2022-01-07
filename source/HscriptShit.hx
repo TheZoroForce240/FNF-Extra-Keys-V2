@@ -48,10 +48,18 @@ class HscriptShit //funni modcharts
         #if sys
 		if (FileSystem.exists(path) && PlayState.modcharts)
 		{
-            loadScript(path);
-            enabled = true;
-            setScriptVars();
-            interp.execute(script);
+            try 
+            {
+                loadScript(path);
+                enabled = true;
+                setScriptVars();
+                interp.execute(script);
+            } 
+            catch(e) 
+            {
+                trace(e.message);
+            }
+
         }
         else 
         {

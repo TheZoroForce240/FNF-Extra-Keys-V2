@@ -1,5 +1,8 @@
 package;
 
+import openfl.filters.BitmapFilter;
+import flixel.FlxCamera;
+import openfl.filters.ShaderFilter;
 import lime.utils.Assets;
 import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
@@ -595,5 +598,31 @@ class ModchartUtil
         //trace(name + Reflect.getProperty(modif, name));
         return Reflect.getProperty(modif, name);
     }
+
+
+    /*public static function addShaderToCamera(cam:FlxCamera, shad:Dynamic) //piece of shit dont wanna work, literally gives no error messages even on a test debug build
+    {
+        @:privateAccess
+        {
+            //var curShaders:Array<BitmapFilter> = cam._filters;
+            //curShaders.push(new ShaderFilter(shad.shader));
+            //cam.setFilters(curShaders);
+        }
+    }
+
+    public static function removeShaderFromCamera(cam:FlxCamera, shad:Dynamic)
+    {
+        @:privateAccess
+        {
+            var curShaders:Array<BitmapFilter> = cam._filters;
+            var shadfilter = new ShaderFilter(shad.shader);
+            for (i in curShaders)
+            {
+                if (i == shadfilter)
+                    curShaders.remove(i);
+            }
+            cam.setFilters(curShaders);
+        }
+    }*/
 
 }

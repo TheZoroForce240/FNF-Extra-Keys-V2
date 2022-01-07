@@ -212,3 +212,145 @@ class RayMarchShader extends FlxShader
           super();
         } 
 }
+
+
+
+
+class ColorToggleEffect //remove all of a certain color or give a color more influence over others
+{
+    public var shader:ColorToggleShader = new ColorToggleShader();
+	public var r:Float = 1;
+	public var g:Float = 1;
+    public var b:Float = 1;
+    public function new(){
+        shader.colorShit.value = [1,1,1];
+    }
+  
+    public function update(){
+        shader.colorShit.value = [r,g,b];
+    }
+}
+class ColorToggleShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    uniform vec3 colorShit;
+
+    void main()
+    {
+        vec2 uv = (openfl_TextureCoordv);
+        vec4 col = flixel_texture2D(bitmap, uv);
+        gl_FragColor = vec4(col.r * colorShit[0], col.g * colorShit[1], col.b * colorShit[2], col.a);
+    }')
+    public function new()
+    {
+        super();
+    } 
+}
+
+
+class GradientShitEffect ///made this on accident, thought it looked cool
+{                       
+    public var shader:GradientShitShader = new GradientShitShader();
+	public var effect:Float = 1;
+
+    public function new(){
+        shader.effect.value = [1];
+    }
+  
+    public function update(){
+        shader.effect.value = [effect];
+    }
+}
+class GradientShitShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    uniform float effect;
+
+    void main()
+    {
+        vec2 uv = (openfl_TextureCoordv);
+        vec4 col = flixel_texture2D(bitmap, uv);
+
+        col.r = vec2(uv + 0.01 * effect);
+        col.b = vec2(uv - 0.01 * effect);
+
+
+        gl_FragColor = vec4(col);
+    }')
+    public function new()
+    {
+        super();
+    } 
+}
+
+
+
+class GlitchInvertEffect
+{                       
+    public var shader:GlitchInvertShader = new GlitchInvertShader();
+
+    public function new(){
+        shader.effect1.value = [0,0,0];
+        shader.effect2.value = [0,0,0];
+        shader.effect3.value = [0,0,0];
+    }
+  
+    public function update(){   //a little annoying but whatever
+
+        var num1 = FlxG.random.float(0, 0.2);
+        var num2 = FlxG.random.float(num1, 0.3);
+        var isbox1inverted = FlxG.random.int(0, 1);
+
+        var num3 = FlxG.random.float(num2, 0.5);
+        var num4 = FlxG.random.float(num3, 0.6);
+        var isbox2inverted = FlxG.random.int(0, 1);
+
+        var num5 = FlxG.random.float(num4, 0.8);
+        var num6 = FlxG.random.float(num5, 1);
+        var isbox3inverted = FlxG.random.int(0, 1);
+
+        shader.effect1.value = [num1, num2, isbox1inverted];
+        shader.effect2.value = [num3, num4, isbox2inverted];
+        shader.effect3.value = [num5, num6, isbox3inverted];
+    }
+}
+class GlitchInvertShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    uniform vec3 effect1;
+    uniform vec3 effect2;
+    uniform vec3 effect3;
+
+    void main()
+    {
+        vec2 uv = (openfl_TextureCoordv);
+
+        if (uv.y > effect1[0] && uv.y < effect1[1])     //offsets
+            uv.x += 0.1;
+        else if (uv.y > effect2[0] && uv.y < effect2[1])
+            uv.x -= 0.1;
+        else if (uv.y > effect3[0] && uv.y < effect3[1])
+            uv.x += 0.1;
+        
+        vec4 col = flixel_texture2D(bitmap, uv);
+
+        if (uv.y > effect1[0] && uv.y < effect1[1] && effect1[2] == 1)     //color invert
+            col = vec4(vec3(1.0, 1.0, 1.0) - col.rgb, col.a);
+        else if (uv.y > effect2[0] && uv.y < effect2[1] && effect2[2] == 1)
+            col = vec4(vec3(1.0, 1.0, 1.0) - col.rgb, col.a);
+        else if (uv.y > effect3[0] && uv.y < effect3[1] && effect3[2] == 1)
+            col = vec4(vec3(1.0, 1.0, 1.0) - col.rgb, col.a);
+
+        gl_FragColor = vec4(col);
+    }')
+    public function new()
+    {
+        super();
+    } 
+}
