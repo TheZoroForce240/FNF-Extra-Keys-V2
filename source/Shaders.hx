@@ -171,14 +171,17 @@ class RayMarchShader extends FlxShader
         return d;
     }
 
-    void main()
+    void main() //this shader is pain
     {
-        vec2 uv = openfl_TextureCoordv / 2; //divide by 2 fixes half screen bug?????????????? it looks a little fucked though
+        
+
+        vec2 uv = (openfl_TextureCoordv);
         //vec2 m = ShaderPointShit.xy/iResolution.xy;
 
-        vec3 ro = vec3(0, 0, -3);
-        ro.yz *= Rot(ShaderPointShit.x);
-        ro.xz *= Rot(ShaderPointShit.y);
+        vec3 ro = vec3(0, 0, -2); //ok so -2 is the correct zoom
+
+        ro.yz *= Rot(ShaderPointShit.y); //rotation shit
+        ro.xz *= Rot(ShaderPointShit.x);
         
         vec3 rd = GetRayDir(uv, ro, vec3(0,0.,0), 1.);
         vec4 col = vec4(0);
@@ -187,16 +190,16 @@ class RayMarchShader extends FlxShader
 
         if(d<MAX_DIST) {
             vec3 p = ro + rd * d;
-            //vec3 n = GetNormal(p);
+
+            //vec3 n = GetNormal(p);  
             //vec3 r = reflect(rd, n);
-
             //float dif = dot(n, normalize(vec3(1,2,3)))*.5+.5;
-            //uv = vec2(n.x,n.y);
 
-            //why tf does only half the screen appear??????????
+            //uv = vec2(n.x,n.y);
+            //uv = vec2(p.x,p.y) + iResolution.xy;
 
             uv = vec2(p.x,p.y);
-            col = flixel_texture2D(bitmap, uv); //shadertoy to haxe bullshit i dont understand
+            col = flixel_texture2D(bitmap, uv); //shadertoy to haxe bullshit i barely understand
         }
         
         //col = pow(col, vec4(.4545));	// gamma correction
