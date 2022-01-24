@@ -1,33 +1,45 @@
-# FNF Extra Keys V2
+# FNF Zoro Engine
 
-This is a mod for Friday Night Funkin, and is a new version of the FNF with extra key support mod I made a while ago.
+This is a mod for Friday Night Funkin, and mainly adds more features to the base game, for easier modding.
+I mainly use this engine to test ideas and mess around with code, but you can still make mods with this of course!
 
-The old Kade Engine version is still available here: https://github.com/TheZoroForce240/FNF-with-extra-keys
+This was originally called the Extra Keys Engine, i changed it to avoid confusion, didnt wanna name it after myself but whatever lol
 
-WARNING: this mod is still pretty early in development, so expect bugs and missing features from the original mod
+WARNING: this mod is still pretty early in development
 
 **Probably only works on desktop rn**
 
 ## Some Features
  - Better Input + rebindable keys
  - Downscroll
- - Middlescroll (while still being able to see the oppenents notes)
+ - Middlescroll
  - Crazy note customization with an interactable menu (plan to make this more in depth soon)
  - 1-9 Key Support
  - a bunch of note types already set up
- - Note specfic speed + velocity changes (going to improve this at some point)
- - Custom song, character and stage support (no compiling required!, currently pretty basic though)
- - A lot of randomizaton options (not all are readded yet, just random speed and velocity changes right now)
- - New difficulty system which is based on the chart files (currently only in freeplay)
+ - Note specfic speed + velocity changes
+ - Custom song, character and stage support (no compiling required!)
+ - A lot of randomizaton options (i love randomization lol)
+ - New difficulty system which is based on the chart files (freeplay only)
  - Local multiplayer support
  - Changing mania mid song (now seperate for each player!)
+ - Support for unlimited amount of strums/players
+ - Support for extra characters
+ - Copy and paste to clipboard support in Chart editor + more advanced charting features
+ - Hscript Modchart support (almost anything is possible)
+ - Modchart modifier system for easy modcharting
+ - WIP Stage Editor (each piece still has to manaully be done)
+ - Song Speed Multiplier with ability to change mid song
+ - Extra Difficulty - ALT - these charts have extra keys, good for practice!
 
 ## Planned Features
- - Unhardcoding most things
- - Documenting as much code as i can, to help noob coders understand the game better and how it works
- - Android Support (not guaranteed, might not happen)
  - Editors for most things
  - probably some other stuff as well i forgot
+ 
+ 
+## Credits 
+ - TheZoroForce240 - coding for this mod + any extra assets
+ - 7salad3salad - Week 5 extra key charts
+ - srPerez - made original extra keys code + arrow designs
 
 # Friday Night Funkin
 
