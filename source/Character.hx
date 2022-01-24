@@ -292,7 +292,10 @@ class Character extends FlxSprite
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)
 	{
-		var defaultFrameRate = animation.getByName(name).frameRate;
+		var defaultFrameRate:Float = 24;
+		if (animation.getByName(name) != null)
+			defaultFrameRate = animation.getByName(name).frameRate;
+
 		var fuck:Array<Dynamic> = [x, y, defaultFrameRate, curGraphic];
 		animOffsets[name] = fuck;
 	}

@@ -138,6 +138,7 @@ class ChartingState extends MusicBeatState
 
 	var curEventData:Array<String> = ["none", ""];
 	var curEventInfo:String = "";
+	var curStrumID:Int = 0;
 
 	var leftHitsounds:Bool = false;
 	var rightHitsounds:Bool = false;
@@ -514,13 +515,22 @@ class ChartingState extends MusicBeatState
 			tutorialTxt.text = "Save the Chart as a .json";
 		}
 
-		var compatSaveButton:FlxButton = new FlxButton(110, 30, "Compatibility Save", function()
+		var compatSaveButton:FlxButton = new FlxButton(110, 38, "Compat Save", function()
 		{
 			saveLevel(true);
 		});
 		compatSaveButton.onOver.callback = function()
 		{
-			tutorialTxt.text = "Save the Chart as a .json\nWithout events, note types, speed\n and velocity changes.";
+			tutorialTxt.text = "Save the Chart as a .json\nWithout events, note types, speed\n and velocity changes.\nGood for transferring to other Engines.";
+		}
+
+		var luaSaveButton:FlxButton = new FlxButton(110, 68, "Lua Save", function()
+		{
+			saveLevel(true, true);
+		});
+		luaSaveButton.onOver.callback = function()
+		{
+			tutorialTxt.text = "Save the Chart as a .json\nWith Formatting to work with\nLua based Extra keys.";
 		}
 
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + saveButton.width + 10, saveButton.y, "Reload Audio", function()
@@ -599,6 +609,7 @@ class ChartingState extends MusicBeatState
 
 		tab_group_song.add(saveButton);
 		tab_group_song.add(compatSaveButton);
+		tab_group_song.add(luaSaveButton);
 		tab_group_song.add(reloadSong);
 		tab_group_song.add(reloadSongJson);
 		tab_group_song.add(loadAutosaveBtn);
@@ -872,6 +883,8 @@ class ChartingState extends MusicBeatState
 
 	var stepperNoteTypes:FlxUINumericStepper;
 
+	var stepperStrumID:FlxUINumericStepper;
+
 	var stepperNoteSpeed:FlxUINumericStepper;
 
 	var stepperNoteVelocity:FlxUINumericStepper;
@@ -916,6 +929,12 @@ class ChartingState extends MusicBeatState
 
 		var strumLabel = new FlxText(10, 120, 100, "Strumtime");
 
+
+		var strumIDLabel = new FlxText(200, 230, 100, "Strum ID (for extra strums)");
+		stepperStrumID = new FlxUINumericStepper(200, 250, 1, curStrumID, 0, 99, 0);
+		stepperStrumID.value = curStrumID;
+		stepperStrumID.name = 'strumID';
+
 		var applyLength:FlxButton = new FlxButton(100, 10, 'Apply', function()
 		{
 			if (curSelectedNote != null)
@@ -925,6 +944,11 @@ class ChartingState extends MusicBeatState
 				curSelectedNote[3] = stepperNoteTypes.value;
 				curSelectedNote[4] = stepperNoteSpeed.value;
 				curSelectedNote[5] = [stepperNoteVelocity.value, Std.parseFloat(velChangeTypingShit.text), check_velStrum.checked];
+				if (curSelectedNote[1] < 0)
+					curSelectedNote[6] = [curEventData[0], curEventData[1]];
+				else
+					curSelectedNote[6] = null;
+				curSelectedNote[7] = curStrumID;
 			}
 		});
 		applyLength.onOver.callback = function()
@@ -977,6 +1001,9 @@ class ChartingState extends MusicBeatState
 
 		tab_group_note.add(stepperNoteVelocity);
 		tab_group_note.add(velocityTimeLabel);
+
+		tab_group_note.add(strumIDLabel);
+		tab_group_note.add(stepperStrumID);
 
 		UI_box.addGroup(tab_group_note);
 	}
@@ -1605,7 +1632,7 @@ class ChartingState extends MusicBeatState
 					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet * 0.4);
 					vocals.time = FlxG.sound.music.time;
 				}
-				if (FlxG.keys.justPressed.ESCAPE)
+				if (FlxG.keys.justPressed.BACKSPACE) //changed to backspace so people used to psych dont accientially leave the chart editor
 				{
 					autosaveSong();
 					FlxG.switchState(new DebugState());
@@ -1734,6 +1761,23 @@ class ChartingState extends MusicBeatState
 		updateStatus("Highlighted all notes in this section");
 		highlightCheck();
 	}
+	function highlightHalfOfSection(left:Bool):Void
+		{
+			curRenderedNotes.forEach(function(note:Note)
+			{
+				var sideToCheck = note.noteData >= PlayState.keyAmmo[_song.mania];
+				if (left)
+					sideToCheck = note.noteData < PlayState.keyAmmo[_song.mania];
+
+				if (note.section == curSection && sideToCheck)
+				{
+					var highlightedNote:Array<Dynamic> = [note.strumTime, note.rawNoteData - 4, note.sustainLength, note.noteType, note.section]; //save section it came from to fix strumtime/section to go in issues
+					ChartingUtil.highlighedNotes.push(highlightedNote);
+				}
+			});
+			updateStatus("Highlighted all notes on the " + (left ? "left" : "right"));
+			highlightCheck();
+		}
 	function highlightCheck():Void
 	{
 		for (note in ChartingUtil.highlighedNotes)
@@ -2100,6 +2144,8 @@ class ChartingState extends MusicBeatState
 								tutorialTxt.text = "Changes the velocity change\ntime of notes you place\nafter changing this.\n(requires a speed multi, change\ntime is in milliseconds before\nstrumtime)";
 							case "mania": 
 								tutorialTxt.text = "Changes the amount of\nkeys for the song.";
+							case "strumID": 
+								tutorialTxt.text = "Changes which strums a note\ngoes to, you need to add extra\nplayers for this to work.\n0-2 do nothing, they are for default strums\nand cannot be set with this stepper.\nIt does not matter which side a\nnote is placed on, placing on\nthe gf side will do nothing.";
 						}
 					}	
 				});
@@ -2310,6 +2356,10 @@ class ChartingState extends MusicBeatState
 				curEventData[1] = curSelectedNote[6][1];
 				eventDropDown.selectedLabel = curEventData[0];
 				eventTypingShit.text = curEventData[1];
+			}
+			if (curSelectedNote[7] != null)
+			{
+				stepperStrumID.value = curSelectedNote[7];
 			}
 			strumTimeTypingShit.text = curSelectedNote[0];
 		}
@@ -2529,6 +2579,7 @@ class ChartingState extends MusicBeatState
 		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
 		note.updateHitbox();
 
+
 		switch (sectionType)
 		{
 			case "normal": 
@@ -2700,23 +2751,27 @@ class ChartingState extends MusicBeatState
 		noteVelocity = [stepperNoteVelocity.value, curNoteVelocityTime, check_velStrum.checked];
 		var eventData:Array<String> = ["none", ""];
 		eventData = [curEventData[0], curEventData[1]];
-		//trace(eventData);
+		
 
 		if (_song.mania == 2 || _song.mania == 5)
 			var noteData = Math.floor(FlxG.mouse.x / S_GRID_SIZE);
 
 		noteData -= 4; //takes away for gf chart negative note data, i am doing it this way so charts dont need to be completely remade lol
 
+		if (noteData < 0)
+			eventData = null; //only save event data to negative note datas
+		var strumID = stepperStrumID.value;
+
 		if (n != null)
-			daSection.sectionNotes.push([n.strumTime, n.noteData, n.sustainLength, n.noteType, n.speed, n.velocityData, n.eventData]);
+			daSection.sectionNotes.push([n.strumTime, n.noteData, n.sustainLength, n.noteType, n.speed, n.velocityData, n.eventData, n.strumID]);
 		else
-			daSection.sectionNotes.push([noteStrum, noteData, noteSus, noteType, noteSpeed, noteVelocity, eventData]);
+			daSection.sectionNotes.push([noteStrum, noteData, noteSus, noteType, noteSpeed, noteVelocity, eventData, strumID]);
 
 		var thingy = daSection.sectionNotes[daSection.sectionNotes.length - 1];
 		curSelectedNote = thingy;
 
 		if (FlxG.keys.pressed.CONTROL)
-			daSection.sectionNotes.push([noteStrum, (noteData -18), noteSus, noteType, noteSpeed, noteVelocity, eventData]);
+			daSection.sectionNotes.push([noteStrum, (noteData -18), noteSus, noteType, noteSpeed, noteVelocity, eventData, strumID]);
 
 		//trace(noteStrum);
 		//trace(curSection);
@@ -2856,8 +2911,48 @@ class ChartingState extends MusicBeatState
 
 		return chart;
 	}
+	function luaChartConvert(chart:SwagSong)
+		{
+			var dataConverts:Array<Array<Int>> = [
+				[0, 1, 2, 3,  4, 5, 6, 7],
+				[0, 2, 3, 0, 1, 3,  4, 6, 7, 4, 5, 7],
+				[0, 1, 2, 3, 2, 0, 1, 2, 3,  4, 5, 6, 7, 6, 4, 5, 6, 7],
+				[0, 1, 2, 2, 3,  4, 5, 6, 6, 7],
+				[0, 2, 3, 2, 0, 1, 3,   4, 6, 7, 6, 4, 5, 7],
+				[0, 1, 2, 3, 0, 1, 2, 3,  4, 5, 6, 7, 4, 5, 6, 7],
+				[2,6],
+				[0,1,4,7],
+				[0,2,3,4,6,7]
+			];
+			var nTypeConverts:Array<Array<String>> = [
+				[null, null, null, null,null, null, null, null],
+				[null, null, null, "extras", null, "extras",null, null, null, "extras", null, "extras"],
+				[null, null, null, null, "space", "extras", "extras", "extras", "extras",null, null, null, null, "space", "extras", "extras", "extras", "extras"],
+				[null, null, "space", null, null,null, null, "space", null, null],
+				[null, null, null, "space", "extras", null, "extras",null, null, null, "space", "extras", null, "extras"],
+				[null, null, null, null, "extras", "extras", "extras", "extras",null, null, null, null, "extras", "extras", "extras", "extras"],
+				["space","space"],
+				[null,null,null,null],
+				[null,"space",null,null,"space",null]
+			];
 
-	private function saveLevel(compatibilityMode:Bool = false)
+
+			for (sections in chart.notes)
+			{
+				for (daNote in sections.sectionNotes)
+				{
+					//trace(nTypeConverts[_song.mania][daNote[1]]);
+					daNote[3] = nTypeConverts[_song.mania][daNote[1]]; //do note type first cuz data gets changed after
+					daNote[1] = dataConverts[_song.mania][daNote[1]];
+					
+				}
+			}
+	
+	
+			return chart;
+		}
+
+	private function saveLevel(compatibilityMode:Bool = false, luaSaveMode:Bool = false)
 	{
 		var json = {
 			"song": _song
@@ -2874,6 +2969,21 @@ class ChartingState extends MusicBeatState
 			{								//so sometimes it would miss random notes, loop it to be sure its all gone
 				thing = cleanChart(thing); //do it 25 times to be 100% sure it works
 			}								//upped to 25 cuz i dont trust it
+
+			json = {
+				"song": thing
+			};
+		}
+
+
+		if (luaSaveMode)
+		{
+			var shit = Json.stringify({ //doin this so it doesnt act as a reference
+				"song": _song
+			});
+			var thing:SwagSong = Song.parseJSONshit(shit);
+
+			thing = luaChartConvert(thing);			
 
 			json = {
 				"song": thing

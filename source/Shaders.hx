@@ -8,6 +8,12 @@ import flixel.FlxG;
 import openfl.Lib;
 
 
+//for anyone lookin through the shaders idc if you use the code just credit lol
+
+//also this helped a lot https://www.shadertoy.com/view/Md23DV
+//useful for anyone wanting to learn how to make shaders
+
+
 class HSVEffect
 {
     public var shader:HSVShader = new HSVShader();
@@ -173,12 +179,13 @@ class RayMarchShader extends FlxShader
 
     void main() //this shader is pain
     {
-        
-
-        vec2 uv = (openfl_TextureCoordv);
+        vec2 center = vec2(0.5, 0.5);
+        //vec2 uv = (openfl_TextureCoordv.xy * iResolution.xy); //apparently this moves it to the center?????? no fuck you
+        //uv = 2.0 * uv.xy / iResolution.xy;
         //vec2 m = ShaderPointShit.xy/iResolution.xy;
+        vec2 uv = openfl_TextureCoordv.xy - center;
 
-        vec3 ro = vec3(0, 0, -2); //ok so -2 is the correct zoom
+        vec3 ro = vec3(0, 0, -3); //ok so -2 is the correct zoom
 
         ro.yz *= Rot(ShaderPointShit.y); //rotation shit
         ro.xz *= Rot(ShaderPointShit.x);
@@ -198,7 +205,9 @@ class RayMarchShader extends FlxShader
             //uv = vec2(n.x,n.y);
             //uv = vec2(p.x,p.y) + iResolution.xy;
 
-            uv = vec2(p.x,p.y);
+            //uv = (vec2(p.x,p.y) / iResolution.xy);
+            uv = vec2(p.x,p.y) / 2;
+            uv += center; //move coords from top left to center
             col = flixel_texture2D(bitmap, uv); //shadertoy to haxe bullshit i barely understand
         }
         
@@ -206,6 +215,7 @@ class RayMarchShader extends FlxShader
         // makes the colour look fuckin weird
         
         gl_FragColor = col;
+        //gl_FragDepth = 2;
     }')
     public function new()
         {
@@ -292,6 +302,7 @@ class GradientShitShader extends FlxShader
 class GlitchInvertEffect
 {                       
     public var shader:GlitchInvertShader = new GlitchInvertShader();
+    public var speed:Float = 50; ///this is a percentage change per frame
 
     public function new(){
         shader.effect1.value = [0,0,0];
@@ -301,21 +312,36 @@ class GlitchInvertEffect
   
     public function update(){   //a little annoying but whatever
 
-        var num1 = FlxG.random.float(0, 0.2);
-        var num2 = FlxG.random.float(num1, 0.3);
-        var isbox1inverted = FlxG.random.int(0, 1);
+        var chanceToUpdate = false;
+        if (speed == 0) //so it can be turned off
+        {
+            shader.effect1.value = [0,0,0];
+            shader.effect2.value = [0,0,0];
+            shader.effect3.value = [0,0,0];
+        }
+        else 
+            chanceToUpdate = FlxG.random.bool(speed);
+        
 
-        var num3 = FlxG.random.float(num2, 0.5);
-        var num4 = FlxG.random.float(num3, 0.6);
-        var isbox2inverted = FlxG.random.int(0, 1);
+        if (chanceToUpdate)
+        {
+            var num1 = FlxG.random.float(0, 0.2);
+            var num2 = FlxG.random.float(num1, 0.3);
+            var isbox1inverted = FlxG.random.int(0, 1);
+    
+            var num3 = FlxG.random.float(num2, 0.5);
+            var num4 = FlxG.random.float(num3, 0.6);
+            var isbox2inverted = FlxG.random.int(0, 1);
+    
+            var num5 = FlxG.random.float(num4, 0.8);
+            var num6 = FlxG.random.float(num5, 1);
+            var isbox3inverted = FlxG.random.int(0, 1);
 
-        var num5 = FlxG.random.float(num4, 0.8);
-        var num6 = FlxG.random.float(num5, 1);
-        var isbox3inverted = FlxG.random.int(0, 1);
+            shader.effect1.value = [num1, num2, isbox1inverted];
+            shader.effect2.value = [num3, num4, isbox2inverted];
+            shader.effect3.value = [num5, num6, isbox3inverted];
+        }
 
-        shader.effect1.value = [num1, num2, isbox1inverted];
-        shader.effect2.value = [num3, num4, isbox2inverted];
-        shader.effect3.value = [num5, num6, isbox3inverted];
     }
 }
 class GlitchInvertShader extends FlxShader

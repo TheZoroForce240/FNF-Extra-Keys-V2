@@ -72,7 +72,7 @@ class StageDebug extends MusicBeatState
     public static var instance:StageDebug;
     var dadCharacter:String = "dad";
 
-    var shaderTest:GlitchInvertEffect = new GlitchInvertEffect();
+    var shaderTest:RayMarchEffect = new RayMarchEffect();
 
     public function new(daStage:String = 'stage', _dad:String = "dad")
     {
@@ -143,10 +143,6 @@ class StageDebug extends MusicBeatState
 
         FlxCamera.defaultCameras = [camGame];
 
-
-        camGame.setFilters([new ShaderFilter(shaderTest.shader)]);
-
-        shaderTest.update();
 
 
         var piecetabs = [
@@ -366,8 +362,6 @@ class StageDebug extends MusicBeatState
         Stage_UI.addGroup(tab_group_stage);
     }
 
-    var shadershit:Float = 1;
-
     override function update(elapsed:Float)
     {
         if (selectedPiece != null)
@@ -384,15 +378,6 @@ class StageDebug extends MusicBeatState
         updateShit();
 
 
-
-        if (FlxG.keys.justPressed.I)
-            shadershit++;
-
-        else if (FlxG.keys.justPressed.O)
-            shadershit--;
-        //shaderTest.effect = shadershit;
-        if (FlxG.random.bool(40))
-            shaderTest.update();
 
 
         if (!typing.hasFocus)

@@ -1,5 +1,6 @@
 package;
 
+import openfl.Lib;
 #if desktop
 import Discord.DiscordClient;
 import sys.thread.Thread;
@@ -105,6 +106,8 @@ class TitleState extends MusicBeatState
 
 		if (FlxG.save.data.volume != null)
 			FlxG.sound.volume = FlxG.save.data.volume;
+
+		(cast (Lib.current.getChildAt(0), Main)).changeFPS(SaveData.fps);
 
 	}
 

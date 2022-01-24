@@ -1,5 +1,6 @@
 package;
 
+import flixel.system.FlxSound;
 import openfl.display.BitmapData;
 import flixel.system.FlxAssets.FlxSoundAsset;
 import flixel.FlxG;
@@ -16,6 +17,7 @@ class CacheShit
 
     public static var xmls:Map<String, String> = new Map(); //stores xml data
     public static var images:Map<String, FlxGraphic> = new Map(); //store image bitmap data
+    public static var sounds:Map<String, FlxSoundAsset> = new Map(); //store image bitmap data
 
 
     //tbh i dont even know if this helps lol
@@ -35,6 +37,7 @@ class CacheShit
         OpenFlAssets.cache.clear(); //just fucking clear everything or some shit idk
         xmls.clear();
         images.clear();
+        sounds.clear();
     }
 
     public static function SaveXml(name:String, xmlString:String)
@@ -45,6 +48,10 @@ class CacheShit
     public static function SaveImage(name:String, image:FlxGraphic)
     {
         images[name] = image;
+    }
+    public static function SaveSound(name:String, sound:FlxSoundAsset)
+    {
+        sounds[name] = sound;
     }
 
 }

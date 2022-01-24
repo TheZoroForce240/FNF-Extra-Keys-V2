@@ -22,7 +22,7 @@ class DebugState extends MusicBeatState
 {
     private static var curSelected:Int = 0;
     private var grpTxt:FlxTypedGroup<Alphabet>;
-    var menuList = ["Character Debug", "Stage Debug", "Chart Editor", "Note Type Debug"];
+    var menuList = ["Character Debug", "Stage Debug", "Chart Editor"];
 
     private static var curSong:String = "tutorial";
     private static var curDiff:String = "Normal";
@@ -53,7 +53,6 @@ class DebugState extends MusicBeatState
         }
 
         var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('characterList'));
-		var gfVersions:Array<String> = CoolUtil.coolTextFile(Paths.txt('gfVersionList'));
 		var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
         var freeplayList:Array<String> = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
         var songs:Array<String> = [];

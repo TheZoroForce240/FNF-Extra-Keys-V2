@@ -73,7 +73,7 @@ class BabyArrow extends FlxSprite
     ];
 
 
-    var whichPlayer:Int = 0;
+    public var whichPlayer:Int = 0;
     public var stylelol:String = "";
     public var colorShiz:Array<Float>;
     var pathToUse:Int = 0;
@@ -111,7 +111,7 @@ class BabyArrow extends FlxSprite
         this.ID = i;
         this.curID = i;
 
-        if (player == 2)
+        if (player >= 2)
             maniaToUse = 0;
 
         curMania = maniaToUse;
@@ -130,7 +130,7 @@ class BabyArrow extends FlxSprite
         if (Note.usingQuant)
             colorShiz = [0,0,0,4];
         
-        if (player != 2)
+        if (player < 2)
         {
             pathToUse = Std.int(colorShiz[3]);
             if (pathToUse == 5)
@@ -223,10 +223,12 @@ class BabyArrow extends FlxSprite
 
     private function setupStrum():Void 
     {
-        if (whichPlayer != 2)
+        if (whichPlayer < 2)
             scrollFactor.set();
-        else 
+        else if (whichPlayer == 2)
             scrollFactor.set(PlayState.gf.scrollFactor.x, PlayState.gf.scrollFactor.y); //gf notes same scroll as gf
+        else 
+            scrollFactor.set(1,1);
 
         if ((SaveData.downscroll && whichPlayer == 1) || (SaveData.P2downscroll && whichPlayer == 0))
         {
@@ -501,27 +503,15 @@ class BabyArrow extends FlxSprite
             x = (PlayState.gf.x + (PlayState.gf.width / 2)) - (Note.noteWidths[0] * 2) + Note.noteWidths[0] * curID;
         }
 
+
         
         if (inPlayState)
         {
             var StrumGroup:StrumLineGroup = PlayState.p1.strums;
             var modif = PlayState.p1.modifiers;
-
-            if (whichPlayer == 1) //playerStrums
-            {
-                StrumGroup = PlayState.p1.strums;
-                modif = PlayState.p1.modifiers;
-            }
-            else if (whichPlayer == 2)
-            {
-                StrumGroup = PlayState.p3.strums;
-                modif = PlayState.p3.modifiers;
-            }	
-            else
-            {
-                StrumGroup = PlayState.p2.strums;
-                modif = PlayState.p2.modifiers;
-            }
+            var curPlayer = PlayState.getPlayerFromID(whichPlayer);
+            StrumGroup = curPlayer.strums;
+            modif = curPlayer.modifiers;
 
             if (this.curID == 10) //from mania changes
                 return;

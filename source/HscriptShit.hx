@@ -125,17 +125,12 @@ class HscriptShit //funni modcharts
         interp.variables.set("P1CpuNoteHit", function (note:Note) {});
         interp.variables.set("P2CpuNoteHit", function (note:Note) {});
         interp.variables.set("P3CpuNoteHit", function (note:Note) {}); //event notes
-        interp.variables.set("P1NoteSpawned", function (note:Note) {}); //3.5 seconds before strumtime
-        interp.variables.set("P2NoteSpawned", function (note:Note) {}); 
-        interp.variables.set("P3NoteSpawned", function (note:Note) {});
-        interp.variables.set("P1NoteNowOnScreen", function (note:Note) {}); //when you can see them on screen
-        interp.variables.set("P2NoteNowOnScreen", function (note:Note) {});
-        interp.variables.set("P3NoteNowOnScreen", function (note:Note) {});
         interp.variables.set("characterMade", function (character:Character) {});
         interp.variables.set("onManiaChange", function (mania:Int) {});
         interp.variables.set("onStrumsGenerated", function (strums:StrumLineGroup) {});
         interp.variables.set("StrumOffsets", function (strum:BabyArrow) {});
         interp.variables.set("NoteOffsets", function (note:Note) {});
+        interp.variables.set("cutscene", function () {}); //need to set allowSongStart to false, you can set up a custom in game cutscene here
 
         interp.variables.set("instance", PlayState.instance); //dont think this works but who cares
         interp.variables.set("PlayState", PlayState);
@@ -184,8 +179,22 @@ class HscriptShit //funni modcharts
         interp.variables.set("HSVShader", HSVShader);
         interp.variables.set("RayMarchEffect", RayMarchEffect);
         interp.variables.set("RayMarchShader", RayMarchShader);
+        interp.variables.set("ScriptEvent", ScriptEvent);
+        interp.variables.set("EventCallType", EventCallType);
+        interp.variables.set("Player", Player);
 
-
+        interp.variables.set("setStepEvent", function(_time:Dynamic, _function:String, _input:Array<Dynamic>)
+        {
+            PlayState.instance.scriptEvents.push(new StepScriptEvent(_time, _function, _input));
+        });
+        interp.variables.set("setBeatEvent", function(_time:Dynamic, _function:String, _input:Array<Dynamic>)
+        {
+            PlayState.instance.scriptEvents.push(new BeatScriptEvent(_time, _function, _input));
+        });
+        interp.variables.set("setStrumTimeEvent", function(_time:Dynamic, _function:String, _input:Array<Dynamic>)
+        {
+            PlayState.instance.scriptEvents.push(new StrumTimeScriptEvent(_time, _function, _input));
+        });
 
         interp.variables.set("add", function(obj:FlxBasic) 
         {
@@ -221,5 +230,86 @@ class HscriptShit //funni modcharts
                 //do this at some point
             }
         });*/
+    }
+}
+
+enum EventCallType //fuck you
+{
+    STRUMTIME;
+    STEP;
+    BEAT;
+}
+
+class ScriptEvent //a way to make modcharts cleaner by setting events at the start of the song, also means they cannot be missed from lag
+{
+
+    //public var callType:EventCallType;
+    //fucking enum my ass
+    public var callTime:Dynamic;
+    public var functionToCall:String;
+    public var functionInput:Array<Dynamic>;
+
+    var wasCalled:Bool = false;
+
+    public function new(_time:Dynamic, _function:String, _input:Array<Dynamic>)
+    {
+        callTime = _time;  
+        functionToCall = _function;
+        functionInput = _input;
+    }
+
+    public function check(shit:Int) //polymorphism go brrrr
+    {
+    }
+
+    public function callEvent()
+    {
+        trace("called event");
+        PlayState.instance.call(functionToCall, functionInput); //call the modchart function
+        wasCalled = true;
+        remove();
+        
+    }
+    public function remove() 
+        PlayState.instance.scriptEvents.remove(this);
+}
+
+class StrumTimeScriptEvent extends ScriptEvent
+{
+    public function new(_time:Dynamic, _function:String, _input:Array<Dynamic>)
+    {
+        super(_time, _function, _input);
+    }
+
+    override public function check(shit:Int)
+    {
+        if (callTime <= Conductor.songPosition && !wasCalled)
+            callEvent(); 
+    }
+}
+class StepScriptEvent extends ScriptEvent
+{
+    public function new(_time:Dynamic, _function:String, _input:Array<Dynamic>)
+    {
+        super(_time, _function, _input);
+    }
+
+    override public function check(shit:Int)
+    {
+        if (shit >= callTime && !wasCalled)
+            callEvent(); 
+    }
+}
+class BeatScriptEvent extends ScriptEvent
+{
+    public function new(_time:Dynamic, _function:String, _input:Array<Dynamic>)
+    {
+        super(_time, _function, _input);
+    }
+
+    override public function check(shit:Int)
+    {
+        if (shit >= callTime && !wasCalled)
+            callEvent(); 
     }
 }

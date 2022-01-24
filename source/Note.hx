@@ -38,7 +38,9 @@ class Note extends FlxSprite
 	public var strumTime:Float = 0;
 	public var baseStrum:Float = 0;
 
-	public var mustPress:Bool = false;
+	public var mustPress:Bool = false; 
+	public var strumID:Int = 0; //support for multiple strums :)
+
 	public var noteData:Int = 0;
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
@@ -337,7 +339,6 @@ class Note extends FlxSprite
 		this.noteData = _noteData % MaxNoteData;
 
 		isGFNote = _gfNote;
-
 		noteTypeCheck();
 
 		if (!inCharter && SaveData.randomNotes)
@@ -515,14 +516,7 @@ class Note extends FlxSprite
 
 	function deleteShit():Void
 	{
-		var strums = "cpu";
-		if (mustPress)
-			strums = "player";
-		if (isGFNote)
-			strums = "gf";
-
-
-		PlayState.instance.removeNote(this, strums);
+		PlayState.instance.removeNote(this);
 	}
 
 	function positionNote():Void //dont think this is needed but il do it anyway
@@ -885,7 +879,7 @@ class Note extends FlxSprite
 		switch (noteTypeList[noteType])
 		{
 			case "warning": 
-				PlayState.instance.removeNote(this, strums);
+				PlayState.instance.removeNote(this);
 				var statsToUse = PlayState.p1.Stats;
 				if (!mustPress && PlayState.multiplayer)
 					statsToUse = PlayState.p2.Stats;
@@ -893,7 +887,7 @@ class Note extends FlxSprite
 				statsToUse.health -= PlayState.warningNoteDamage;
 				statsToUse.misses++;
 			case "glitch": 
-				PlayState.instance.removeNote(this, strums);
+				PlayState.instance.removeNote(this);
 				var statsToUse = PlayState.p1.Stats;
 				if (!mustPress && PlayState.multiplayer)
 					statsToUse = PlayState.p2.Stats;
@@ -902,24 +896,24 @@ class Note extends FlxSprite
 				statsToUse.misses++;
 			case "angel": 
 				//nothing, they literally do nothing if you miss
-				PlayState.instance.removeNote(this, strums);
+				PlayState.instance.removeNote(this);
 			case "burning" | "death" | "bob" | "poison": 
-				PlayState.instance.removeNote(this, strums);
+				PlayState.instance.removeNote(this);
 			case "regular" | "alt" | "drain": 
 				if (isSustainNote && wasGoodHit) //to 100% make sure the sustain is gone
 				{
 					this.kill();
-					PlayState.instance.removeNote(this, strums);
+					PlayState.instance.removeNote(this);
 				}
 				else
 				{
 					PlayState.instance.vocals.volume = 0;
 					PlayState.instance.noteMiss(this.noteData, this, playernum);								
 				}
-				PlayState.instance.removeNote(this, strums);
+				PlayState.instance.removeNote(this);
 			default: 
 				//add custom ntoe tyeps scucppotp 
-				PlayState.instance.removeNote(this, strums); //temp
+				PlayState.instance.removeNote(this); //temp
 		}
 	}
 

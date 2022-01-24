@@ -221,46 +221,18 @@ class ModchartUtil
         return null;
     }
 
-
-
-
-
-
-
-
-
-
-
     //alright here the modifier shit
     //modifier struct is in player.hx btw
     public static function getModif(playernum:Int)
     {
-        switch(playernum)
-        {
-            case 0: 
-                return PlayState.p2.modifiers;
-            case 1: 
-                return PlayState.p1.modifiers;
-            case 2: 
-                return PlayState.p3.modifiers;
-            default: 
-                return PlayState.p1.modifiers;
-        }
+        var curPlayer = PlayState.getPlayerFromID(playernum);
+        return curPlayer.modifiers;
     }
     public static function getModifValues(playernum:Int)
-        {
-            switch(playernum)
-            {
-                case 0: 
-                    return PlayState.p2.modifValues;
-                case 1: 
-                    return PlayState.p1.modifValues;
-                case 2: 
-                    return PlayState.p3.modifValues;
-                default: 
-                    return PlayState.p1.modifValues;
-            }
-        }
+    {
+        var curPlayer = PlayState.getPlayerFromID(playernum);
+        return curPlayer.modifValues;
+    }
 
 
     public static function strumOffset(playernum:Int, noteData:Int, curMania:Int)
@@ -365,6 +337,7 @@ class ModchartUtil
     public static function noteModifierShit(daNote:Note, playernum:Int)
     {
         var modif = getModif(playernum);
+        var modifValues = getModifValues(playernum);
 
         if (modif.ghostNotes != 0)
         {
@@ -390,11 +363,18 @@ class ModchartUtil
             if (daNote.strumTime >= Conductor.songPosition + (Conductor.stepCrochet * 12))
                 daNote.alpha = 0.1 * daNote.curAlpha;
         }
+
+        var notesine:Array<Float> = Reflect.getProperty(modifValues, "noteSine" + daNote.noteDataToFollow);
+        if (notesine[0] != 0)
+            daNote.x += notesine[0] * Math.sin(daNote.curPos * notesine[1]);
+        
+
+
     }
     
 
 
-    //old shit i dont use anymore but still exists because
+    //old shit i dont use anymore but still exists because compatibility
     public static function CalculateArrowShit(i:BabyArrow, ID:Int, strumnum:Int = 1, thingToCalculate:String = "X", beat:Float)
     {
         var CalculatedShit:Float = 0;

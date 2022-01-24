@@ -18,7 +18,9 @@ class Player
 {
 
     public var strums:StrumLineGroup = null;
+    public var generatedStrums:Bool = false;
     public var wiggleShit:WiggleEffect = new WiggleEffect();
+    public var mustHitNotes:Bool = false;
 
     public var Stats = {
 		songScore : 0,
@@ -147,13 +149,24 @@ class Player
         bopTo6 : [0.0,20.0,0.0],
         bopTo7 : [0.0,-20.0,0.0],
         bopTo8 : [20.0,0.0,0.0],
-    }
+
+        noteSine0 : [0.0,1.0], //these make the notes wavy as they fall
+        noteSine1 : [0.0,1.0],
+        noteSine2 : [0.0,1.0],
+        noteSine3 : [0.0,1.0],
+        noteSine4 : [0.0,1.0],
+        noteSine5 : [0.0,1.0],
+        noteSine6 : [0.0,1.0],
+        noteSine7 : [0.0,1.0],
+        noteSine8 : [0.0,1.0],
+  }
 
     public var playernum:Int;
     public var noteCams:Array<FlxCamera> = [];
     public var noteCamsSus:Array<FlxCamera> = [];    //so i can have wiggle sustains
     public var char:Boyfriend;
     public var isCpu:Bool = true;
+    public var activeCharacters = [];
 
     public function new(player:Int = 0)
     {
@@ -415,6 +428,16 @@ class Player
             bopTo6 : [0.0,20.0,0.0],
             bopTo7 : [0.0,-20.0,0.0],
             bopTo8 : [20.0,0.0,0.0],
+
+            noteSine0 : [0.0,1.0],
+            noteSine1 : [0.0,1.0],
+            noteSine2 : [0.0,1.0],
+            noteSine3 : [0.0,1.0],
+            noteSine4 : [0.0,1.0],
+            noteSine5 : [0.0,1.0],
+            noteSine6 : [0.0,1.0],
+            noteSine7 : [0.0,1.0],
+            noteSine8 : [0.0,1.0],
         }
     }
 
