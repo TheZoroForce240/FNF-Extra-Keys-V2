@@ -1,0 +1,19 @@
+function onPlayStateCreated()
+{
+    PlayState.p1.modifValues.noteSine0 = [100, 0.2];
+}
+
+function endScript() /*any place the song can end (pause menu from exiting, entering chart editor, etc)*/
+{
+
+}
+
+function startSong(song) //when countdown ends
+{
+    //PlayState.p1.wiggleShit.waveAmplitude = 0.01;
+}
+
+function endSong() //only if song ends from beating it (e.g you wanna play a cutscene or something idk)
+{
+
+}

@@ -20,12 +20,16 @@ class Boyfriend extends Character
 	{
 		if (!debugMode)
 		{
-			if (animation.curAnim.name.startsWith('sing'))
+			if (isPlayer)
 			{
-				holdTimer += elapsed * PlayState.SongSpeedMultiplier;
+				if (animation.curAnim.name.startsWith('sing'))
+				{
+					holdTimer += elapsed * PlayState.SongSpeedMultiplier;
+				}
+				else
+					holdTimer = 0;
 			}
-			else
-				holdTimer = 0;
+
 
 			if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !debugMode)
 			{

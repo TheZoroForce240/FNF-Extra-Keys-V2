@@ -1,5 +1,6 @@
 package;
 
+import flixel.math.FlxPoint;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.animation.FlxBaseAnimation;
@@ -29,11 +30,19 @@ typedef OffsetFile =
 	var aa:Bool;
 	var arrowColorShit:ArrowColors;
 	var healthBar:RGB;
+	var useExtraSpritesheets:Bool;
+	var otherSheetAnims:Array<AnimsOnOtherSheets>;
 }
 typedef OtherOffsetShit = 
 {
 	var type:String;
 	var offsets:Array<Int>;
+}
+
+typedef AnimsOnOtherSheets = 
+{
+	var animName:String;
+	var charNameForSpritesheet:String;
 }
 
 typedef AnimOffsetShit = 
@@ -43,6 +52,7 @@ typedef AnimOffsetShit =
 	var offsets:Array<Int>;
 	var frameRate:Int;
 	var loop:Bool;
+	
 }
 
 typedef ArrowColors = 
@@ -73,6 +83,7 @@ class Character extends FlxSprite
 
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = 'bf';
+	public var curGraphic:String = 'bf'; //for extra spritesheets????? auto switch character based on animation???
 
 	public var holdTimer:Float = 0;
 
@@ -80,22 +91,32 @@ class Character extends FlxSprite
 
 	public var flip:Bool = false;
 
-	public var purple:Array<Float> = [0, 0, 0, 0]; //all 0 means no hsv change + default assets
-    public var blue:Array<Float> = [0, 0, 0, 0];
-    public var green:Array<Float> = [0, 0, 0, 0];
-    public var red:Array<Float> = [0, 0, 0, 0];
-    public var white:Array<Float> = [0, 0, 0, 0];
-    public var yellow:Array<Float> = [0, 0, 0, 0];
-    public var violet:Array<Float> = [0, 0, 0, 0];
-    public var darkred:Array<Float> = [0, 0, 0, 0];
-    public var dark:Array<Float> = [0, 0, 0, 0];
+	public var noteColors:Array<Array<Float>> = [
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ];
 
 	public var healthColors:Array<Int> = [255, 0, 0]; //rgb, so default is set to red
 
 	public var animTime:Float = 4;
 	public var noteCamMovement:Array<Float> = [0, 0];
 	public var defaultPos:Array<Float>;
-	public var floatInfo:Array<String> = ["", "", ""];
+
+	public var canSing:Bool = true;
+	public var singAllNoteDatas:Bool = true;
+	public var noteDatasToSingOn:Array<Int> = [0,1,2,3,4,5,6,7,8];
+	public var player1Side:Bool = false;
+	var tex:FlxAtlasFrames;
+
+	public var useExtraSpritesheets:Bool = false;
+	public var otherSheetAnims:Array<Dynamic> = [];
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false, ?flip:Bool = false)
 	{
@@ -103,14 +124,227 @@ class Character extends FlxSprite
 
 		animOffsets = new Map<String, Array<Dynamic>>();
 		posOffsets = new Map<String, Array<Dynamic>>();
-		curCharacter = character;
+		
 		this.isPlayer = isPlayer;
 		this.flip = flip;
 
-		var tex:FlxAtlasFrames;
 		antialiasing = true;
+		if (PlayState.characters)
+			loadCharacter(character);
+		else 
+		{
+			curCharacter = character;
+			curGraphic = character;
+			makeGraphic(1,1); //bf become cube
+			visible = false;
+			animation.add("idle", [0]);
+			animation.add("singLEFT", [0]);
+			animation.add("singRIGHT", [0]);
+			animation.add("singDOWN", [0]);
+			animation.add("singUP", [0]);
+			dance();
+		}
+	}
 
+	override function update(elapsed:Float)
+	{
+		if (!isPlayer)
+		{
+			if (animation.curAnim.name.startsWith('sing'))
+			{
+				holdTimer += elapsed * PlayState.SongSpeedMultiplier;
+			}
+
+			if (holdTimer >= Conductor.stepCrochet * animTime * 0.001)
+			{
+				dance();
+				holdTimer = 0;
+			}
+		}
 		switch (curCharacter)
+		{
+			case 'gf':
+				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
+					playAnim('danceRight');
+		}
+
+		super.update(elapsed);
+	}
+
+	private var danced:Bool = false;
+
+	/**
+	 * FOR GF DANCING SHIT
+	 */
+	public function dance()
+	{
+		if (!PlayState.characters)
+			return;
+
+		if (!debugMode)
+		{
+			switch (curCharacter)
+			{
+				case 'gf':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+
+				case 'gf-christmas':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+
+				case 'gf-car':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+				case 'gf-pixel':
+					if (!animation.curAnim.name.startsWith('hair'))
+					{
+						danced = !danced;
+
+						if (danced)
+							playAnim('danceRight');
+						else
+							playAnim('danceLeft');
+					}
+
+				case 'spooky':
+					danced = !danced;
+
+					if (danced)
+						playAnim('danceRight');
+					else
+						playAnim('danceLeft');
+				default:
+					playAnim('idle');
+			}
+		}
+	}
+
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0, noteData:Int = 0):Void
+	{
+		if (AnimName == "singNONE")
+			return;
+
+		if (AnimName.startsWith("sing"))
+		{
+			if (!canSing)
+				return;
+			else if (!singAllNoteDatas && !noteDatasToSingOn.contains(noteData))
+				return;
+			else 
+				holdTimer = 0;
+		}
+
+		if (!PlayState.characters)
+			return;
+
+		if (animation.getByName(AnimName) == null)
+			checkAnimation(AnimName);
+
+		animation.play(AnimName, Force, Reversed, Frame);
+		var daOffset = animOffsets.get(AnimName);
+		if (animOffsets.exists(AnimName))
+		{
+			offset.set(daOffset[0], daOffset[1]);
+			animation.curAnim.frameRate = Std.int(daOffset[2] * PlayState.SongSpeedMultiplier);
+		}
+		else
+			offset.set(0, 0);
+
+		if (curCharacter == 'gf')
+		{
+			if (AnimName == 'singLEFT')
+			{
+				danced = true;
+			}
+			else if (AnimName == 'singRIGHT')
+			{
+				danced = false;
+			}
+
+			if (AnimName == 'singUP' || AnimName == 'singDOWN')
+			{
+				danced = !danced;
+			}
+		}
+	}
+
+	public function addOffset(name:String, x:Float = 0, y:Float = 0)
+	{
+		var defaultFrameRate:Float = 24;
+		if (animation.getByName(name) != null)
+			defaultFrameRate = animation.getByName(name).frameRate;
+
+		var fuck:Array<Dynamic> = [x, y, defaultFrameRate, curGraphic];
+		animOffsets[name] = fuck;
+	}
+
+	public function addPosOffset(name:String, x:Float = 0, y:Float = 0)
+	{
+		posOffsets[name] = [x, y];
+	}
+
+
+	public function checkAnimation(AnimName:String)
+	{
+		//trace(otherSheetAnims);
+		var foundSheet:Bool = false;
+		for (i in 0...otherSheetAnims.length)
+		{
+			if (otherSheetAnims[i][0] == AnimName) //haha funni switch character
+			{
+				trace("found anim name");
+				if (otherSheetAnims[i][1] != curGraphic)
+					loadCharacter(otherSheetAnims[i][1], false);
+				foundSheet = true;
+				break;
+			}
+		}
+	}
+
+	public function loadCharacter(char:String, reset:Bool = true)
+	{
+
+		if (!PlayState.characters)
+			return;
+
+		if (reset)
+		{
+			curCharacter = char;
+			animOffsets.clear();
+			posOffsets.clear();
+			flipX = false;
+			
+		}
+		animation.destroyAnimations();
+		tex = null;
+		frames = null;
+		curGraphic = char;
+
+		trace("loading character: " + curGraphic);
+
+		switch (curGraphic)
 		{
 			case 'gf':
 				// GIRLFRIEND CODE
@@ -365,7 +599,7 @@ class Character extends FlxSprite
 				addPosOffset('startCam', 600, 0);
 
 			case 'bf':
-				var tex = Paths.getSparrowAtlas('BOYFRIEND');
+				tex = Paths.getSparrowAtlas('BOYFRIEND');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
 				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -404,7 +638,7 @@ class Character extends FlxSprite
 				flipX = true;
 
 			case 'bf-christmas':
-				var tex = Paths.getSparrowAtlas('christmas/bfChristmas', 'week5');
+				tex = Paths.getSparrowAtlas('christmas/bfChristmas', 'week5');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
 				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -432,7 +666,7 @@ class Character extends FlxSprite
 
 				flipX = true;
 			case 'bf-car':
-				var tex = Paths.getSparrowAtlas('bfCar', 'week4');
+				tex = Paths.getSparrowAtlas('bfCar', 'week4');
 				frames = tex;
 				animation.addByPrefix('idle', 'BF idle dance', 24, false);
 				animation.addByPrefix('singUP', 'BF NOTE UP0', 24, false);
@@ -611,7 +845,7 @@ class Character extends FlxSprite
 				addPosOffset('pos', -500, 0);
 
 			default:  	///custom character shit
-				var imagePath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".png";
+				var imagePath = "assets/images/characters/" + curGraphic + "/image.png";
 				var imageGraphic:FlxGraphic;
 
 				if (CacheShit.images[imagePath] == null)
@@ -622,7 +856,7 @@ class Character extends FlxSprite
 				}
 				imageGraphic = CacheShit.images[imagePath];
 
-				var xmlPath = "assets/images/characters/" + curCharacter + "/" + curCharacter + ".xml";
+				var xmlPath = "assets/images/characters/" + curGraphic + "/image.xml";
 				var xml:String;
 
 				if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
@@ -638,13 +872,13 @@ class Character extends FlxSprite
 				}
 					
 
-				var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml); //todo set up the packer things with txts i think idk why tf youd use one just use an xml
+				tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml); //todo set up the packer things with txts i think idk why tf youd use one just use an xml
 				frames = tex;
 
 				#if sys
-				var rawJson = File.getContent(Paths.imageJson("characters/" + curCharacter + "/offsets"));
+				var rawJson = File.getContent(Paths.imageJson("characters/" + curGraphic + "/offsets"));
 				#else
-				var rawJson = Assets.getText(Paths.imageJson("characters/" + curCharacter + "/offsets"));
+				var rawJson = Assets.getText(Paths.imageJson("characters/" + curGraphic + "/offsets"));
 				#end
 				var json:OffsetFile = cast Json.parse(rawJson);
 
@@ -670,8 +904,28 @@ class Character extends FlxSprite
 
 						animation.addByPrefix(animname, xmlname, fps, loop);
 						addOffset(animname, offsets[0], offsets[1]);
+						if (reset)
+							otherSheetAnims.push([animname, curCharacter]);
 					}
 				}
+				if (reset)
+				{
+					if (json.useExtraSpritesheets)
+					{
+						useExtraSpritesheets = json.useExtraSpritesheets;
+						if (json.otherSheetAnims != null && json.otherSheetAnims.length != 0)
+						{
+							for (i in json.otherSheetAnims)
+							{
+								var animName:String = i.animName;
+								var charName:String = i.charNameForSpritesheet;
+								trace("adding extra sheet anim");
+								otherSheetAnims.push([animName, charName]);
+							}
+						}
+					}
+				}
+
 				flip = json.flip;
 				setGraphicSize(Std.int(this.width * json.scale));
 				scrollFactor.set(json.scrollFactor[0], json.scrollFactor[1]);
@@ -679,183 +933,83 @@ class Character extends FlxSprite
 
 				var colors = json.arrowColorShit;
 
-				purple = colors.purple;
-				blue = colors.blue;
-				green = colors.green;
-				red = colors.red;
-				white = colors.white;
-				yellow = colors.yellow;
-				violet = colors.violet;
-				darkred = colors.darkred;
-				dark = colors.dark;
+
+				noteColors = [
+					colors.purple,
+					colors.blue,
+					colors.green,
+					colors.red,
+					colors.white,
+					colors.yellow,
+					colors.violet,
+					colors.darkred,
+					colors.dark
+				];
 
 				var color = json.healthBar;
 				healthColors = [color.red, color.green, color.blue];
+				
 					
 
 		}
 
-		dance();
+		if (reset)
+			dance();
 
 		if (flip)
 		{
 			flipX = !flipX;
-
-			// Doesn't flip for BF, since his are already in the right place???
-			if (!curCharacter.startsWith('bf'))
-			{
-				// var animArray
-				var oldRight = animation.getByName('singRIGHT').frames;
-				animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
-				animation.getByName('singLEFT').frames = oldRight;
-
-				// IF THEY HAVE MISS ANIMATIONS??
-				if (animation.getByName('singRIGHTmiss') != null)
-				{
-					var oldMiss = animation.getByName('singRIGHTmiss').frames;
-					animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
-					animation.getByName('singLEFTmiss').frames = oldMiss;
-				}
-			}
 		}
 	}
 
-	override function update(elapsed:Float)
+
+
+	function autoGenerateAnims():Void //auto animation shit, no auto offsets though obviously
 	{
-		if (!isPlayer)
-			{
-				if (animation.curAnim.name.startsWith('sing'))
-				{
-					holdTimer += elapsed * PlayState.SongSpeedMultiplier;
-				}
-	
-				var dadVar:Float = 4;
-	
-				if (curCharacter == 'dad')
-					dadVar = 6.1;
-				if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
-				{
-					dance();
-					holdTimer = 0;
-				}
-			}
-		switch (curCharacter)
+		if (animation.getByName('idle') != null)
 		{
-			case 'gf':
-				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
-					playAnim('danceRight');
+			var animName = findAnimName('idle');
+			if (animName != "")
+				animation.addByPrefix('idle', animName, 24, false);
 		}
-
-		super.update(elapsed);
-	}
-
-	private var danced:Bool = false;
-
-	/**
-	 * FOR GF DANCING SHIT
-	 */
-	public function dance()
-	{
-		if (!debugMode)
+		if (animation.getByName('singLEFT') != null)
 		{
-			switch (curCharacter)
-			{
-				case 'gf':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'gf-christmas':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'gf-car':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-				case 'gf-pixel':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'spooky':
-					danced = !danced;
-
-					if (danced)
-						playAnim('danceRight');
-					else
-						playAnim('danceLeft');
-				default:
-					playAnim('idle');
-			}
+			var animName = findAnimName('left');
+			if (animName != "")
+				animation.addByPrefix('singLEFT', animName, 24, false);
 		}
-	}
-
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-	{
-		animation.play(AnimName, Force, Reversed, Frame);
+		if (animation.getByName('singUP') != null)
+		{
+			var animName = findAnimName('up');
+			if (animName != "")
+				animation.addByPrefix('singUP', animName, 24, false);
+		}
+		if (animation.getByName('singDOWN') != null)
+		{
+			var animName = findAnimName('down');
+			if (animName != "")
+				animation.addByPrefix('singDOWN', animName, 24, false);
+		}
+		if (animation.getByName('singRIGHT') != null)
+		{
+			var animName = findAnimName('right');
+			if (animName != "")
+				animation.addByPrefix('singRIGHT', animName, 24, false);
+		}
 		
-
-		var daOffset = animOffsets.get(AnimName);
-		if (animOffsets.exists(AnimName))
-		{
-			offset.set(daOffset[0], daOffset[1]);
-			animation.curAnim.frameRate = Std.int(daOffset[2] * PlayState.SongSpeedMultiplier);
-		}
-		else
-			offset.set(0, 0);
-
-		if (curCharacter == 'gf')
-		{
-			if (AnimName == 'singLEFT')
-			{
-				danced = true;
-			}
-			else if (AnimName == 'singRIGHT')
-			{
-				danced = false;
-			}
-
-			if (AnimName == 'singUP' || AnimName == 'singDOWN')
-			{
-				danced = !danced;
-			}
-		}
 	}
 
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
+	function findAnimName(name:String)
 	{
-		var defaultFrameRate = animation.getByName(name).frameRate;
-		animOffsets[name] = [x, y, defaultFrameRate];
-	}
-
-	public function addPosOffset(name:String, x:Float = 0, y:Float = 0)
-	{
-		posOffsets[name] = [x, y];
+		for (frame in this.frames.frames)
+		{
+			if (frame.name != null)
+			{
+				var fname = frame.name.toLowerCase();
+				if (fname.contains(name.toLowerCase()))
+					return frame.name;
+			}
+		}
+		return "";
 	}
 }

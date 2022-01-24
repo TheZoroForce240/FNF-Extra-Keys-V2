@@ -31,6 +31,7 @@ class PauseSubState extends MusicBeatSubstate
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
 
 		FlxG.sound.list.add(pauseMusic);
+		QuickOptions.midSong = true;
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		bg.alpha = 0;
@@ -107,7 +108,9 @@ class PauseSubState extends MusicBeatSubstate
 					close();
 				case "Restart Song":
 					FlxG.resetState();
+					PlayState.instance.call('endScript', []);
 				case "Exit to menu":
+					PlayState.instance.call('endScript', []);
 					FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
 					FlxG.sound.music.onComplete = MainMenuState.musicShit;
 					FlxG.switchState(new MainMenuState());

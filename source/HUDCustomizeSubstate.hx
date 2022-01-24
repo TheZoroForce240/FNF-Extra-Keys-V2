@@ -11,12 +11,6 @@ import flixel.util.FlxTimer;
 import flixel.ui.FlxBar;
 import flixel.math.FlxMath;
 
-
-
-
-
-
-
 class HUDCustomizeSubstate extends MusicBeatSubstate
 {
     var curSelected:Int = 0;
@@ -178,6 +172,10 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
             curCategory[curSelected][1] = 0.1;
         else if (curCategory[curSelected][1] > 1 && curCategory[curSelected][0] == "Lane Opacity")
             curCategory[curSelected][1] = 1;
+        if (curCategory[curSelected][1] <= 0.1 && curCategory[curSelected][0] == "Hud Opacity") //need to figure out a better way to do this, TODO
+            curCategory[curSelected][1] = 0.1;
+        else if (curCategory[curSelected][1] > 1 && curCategory[curSelected][0] == "Hud Opacity")
+            curCategory[curSelected][1] = 1;
 
         P1Stats.scorelerp = Math.floor(FlxMath.lerp(P1Stats.scorelerp, P1Stats.songScore, 0.4)); //funni lerp
 		P1Stats.acclerp = FlxMath.roundDecimal(FlxMath.lerp(P1Stats.acclerp, P1Stats.accuracy, 0.4), 2);
@@ -298,7 +296,7 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
         {
             switch(curCategory[curSelected][0])
             {
-                case "Lane Opacity": 
+                case "Lane Opacity" | "Hud Opacity": 
                     change = change / 10; //makes it 0.1
             }
 
@@ -373,7 +371,6 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
         categories = [
             ["Score Hud Position", SaveData.hudPos, "mode"],
             ["Song Name/Time Hud Position", SaveData.songhudPos, "mode"],
-            ["Health Bar Position", SaveData.hpBarPos, "mode", "Auto-Centers if P1 scroll is not the same as P2 scroll"],
             ["Score", SaveData.enabledHudSections[0], "toggle"],
             ["Rank", SaveData.enabledHudSections[1], "toggle"],
             ["Accuracy", SaveData.enabledHudSections[2], "toggle"],
@@ -392,7 +389,9 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
             ["Highest NPS", SaveData.enabledHudSections[14], "toggle"],
             ["", "", ""],
             ["Arrow Lanes/backing", SaveData.arrowLanes, "mode"],
-            ["Lane Opacity", SaveData.laneOpacity, "slider"]
+            ["Lane Opacity", SaveData.laneOpacity, "slider"],
+            ["Health Bar Position", SaveData.hpBarPos, "mode", "Auto-Centers if P1 scroll is not the same as P2 scroll"],
+            ["Hud Opacity", SaveData.hudOpacity, "slider"],
         ];
         //name, savedata, type of option, info
         
@@ -415,7 +414,8 @@ class HUDCustomizeSubstate extends MusicBeatSubstate
                     SaveData.songhudPos = curCategory[i][1]; 
                 case "Health Bar Position":
                     SaveData.hpBarPos = curCategory[i][1]; 
-
+                case "Hud Opacity":
+                    SaveData.hudOpacity = curCategory[i][1]; 
                 case "Score":
                     SaveData.enabledHudSections[0] = curCategory[i][1]; 
                 case "Rank":

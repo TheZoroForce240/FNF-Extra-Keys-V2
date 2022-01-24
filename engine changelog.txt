@@ -1,0 +1,65 @@
+0.5 ///////////////////////////////////////////////
+
+Now just called Zoro Engine rather than Extra Keys V2, to avoid any confusion with my other extra key engines for kade and psych
+
+i have no idea how to do github thing for changelog lol
+
+--bug fixes--
+
+- fixed sustains not appearing properly in chart editor
+
+- fixed fps not updating on game load
+
+- fixed song start lag
+
+- fixed audio glitchiness from song speed stuff, also fixed desyncs
+
+--additions--
+
+- sustains in chart editor are now colored based on the note
+
+- hscript modchart support (uses actual haxe code so almost anything can be done)
+
+- added a song slider in the chart editor for easily getting around the song
+
+- you can now grab a note with right click in the chart editor to pull out a sustain from it (will appear when let go)
+
+- ctrl z,x,c,v,a,s support in chart editor
+
+- note quantization support (up to 6144th lol)
+
+- note quant snaps in chart editor (press Tab)
+
+- strumline angling and note incoming direction angling
+
+- support for extra characters (done by adding character names to an array with a modchart)
+
+- options to toggle gf strums in chart editor (kinda like how it works in applecore, strums will float above gf)
+
+- support for multiple note cams (can do cool stuff with this)
+
+- support for extra players (unlimited amount of strums!!!!)
+
+- added a raymarching shader for funni 3d
+
+- updated the note assets and added fla shit
+
+- modifier system for easier modcharting
+
+
+
+
+code stuff most people wont care about
+
+- added a player class for reducing duplicated code
+
+- cleaned up keybind code
+
+- cleaned up the note color code a bit
+
+- now requires you to install hscript-ex
+
+haxelib install hscript-ex
+
+
+//////////////////////////////////////////////////

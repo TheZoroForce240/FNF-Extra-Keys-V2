@@ -1,0 +1,444 @@
+var phase1 = true;
+var phase2 = false;
+var phase3 = false;
+var phase4 = false;
+var phase5 = false;
+var phase6 = false;
+
+function stepHit(step) //every step (happens 4 times per beat, best place to put events)
+{
+    switch (step)
+    {
+        case 64: 
+            phase1 = false;
+            phase2 = true;
+            PlayState.p1.modifiers.StrumLinefollowAngle = true;
+            PlayState.p2.modifiers.StrumLinefollowAngle = true;
+            tweenP1StrumAngle(0);
+            tweenP2StrumAngle(-180);
+            PlayState.instance.alignCams = false;
+            tweenNoteCams(0.6);
+        case 96: 
+            tweenP1StrumAngle(90);
+            tweenP2StrumAngle(-270);
+        case 128: 
+            tweenP1StrumAngle(-180);
+            tweenP2StrumAngle(0);
+        case 160: 
+            FlxTween.tween(PlayState.p1.modifiers, {scrollAngle: 0}, (Conductor.stepCrochet / 1000) * 32, {ease: FlxEase.circIn});
+            FlxTween.tween(PlayState.p2.modifiers, {scrollAngle: 0}, (Conductor.stepCrochet / 1000) * 32, {ease: FlxEase.circIn});
+            
+        case 192: 
+            phase2 = false;
+            phase3 = true;
+            tweenStrumAngle(-115);
+        case 253: 
+            phase3 = false;
+            tweenStrumAngle(-90);
+        case 256: 
+            PlayState.p1.modifiers.StrumLinefollowAngle = false;
+            PlayState.p2.modifiers.StrumLinefollowAngle = false;
+            phase3 = false;
+            phase4 = true;
+            PlayState.p1.modifiers.incomingAngleIsStrumAngle = true;
+            PlayState.p2.modifiers.incomingAngleIsStrumAngle = true;
+
+            FlxTween.tween(PlayState.p1.strums.members[0], {angle: 20}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[1], {angle: 40}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[2], {angle: -40}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[3], {angle: -20}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[0], {angle: 20}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[1], {angle: 40}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[2], {angle: -40}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[3], {angle: -20}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+        case 320: 
+            FlxTween.tween(PlayState.p1.strums.members[0], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[1], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[2], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[3], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[0], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[1], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[2], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[3], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+        case 328: 
+            flipScroll();
+        case 332: 
+            flipScroll();
+        case 344: 
+            flipScroll();
+        case 348: 
+            flipScroll();
+        case 360: 
+            flipScroll();
+        case 366: 
+            flipScroll();
+        case 376: 
+            flipScroll();
+        case 382: 
+            flipScroll();
+        case 392: 
+            flipSides();
+        case 398: 
+            flipSides();
+        case 408: 
+            flipSides();
+        case 414: 
+            flipSides();
+        case 416: 
+            phase5 = true;
+        case 448: 
+            phase5 = false;
+            phase6 = true;
+            for (i in 0...PlayState.p1.strums.length)
+            {
+                FlxTween.tween(PlayState.p1.strums.members[i], {x: PlayState.p1.strums.members[i].defaultX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+            for (i in 0...PlayState.p2.strums.length)
+            {
+                FlxTween.tween(PlayState.p2.strums.members[i], {x: PlayState.p2.strums.members[i].defaultX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+        case 512: 
+            phase6 = false;
+            phase4 = false;
+            tweenNoteCams(0.5);
+            FlxTween.tween(PlayState.p1.strums.members[0], {angle: 180}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[1], {angle: 180}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[2], {angle: 0}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[3], {angle: 0}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[0], {angle: 180}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[1], {angle: 180}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[2], {angle: 0}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[3], {angle: 0}, (Conductor.stepCrochet / 1000) * 16, {ease: FlxEase.expoInOut});
+        case 576: 
+            FlxTween.tween(PlayState.p1.strums.members[0], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[1], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[2], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p1.strums.members[3], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[0], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[1], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[2], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            FlxTween.tween(PlayState.p2.strums.members[3], {angle: 0}, (Conductor.stepCrochet / 1000), {ease: FlxEase.expoInOut});
+            phase1 = true;
+            phase4 = true;
+            phase6 = false;
+            tweenNoteCams(1);
+            for (i in 0...PlayState.p1.strums.length)
+            {
+                FlxTween.tween(PlayState.p1.strums.members[i], {y: PlayState.p1.strums.members[i].defaultY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+            for (i in 0...PlayState.p2.strums.length)
+            {
+                FlxTween.tween(PlayState.p2.strums.members[i], {y: PlayState.p2.strums.members[i].defaultY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+        case 638: 
+            phase1 = false;
+            phase2 = false;
+            phase3 = false;
+            phase4 = false;
+            phase5 = false;
+    }
+    if (phase4)
+    {
+        tweenNoteCams(1);
+    }
+    if (phase5)
+    {
+        if (step % 4 == 0)
+        {
+            for (i in 0...PlayState.p1.strums.length)
+            {
+                var shit = Note.swagWidth;
+                if (i % 2 == 0)
+                    shit = -shit;
+
+                FlxTween.tween(PlayState.p1.strums.members[i], {x: PlayState.p1.strums.members[i].defaultX + shit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+            for (i in 0...PlayState.p2.strums.length)
+            {
+                var shit = Note.swagWidth;
+                if (i % 2 == 0)
+                    shit = -shit;
+                FlxTween.tween(PlayState.p2.strums.members[i], {x: PlayState.p2.strums.members[i].defaultX + shit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+        }
+        else 
+        {
+            for (i in 0...PlayState.p1.strums.length)
+            {
+                FlxTween.tween(PlayState.p1.strums.members[i], {x: PlayState.p1.strums.members[i].defaultX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+            for (i in 0...PlayState.p2.strums.length)
+            {
+                FlxTween.tween(PlayState.p2.strums.members[i], {x: PlayState.p2.strums.members[i].defaultX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+        }
+    }
+    if (phase6)
+    {
+        if (step % 4 == 0)
+        {
+            for (i in 0...PlayState.p1.strums.length)
+            {
+                var shit = Note.swagWidth;
+                if (i % 2 == 0)
+                    shit = -shit;
+
+                FlxTween.tween(PlayState.p1.strums.members[i], {y: PlayState.p1.strums.members[i].defaultY + shit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+            for (i in 0...PlayState.p2.strums.length)
+            {
+                var shit = Note.swagWidth;
+                if (i % 2 == 0)
+                    shit = -shit;
+                FlxTween.tween(PlayState.p2.strums.members[i], {y: PlayState.p2.strums.members[i].defaultY + shit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+        }
+        else 
+        {
+            for (i in 0...PlayState.p1.strums.length)
+            {
+                FlxTween.tween(PlayState.p1.strums.members[i], {y: PlayState.p1.strums.members[i].defaultY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+            for (i in 0...PlayState.p2.strums.length)
+            {
+                FlxTween.tween(PlayState.p2.strums.members[i], {y: PlayState.p2.strums.members[i].defaultY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+            }
+        }
+    }
+}
+
+var switched = false;
+
+function beatHit(beat) //every beat
+{
+    if (phase3)
+    {
+        var angleShit = -65;
+        if (switched)
+            angleShit = -115;
+
+        tweenStrumAngle(angleShit);
+        switched = !switched;
+    }
+    else if (phase4)
+    {
+        tweenNoteCams(1.2);
+    }
+    if (phase5)
+    {
+
+    }
+
+
+}
+
+function tweenStrumAngle(fuck)
+{
+    FlxTween.tween(PlayState.p1.modifiers, {scrollAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+    FlxTween.tween(PlayState.p2.modifiers, {scrollAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+}
+
+function tweenP1StrumAngle(fuck)
+{
+    FlxTween.tween(PlayState.p1.modifiers, {scrollAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+}
+function tweenP2StrumAngle(fuck)
+{
+    FlxTween.tween(PlayState.p2.modifiers, {scrollAngle: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+}
+
+function tweenStrumX(fuck)
+{
+
+}
+
+function tweenNoteCams(fuck)
+{
+    FlxTween.tween(PlayState.p1.noteCam, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+    FlxTween.tween(PlayState.p1.noteCamsus, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+    FlxTween.tween(PlayState.p2.noteCam, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+    FlxTween.tween(PlayState.p2.noteCamsus, {zoom: fuck}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+}
+
+function flipScroll()
+{
+    FlxTween.tween(PlayState.p1.noteCam.flashSprite, {scaleY: -PlayState.p1.noteCam.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+    FlxTween.tween(PlayState.p1.noteCamsus.flashSprite, {scaleY: -PlayState.p1.noteCamsus.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+    FlxTween.tween(PlayState.p2.noteCam.flashSprite, {scaleY: -PlayState.p2.noteCam.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+    FlxTween.tween(PlayState.p2.noteCamsus.flashSprite, {scaleY: -PlayState.p2.noteCamsus.flashSprite.scaleY}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+}
+function flipSides()
+{
+    FlxTween.tween(PlayState.p1.noteCam.flashSprite, {scaleX: -PlayState.p1.noteCam.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+    FlxTween.tween(PlayState.p1.noteCamsus.flashSprite, {scaleX: -PlayState.p1.noteCamsus.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+    FlxTween.tween(PlayState.p2.noteCam.flashSprite, {scaleX: -PlayState.p2.noteCam.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+    FlxTween.tween(PlayState.p2.noteCamsus.flashSprite, {scaleX: -PlayState.p2.noteCamsus.flashSprite.scaleX}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circOut});
+}
+
+
+function update(elapsed) //every frame
+{
+
+}
+
+function loadScript() /*as soon as the script exists, good for changing varibles at the start (if savedata or static var, make sure to change it back after!!!!!)*/
+{
+    Note.followAngle = true;
+    Note.StrumLinefollowAngle = false;
+    
+}
+
+function onPlayStateCreated()
+{
+
+}
+
+function endScript() /*any place the song can end (pause menu from exiting, entering chart editor, etc)*/
+{
+
+}
+
+function startSong(song) //when countdown ends
+{
+    //PlayState.p1.wiggleShit.waveAmplitude = 0.01;
+}
+
+function endSong() //only if song ends from beating it (e.g you wanna play a cutscene or something idk)
+{
+
+}
+
+var p1switch = false;
+var p2switch = false;
+////////////////////////////////////
+function P1NoteHit(note)
+{
+    if (phase1)
+    {
+        var data = note.noteData;
+        trace(data);
+        var XShit = 0;
+        var YShit = 0;
+        switch(data)
+        {
+            case 0: 
+                XShit = -50;
+            case 3: 
+                XShit = 50;
+            case 2: 
+                YShit = -50;
+            case 1: 
+                YShit = 50;
+        }
+
+        FlxTween.tween(PlayState.p1.modifiers, {xOffset: XShit, yOffset: YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+        
+    }
+
+}
+function P2NoteHit(note) //for multi/play as oppenent
+{
+    if (phase1)
+    {
+        var data = note.noteData;
+        trace(data);
+        var XShit = 0;
+        var YShit = 0;
+        switch(data)
+        {
+            case 0: 
+                XShit = -50;
+            case 3: 
+                XShit = 50;
+            case 2: 
+                YShit = -50;
+            case 1: 
+                YShit = 50;
+        }
+
+        FlxTween.tween(PlayState.p2.modifiers, {xOffset: XShit, yOffset: YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+        
+    }
+}
+///////////////////////////////////
+function P1NoteMiss(note)
+{
+
+}
+function P2NoteMiss(note) //for multi/play as oppenent
+{
+
+}
+///////////////////////////////////
+function P1MissPress(direction)
+{
+
+}
+function P2MissPress(direction) //for multi/play as oppenent
+{
+
+}
+//////////////////////////////////////
+function P1CpuNoteHit(note) //for play as oppenent
+{
+    if (phase1)
+    {
+        var data = note.noteData;
+        trace(data);
+        var XShit = 0;
+        var YShit = 0;
+        switch(data)
+        {
+            case 0: 
+                XShit = -50;
+            case 3: 
+                XShit = 50;
+            case 2: 
+                YShit = -50;
+            case 1: 
+                YShit = 50;
+        }
+
+        FlxTween.tween(PlayState.p1.modifiers, {xOffset: XShit, yOffset: YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+    }
+}
+function P2CpuNoteHit(note)
+{
+    if (phase1)
+    {
+        var data = note.noteData;
+        trace(data);
+        var XShit = 0;
+        var YShit = 0;
+        switch(data)
+        {
+            case 0: 
+                XShit = -50;
+            case 3: 
+                XShit = 50;
+            case 2: 
+                YShit = -50;
+            case 1: 
+                YShit = 50;
+        }
+
+        FlxTween.tween(PlayState.p2.modifiers, {xOffset: XShit, yOffset: YShit}, (Conductor.stepCrochet / 1000), {ease: FlxEase.circIn});
+    }
+}
+function P3CpuNoteHit(note) //event notes
+{
+
+}
+////////////////////////////////////// //around 3.5 seconds before a note can be hit
+function P1NoteSpawned(note)
+{
+
+}
+function P2NoteSpawned(note)
+{
+
+}
+function P3NoteSpawned(note)
+{
+
+}

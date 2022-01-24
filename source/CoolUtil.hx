@@ -67,25 +67,30 @@ class CoolUtil
 			
 			for (file in diffs)
 			{
-				if (!file.endsWith(".json")) //get rid of non json files
-					diffs.remove(file);
-				else if (file.endsWith("-easy.json")) //add easy first
+				if (!file.contains(".hscript") && file.endsWith(".json")) //fuck you
 				{
-					easy = file;
+					if (!file.endsWith(".json")) //get rid of non json files
+						diffs.remove(file);
+					else if (file.endsWith("-easy.json")) //add easy first
+					{
+						easy = file;
+					}
+					else if (file.endsWith(song + ".json")) //add normal
+					{
+						normal = file;
+					}
+					else if (file.endsWith("-hard.json")) //add hard
+					{
+						hard = file;
+					}
+					else
+					{
+						extra.push(file);
+						extraCount++;
+					}
 				}
-				else if (file.endsWith(song + ".json")) //add normal
-				{
-					normal = file;
-				}
-				else if (file.endsWith("-hard.json")) //add hard
-				{
-					hard = file;
-				}
-				else
-				{
-					extra.push(file);
-					extraCount++;
-				}
+
+				
 			}
 			var textDiffs:Array<String> = [];
 			if (easy != "")
@@ -167,8 +172,7 @@ class CoolUtil
 						case 4: 
 							binds = [savedBinds[1][0], savedBinds[1][4], savedBinds[1][1], savedBinds[1][2], savedBinds[2][4], savedBinds[1][3], null, null, savedBinds[1][5]];
 						case 5: 
-							binds = savedBinds[2]; //easier than typing the whole thing
-							binds[4] = null;
+							binds = savedBinds[2]; //doesnt really matter if you can sit hit space lol
 						case 6: 
 							binds = [null, null, null, null, savedBinds[2][4], null, null, null, null];
 						case 7: 
@@ -197,9 +201,9 @@ class CoolUtil
 
 	public static function complexAssKeybindSaving(maniaToChange:Int, key:String, curSelectedNote:Int, player:Int = 1) //wait shouldnt i put this in save data?? who cares lol
 	{
-		var binds = bindCheck(maniaToChange, true, FlxG.save.data.binds, maniaToChange);
+		var binds = bindCheck(maniaToChange, true, SaveData.binds, maniaToChange);
 		if (player != 1)
-			binds = bindCheck(maniaToChange, true, FlxG.save.data.P2binds, maniaToChange);
+			binds = bindCheck(maniaToChange, true, SaveData.P2binds, maniaToChange);
 
 		binds[curSelectedNote] = key;
 
@@ -208,43 +212,43 @@ class CoolUtil
 			switch (maniaToChange) //this code scares me
 			{
 				case 0: 
-					FlxG.save.data.binds[0] = binds;
+					SaveData.binds[0] = binds;
 				case 1: 
-					FlxG.save.data.binds[1] = binds;
+					SaveData.binds[1] = binds;
 				case 2: 
-					FlxG.save.data.binds[2] = binds;
+					SaveData.binds[2] = binds;
 				case 3: 
-					FlxG.save.data.binds[0][0] = binds[0];
-					FlxG.save.data.binds[0][1] = binds[1];
-					FlxG.save.data.binds[2][4] = binds[2];
-					FlxG.save.data.binds[0][2] = binds[3];
-					FlxG.save.data.binds[0][3] = binds[4];
+					SaveData.binds[0][0] = binds[0];
+					SaveData.binds[0][1] = binds[1];
+					SaveData.binds[2][4] = binds[2];
+					SaveData.binds[0][2] = binds[3];
+					SaveData.binds[0][3] = binds[4];
 				case 4: 
-					FlxG.save.data.binds[1][0] = binds[0];
-					FlxG.save.data.binds[1][1] = binds[1];
-					FlxG.save.data.binds[1][2] = binds[2];
-					FlxG.save.data.binds[2][4] = binds[3];
-					FlxG.save.data.binds[1][3] = binds[4];
-					FlxG.save.data.binds[1][4] = binds[5];
-					FlxG.save.data.binds[1][5] = binds[6];
+					SaveData.binds[1][0] = binds[0];
+					SaveData.binds[1][1] = binds[1];
+					SaveData.binds[1][2] = binds[2];
+					SaveData.binds[2][4] = binds[3];
+					SaveData.binds[1][3] = binds[4];
+					SaveData.binds[1][4] = binds[5];
+					SaveData.binds[1][5] = binds[6];
 				case 5: 
-					FlxG.save.data.binds[2][0] = binds[0];
-					FlxG.save.data.binds[2][1] = binds[1];
-					FlxG.save.data.binds[2][2] = binds[2];
-					FlxG.save.data.binds[2][3] = binds[3];
-					FlxG.save.data.binds[2][5] = binds[4];
-					FlxG.save.data.binds[2][6] = binds[5];
-					FlxG.save.data.binds[2][7] = binds[6];
-					FlxG.save.data.binds[2][8] = binds[7];
+					SaveData.binds[2][0] = binds[0];
+					SaveData.binds[2][1] = binds[1];
+					SaveData.binds[2][2] = binds[2];
+					SaveData.binds[2][3] = binds[3];
+					SaveData.binds[2][5] = binds[4];
+					SaveData.binds[2][6] = binds[5];
+					SaveData.binds[2][7] = binds[6];
+					SaveData.binds[2][8] = binds[7];
 				case 6: 
-					FlxG.save.data.binds[2][4] = binds[0];
+					SaveData.binds[2][4] = binds[0];
 				case 7: 
-					FlxG.save.data.binds[0][0] = binds[0];
-					FlxG.save.data.binds[0][3] = binds[1];
+					SaveData.binds[0][0] = binds[0];
+					SaveData.binds[0][3] = binds[1];
 				case 8: 
-					FlxG.save.data.binds[0][0] = binds[0];
-					FlxG.save.data.binds[2][4] = binds[1];
-					FlxG.save.data.binds[0][3] = binds[2];
+					SaveData.binds[0][0] = binds[0];
+					SaveData.binds[2][4] = binds[1];
+					SaveData.binds[0][3] = binds[2];
 			}
 		}
 		else 
@@ -252,43 +256,43 @@ class CoolUtil
 			switch (maniaToChange) //for player 2
 			{
 				case 0: 
-					FlxG.save.data.P2binds[0] = binds;
+					SaveData.P2binds[0] = binds;
 				case 1: 
-					FlxG.save.data.P2binds[1] = binds;
+					SaveData.P2binds[1] = binds;
 				case 2: 
-					FlxG.save.data.P2binds[2] = binds;
+					SaveData.P2binds[2] = binds;
 				case 3: 
-					FlxG.save.data.P2binds[0][0] = binds[0];
-					FlxG.save.data.P2binds[0][1] = binds[1];
-					FlxG.save.data.P2binds[2][4] = binds[2];
-					FlxG.save.data.P2binds[0][2] = binds[3];
-					FlxG.save.data.P2binds[0][3] = binds[4];
+					SaveData.P2binds[0][0] = binds[0];
+					SaveData.P2binds[0][1] = binds[1];
+					SaveData.P2binds[2][4] = binds[2];
+					SaveData.P2binds[0][2] = binds[3];
+					SaveData.P2binds[0][3] = binds[4];
 				case 4: 
-					FlxG.save.data.P2binds[1][0] = binds[0];
-					FlxG.save.data.P2binds[1][1] = binds[1];
-					FlxG.save.data.P2binds[1][2] = binds[2];
-					FlxG.save.data.P2binds[2][4] = binds[3];
-					FlxG.save.data.P2binds[1][3] = binds[4];
-					FlxG.save.data.P2binds[1][4] = binds[5];
-					FlxG.save.data.P2binds[1][5] = binds[6];
+					SaveData.P2binds[1][0] = binds[0];
+					SaveData.P2binds[1][1] = binds[1];
+					SaveData.P2binds[1][2] = binds[2];
+					SaveData.P2binds[2][4] = binds[3];
+					SaveData.P2binds[1][3] = binds[4];
+					SaveData.P2binds[1][4] = binds[5];
+					SaveData.P2binds[1][5] = binds[6];
 				case 5: 
-					FlxG.save.data.P2binds[2][0] = binds[0];
-					FlxG.save.data.P2binds[2][1] = binds[1];
-					FlxG.save.data.P2binds[2][2] = binds[2];
-					FlxG.save.data.P2binds[2][3] = binds[3];
-					FlxG.save.data.P2binds[2][5] = binds[4];
-					FlxG.save.data.P2binds[2][6] = binds[5];
-					FlxG.save.data.P2binds[2][7] = binds[6];
-					FlxG.save.data.P2binds[2][8] = binds[7];
+					SaveData.P2binds[2][0] = binds[0];
+					SaveData.P2binds[2][1] = binds[1];
+					SaveData.P2binds[2][2] = binds[2];
+					SaveData.P2binds[2][3] = binds[3];
+					SaveData.P2binds[2][5] = binds[4];
+					SaveData.P2binds[2][6] = binds[5];
+					SaveData.P2binds[2][7] = binds[6];
+					SaveData.P2binds[2][8] = binds[7];
 				case 6: 
-					FlxG.save.data.P2binds[2][4] = binds[0];
+					SaveData.P2binds[2][4] = binds[0];
 				case 7: 
-					FlxG.save.data.P2binds[0][0] = binds[0];
-					FlxG.save.data.P2binds[0][3] = binds[1];
+					SaveData.P2binds[0][0] = binds[0];
+					SaveData.P2binds[0][3] = binds[1];
 				case 8: 
-					FlxG.save.data.P2binds[0][0] = binds[0];
-					FlxG.save.data.P2binds[2][4] = binds[1];
-					FlxG.save.data.P2binds[0][3] = binds[2];
+					SaveData.P2binds[0][0] = binds[0];
+					SaveData.P2binds[2][4] = binds[1];
+					SaveData.P2binds[0][3] = binds[2];
 			}
 		}
 		

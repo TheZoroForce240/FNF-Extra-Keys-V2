@@ -1,5 +1,6 @@
 package;
 
+import openfl.Lib;
 #if desktop
 import Discord.DiscordClient;
 import sys.thread.Thread;
@@ -46,8 +47,6 @@ class TitleState extends MusicBeatState
 
 	var wackyImage:FlxSprite;
 
-	
-
 	override public function create():Void
 	{
 		//Main.updateGameData();
@@ -66,7 +65,7 @@ class TitleState extends MusicBeatState
 		//NGio.noLogin(APIStuff.API);
 
 
-		FlxG.save.bind('funkin', 'ninjamuffin99');
+		FlxG.save.bind('ek', 'bruhj');
 
 		Highscore.load();
 
@@ -108,6 +107,7 @@ class TitleState extends MusicBeatState
 		if (FlxG.save.data.volume != null)
 			FlxG.sound.volume = FlxG.save.data.volume;
 
+		(cast (Lib.current.getChildAt(0), Main)).changeFPS(SaveData.fps);
 
 	}
 
@@ -124,9 +124,9 @@ class TitleState extends MusicBeatState
 			diamond.persist = true;
 			diamond.destroyOnNoUse = false;
 
-			FlxTransitionableState.defaultTransIn = new TransitionData(FADE, FlxColor.BLACK, 1, new FlxPoint(0, -1), {asset: diamond, width: 32, height: 32},
+			FlxTransitionableState.defaultTransIn = new TransitionData(TILES, FlxColor.BLACK, 0.5, new FlxPoint(2, -1), {asset: diamond, width: 32, height: 32},
 				new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
-			FlxTransitionableState.defaultTransOut = new TransitionData(FADE, FlxColor.BLACK, 0.7, new FlxPoint(0, 1),
+			FlxTransitionableState.defaultTransOut = new TransitionData(TILES, FlxColor.BLACK, 0.3, new FlxPoint(2, 1),
 				{asset: diamond, width: 32, height: 32}, new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
 
 			transIn = FlxTransitionableState.defaultTransIn;
@@ -253,6 +253,12 @@ class TitleState extends MusicBeatState
 			FlxG.fullscreen = !FlxG.fullscreen;
 		}
 
+		if (FlxG.keys.justPressed.FIVE)
+			{
+				rewindAudio();
+			}
+
+
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
 
 		#if mobile
@@ -349,7 +355,9 @@ class TitleState extends MusicBeatState
 	{
 		super.beatHit();
 
-		logoBl.animation.play('bump');
+		if (logoBl != null)
+			logoBl.animation.play('bump');
+
 		danceLeft = !danceLeft;
 
 		if (danceLeft)
@@ -421,5 +429,15 @@ class TitleState extends MusicBeatState
 			remove(credGroup);
 			skippedIntro = true;
 		}
+	}
+
+	function rewindAudio():Void 
+	{
+		#if cpp
+		@:privateAccess
+		{
+			lime.media.openal.AL.sourcef(FlxG.sound.music._channel.__source.__backend.handle, lime.media.openal.AL.PITCH, 1.3);
+		}
+		#end	
 	}
 }
