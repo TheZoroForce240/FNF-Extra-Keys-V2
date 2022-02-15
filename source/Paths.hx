@@ -76,14 +76,12 @@ class Paths
 		return getPath('data/$key.xml', TEXT, library);
 	}
 
-	inline static public function json(key:String, ?library:String)
+	inline static public function json(key:String, ?library:String, freeplay:Bool = false)
 	{
+		if (freeplay)
+			return getPath('data/freeplayCharts/$key.json', TEXT, library);
+		
 		return getPath('data/charts/$key.json', TEXT, library);
-	}
-
-	inline static public function customChartjson(key:String, ?library:String)
-	{
-		return getPath('data/customCharts/$key.json', TEXT, library);
 	}
 
 	static public function sound(key:String, ?library:String)
@@ -101,14 +99,14 @@ class Paths
 		return getPath('music/$key.$SOUND_EXT', MUSIC, library);
 	}
 
-	inline static public function voices(song:String)
+	inline static public function voices(song:String, prefix:String)
 	{
-		return 'assets/songs/${song.toLowerCase()}/Voices.$SOUND_EXT';
+		return 'assets/songs/${song.toLowerCase()}/Voices${prefix.toLowerCase()}.$SOUND_EXT';
 	}
 
-	inline static public function inst(song:String)
+	inline static public function inst(song:String, prefix:String)
 	{
-		return 'assets/songs/${song.toLowerCase()}/Inst.$SOUND_EXT';
+		return 'assets/songs/${song.toLowerCase()}/Inst${prefix.toLowerCase()}.$SOUND_EXT';
 	}
 
 	inline static public function image(key:String, ?library:String)

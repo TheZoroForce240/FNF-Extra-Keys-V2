@@ -167,10 +167,22 @@ class Player
     public var char:Boyfriend;
     public var isCpu:Bool = true;
     public var activeCharacters = [];
+    public var curMania:Int = 0;
+    public var curNoteScale:Float = 0.7;
+    public var curNoteMania:Int = 0;
+    public var prevNoteMania:Int = 0;
+    public var lastManiaChange:Float = 0; //in strumtime
 
     public function new(player:Int = 0)
     {
         playernum = player;
+    }
+    public function resetManias(mania:Int)
+    {
+        curMania = mania;
+        curNoteMania = mania;
+        prevNoteMania = mania;
+        lastManiaChange = 0;    
     }
 	public function updateCams()
     {

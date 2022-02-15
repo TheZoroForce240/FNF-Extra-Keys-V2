@@ -23,6 +23,12 @@ import hscript.Expr;
 import hscript.Interp;
 import hscript.Parser;
 
+import lime.app.Application;
+import haxe.Json;
+import haxe.format.JsonParser;
+import Section.SwagSection;
+import Song.SwagSong;
+
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -141,6 +147,27 @@ class MainMenuState extends MusicBeatState
 		SaveData.keyBindCheck();
 		//call("onStateCreated", []);
 		changeItem();
+
+		Application.current.window.onDropFile.add(function (path:String)
+		{
+			var rawJson = File.getContent(path).trim();
+			while (!rawJson.endsWith("}"))
+			{
+				rawJson = rawJson.substr(0, rawJson.length - 1);
+			}
+			var swagShit:SwagSong = cast Json.parse(rawJson).song;
+			if (swagShit.validScore == false)
+				swagShit.validScore = true;
+
+			PlayState.SONG = swagShit;
+			PlayState.isFreeplayChart = true;
+			PlayState.didDownloadContent = false;
+			PlayState.isStoryMode = false;
+			PlayState.storyDifficulty = 0;
+			CoolUtil.CurSongDiffs = ['NORMAL'];
+			PlayState.storyWeek = 0;
+			FlxG.switchState(new DownloadingState(PlayState.SONG.downloadingStuff));
+		});
 
 		super.create();
 	}
@@ -278,20 +305,27 @@ class MainMenuState extends MusicBeatState
 
 	public static function musicShit():Void
 	{
-		
-		var initSonglist = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
-		var randomSong = FlxG.random.int(0, initSonglist.length - 1);
-
-		var data:Array<String> = initSonglist[randomSong].split(':');
-		var song = data[0].toLowerCase();
-
 		#if sys
-		FlxG.sound.playMusic(Sound.fromFile(Paths.inst(song)), 0.6, true);
+		var initSonglist = FileSystem.readDirectory('assets/songs');
+		if (initSonglist.length > 0)
+		{
+			var randomSong = FlxG.random.int(0, initSonglist.length - 1);
+
+			var song = initSonglist[randomSong].toLowerCase();
+	
+			FlxG.sound.playMusic(Sound.fromFile(Paths.inst(song, '')), 0.6, true);
+			curSong = initSonglist[randomSong];
+		}
+		else 
+			FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
+
+		#else 
+		FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
 		#end
 
 		FlxG.sound.music.onComplete = MainMenuState.musicShit;
 
-		curSong = data[0];
+		
 
 		//CacheShit.clearCache();
 

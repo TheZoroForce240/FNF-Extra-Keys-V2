@@ -30,6 +30,13 @@ class HealthIcon extends FlxSprite
 			var iconGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path));
 			//trace("loading da custom icon");
 			loadGraphic(iconGraphic, true, 150, 150);
+			animation.add(char, [0, 1], 0, false, isPlayer);	
+		}
+		else if (CacheShit.images[path] != null)
+		{
+			var iconGraphic = CacheShit.images[path];
+			//trace("loading da custom icon");
+			loadGraphic(iconGraphic, true, 150, 150);
 			animation.add(char, [0, 1], 0, false, isPlayer);
 		}
 		#else 

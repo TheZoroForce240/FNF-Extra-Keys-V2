@@ -42,8 +42,9 @@ class Alphabet extends FlxSpriteGroup
 	var splitWords:Array<String> = [];
 
 	var isBold:Bool = false;
+	var isVertical:Bool = false;
 
-	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false, menuOffset:Float = 90)
+	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false, menuOffset:Float = 90, vertical:Bool = false)
 	{
 		super(x, y);
 
@@ -75,6 +76,7 @@ class Alphabet extends FlxSpriteGroup
 		doSplitWords();
 
 		var xPos:Float = 0;
+		var yPos:Float = 0;
 		for (character in splitWords)
 		{
 			// if (character.fastCodeAt() == " ")
@@ -97,17 +99,23 @@ class Alphabet extends FlxSpriteGroup
 			{
 				if (lastSprite != null)
 				{
-					xPos = lastSprite.x + lastSprite.width;
+					if (!isVertical)
+						xPos = lastSprite.x + lastSprite.width;
+					else
+						yPos = lastSprite.y + lastSprite.height;
 				}
 
 				if (lastWasSpace)
 				{
-					xPos += 40;
+					if (!isVertical)
+						xPos += 40;
+					else
+						yPos += 40;
 					lastWasSpace = false;
 				}
 
 				// var letter:AlphaCharacter = new AlphaCharacter(30 * loopNum, 0);
-				var letter:AlphaCharacter = new AlphaCharacter(xPos, 0);
+				var letter:AlphaCharacter = new AlphaCharacter(xPos, yPos);
 				if (isBold)
 				{
 					if (isNumber)

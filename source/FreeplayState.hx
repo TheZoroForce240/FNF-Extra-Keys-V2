@@ -47,6 +47,112 @@ class FreeplayState extends MusicBeatState
 	private var customSongCheck:Array<Bool> = [];
 	public static var useAutoDiffSystem:Bool = true;
 
+
+
+	function loadSongFromPath(path:String, song:String, freeplayChart:Bool = false)
+	{
+		if (useAutoDiffSystem)
+		{
+			#if sys
+			
+			if (FileSystem.exists(path))
+			{
+				var diffs:Array<String> = [];
+				var sortedDiffs:Array<String> = [];
+				var diffTexts:Array<String> = []; //for display text
+				var ratingList:Array<Dynamic> = []; 
+				diffs = FileSystem.readDirectory(path);
+
+				var easy:String = "";
+				var normal:String = "";
+				var hard:String = "";
+				var extra:Array<String> = [];
+				var extraCount = 0;
+				
+				for (file in diffs)
+				{
+					if (!file.contains(".hscript") && file.endsWith(".json")) //fuck you
+					{
+						if (!file.endsWith(".json")) //get rid of non json files
+							diffs.remove(file);
+						else if (file.endsWith("-easy.json")) //add easy first
+						{
+							easy = file;
+						}
+						else if (file.endsWith(song.toLowerCase() + ".json")) //add normal
+						{
+							normal = file;
+						}
+						else if (file.endsWith("-hard.json")) //add hard
+						{
+							hard = file;
+						}
+						else if (file.endsWith(".json"))
+						{
+							var text:String = StringTools.replace(file, song.toLowerCase() + "-", "");
+							var fixedText:String = StringTools.replace(text,".json", "");
+							extra.push(fixedText.toUpperCase());
+							extraCount++;
+						}
+					}
+
+
+				}
+
+				if (easy != "") //me trying to figure out how to sort the diffs in correct order :(
+				{
+					/*var shittyFile = StringTools.replace(easy,".json", ""); 
+					var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, song.toLowerCase(),freeplayChart));
+					ratingList.push(ratingShit);*/
+					ratingList.push([0,0]);
+					diffTexts.push("EASY"); //it works pog
+				}
+				if (normal != "")
+				{
+					/*var shittyFile = StringTools.replace(normal,".json", ""); 
+					var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, song.toLowerCase(),freeplayChart));
+					ratingList.push(ratingShit);*/
+					ratingList.push([0,0]);
+					diffTexts.push("NORMAL");
+				}
+				if (hard != "")
+				{
+					/*var shittyFile = StringTools.replace(hard,".json", ""); 
+					var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, song.toLowerCase(),freeplayChart));
+					ratingList.push(ratingShit);*/
+					ratingList.push([0,0]);
+					diffTexts.push("HARD");
+				}	
+				if (extraCount != 0)
+				{
+					for (i in extra)
+					{
+						/*var poop:String = CoolUtil.getSongFromJsons(song.toLowerCase(), diffTexts.length,freeplayChart);
+						var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(poop, song.toLowerCase(),freeplayChart));
+						ratingList.push(ratingShit);*/
+						ratingList.push([0,0]);
+						diffTexts.push(i);
+					}
+				}
+
+						
+
+				//diffArrays.push(sortedDiffs);
+				diffTextArrays.push(diffTexts);
+				ratingArray.push(ratingList);
+				
+			}
+			#end
+		}
+		else 
+		{
+			var diffTexts = ["EASY", "NORMAL", "HARD", "ALT"];
+			diffTextArrays.push(diffTexts);
+			var ratingList = [[0,0],[0,0],[0,0],[0,0]];
+			ratingArray.push(ratingList);
+		}
+	}
+
 	override function create()
 	{
 		PlayState.isStoryMode = false; //so files load properly
@@ -58,110 +164,34 @@ class FreeplayState extends MusicBeatState
 		#if !sys
 		useAutoDiffSystem = false;
 		#end
-
-		for (i in 0...initSonglist.length)
+		if (initSonglist.length > 0 && initSonglist[0] != '')
 		{
-			var data:Array<String> = initSonglist[i].split(':');
-			songs.push(new SongMetadata(data[0], Std.parseInt(data[2]), data[1]));
-			if (useAutoDiffSystem)
+			for (i in 0...initSonglist.length)
 			{
-				#if sys
+				var data:Array<String> = initSonglist[i].split(':');
+				songs.push(new SongMetadata(data[0], Std.parseInt(data[2]), data[1]));
 				var path = "assets/data/charts/" + data[0];
-				if (FileSystem.exists(path))
-				{
-					var diffs:Array<String> = [];
-					var sortedDiffs:Array<String> = [];
-					var diffTexts:Array<String> = []; //for display text
-					var ratingList:Array<Dynamic> = []; 
-					diffs = FileSystem.readDirectory(path);
-	
-					var easy:String = "";
-					var normal:String = "";
-					var hard:String = "";
-					var extra:Array<String> = [];
-					var extraCount = 0;
-					
-					for (file in diffs)
-					{
-						if (!file.contains(".hscript") && file.endsWith(".json")) //fuck you
-						{
-							if (!file.endsWith(".json")) //get rid of non json files
-								diffs.remove(file);
-							else if (file.endsWith("-easy.json")) //add easy first
-							{
-								easy = file;
-							}
-							else if (file.endsWith(data[0].toLowerCase() + ".json")) //add normal
-							{
-								normal = file;
-							}
-							else if (file.endsWith("-hard.json")) //add hard
-							{
-								hard = file;
-							}
-							else if (file.endsWith(".json"))
-							{
-								var text:String = StringTools.replace(file, data[0].toLowerCase() + "-", "");
-								var fixedText:String = StringTools.replace(text,".json", "");
-								extra.push(fixedText.toUpperCase());
-								extraCount++;
-							}
-						}
-
-
-					}
-	
-					if (easy != "") //me trying to figure out how to sort the diffs in correct order :(
-					{
-						var shittyFile = StringTools.replace(easy,".json", ""); 
-						var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
-						ratingList.push(ratingShit);
-						diffTexts.push("EASY"); //it works pog
-					}
-					if (normal != "")
-					{
-						var shittyFile = StringTools.replace(normal,".json", ""); 
-						var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
-						ratingList.push(ratingShit);
-						diffTexts.push("NORMAL");
-					}
-					if (hard != "")
-					{
-						var shittyFile = StringTools.replace(hard,".json", ""); 
-						var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(shittyFile, data[0].toLowerCase()));
-						ratingList.push(ratingShit);
-						diffTexts.push("HARD");
-					}	
-					if (extraCount != 0)
-					{
-						for (i in extra)
-						{
-							var poop:String = CoolUtil.getSongFromJsons(data[0].toLowerCase(), diffTexts.length);
-							var ratingShit:Array<Float> = SongRating.CalculateSongRating(Song.loadFromJson(poop, data[0].toLowerCase()));
-							ratingList.push(ratingShit);
-							diffTexts.push(i);
-						}
-					}
-	
-							
-	
-					//diffArrays.push(sortedDiffs);
-					diffTextArrays.push(diffTexts);
-					ratingArray.push(ratingList);
-					
-				}
-				#end
+				loadSongFromPath(path, data[0]);
 			}
-			else 
-			{
-				var diffTexts = ["EASY", "NORMAL", "HARD", "ALT"];
-				diffTextArrays.push(diffTexts);
-				var ratingList = [[0,0],[0,0],[0,0],[0,0]];
-				ratingArray.push(ratingList);
-			}
-
-
 		}
+	
+
+		#if sys
+		var freeplayCharts = FileSystem.readDirectory('assets/data/freeplayCharts');
+		if (freeplayCharts.length > 0)
+		{
+			for (chart in freeplayCharts)
+			{
+				if (!chart.contains('.txt'))
+				{
+					songs.push(new SongMetadata(chart, 0, 'face', true));
+					var path = "assets/data/freeplayCharts/" + chart;
+					loadSongFromPath(path, chart, true);
+				}
+			}
+		}
+
+		#end
 		
 		/*var customChartsSearch = FileSystem.readDirectory("assets/data/customCharts/");
 		if (customChartsSearch.length != 0)
@@ -244,6 +274,10 @@ class FreeplayState extends MusicBeatState
 		#if debug
 		isDebug = true;
 		#end
+
+
+
+		
 
 		// LOAD MUSIC
 
@@ -395,9 +429,6 @@ class FreeplayState extends MusicBeatState
 			FlxG.switchState(new MainMenuState());
 		}
 
-		if (FlxG.keys.justPressed.SPACE)
-			FlxG.sound.playMusic(Sound.fromFile(Paths.inst(songs[curSelected].songName)), 0);
-
 
 		if (accepted)
 		{
@@ -405,14 +436,16 @@ class FreeplayState extends MusicBeatState
 			{
 				Main.editor = true;
 				#if sys
-				var poop:String = CoolUtil.getSongFromJsons(songs[curSelected].songName.toLowerCase(), curDifficulty);
+				var poop:String = CoolUtil.getSongFromJsons(songs[curSelected].songName.toLowerCase(), curDifficulty, songs[curSelected].isFreeplayChart);
 				#else
 				var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
 				#end
 				trace(poop);
 	
-				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
+				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase(), songs[curSelected].isFreeplayChart);
+				PlayState.isFreeplayChart = songs[curSelected].isFreeplayChart;
 				PlayState.isStoryMode = false;
+				PlayState.didDownloadContent = false;
 				PlayState.storyDifficulty = curDifficulty;
 				PlayState.storyWeek = songs[curSelected].week;
 				trace('CUR WEEK' + PlayState.storyWeek);
@@ -421,18 +454,20 @@ class FreeplayState extends MusicBeatState
 			else
 			{
 				#if sys
-				var poop:String = CoolUtil.getSongFromJsons(songs[curSelected].songName.toLowerCase(), curDifficulty);
+				var poop:String = CoolUtil.getSongFromJsons(songs[curSelected].songName.toLowerCase(), curDifficulty, songs[curSelected].isFreeplayChart);
 				#else
 				var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
 				#end
 				trace(poop);
 	
-				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
+				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase(), songs[curSelected].isFreeplayChart);
+				PlayState.isFreeplayChart = songs[curSelected].isFreeplayChart;
 				PlayState.isStoryMode = false;
+				PlayState.didDownloadContent = false;
 				PlayState.storyDifficulty = curDifficulty;
 				PlayState.storyWeek = songs[curSelected].week;
 				trace('CUR WEEK' + PlayState.storyWeek);
-				LoadingState.loadAndSwitchState(new PlayState());
+				FlxG.switchState(new DownloadingState(PlayState.SONG.downloadingStuff));
 			}
 
 		}
@@ -516,11 +551,13 @@ class SongMetadata
 	public var songName:String = "";
 	public var week:Int = 0;
 	public var songCharacter:String = "";
+	public var isFreeplayChart:Bool = false;
 
-	public function new(song:String = "tutorial", week:Int = 0, songCharacter:String = "bf")
+	public function new(song:String = "tutorial", week:Int = 0, songCharacter:String = "bf", isFreeplayChart:Bool = false)
 	{
 		this.songName = song;
 		this.week = week;
 		this.songCharacter = songCharacter;
+		this.isFreeplayChart = isFreeplayChart;
 	}
 }

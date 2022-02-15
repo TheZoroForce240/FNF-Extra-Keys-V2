@@ -14,10 +14,11 @@ import flash.media.Sound;
 
 class CacheShit
 {
-
+    public static var jsons:Map<String, String> = new Map(); //stores json data
     public static var xmls:Map<String, String> = new Map(); //stores xml data
     public static var images:Map<String, FlxGraphic> = new Map(); //store image bitmap data
-    public static var sounds:Map<String, FlxSoundAsset> = new Map(); //store image bitmap data
+    public static var sounds:Map<String, FlxSoundAsset> = new Map(); //store inst and vocals i think
+    public static var modcharts:Map<String, String> = new Map(); //stores modcharts
 
 
     //tbh i dont even know if this helps lol
@@ -35,9 +36,16 @@ class CacheShit
         FlxG.bitmap.dumpCache();
         FlxG.bitmap.clearCache();
         OpenFlAssets.cache.clear(); //just fucking clear everything or some shit idk
+        jsons.clear();
         xmls.clear();
         images.clear();
         sounds.clear();
+        modcharts.clear();
+    }
+
+    public static function SaveJson(name:String, jsonString:String)
+    {
+        jsons[name] = jsonString;
     }
 
     public static function SaveXml(name:String, xmlString:String)

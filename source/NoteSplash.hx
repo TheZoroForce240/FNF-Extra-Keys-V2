@@ -35,9 +35,9 @@ class NoteSplash extends FlxSprite
 	public function makeSplash(nX:Float, nY:Float, color:Int, playernum:Int = 1, cameraShit:Array<FlxCamera>, colorShiz:Array<Float>) 
 	{
 		this.cameras = cameraShit;
-		var maniaToUse = PlayState.p1Mania;
+		var maniaToUse = PlayState.p1.curMania;
 		if (playernum == 0)
-			maniaToUse = PlayState.p2Mania;
+			maniaToUse = PlayState.p2.curMania;
 
         setPosition(nX - (102 * (Note.noteWidths[maniaToUse] / 66.5)), nY - (110 * (Note.noteWidths[maniaToUse] / 66.5)));
 		angle = FlxG.random.int(0, 360);

@@ -1,5 +1,6 @@
 package;
 
+import flixel.system.FlxAssets.FlxSoundAsset;
 import flixel.input.keyboard.FlxKeyboard;
 import flixel.input.keyboard.FlxKey;
 import flixel.addons.ui.FlxUIGroup;
@@ -7,6 +8,7 @@ import Note.CharterSustain;
 import Conductor.BPMChangeEvent;
 import Section.SwagSection;
 import Song.SwagSong;
+import DownloadingState.DownloadableObj;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.display.FlxGridOverlay;
@@ -43,6 +45,7 @@ import flixel.addons.effects.chainable.FlxOutlineEffect;
 import lime.media.openal.AL;
 
 import flash.media.Sound;
+import flash.net.URLRequest;
 
 import flash.desktop.Clipboard;
 import flash.desktop.ClipboardFormats;
@@ -100,11 +103,8 @@ class ChartingState extends MusicBeatState
 	var bottomSection:SwagSection;
 
 	var newGridSize:Int = 8;
-
-	var typingShit:FlxInputText;
-	var eventTypingShit:FlxInputText;
-	var strumTimeTypingShit:FlxInputText;
-	var velChangeTypingShit:FlxInputText;
+	
+	var InputTexts:Map<String, FlxInputText>;
 	/*
 	 * WILL BE THE CURRENT / LAST PLACED NOTE
 	**/
@@ -190,6 +190,7 @@ class ChartingState extends MusicBeatState
 	This Mode disables other Controls!!!!\nSnaps affect note placements!!!";
 
 	var realTimeCharting:Bool = false;
+	var typing:Bool = false;
 
 	override function create()
 	{
@@ -239,6 +240,8 @@ class ChartingState extends MusicBeatState
 		curRenderedTypes = new FlxTypedGroup<FlxText>();
 		curRenderedSpeed = new FlxTypedGroup<FlxText>();
 
+		InputTexts = new Map<String, FlxInputText>();
+
 
 		if (PlayState.SONG != null)
 			_song = PlayState.SONG;
@@ -256,7 +259,14 @@ class ChartingState extends MusicBeatState
 				speed: 1,
 				mania: 0,
 				validScore: false,
-				showGFStrums: false
+				showGFStrums: false,
+				instSuffix: '',
+				vocalsSuffix: '',
+				displayName: '',
+				audioFromUrl: false,
+				instUrl: '',
+				vocalsUrl: '',
+				downloadingStuff: []
 			};
 		}
 		dadcharacter = _song.player2;
@@ -318,7 +328,7 @@ class ChartingState extends MusicBeatState
 
 		updateGrid();
 
-		loadSong(_song.song);
+		loadSong(_song);
 		Conductor.changeBPM(_song.bpm);
 		Conductor.mapBPMChanges(_song);
 
@@ -485,7 +495,9 @@ class ChartingState extends MusicBeatState
 	function addSongUI():Void
 	{
 		var UI_songTitle = new FlxUIInputText(10, 10, 70, _song.song, 8);
-		typingShit = UI_songTitle;
+		InputTexts['song'] = UI_songTitle;
+		UI_songTitle.focusGained = function() { typing = true; }
+		UI_songTitle.focusLost = function() { typing = false; }
 
 		var check_voices = new FlxUICheckBox(10, 25, null, null, "Has voice track", 100);
 		check_voices.checked = _song.needsVoices;
@@ -535,7 +547,7 @@ class ChartingState extends MusicBeatState
 
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + saveButton.width + 10, saveButton.y, "Reload Audio", function()
 		{
-			loadSong(_song.song);
+			loadSong(_song);
 		});
 		reloadSong.onOver.callback = function()
 		{
@@ -601,6 +613,20 @@ class ChartingState extends MusicBeatState
 		var StageLabel = new FlxText(10,250,64,'Stages');
 
 
+		var instSuffixText = new FlxUIInputText(saveButton.x + saveButton.width + 10, 120, 70, _song.instSuffix, 8);
+		instSuffixText.focusGained = function() { typing = true; }
+		instSuffixText.focusLost = function() { typing = false; }
+		instSuffixText.name = 'instSuffix';
+		var instSuffixLabel = new FlxText(saveButton.x + saveButton.width + 10,100,64,'Inst Suffix');
+		InputTexts['instSuffix'] = instSuffixText;
+
+		var vocalsSuffixText = new FlxUIInputText(saveButton.x + saveButton.width + 10, 170, 70, _song.vocalsSuffix, 8);
+		vocalsSuffixText.focusGained = function() { typing = true; }
+		vocalsSuffixText.focusLost = function() { typing = false; }
+		vocalsSuffixText.name = 'vocalsSuffix';
+		var vocalsSuffixLabel = new FlxText(saveButton.x + saveButton.width + 10,150,64,'Vocals Suffix');
+		InputTexts['vocalsSuffix'] = vocalsSuffixText;
+
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
 		tab_group_song.add(UI_songTitle);
@@ -625,6 +651,11 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(p1Label);
 		tab_group_song.add(p1DropDown);
 		tab_group_song.add(gf_strum);
+
+		tab_group_song.add(instSuffixText);
+		tab_group_song.add(instSuffixLabel);
+		tab_group_song.add(vocalsSuffixText);
+		tab_group_song.add(vocalsSuffixLabel);
 
 
 
@@ -658,7 +689,9 @@ class ChartingState extends MusicBeatState
 		eventDropDown.name = "events";
 
 		var EventInputText = new FlxUIInputText(10, 150, 260, curEventData[1], 8);
-		eventTypingShit = EventInputText;
+		InputTexts['events'] = EventInputText;
+		EventInputText.focusGained = function() { typing = true; }
+		EventInputText.focusLost = function() { typing = false; }
 
 		/*var presetsList:Array<String> = [];
 		for (i in 0...EventList.noteMovementsPresets.length)
@@ -843,7 +876,8 @@ class ChartingState extends MusicBeatState
 				var note = middleSection.sectionNotes[i];
 				var half = keyAmmo[_song.mania];
 				var nT = Math.floor(note[1] / (half * 2));
-				note[1] = (note[1] + half) % (half * 2) + nT * (half * 2);
+				if (note[1] > 0)
+					note[1] = (note[1] + half) % (half * 2) + nT * (half * 2);
 				middleSection.sectionNotes[i] = note;
 				updateGrid();
 				updateStatus("Swapped Section");
@@ -939,11 +973,11 @@ class ChartingState extends MusicBeatState
 		{
 			if (curSelectedNote != null)
 			{
-				curSelectedNote[0] = Std.parseFloat(strumTimeTypingShit.text);
+				curSelectedNote[0] = Std.parseFloat(InputTexts.get('strumTime').text);
 				curSelectedNote[2] = stepperSusLength.value;
 				curSelectedNote[3] = stepperNoteTypes.value;
 				curSelectedNote[4] = stepperNoteSpeed.value;
-				curSelectedNote[5] = [stepperNoteVelocity.value, Std.parseFloat(velChangeTypingShit.text), check_velStrum.checked];
+				curSelectedNote[5] = [stepperNoteVelocity.value, Std.parseFloat(InputTexts.get('velChange').text), check_velStrum.checked];
 				if (curSelectedNote[1] < 0)
 					curSelectedNote[6] = [curEventData[0], curEventData[1]];
 				else
@@ -964,13 +998,17 @@ class ChartingState extends MusicBeatState
 
 		var strumTimeShit = new FlxUIInputText(10, 140, 150, "", 8);
 		strumTimeShit.filterMode = 3;
-		strumTimeTypingShit = strumTimeShit;
+		InputTexts['strumTime'] = strumTimeShit;
 		strumTimeShit.name = "StrumTime";
+		strumTimeShit.focusGained = function() { typing = true; }
+		strumTimeShit.focusLost = function() { typing = false; }
 
 		var velChangeShit = new FlxUIInputText(10, 200, 150, "", 8);
 		velChangeShit.filterMode = 3;
-		velChangeTypingShit = velChangeShit;
+		InputTexts['velChange'] = velChangeShit;
 		velChangeShit.name = "changeTime";
+		velChangeShit.focusGained = function() { typing = true; }
+		velChangeShit.focusLost = function() { typing = false; }
 
 		check_velStrum = new FlxUICheckBox(10, 230, null, null, "Use Specific Strumtime for Velocity Change", 200);
 		check_velStrum.name = 'check_velStrum';
@@ -1008,18 +1046,45 @@ class ChartingState extends MusicBeatState
 		UI_box.addGroup(tab_group_note);
 	}
 
-	function loadSong(daSong:String):Void
+	function cacheSong(daSong:SwagSong):Void 
+	{
+		var inst = Paths.inst(daSong.song, daSong.instSuffix);
+		if (CacheShit.sounds[inst] == null)
+		{
+			var sound:FlxSoundAsset = null;
+			if (daSong.audioFromUrl)
+				sound = new Sound(new URLRequest(daSong.instUrl));
+			else
+				sound = Sound.fromFile(inst);
+			CacheShit.sounds[inst] = sound;
+		}
+		var vocal = Paths.voices(daSong.song, daSong.vocalsSuffix);
+		if (CacheShit.sounds[vocal] == null)
+		{
+			var sound:FlxSoundAsset = null;
+			if (daSong.audioFromUrl)
+				sound = new Sound(new URLRequest(daSong.vocalsUrl));
+			else
+				sound = Sound.fromFile(vocal);
+			CacheShit.sounds[vocal] = sound;
+		}
+	}
+
+	function loadSong(daSong:SwagSong):Void
 	{
 		if (FlxG.sound.music != null)
 		{
 			FlxG.sound.music.stop();
 			// vocals.stop();
 		}
+		cacheSong(daSong);
 
-		FlxG.sound.playMusic(Sound.fromFile(Paths.inst(daSong)), 0.6);
+		
+
+		FlxG.sound.playMusic(CacheShit.sounds[Paths.inst(daSong.song, daSong.instSuffix)], 0.6);
 
 		// WONT WORK FOR TUTORIAL OR TEST SONG!!! REDO LATER
-		vocals = new FlxSound().loadEmbedded(Sound.fromFile(Paths.voices(daSong)));
+		vocals = new FlxSound().loadEmbedded(CacheShit.sounds[Paths.voices(daSong.song, daSong.vocalsSuffix)]);
 		FlxG.sound.list.add(vocals);
 
 		FlxG.sound.music.pause();
@@ -1227,13 +1292,15 @@ class ChartingState extends MusicBeatState
 
 
 		Conductor.songPosition = FlxG.sound.music.time;
-		_song.song = typingShit.text;
-		curEventData[1] = eventTypingShit.text;
+		_song.song = InputTexts.get('song').text;
+		_song.instSuffix = InputTexts.get('instSuffix').text;
+		_song.vocalsSuffix = InputTexts.get('vocalsSuffix').text;
+		curEventData[1] = InputTexts.get('events').text;
 		if (curSelectedNote != null)
 		{
-			curSelectedNote[0] = Std.parseFloat(strumTimeTypingShit.text);
+			curSelectedNote[0] = Std.parseFloat(InputTexts.get('strumTime').text);
 		}
-		curNoteVelocityTime = Std.parseFloat(velChangeTypingShit.text);
+		curNoteVelocityTime = Std.parseFloat(InputTexts.get('velChange').text);
 		eventInfoLabel.text = "Current Event Info:\n" + curEventInfo;
 
 		if (statusText.alpha > 0.13)
@@ -1255,17 +1322,17 @@ class ChartingState extends MusicBeatState
 						note.playedSound = true;
 						if (note.rawNoteData < 4)
 						{
-							gf.playAnim('sing' + GFsDir[note.noteData], true);
+							gf.playAnim('sing' + GFsDir[note.noteData % Note.MaxNoteData], true);
 							gf.holdTimer = 0;	
 						}
 						else if (!note.mustPress)
 						{
-							player2.playAnim('sing' + PlayState.sDir[_song.mania][note.noteData], true);
+							player2.playAnim('sing' + PlayState.sDir[_song.mania][note.noteData % Note.MaxNoteData], true);
 							player2.holdTimer = 0;
 						}
 						else if (note.mustPress)
 						{
-							player1.playAnim('sing' + PlayState.sDir[_song.mania][note.noteData], true);
+							player1.playAnim('sing' + PlayState.sDir[_song.mania][note.noteData % Note.MaxNoteData], true);
 							player1.holdTimer = 0;
 						}
 
@@ -1516,7 +1583,7 @@ class ChartingState extends MusicBeatState
 			FlxG.sound.music.stop();
 			vocals.stop();
 			Main.editor = false;
-			FlxG.switchState(new PlayState());
+			FlxG.switchState(new DownloadingState(PlayState.SONG.downloadingStuff));
 		}
 
 
@@ -1524,7 +1591,7 @@ class ChartingState extends MusicBeatState
 		if (FlxG.keys.pressed.SHIFT)
 			shiftThing = 4;
 
-		if (!typingShit.hasFocus && !eventTypingShit.hasFocus) //so you cant do shit on accident when typing
+		if (!typing) //so you cant do shit on accident when typing
 		{
 			if (FlxG.keys.justPressed.CAPSLOCK)
 			{
@@ -1632,7 +1699,7 @@ class ChartingState extends MusicBeatState
 					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet * 0.4);
 					vocals.time = FlxG.sound.music.time;
 				}
-				if (FlxG.keys.justPressed.BACKSPACE) //changed to backspace so people used to psych dont accientially leave the chart editor
+				if (FlxG.keys.justPressed.ESCAPE)
 				{
 					autosaveSong();
 					FlxG.switchState(new DebugState());
@@ -1778,7 +1845,7 @@ class ChartingState extends MusicBeatState
 			updateStatus("Highlighted all notes on the " + (left ? "left" : "right"));
 			highlightCheck();
 		}
-	function highlightCheck():Void
+	function highlightCheck():Void //need to optimize this
 	{
 		for (note in ChartingUtil.highlighedNotes)
 		{
@@ -1908,9 +1975,9 @@ class ChartingState extends MusicBeatState
 
 			var strum = note[0] - sectionStartTime(sectionNoteCameFrom);
 			strum += sectionStartTime(sectionToAddTo);
-			trace("came from: " + sectionNoteCameFrom);
-			trace("da sec:" + daSec);
-			trace("adding to: " + sectionToAddTo);
+			//trace("came from: " + sectionNoteCameFrom);
+			//trace("da sec:" + daSec);
+			//trace("adding to: " + sectionToAddTo);
 			//var foundSection = false;
 			
 
@@ -2347,7 +2414,7 @@ class ChartingState extends MusicBeatState
 			if (curSelectedNote[5] != null)
 			{
 				stepperNoteVelocity.value = curSelectedNote[5][0];
-				velChangeTypingShit.text = curSelectedNote[5][1];
+				InputTexts.get('velChange').text = curSelectedNote[5][1];
 				check_velStrum.checked = curSelectedNote[5][2];
 			}
 			if (curSelectedNote[6] != null)
@@ -2355,13 +2422,13 @@ class ChartingState extends MusicBeatState
 				curEventData[0] = curSelectedNote[6][0];
 				curEventData[1] = curSelectedNote[6][1];
 				eventDropDown.selectedLabel = curEventData[0];
-				eventTypingShit.text = curEventData[1];
+				InputTexts.get('events').text = curEventData[1];
 			}
 			if (curSelectedNote[7] != null)
 			{
 				stepperStrumID.value = curSelectedNote[7];
 			}
-			strumTimeTypingShit.text = curSelectedNote[0];
+			InputTexts.get('strumTime').text = curSelectedNote[0];
 		}
 
 	}
@@ -2654,7 +2721,6 @@ class ChartingState extends MusicBeatState
 		var sec:SwagSection = {
 			lengthInSteps: lengthInSteps,
 			bpm: _song.bpm,
-			mania: _song.mania,
 			changeBPM: false,
 			mustHitSection: true,
 			sectionNotes: [],
@@ -2758,8 +2824,8 @@ class ChartingState extends MusicBeatState
 
 		noteData -= 4; //takes away for gf chart negative note data, i am doing it this way so charts dont need to be completely remade lol
 
-		if (noteData < 0)
-			eventData = null; //only save event data to negative note datas
+		/*if (noteData >= 0)
+			eventData = null; //only save event data to negative note datas*/
 		var strumID = stepperStrumID.value;
 
 		if (n != null)
@@ -2795,17 +2861,11 @@ class ChartingState extends MusicBeatState
 		noteType = Std.int(stepperNoteTypes.value);
 		var noteSpeed:Float = 1;
 		noteSpeed = stepperNoteSpeed.value;
-		var noteVelocity:Array<Float> = [1, 0];
-		noteVelocity = [stepperNoteVelocity.value, stepperNoteVelocityTime.value];
-		var eventData:Array<String> = ["none", ""];
-		eventData = [curEventData[0], curEventData[1]];
-		if (noteData >= 0)
-			eventData = null;
 
-		middleSection.sectionNotes.push([noteStrum, noteData, noteSus, noteType, noteSpeed, noteVelocity, eventData]);
+		middleSection.sectionNotes.push([noteStrum, noteData, noteSus, noteType, noteSpeed, null, null]);
 
 		if (FlxG.keys.pressed.CONTROL)
-			middleSection.sectionNotes.push([noteStrum, (noteData -18), noteSus, noteType, noteSpeed, noteVelocity, eventData]);
+			middleSection.sectionNotes.push([noteStrum, (noteData -18), noteSus, noteType, noteSpeed, null, null]);
 
 		updateStatus("Added Note");
 

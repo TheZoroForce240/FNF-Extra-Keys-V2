@@ -120,11 +120,11 @@ class BabyArrow extends FlxSprite
 
 		if (player == 0)
         {
-            colorShiz = ColorPresets.noteColors[BabyArrow.colorFromData[maniaToUse][i]];
+            colorShiz = ColorPresets.noteColors[BabyArrow.colorFromData[maniaToUse][i % Note.MaxNoteData]];
         }
         else if (player == 1)
         {
-            colorShiz = SaveData.noteColors[BabyArrow.colorFromData[maniaToUse][i]];
+            colorShiz = SaveData.noteColors[BabyArrow.colorFromData[maniaToUse][i % Note.MaxNoteData]];
         }
 
         if (Note.usingQuant)
@@ -267,7 +267,7 @@ class BabyArrow extends FlxSprite
 
     function createLane():Void 
     {
-        var color = Note.frameN[curMania][curID];
+        var color = Note.frameN[curMania][curID % Note.MaxNoteData];
         if (SaveData.arrowLanes == "Colored")
         {
             switch (color)
@@ -296,7 +296,7 @@ class BabyArrow extends FlxSprite
 
         if (inPlayState && (whichPlayer == 1 || (whichPlayer == 0 && PlayState.multiplayer || PlayState.flipped)) && SaveData.arrowLanes != "Off")
         {
-            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[curMania] * widthMulti), Std.int(FlxG.height * 2), flxcolorToUse);
+            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[curMania] * widthMulti * 1.05), Std.int(FlxG.height * 2), flxcolorToUse);
             PlayState.instance.add(lane);
             lane.cameras = [PlayState.instance.camHUD];
             lane.alpha = SaveData.laneOpacity;
@@ -331,12 +331,12 @@ class BabyArrow extends FlxSprite
                 setGraphicSize(Std.int(width * PlayState.daPixelZoom * Note.pixelNoteScales[curMania] * scaleMulti));
                 updateHitbox();
                 antialiasing = false;
-                animation.add('static', [colorFromData[curMania][ID]]);
-                animation.add('pressed', [colorFromData[curMania][ID] + 9, colorFromData[curMania][ID] + 18], 12, false);
-                animation.add('confirm', [colorFromData[curMania][ID] + 27, colorFromData[curMania][ID] + 36], 24, false);
+                animation.add('static', [colorFromData[curMania][ID % Note.MaxNoteData]]);
+                animation.add('pressed', [colorFromData[curMania][ID % Note.MaxNoteData] + 9, colorFromData[curMania][ID % Note.MaxNoteData] + 18], 12, false);
+                animation.add('confirm', [colorFromData[curMania][ID % Note.MaxNoteData] + 27, colorFromData[curMania][ID % Note.MaxNoteData] + 36], 24, false);
 
             default:
-                var dir = dirArray[curMania][ID];
+                var dir = dirArray[curMania][ID % Note.MaxNoteData];
                 frames = Paths.getSparrowAtlas(path);
                 animation.addByPrefix('green', 'arrowUP');
                 animation.addByPrefix('blue', 'arrowDOWN');
@@ -389,49 +389,14 @@ class BabyArrow extends FlxSprite
 
         if (stylelol != "pixel")
         {
-            //offset.x -= xoffset;
-            //offset.y -= yoffset;
-            var scaleToUse = Note.p1NoteScale;
-            if (whichPlayer == 0)
-                scaleToUse = Note.p2NoteScale;
-            if (whichPlayer == 2)
-                scaleToUse = Note.noteScales[0];
-
             centerOrigin();
             updateHitbox();
             offset.x = frameWidth / 2;
             offset.y = frameHeight / 2;
 
-            offset.x -= (offsetshit / 0.7) * (scaleToUse * scaleMulti);
-            offset.y -= (offsetshit / 0.7) * (scaleToUse * scaleMulti);
+            offset.x -= (offsetshit / 0.7) * (scale.x * scaleMulti);
+            offset.y -= (offsetshit / 0.7) * (scale.x * scaleMulti); //do scale.x on y so it matches correctly, changing to scale.y will fuck it up just leave it
         }
-
-
-        /*if (animation.curAnim.name == 'confirm')
-        {
-            var yoffset:Float = 13;
-            var xoffset:Float = 13;
-            var downscrollOffset:Float = 42; //downscroll needs another offset for some reason ??????            
-                                            //idk why tf flipping the camera affects this
-                                            
-            var scaleToUse = Note.p1NoteScale;
-            if (whichPlayer == 0)
-                scaleToUse = Note.p2NoteScale;
-
-            xoffset = (xoffset * 0.7) / (scaleToUse * scaleMulti); //calculates offset based on notescale 
-            yoffset = (yoffset * 0.7) / (scaleToUse * scaleMulti);
-    
-            downscrollOffset = (downscrollOffset / 0.7) * (scaleToUse * scaleMulti);
-            if ((SaveData.downscroll && whichPlayer == 1) || (SaveData.P2downscroll && whichPlayer == 0))
-                yoffset += downscrollOffset;
-    
-            if (stylelol != 'pixel') //pixel note style doesnt need to be offset
-            {
-                offset.x -= xoffset;
-                offset.y -= yoffset;
-            }
-        }*/
-        
     }
     public function moveKeyPositions(spr:FlxSprite, newMania:Int, player:Int):Void 
     {
@@ -478,7 +443,7 @@ class BabyArrow extends FlxSprite
         if ((player == 1 || (player != 1 && PlayState.multiplayer)) && SaveData.arrowLanes != "Off")
         {
             PlayState.instance.remove(lane);
-            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[curMania] * widthMulti), Std.int(FlxG.height * 2), flxcolorToUse);
+            lane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.noteWidths[curMania] * widthMulti * 1.05), Std.int(FlxG.height * 2), flxcolorToUse);
             PlayState.instance.add(lane);
             lane.cameras = [PlayState.instance.camHUD];
             lane.alpha = SaveData.laneOpacity;
@@ -492,7 +457,7 @@ class BabyArrow extends FlxSprite
 
         if (lane != null)
         {
-            lane.x = this.x + laneOffset[curMania];
+            lane.x = this.x;
             lane.y = this.y - 300;
         }
         centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2);

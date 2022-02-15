@@ -476,14 +476,23 @@ class StagePiece extends FlxSprite
                 #end
                 var rawJson = "";
 
-                if (jsonExists)
+                if (CacheShit.jsons[jsonPath] == null && jsonExists)
                 {
                     #if sys
                     rawJson = File.getContent(jsonPath);
                     #else
                     rawJson = Assets.getText(jsonPath);
                     #end
-                }   
+                    CacheShit.jsons[jsonPath] = rawJson;
+                }
+                if (jsonExists || PlayState.didDownloadContent)
+                {
+                    jsonExists = true;
+                    rawJson = CacheShit.jsons[jsonPath];
+                }
+                    
+
+                    
                 var json:PieceFile = null;
                 if (jsonExists)
                     json = cast Json.parse(rawJson);
@@ -494,6 +503,9 @@ class StagePiece extends FlxSprite
                 if (!FileSystem.exists(imagePath))
                     imageExists = false;
                 #end
+                if (CacheShit.images[imagePath] != null)
+                    imageExists = true;
+                
 
                 var imageGraphic:FlxGraphic = null;
 
@@ -519,11 +531,8 @@ class StagePiece extends FlxSprite
                             var xmlPath = "assets/images/customStagePieces/" + part + "/image.xml";
                             var xml:String;
         
-                            if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
-                                xml = CacheShit.xmls[xmlPath];
-                            else
+                            if (CacheShit.xmls[xmlPath] == null) //check if xml is stored in cache					
                             {
-                                
                                 #if sys
                                 xml = File.getContent(xmlPath);
                                 #else
@@ -531,6 +540,8 @@ class StagePiece extends FlxSprite
                                 #end
                                 CacheShit.SaveXml(xmlPath, xml);
                             }
+                            xml = CacheShit.xmls[xmlPath];
+
                             var tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml);
                             frames = tex;
     
@@ -800,15 +811,22 @@ class StagePiece extends FlxSprite
                     pieces = ['stageBG', 'stageFront', 'stageCurtains'];
                 default: 
                     var stageList:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
-                    if (!stageList.contains(stage))
+                    if (!stageList.contains(stage) && !PlayState.didDownloadContent)
                         return;
     
                     daStage = stage;
-                    #if sys
-                    var rawJson = File.getContent("assets/data/stages/" + stage + ".json");
-                    #else
-                    var rawJson = Assets.getText("assets/data/stages/" + stage + ".json");
-                    #end
+                    var jsonPath = "assets/data/stages/" + daStage + ".json";
+                    if (CacheShit.jsons[jsonPath] == null)
+                    {
+                        #if sys
+                        var rawJson = File.getContent(jsonPath);
+                        #else
+                        var rawJson = Assets.getText(jsonPath);
+                        #end
+                        CacheShit.jsons[jsonPath] = rawJson;
+                    }
+                    var rawJson = CacheShit.jsons[jsonPath];
+
                     var json:StageFile = cast Json.parse(rawJson);
     
 

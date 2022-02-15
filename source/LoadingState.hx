@@ -31,17 +31,21 @@ class LoadingState extends MusicBeatState
 	var danceLeft = false;
 
 	private static var lastLoadedLibrary:String;
+	var downloadStuff:Bool = false;
 	
-	function new(target:FlxState, stopMusic:Bool)
+	function new(target:FlxState, stopMusic:Bool, downloadStuff:Bool = false)
 	{
 		super();
 		this.target = target;
 		this.stopMusic = stopMusic;
+		this.downloadStuff = downloadStuff;
 	}
 	
 	override function create()
 	{
-		CacheShit.clearCache();
+		if (!downloadStuff)
+			CacheShit.clearCache();
+		
 		logo = new FlxSprite(-150, -100);
 		logo.frames = Paths.getSparrowAtlas('logoBumpin');
 		logo.antialiasing = true;
@@ -149,20 +153,20 @@ class LoadingState extends MusicBeatState
 	
 	static function getSongPath()
 	{
-		return Paths.inst(PlayState.SONG.song);
+		return Paths.inst(PlayState.SONG.song, PlayState.SONG.instSuffix);
 	}
 	
 	static function getVocalPath()
 	{
-		return Paths.voices(PlayState.SONG.song);
+		return Paths.voices(PlayState.SONG.song, PlayState.SONG.vocalsSuffix);
 	}
 	
-	inline static public function loadAndSwitchState(target:FlxState, stopMusic = false)
+	inline static public function loadAndSwitchState(target:FlxState, stopMusic = false, downloadShit:Bool = false)
 	{
-		FlxG.switchState(getNextState(target, stopMusic));
+		FlxG.switchState(getNextState(target, stopMusic, downloadShit));
 	}
 	
-	static function getNextState(target:FlxState, stopMusic = false):FlxState
+	static function getNextState(target:FlxState, stopMusic = false, downloadShit:Bool = false):FlxState
 	{
 		Paths.setCurrentLevel("week" + PlayState.storyWeek);
 		#if NO_PRELOAD_ALL
@@ -171,7 +175,7 @@ class LoadingState extends MusicBeatState
 			&& isLibraryLoaded("shared");
 		
 		if (!loaded)
-			return new LoadingState(target, stopMusic);
+			return new LoadingState(target, stopMusic, downloadShit);
 		#end
 		if (stopMusic && FlxG.sound.music != null)
 			FlxG.sound.music.stop();

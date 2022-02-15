@@ -47,7 +47,7 @@ class CoolUtil
 	{
 		var path = "assets/data/charts/" + song;
 		if (customChart)
-			path = "assets/data/customChart/" + song;
+			path = "assets/data/freeplayCharts/" + song;
 
 		if (PlayState.isStoryMode) //idk why its flagged as incorrect, game still compiles??????
 			return song + PlayState.storySuffix;
@@ -147,7 +147,7 @@ class CoolUtil
 	public static function bindCheck(mania:Int, customizing:Bool = false, savedBinds:Array<Dynamic>, changedMania:Int)
 	{
 		if (PlayState.flipped && !PlayState.multiplayer && !customizing)
-			changedMania = PlayState.p2Mania;
+			changedMania = PlayState.p2.curMania;
 
 		var binds:Array<String> = savedBinds[0];
 		switch(mania)

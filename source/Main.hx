@@ -128,7 +128,7 @@ class Main extends Sprite
 	public static var gameData:GameData; //unhardcode almost everything lol
 	public static var enabledMod:String = "";
 	public static var curCustomPath = "assets/";
-
+	
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
 	public static function main():Void

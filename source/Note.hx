@@ -16,10 +16,11 @@ import polymod.format.ParseRules.TargetSignatureElement;
 #end
 import PlayState;
 import Shaders;
-import openfl.filters.BitmapFilter;
-import openfl.filters.ShaderFilter;
-import openfl.geom.Rectangle;
-import openfl.geom.Point;
+//import openfl.filters.BitmapFilter;
+//import openfl.filters.ShaderFilter;
+//import openfl.geom.Rectangle;
+//import openfl.geom.Point;
+//import flixel.addons.effects.FlxSkewedSprite;
 
 using StringTools;
 
@@ -77,7 +78,6 @@ class Note extends FlxSprite
 	public var normalNote:Bool = true; //just to make checking easier i guess
 	public var warningNoteType:Bool = false;
 	public var badNoteType:Bool = false;
-	public var downscrollYOffset:Float = 0;
 
 	public var healthChangesOnHit:Float = 0; //0 for sustains, used as default
 	public var healthChangesOnMiss:Float = 0.15;
@@ -101,13 +101,9 @@ class Note extends FlxSprite
 	public static var mania:Int = 0; 
 	public static var swagWidth:Float = 160 * 0.7;
 	public static var noteScale:Float;
-	public static var p1NoteScale:Float = 0;
-	public static var p2NoteScale:Float = 0;
-	//public static var prevNoteScale:Float = 0.5;
 	public static var pixelnoteScale:Float;
 	public static var tooMuch:Float = 30;
 	public var scaleToUse:Float = 1;
-	public var curMania:Int = 0; 
 	public var changesMania:Bool = false;
 
 	public static var ammoToMania:Array<Int> = [0, 6, 7, 8, 0, 3, 1, 4, 5, 2];
@@ -192,6 +188,7 @@ class Note extends FlxSprite
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
 	public var curAlpha:Float = 1;
+	public var curIncomingAngle:Float = -90;
 	public var noteDataToFollow:Int = 0;
 
 	////////////////////////////////////////////////////////////
@@ -253,8 +250,15 @@ class Note extends FlxSprite
 
 		if (!PlayState.regeneratingNotes)
 		{
-			p1NoteScale = noteScale;
-			p2NoteScale = noteScale;
+			PlayState.p1.curNoteScale = noteScale;
+			PlayState.p2.curNoteScale = noteScale;
+			if (!inCharter)
+			{
+				for (i in 0...PlayState.instance.amountOfExtraPlayers)
+				{
+					PlayState.playerList[i].curNoteScale = noteScale;
+				}
+			}
 		}
 
 		if (_speed <= 1) //sets speed to song speed if the speed value of a note is 1 or less, just as a backup in case it becomes 0
@@ -336,7 +340,7 @@ class Note extends FlxSprite
 			velocityChangeTime = FlxMath.roundDecimal(FlxG.random.float(0, 800), 2);
 		}
 
-		this.noteData = _noteData % MaxNoteData;
+		this.noteData = _noteData % PlayState.keyAmmo[mania];
 
 		isGFNote = _gfNote;
 		noteTypeCheck();
@@ -352,31 +356,18 @@ class Note extends FlxSprite
 		
 		if (!_mustPress)
 		{
-			if (strumTime >= PlayState.lastP2mChange)
-				curMania = PlayState.curP2NoteMania;
-			else
-				curMania = PlayState.prevP2NoteMania;
-			colorShit = ColorPresets.noteColors[BabyArrow.colorFromData[mania][noteData]];
+			colorShit = ColorPresets.noteColors[BabyArrow.colorFromData[mania][noteData % MaxNoteData]];
 		}
 		else
 		{
-			if (strumTime >= PlayState.lastP1mChange)
-				curMania = PlayState.curP1NoteMania;
-			else
-				curMania = PlayState.prevP1NoteMania;
-			colorShit = SaveData.noteColors[BabyArrow.colorFromData[mania][noteData]];
+			colorShit = SaveData.noteColors[BabyArrow.colorFromData[mania][noteData % MaxNoteData]];
 		}
-		if (mania != 2) //mania changes only allowed on 9k
-			curMania = mania;
 
 
 		if (Note.usingQuant)
             colorShit = [0,0,0,4];
 
-		if (isGFNote)
-			curMania = 0;
-
-		scaleToUse = noteScales[curMania];
+		scaleToUse = noteScale;
 
 		if (!isGFNote)
 		{
@@ -412,11 +403,6 @@ class Note extends FlxSprite
 				if (isSustainNote)
 					this.cameras = PlayState.p2.getNoteCams(true);			
 			}
-		}
-
-		if (curMania != mania)
-		{
-			changesMania = true;
 		}
 
 		quantCheck();
@@ -523,11 +509,11 @@ class Note extends FlxSprite
 	{
 		y -= 2000;
 		x += 50;
-		if (curMania == 2)
+		if (mania == 2)
 		{
 			x -= tooMuch; //moves notes a little to the left on 9k
 		}
-		x += noteWidths[curMania] * noteData;
+		x += noteWidths[mania] * noteData;
 	}
 
 
@@ -565,24 +551,24 @@ class Note extends FlxSprite
 				var prefix:String = noteTypePrefixes[noteType];
 				if (normalNote)
 				{
-					prefix = frameN[mania][noteData]; 
+					prefix = frameN[mania][noteData % MaxNoteData]; 
 					frames = Paths.getSparrowAtlas(pathList[pathToUse]);
 				}	
 				else
 				{
 					if (!isSustainNote)
-						prefix += " " + frameN[mania][noteData]; //sustains use same part of xml, so they dont need the color for the prefix
+						prefix += " " + frameN[mania][noteData % MaxNoteData]; //sustains use same part of xml, so they dont need the color for the prefix
 																//i literally i have fucking clue wtf im talking about here
 					frames = Paths.getSparrowAtlas(noteTypeAssetPaths[noteType]);
 				}
 				if (isGFNote && inCharter)
-					animation.addByPrefix(frameN[2][noteData] + 'Scroll', prefix + '0'); // fix issues with charter
+					animation.addByPrefix(frameN[2][noteData % MaxNoteData] + 'Scroll', prefix + '0'); // fix issues with charter
 				else if (!isSustainNote)
-					animation.addByPrefix(frameN[mania][noteData] + 'Scroll', prefix + '0'); // Normal notes
+					animation.addByPrefix(frameN[mania][noteData % MaxNoteData] + 'Scroll', prefix + '0'); // Normal notes
 				else 
 				{
-					animation.addByPrefix(frameN[mania][noteData] + 'hold', prefix + ' hold piece'); // Hold
-					animation.addByPrefix(frameN[mania][noteData] + 'holdend', prefix + ' hold end'); // Tails
+					animation.addByPrefix(frameN[mania][noteData % MaxNoteData] + 'hold', prefix + ' hold piece'); // Hold
+					animation.addByPrefix(frameN[mania][noteData % MaxNoteData] + 'holdend', prefix + ' hold end'); // Tails
 				}
 
 
@@ -599,15 +585,15 @@ class Note extends FlxSprite
 		if (inCharter)
 		{
 			if (isGFNote)
-				animation.play(frameN[2][noteData] + 'Scroll');
+				animation.play(frameN[2][noteData % MaxNoteData] + 'Scroll');
 			else
 			{
-				animation.play(frameN[mania][noteData] + 'Scroll');
+				animation.play(frameN[mania][noteData % MaxNoteData] + 'Scroll');
 			}
 		}
 		else if (!isSustainNote)
 		{
-			animation.play(frameN[mania][noteData] + 'Scroll');
+			animation.play(frameN[mania][noteData % MaxNoteData] + 'Scroll');
 		}	
 	}
 
@@ -634,7 +620,7 @@ class Note extends FlxSprite
 		//setGraphicSize(Std.int(width * 2));
 
 		
-		animation.play(frameN[mania][noteData] + 'holdend');
+		animation.play(frameN[mania][noteData % MaxNoteData] + 'holdend');
 
 		updateHitbox();
 
@@ -645,7 +631,7 @@ class Note extends FlxSprite
 
 		if (prevNote.isSustainNote)
 		{
-			prevNote.animation.play(frameN[mania][prevNote.noteData] + 'hold');
+			prevNote.animation.play(frameN[mania][prevNote.noteData % MaxNoteData] + 'hold');
 			prevNote.updateHitbox();
 			prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (scaleToUse * scaleMulti));
 			prevNote.updateHitbox();
@@ -797,19 +783,15 @@ class Note extends FlxSprite
 			case "warning" | "glitch": 
 				warningNoteType = true;
 				normalNote = false;
-				downscrollYOffset = 50;
 			case "regular" | "alt": 
 				normalNote = true;
 			case "angel": 
 				normalNote = false;
-				downscrollYOffset = 50;
 			case "drain": 
 				normalNote = false;
-				downscrollYOffset = 50;
 			case "burning" | "death" | "bob" | "poison": 
 				normalNote = false;
 				badNoteType = true;
-				downscrollYOffset = 50;
 			default: 
 				//add custom ntoe tyeps scucppotp 
 		}
@@ -925,12 +907,7 @@ class Note extends FlxSprite
 		//var rectPos = FlxAngle.getCartesianCoords(rectshit., angle + 90);
 		//fuckYouRect.y = (clipTo.y - rectPos.y) / scale.y;
 
-		var angleshit = ((incomingAngle % 360) + 360) % 360; //do mod twice to make negative numbers positive
-
-		if (followAngle)
-		{
-			angleshit = (((angle - 90) % 360) + 360) % 360;
-		}
+		var angleshit = ((curIncomingAngle % 360) + 360) % 360; //do mod twice to make negative numbers positive
 
 		var up = (angleshit <= 315 && angleshit >= 225);
 		var left = (angleshit <= 225 && angleshit >= 135);
@@ -966,7 +943,7 @@ class CharterSustain extends FlxSprite //so i can do the grabbing thing
 		y = ypos;
 		note = _note;
 		noteData = note.noteData;
-		var color = Note.frameN[mania][noteData];
+		var color = Note.frameN[mania][noteData % Note.MaxNoteData];
 		var flxcolorToUse:FlxColor = FlxColor.WHITE;
 		switch (color)
 		{

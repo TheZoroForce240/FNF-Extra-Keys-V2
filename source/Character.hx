@@ -114,6 +114,9 @@ class Character extends FlxSprite
 	public var noteDatasToSingOn:Array<Int> = [0,1,2,3,4,5,6,7,8];
 	public var player1Side:Bool = false;
 	var tex:FlxAtlasFrames;
+	public var playWholeAnim:Bool = false; //for a single animation
+	public var preventAnimOverride:Bool = false; //same thing as above but doesnt auto turn off
+	public var currentIdle:String = 'idle';
 
 	public var useExtraSpritesheets:Bool = false;
 	public var otherSheetAnims:Array<Dynamic> = [];
@@ -143,6 +146,16 @@ class Character extends FlxSprite
 			animation.add("singDOWN", [0]);
 			animation.add("singUP", [0]);
 			dance();
+		}
+
+		this.animation.finishCallback = function(anim:String)
+		{
+			if (playWholeAnim)
+			{
+				playWholeAnim = false;
+				dance();
+			}
+
 		}
 	}
 
@@ -236,14 +249,14 @@ class Character extends FlxSprite
 					else
 						playAnim('danceLeft');
 				default:
-					playAnim('idle');
+					playAnim(currentIdle);
 			}
 		}
 	}
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0, noteData:Int = 0):Void
 	{
-		if (AnimName == "singNONE")
+		if (AnimName == "singNONE" || !PlayState.characters || preventAnimOverride || playWholeAnim)
 			return;
 
 		if (AnimName.startsWith("sing"))
@@ -255,9 +268,6 @@ class Character extends FlxSprite
 			else 
 				holdTimer = 0;
 		}
-
-		if (!PlayState.characters)
-			return;
 
 		if (animation.getByName(AnimName) == null)
 			checkAnimation(AnimName);
@@ -561,21 +571,10 @@ class Character extends FlxSprite
 				animation.addByPrefix('idle', "Pico Idle Dance", 24);
 				animation.addByPrefix('singUP', 'pico Up note0', 24, false);
 				animation.addByPrefix('singDOWN', 'Pico Down Note0', 24, false);
-				if (isPlayer)
-				{
-					animation.addByPrefix('singLEFT', 'Pico NOTE LEFT0', 24, false);
-					animation.addByPrefix('singRIGHT', 'Pico Note Right0', 24, false);
-					animation.addByPrefix('singRIGHTmiss', 'Pico Note Right Miss', 24, false);
-					animation.addByPrefix('singLEFTmiss', 'Pico NOTE LEFT miss', 24, false);
-				}
-				else
-				{
-					// Need to be flipped! REDO THIS LATER!
-					animation.addByPrefix('singLEFT', 'Pico Note Right0', 24, false);
-					animation.addByPrefix('singRIGHT', 'Pico NOTE LEFT0', 24, false);
-					animation.addByPrefix('singRIGHTmiss', 'Pico NOTE LEFT miss', 24, false);
-					animation.addByPrefix('singLEFTmiss', 'Pico Note Right Miss', 24, false);
-				}
+				animation.addByPrefix('singLEFT', 'Pico NOTE LEFT0', 24, false);
+				animation.addByPrefix('singRIGHT', 'Pico Note Right0', 24, false);
+				animation.addByPrefix('singRIGHTmiss', 'Pico Note Right Miss', 24, false);
+				animation.addByPrefix('singLEFTmiss', 'Pico NOTE LEFT miss', 24, false);
 
 				animation.addByPrefix('singUPmiss', 'pico Up note miss', 24);
 				animation.addByPrefix('singDOWNmiss', 'Pico Down Note MISS', 24);
@@ -611,6 +610,9 @@ class Character extends FlxSprite
 				animation.addByPrefix('singRIGHTmiss', 'BF NOTE RIGHT MISS', 24, false);
 				animation.addByPrefix('singDOWNmiss', 'BF NOTE DOWN MISS', 24, false);
 				animation.addByPrefix('hey', 'BF HEY', 24, false);
+
+				animation.addByPrefix('hit', 'BF hit', 24, false);
+				animation.addByPrefix('dodge', 'boyfriend dodge', 24, false);
 
 				animation.addByPrefix('firstDeath', "BF dies", 24, false);
 				animation.addByPrefix('deathLoop', "BF Dead Loop", 24, true);
@@ -859,9 +861,7 @@ class Character extends FlxSprite
 				var xmlPath = "assets/images/characters/" + curGraphic + "/image.xml";
 				var xml:String;
 
-				if (CacheShit.xmls[xmlPath] != null) //check if xml is stored in cache
-					xml = CacheShit.xmls[xmlPath];
-				else
+				if (CacheShit.xmls[xmlPath] == null) //check if xml is stored in cache					
 				{
 					#if sys
 					xml = File.getContent(xmlPath);
@@ -870,17 +870,24 @@ class Character extends FlxSprite
 					#end
 					CacheShit.SaveXml(xmlPath, xml);
 				}
+				xml = CacheShit.xmls[xmlPath];
 					
 
 				tex = FlxAtlasFrames.fromSparrow(imageGraphic, xml); //todo set up the packer things with txts i think idk why tf youd use one just use an xml
 				frames = tex;
 
-				#if sys
-				var rawJson = File.getContent(Paths.imageJson("characters/" + curGraphic + "/offsets"));
-				#else
-				var rawJson = Assets.getText(Paths.imageJson("characters/" + curGraphic + "/offsets"));
-				#end
-				var json:OffsetFile = cast Json.parse(rawJson);
+				var jsonPath = Paths.imageJson("characters/" + curGraphic + "/offsets");
+
+				if (CacheShit.jsons[jsonPath] == null)
+				{
+					#if sys
+					var rawJson = File.getContent(jsonPath);
+					#else
+					var rawJson = Assets.getText(jsonPath);
+					#end
+					CacheShit.jsons[jsonPath] = rawJson;
+				}
+				var json:OffsetFile = cast Json.parse(CacheShit.jsons[jsonPath]);
 
 				if (json.otherOffsets.length != 0 && frames != null)
 				{

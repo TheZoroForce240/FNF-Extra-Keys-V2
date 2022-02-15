@@ -1,9 +1,12 @@
 package;
 
 import Section.SwagSection;
+import DownloadingState.DownloadableObj;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
+
+
 
 #if sys
 import sys.io.File;
@@ -28,6 +31,17 @@ typedef SwagSong =
 	var validScore:Bool;
 
 	var showGFStrums:Bool;
+
+	var instSuffix:String;
+	var vocalsSuffix:String;
+	var displayName:String;
+
+	var audioFromUrl:Bool;
+	var instUrl:String;
+	var vocalsUrl:String;
+
+	var downloadingStuff:Array<DownloadableObj>;
+
 }
 
 class Song
@@ -45,6 +59,16 @@ class Song
 	public var stage:String = '';
 	public var showGFStrums:Bool = false;
 
+	public var instSuffix:String = '';
+	public var vocalsSuffix:String = '';
+	public var displayName:String = '';
+
+	public var audioFromUrl:Bool = false;
+	public var instUrl:String = '';
+	public var vocalsUrl:String = '';
+
+	public var downloadingStuff:Array<DownloadableObj> = [];
+
 	public function new(song, notes, bpm)
 	{
 		this.song = song;
@@ -52,13 +76,13 @@ class Song
 		this.bpm = bpm;
 	}
 
-	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
+	public static function loadFromJson(jsonInput:String, ?folder:String, freeplay:Bool = false):SwagSong
 	{
 
 		#if sys
-		var rawJson = File.getContent(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
+		var rawJson = File.getContent(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase(), freeplay)).trim();
 		#else
-		var rawJson = Assets.getText(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
+		var rawJson = Assets.getText(Paths.json(folder.toLowerCase() + '/' + jsonInput.toLowerCase(), false)).trim();
 		#end
 
 		/*#if sys
@@ -94,7 +118,9 @@ class Song
 	public static function parseJSONshit(rawJson:String):SwagSong
 	{
 		var swagShit:SwagSong = cast Json.parse(rawJson).song;
-		swagShit.validScore = true;
+		if (swagShit.validScore == false)
+			swagShit.validScore = true;
+
 		return swagShit;
 	}
 }

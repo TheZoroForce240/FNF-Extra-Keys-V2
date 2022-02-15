@@ -25,6 +25,7 @@ class EventList
         ["none", "none"],
         ["Change P1 Mania", "Type the new Mania Value.\n(WARNING: the song mania HAS to be set to 9k to work!)"],
         ["Change P2 Mania", "Type the new Mania Value.\n(WARNING: the song mania HAS to be set to 9k to work!)"],
+        ["Change Extra Player Mania", "Type in the player ID,\nand Type the new Mania Value.\nSeperate each value with a commma, no spaces.\n(WARNING: the song mania HAS to be set to 9k to work!)"],
         ["Change Camera Beats", "Type in Cam Zoom amount, Hud Zoom amount, and how often it zooms(in beats)\nSeperate Each value with a comma, no Spaces."],
         ["P1 Cam Shake on Note Hit", "Type in the shake intensity, then the duration\nSeperate each value with a commma, no spaces."],
         ["P2 Cam Shake on Note Hit", "Type in the shake intensity, then the duration\nSeperate each value with a commma, no spaces."],
@@ -45,10 +46,10 @@ class EventList
 
     public static function convertEventDataToEvent(eventName:String, data:String, daNote:Note)
     {
-        trace("finding Event from Event Name"); 
+        /*trace("finding Event from Event Name"); 
         trace(eventName);
-        trace(data);
-        if (eventName == null)
+        trace(data);*/
+        if (eventName == null || eventName.trim() == '')
             return;
         switch(eventName)
         {
@@ -98,6 +99,9 @@ class EventList
                 PlayState.instance.switchMania(Std.parseInt(data), 1);
             case "Change P2 Mania":
                 PlayState.instance.switchMania(Std.parseInt(data), 0);
+            case "Change Extra Player Mania":
+                var split:Array<String> = data.split(",");
+                PlayState.instance.switchMania(Std.parseInt(split[1]), Std.parseInt(split[2]));
             case "Change Camera Beats": 
                 var split:Array<String> = data.split(",");
                 PlayState.beatCamZoom = Std.parseFloat(split[0]);
@@ -303,14 +307,14 @@ class ModchartUtil
 
         if (modif.press != 0)
         {
-            var pressoffset:Array<Float> = Reflect.getProperty(modifValues, "pressOffset" + noteData);
+            var pressoffset:Array<Float> = Reflect.getProperty(modifValues, "pressOffset" + noteData % Note.MaxNoteData);
             //trace(pressoffset + " " + noteData);
             xPos += pressoffset[0];
             yPos += pressoffset[1];
             ang += pressoffset[2];
         }
 
-        var bopoffset:Array<Float> = Reflect.getProperty(modifValues, "bopOffset" + noteData);
+        var bopoffset:Array<Float> = Reflect.getProperty(modifValues, "bopOffset" + noteData % Note.MaxNoteData);
         xPos += bopoffset[0];
         yPos += bopoffset[1];
         ang += bopoffset[2];
@@ -358,13 +362,13 @@ class ModchartUtil
             if (daNote.y > FlxG.height)
                 daNote.y = FlxMath.remapToRange(daNote.y, 0, FlxG.height, FlxG.height, 0) + FlxG.height;
 
-            daNote.y -= Note.noteWidths[daNote.curMania] / 2;
+            //daNote.y -= Note.noteWidths[daNote.curMania] / 2;
 
             if (daNote.strumTime >= Conductor.songPosition + (Conductor.stepCrochet * 12))
                 daNote.alpha = 0.1 * daNote.curAlpha;
         }
 
-        var notesine:Array<Float> = Reflect.getProperty(modifValues, "noteSine" + daNote.noteDataToFollow);
+        var notesine:Array<Float> = Reflect.getProperty(modifValues, "noteSine" + daNote.noteDataToFollow % Note.MaxNoteData);
         if (notesine[0] != 0)
             daNote.x += notesine[0] * Math.sin(daNote.curPos * notesine[1]);
         

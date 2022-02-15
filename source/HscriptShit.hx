@@ -61,6 +61,13 @@ class HscriptShit //funni modcharts
             }
 
         }
+        else if (CacheShit.modcharts[path] != null && PlayState.modcharts)
+        {
+            loadScript(path);
+            enabled = true;
+            setScriptVars();
+            interp.execute(script);
+        }
         else 
         {
             trace("no file detected");
@@ -91,17 +98,26 @@ class HscriptShit //funni modcharts
     public function loadScript(path:String)
     {
         var parser = new ParserEx(); //dunno what the difference is with ex ver but tryin it anyway, think there something i can do with classes or something but idk theres barely any documentation on it
-        #if sys
-		var rawCode = File.getContent(path);
-		#else
-		var rawCode = Assets.getText(path);
-		#end
+        if (CacheShit.modcharts[path] == null)
+        {
+            #if sys
+            var rawCode = File.getContent(path);
+            #else
+            var rawCode = Assets.getText(path);
+            #end
+            CacheShit.modcharts[path] = rawCode;
+        }
+        var rawCode = CacheShit.modcharts[path];
+
+
         parser.allowTypes = true;
         parser.allowMetadata = true;
         parser.allowJSON = true;
         parser.resumeErrors = true;
         script = parser.parseString(rawCode); //load da shit
-        interp = new Interp();       
+        interp = new Interp(); 
+        
+        CacheShit.modcharts.clear(); //so can update modcharts
         //trace(script);
     }
 
