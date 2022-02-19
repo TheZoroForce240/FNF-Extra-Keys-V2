@@ -107,12 +107,13 @@ class PauseSubState extends MusicBeatSubstate
 				case "Resume":
 					close();
 				case "Restart Song":
-					FlxG.resetState();
 					PlayState.instance.call('endScript', []);
+					FlxG.resetState();
 				case "Exit to menu":
 					PlayState.instance.call('endScript', []);
 					FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
 					FlxG.sound.music.onComplete = MainMenuState.musicShit;
+					CacheShit.modcharts.clear(); //so can update modcharts
 					FlxG.switchState(new MainMenuState());
 				case "Quick Options": 
 					openSubState(new QuickOptions());

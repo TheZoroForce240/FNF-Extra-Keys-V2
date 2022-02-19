@@ -131,7 +131,7 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
                     case "toggle": 
                         curCategory[curSelected][1] = !curCategory[curSelected][1];
                         turnOptionsIntoSaveData();
-                        SaveData.saveDataCheck();
+                        SaveData.saveTheData();
                         reloadOptions();
                         createText();
                     case "cat": 
@@ -191,7 +191,7 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
                             
                         }
                         //turnOptionsIntoSaveData();
-                        SaveData.saveDataCheck();
+                        SaveData.saveTheData();
                         reloadOptions();
                         createText();
                 }
@@ -218,14 +218,14 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
                         {
                             curCategory[curSelected][1] = key;
                             turnOptionsIntoSaveData();
-                            SaveData.saveDataCheck();
+                            SaveData.saveTheData();
                             reloadOptions();
                             createText();
                         }
                         waitingForInput = false;
                         gamepadInput = false;
                         turnOptionsIntoSaveData();
-                        SaveData.saveDataCheck();
+                        SaveData.saveTheData();
                         reloadOptions();
                         createText();
                     }
@@ -247,14 +247,14 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
                         {
                             curCategory[curSelected][1] = key;
                             turnOptionsIntoSaveData();
-                            SaveData.saveDataCheck();
+                            SaveData.saveTheData();
                             reloadOptions();
                             createText();
                         }
                         waitingForInput = false;
                         gamepadInput = false;
                         turnOptionsIntoSaveData();
-                        SaveData.saveDataCheck();
+                        SaveData.saveTheData();
                         reloadOptions();
                         createText();
                     }
@@ -263,18 +263,29 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
         }
         
 
-        if (curCategory[curSelected][1] < 1 && curCategory[curSelected][0] == "Scroll Speed") //checks
-            curCategory[curSelected][1] = 1;
-        else if (curCategory[curSelected][1] > 10 && curCategory[curSelected][0] == "Scroll Speed")
-            curCategory[curSelected][1] = 10;
-        else if (curCategory[curSelected][1] < 60 && curCategory[curSelected][0] == "FPS Cap")
-            curCategory[curSelected][1] = 60;
-        else if (curCategory[curSelected][1] > 300 && curCategory[curSelected][0] == "FPS Cap")
-            curCategory[curSelected][1] = 300;
-        else if (curCategory[curSelected][1] <= 0 && curCategory[curSelected][0] == "Song Speed Multi") //need to figure out a better way to do this, TODO
-            curCategory[curSelected][1] = 0.1;
-        else if (curCategory[curSelected][1] > 10 && curCategory[curSelected][0] == "Song Speed Multi")
-            curCategory[curSelected][1] = 10;
+
+        for (i in 0...curCategory.length)
+            {
+                switch (curCategory[i][0])
+                {
+                    case "Scroll Speed":
+                        if (curCategory[i][1] < 1) //need to figure out a better way to do this, TODO
+                            curCategory[i][1] = 1;
+                        else if (curCategory[i][1] > 10)
+                            curCategory[i][1] = 10;
+                    case "FPS Cap":
+                        if (curCategory[i][1] < 60)
+                            curCategory[i][1] = 60;
+                        else if (curCategory[i][1] > 300)
+                            curCategory[i][1] = 300;
+                        (cast (Lib.current.getChildAt(0), Main)).changeFPS(SaveData.fps);
+                    case "Song Speed Multi":
+                        if (curCategory[i][1] < 0.1)
+                            curCategory[i][1] = 0.1;
+                        else if (curCategory[i][1] > 10)
+                            curCategory[i][1] = 10;
+                }
+            }
             
 
 
@@ -289,12 +300,14 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
 
     function changeOptionSetting(change:Float = 0)
     {
+        if (FlxG.keys.pressed.SHIFT)
+            change *= 10;
         switch(curCategory[curSelected][0])
         {
             case "Scroll Speed" | "Song Speed Multi": 
-                change = change / 10; //makes it 0.1
+                change /= 10; //makes it 0.1
             case "FPS Cap": 
-                change = change * 10; //makes it 10
+                change *= 10; //makes it 10
         }
         if (curCategory[curSelected][2] == "slider")
             curCategory[curSelected][1]+= change;
@@ -310,7 +323,7 @@ class QuickOptions extends MusicBeatSubstate //TODO remake this with classes for
         }
 
         turnOptionsIntoSaveData();
-        SaveData.saveDataCheck();
+        SaveData.saveTheData();
         reloadOptions();
         createText();
     }

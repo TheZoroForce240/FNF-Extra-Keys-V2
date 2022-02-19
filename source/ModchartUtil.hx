@@ -123,8 +123,7 @@ class EventList
                 else
                     value = Std.parseFloat(split[1]); //assume its a float??? i think floats will work with ints if there are any
                  
-                if (ModchartUtil.modifierList.contains(split[0]))
-                    ModchartUtil.changeModifier(split[0], value, 1);
+                ModchartUtil.changeModifier(split[0], value, 1);
             case "Change P2 Modifier": 
                 var split:Array<String> = data.split(",");
                 var value:Dynamic = 0.0;
@@ -135,8 +134,7 @@ class EventList
                 else
                     value = Std.parseFloat(split[1]);
                     
-                if (ModchartUtil.modifierList.contains(split[0]))
-                    ModchartUtil.changeModifier(split[0], value, 0);
+                ModchartUtil.changeModifier(split[0], value, 0);
 
             case "Change P3 Modifier": 
                 var split:Array<String> = data.split(",");
@@ -148,8 +146,7 @@ class EventList
                 else
                     value = Std.parseFloat(split[1]);
                     
-                if (ModchartUtil.modifierList.contains(split[0]))
-                    ModchartUtil.changeModifier(split[0], value, 2);
+                ModchartUtil.changeModifier(split[0], value, 2);
                 
             default: 
                 daNote.eventWasValid = false;
@@ -239,92 +236,162 @@ class ModchartUtil
     }
 
 
-    public static function strumOffset(playernum:Int, noteData:Int, curMania:Int)
+    public static function strumOffset(playernum:Int, noteData:Int, curMania:Int, strum:BabyArrow)
     {
         var xPos:Float = 0;
         var yPos:Float = 0;
         var ang:Float = 0;
+        var scaleX:Float = 1;
+        var scaleY:Float = 1;
+        var alpha:Float = 1;
+
         var modif = getModif(playernum);
-
         var modifValues = getModifValues(playernum);
+        var playe = PlayState.getPlayerFromID(playernum);
+        if (!playe.allowModifiers)
+            return [xPos,yPos,ang,scaleX,scaleY,alpha];
 
-        if (modif.twist != 0)
-        {
-            if (noteData < PlayState.keyAmmo[curMania])
-                xPos += Note.noteWidths[curMania] * modif.twist;
-            else 
-                xPos -= Note.noteWidths[curMania] * modif.twist;
-        }
+        var arrowSize = Note.noteWidths[curMania];
+        var beat = PlayState.instance.currentBeat;
+        var keyAmmo = PlayState.keyAmmo[curMania];
 
-        xPos += modif.xOffset;
-        yPos += modif.yOffset;
+        xPos += modif['xOffset'];
+        yPos += modif['yOffset'];
 
-
-        var noteDataOffsetx = Reflect.getProperty(modifValues, "xOffset" + noteData);
-        var noteDataOffsety = Reflect.getProperty(modifValues, "yOffset" + noteData);
-        var noteDataOffsetz = Reflect.getProperty(modifValues, "zOffset" + noteData);
-        xPos += noteDataOffsetx;
-        yPos += noteDataOffsety;
-        ang += noteDataOffsetz;
+        xPos += strum.strumOffsets.x;
+        yPos += strum.strumOffsets.y;
+        ang += strum.strumOffsets.angle;
+        scaleX *= strum.strumOffsets.scaleX;
+        scaleY *= strum.strumOffsets.scaleY;
+        alpha *= strum.strumOffsets.alpha;
         
+        xPos += strum.strumOffsetsTwo.x;
+        yPos += strum.strumOffsetsTwo.y;
+        ang += strum.strumOffsetsTwo.angle;
+        scaleX *= strum.strumOffsetsTwo.scaleX;
+        scaleY *= strum.strumOffsetsTwo.scaleY;
+        alpha *= strum.strumOffsetsTwo.alpha;
         //manual modifiers
-        if (modif.sinWaveX[0] != 0)
-            xPos += sinWave(modif.sinWaveX[0], modif.sinWaveX[1], noteData);
-        if (modif.sinWaveY[0] != 0)
-            yPos += sinWave(modif.sinWaveY[0], modif.sinWaveY[1], noteData);
-        if (modif.cosWaveX[0] != 0)
-            xPos += cosWave(modif.cosWaveX[0], modif.cosWaveX[1], noteData);
-        if (modif.cosWaveY[0] != 0)
-            yPos += cosWave(modif.cosWaveY[0], modif.cosWaveY[1], noteData);
+        if (modif['sinWaveX'][0] != 0)
+            xPos += sinWave(modif['sinWaveX'][0], modif['sinWaveX'][1], noteData);
+        if (modif['sinWaveY'][0] != 0)
+            yPos += sinWave(modif['sinWaveY'][0], modif['sinWaveY'][1], noteData);
+        if (modif['cosWaveX'][0] != 0)
+            xPos += cosWave(modif['cosWaveX'][0], modif['cosWaveX'][1], noteData);
+        if (modif['cosWaveY'][0] != 0)
+            yPos += cosWave(modif['cosWaveY'][0], modif['cosWaveY'][1], noteData);
 
-        if (modif.sinMoveX[0] != 0)
-            xPos += sinMove(modif.sinMoveX[0], modif.sinMoveX[1]);
-        if (modif.sinMoveY[0] != 0)
-            yPos += sinMove(modif.sinMoveY[0], modif.sinMoveY[1]);
-        if (modif.cosMoveX[0] != 0)
-            xPos += cosMove(modif.cosMoveX[0], modif.cosMoveX[1]);
-        if (modif.cosMoveY[0] != 0)
-            yPos += cosMove(modif.cosMoveY[0], modif.cosMoveY[1]);
+        if (modif['sinMoveX'][0] != 0)
+            xPos += sinMove(modif['sinMoveX'][0], modif['sinMoveX'][1]);
+        if (modif['sinMoveY'][0] != 0)
+            yPos += sinMove(modif['sinMoveY'][0], modif['sinMoveY'][1]);
+        if (modif['cosMoveX'][0] != 0)
+            xPos += cosMove(modif['cosMoveX'][0], modif['cosMoveX'][1]);
+        if (modif['cosMoveY'][0] != 0)
+            yPos += cosMove(modif['cosMoveY'][0], modif['cosMoveY'][1]);
 
-        if (modif.swing != 0)
+        if (modif['swing'] != 0)
         {
-            yPos += cosMove(modif.cosMoveY[0], modif.cosMoveY[1]);
+            yPos += cosMove(modif['cosMoveY'][0], modif['cosMoveY'][1]);
         }
 
-        if (modif.dislocated != 0)
+        if (modif['dislocated'] != 0)
         {
-            yPos += (0 + 25 * Math.cos(modif.dislocated * noteData));
-            xPos += (0 + 25 * Math.sin(modif.dislocated * noteData));
+            yPos += (0 + 25 * Math.cos(modif['dislocated'] * noteData));
+            xPos += (0 + 25 * Math.sin(modif['dislocated'] * noteData));
         }
-        if (modif.chaos != 0)
+        if (modif['chaos'] != 0)
         {
-            yPos += (0 + (25*modif.chaos) * Math.cos(PlayState.instance.currentBeat * (noteData + 1) *(25*modif.chaos)));
-            xPos += (0 + (25*modif.chaos) * Math.sin(PlayState.instance.currentBeat * (noteData + 1) *(25*modif.chaos)));
-            ang += (0 + (25*modif.chaos) * Math.sin(PlayState.instance.currentBeat * (noteData + 1) *(25*modif.chaos)));
+            yPos += (0 + (25*modif['chaos']) * Math.cos(PlayState.instance.currentBeat * (noteData + 1) *(25*modif['chaos'])));
+            xPos += (0 + (25*modif['chaos']) * Math.sin(PlayState.instance.currentBeat * (noteData + 1) *(25*modif['chaos'])));
+            ang += (0 + (25*modif['chaos']) * Math.sin(PlayState.instance.currentBeat * (noteData + 1) *(25*modif['chaos'])));
         }
-        if (modif.spin != 0)
-            ang += 0 + 180 * Math.cos(PlayState.instance.currentBeat * (noteData + 1) * modif.spin);
+        if (modif['spin'] != 0)
+            ang += 0 + 180 * (PlayState.instance.currentBeat * modif['spin']);
 
-        if (modif.press != 0)
+        if (modif['press'] != 0)
         {
-            var pressoffset:Array<Float> = Reflect.getProperty(modifValues, "pressOffset" + noteData % Note.MaxNoteData);
-            //trace(pressoffset + " " + noteData);
-            xPos += pressoffset[0];
-            yPos += pressoffset[1];
-            ang += pressoffset[2];
+            xPos += strum.pressOffset.x;
+            yPos += strum.pressOffset.y;
+            ang += strum.pressOffset.angle;
+            scaleX *= strum.pressOffset.scaleX;
+            scaleY *= strum.pressOffset.scaleY;
+            alpha *= strum.pressOffset.alpha;
+        }
+        if (modif['flip'] != 0)
+            xPos += (arrowSize * 2 * (1.5 - noteData)) * modif['flip'];
+        if (modif['invert'] != 0)
+        {
+            var invertShit = noteData % 2;
+            if (invertShit == 0)
+                invertShit = 1;
+            else 
+                invertShit = -1;
+            xPos += (arrowSize * invertShit) * modif['invert'];
+        }
+        if (modif['drunk'] != 0)
+            xPos += modif['drunk'] * Math.cos((Conductor.songPosition*0.001) + (noteData*(0.2)) + (1*0.2)) + (arrowSize*0.5);
+        if (modif['tipsy'] != 0)
+            yPos += modif['tipsy'] * Math.cos((Conductor.songPosition*0.001) * (1.2) + (noteData*(2.0)) + (1*(0.2))) + (arrowSize*0.4);
+
+        if (modif['dark'] != 0 || strum.modifiers['dark'] != 0)
+            alpha *= (1-modif['dark'])*(1-strum.modifiers['dark']);
+        if (modif['confusion'] != 0 || strum.modifiers['confusion'] != 0)
+            ang += modif['confusion'] + strum.modifiers['confusion'];
+        //if (modifdizzy != 0)
+            //ang += modifdizzy; //doesnt work well with my current setup
+
+        if (modif['split'] != 0 || modif['cross'] != 0 || modif['alternate'] != 0 || modif['reverse'] != 0 || strum.modifiers['reverse'] != 0)
+        {
+            var amount = modif['reverse']+strum.modifiers['reverse'];
+            if (modif['split'] != 0 && noteData+1 > keyAmmo/2)
+                amount += modif['split'];
+            if (modif['cross'] != 0 && noteData+1 > keyAmmo/4 && noteData < (keyAmmo/4)*3)
+                amount += modif['cross'];
+            if (modif['alternate'] != 0 && noteData % 2 == 1)
+                amount += modif['alternate'];
+
+            yPos += amount*450;
         }
 
-        var bopoffset:Array<Float> = Reflect.getProperty(modifValues, "bopOffset" + noteData % Note.MaxNoteData);
-        xPos += bopoffset[0];
-        yPos += bopoffset[1];
-        ang += bopoffset[2];
+        if (modif['pingPong'] != 0)
+        {
+            yPos += Math.min(-arrowSize * Math.sin(beat*Math.PI + noteData*Math.PI),0) * modif['pingPong'];
+            var pingPong = beat - Math.floor(beat);
+            if (beat % 2 > 1)
+				pingPong = 1 - pingPong;
 
-        /*if (modif.clutter != 0)
+            var invertShit = noteData % 2;
+            if (invertShit == 0)
+                invertShit = 1;
+            else 
+                invertShit = -1;
+            xPos += (arrowSize * invertShit) * (pingPong * 1.2) * modif['pingPong'];
+        }
+
+        if (modif['halo'] != 0)
+        {
+            var haloAng = 2*Math.PI*(noteData)/(keyAmmo) + ((beat)*0.5*Math.PI);
+					
+            xPos += modif['haloWidth'] * modif['halo'] * Math.sin(haloAng);
+            yPos += modif['haloHeight'] * modif['halo'] * Math.cos(haloAng);
+        }
+            
+
+        xPos += strum.bopOffset.x;
+        yPos += strum.bopOffset.y;
+        ang += strum.bopOffset.angle;
+        scaleX *= strum.bopOffset.scaleX;
+        scaleY *= strum.bopOffset.scaleY;
+        alpha *= strum.bopOffset.alpha;
+
+        /*if (modifclutter != 0)
         {
             xPos += ;
         }*/
+
             
-        return [xPos,yPos,ang];
+        return [xPos,yPos,ang,scaleX,scaleY,alpha];
     }
 
     public static function sinWave(range:Float, speed:Float, noteData:Int)
@@ -338,27 +405,30 @@ class ModchartUtil
         return 0 + range * Math.cos(PlayState.instance.currentBeat * speed * Math.PI);
 
 
-    public static function noteModifierShit(daNote:Note, playernum:Int)
+    public static function noteModifierShit(daNote:Note, playernum:Int, strum:BabyArrow)
     {
         var modif = getModif(playernum);
         var modifValues = getModifValues(playernum);
+        var playe = PlayState.getPlayerFromID(playernum);
+        if (!playe.allowModifiers)
+            return;
 
-        if (modif.ghostNotes != 0)
+        if (modif['ghostNotes'] != 0)
         {
-            if (daNote.curPos <= Conductor.stepCrochet * modif.ghostNotes)
-                daNote.alpha = FlxMath.remapToRange(daNote.curPos, 0, Conductor.stepCrochet * modif.ghostNotes, 0, 1);
+            if (daNote.curPos <= (Conductor.stepCrochet * modif['ghostNotes']) + modif['ghostOffset'])
+                daNote.alpha = FlxMath.remapToRange(daNote.curPos, 0, (Conductor.stepCrochet * modif['ghostNotes']) + modif['ghostOffset'], 0, 1);
         }
-        else if (modif.inverseGhostNotes != 0)
+        else if (modif['inverseGhostNotes'] != 0)
         {
             daNote.alpha = 0;
-            if (daNote.curPos <= Conductor.stepCrochet * modif.inverseGhostNotes)
-                daNote.alpha = FlxMath.remapToRange(daNote.curPos, 0, Conductor.stepCrochet * modif.inverseGhostNotes, 1, 0) * daNote.curAlpha;
+            if (daNote.curPos <= (Conductor.stepCrochet * modif['inverseGhostNotes']) + modif['ghostOffset'])
+                daNote.alpha = FlxMath.remapToRange(daNote.curPos, 0, (Conductor.stepCrochet * modif['inverseGhostNotes']) + modif['ghostOffset'], 1, 0) * daNote.curAlpha;
         }
 
 
-        if (modif.strumsFollowNotes != 0)
+        if (modif['strumsFollowNotes'] != 0)
         {
-            daNote.y = FlxMath.remapToRange(daNote.strumTime % (Conductor.stepCrochet * (32 * modif.strumsFollowNotes)), 0, Conductor.stepCrochet * (32 * modif.strumsFollowNotes), 0, FlxG.height * 2);
+            daNote.y = FlxMath.remapToRange(daNote.strumTime % (Conductor.stepCrochet * (32 * modif['strumsFollowNotes'])), 0, Conductor.stepCrochet * (32 * modif['strumsFollowNotes']), 0, FlxG.height * 2);
             if (daNote.y > FlxG.height)
                 daNote.y = FlxMath.remapToRange(daNote.y, 0, FlxG.height, FlxG.height, 0) + FlxG.height;
 
@@ -367,13 +437,39 @@ class ModchartUtil
             if (daNote.strumTime >= Conductor.songPosition + (Conductor.stepCrochet * 12))
                 daNote.alpha = 0.1 * daNote.curAlpha;
         }
+        if (modif['stealth'] != 0 || strum.modifiers['stealth'] != 0)
+            daNote.alpha *= (1-modif['dark'])*(1-strum.modifiers['stealth']);
+    }
 
-        var notesine:Array<Float> = Reflect.getProperty(modifValues, "noteSine" + daNote.noteDataToFollow % Note.MaxNoteData);
-        if (notesine[0] != 0)
-            daNote.x += notesine[0] * Math.sin(daNote.curPos * notesine[1]);
-        
+    public static function noteModifierShitBefore(daNote:Note, playernum:Int, strum:BabyArrow)
+    {
 
+        var modif = getModif(playernum);
+        var modifValues = getModifValues(playernum);
+        var playe = PlayState.getPlayerFromID(playernum);
+        if (!playe.allowModifiers)
+            return;
 
+        if (modif['split'] != 0 || modif['cross'] != 0 || modif['alternate'] != 0 || modif['reverse'] != 0 || strum.modifiers['reverse'] != 0)
+		{
+            var amount = modif['reverse']+strum.modifiers['reverse'];
+            if (modif['split'] != 0 && daNote.noteData+1 > (PlayState.keyAmmo[playe.curMania]/2))
+                amount += modif['split'];
+            if (modif['cross'] != 0 && daNote.noteData+1 > PlayState.keyAmmo[playe.curMania]/4 && daNote.noteData < (PlayState.keyAmmo[playe.curMania]/4)*3)
+                amount += modif['cross'];
+            if (modif['alternate'] != 0 && daNote.noteData % 2 == 1)
+                amount += modif['alternate'];
+
+            daNote.noteDistMulti = (1 - (amount * 2));
+		}
+        else
+            daNote.noteDistMulti = 1;
+
+        if (modif['incomingAngleIsStrumAngle'])
+			daNote.curIncomingAngle = strum.angle - 90;
+
+		if (modif['drugged'] != 0)
+			daNote.curIncomingAngle = daNote.curIncomingAngle + 15 * Math.sin(PlayState.instance.currentBeat * modif['drugged']);
     }
     
 
@@ -522,91 +618,16 @@ class ModchartUtil
         }
     }
 
-
-
-    public static var modifierList = [
-        "yOffset",
-        "xOffset",
-        "StrumLinefollowAngle",
-        "incomingAngleIsStrumAngle",
-        "scrollAngle",
-        "sinWaveX",
-        "sinWaveY",
-        "cosWaveX",
-        "cosWaveY",
-        "sinMoveX",
-        "sinMoveY",
-        "cosMoveX",
-        "cosMoveY",
-        "noteAlpha",
-        "strumAlpha",
-        "twist",
-        "spin",
-        "ghostNotes",
-        "inverseGhostNotes",
-        "drugged",
-        "scramble",
-        "strumsFollowNotes",
-        "overlap",
-        "swing",
-        "dislocated",
-        "chaos",
-        "clutter",
-        "bop",
-        "press",
-        "jumpy"
-    ];
-
     public static function changeModifier(name:String, value:Dynamic, playernum:Int)
     {
         var modif = getModif(playernum);
-        Reflect.setProperty(modif, name, value);
-    }
-
-    public static function changeModifierValue(name:String, value:Dynamic, playernum:Int)
-    {
-        var modif = getModifValues(playernum);
-        Reflect.setProperty(modif, name, value);
+        modif[name] = value;
     }
 
     public static function getModifierValue(name:String, playernum:Int)
     {
         var modif = getModif(playernum);
         //trace(name + Reflect.getProperty(modif, name));
-        return Reflect.getProperty(modif, name);
+        return modif[name];
     }
-
-    public static function getModifierValuesValue(name:String, playernum:Int) //value of a value what the fuck are my variable names
-    {
-        var modif = getModifValues(playernum);
-        //trace(name + Reflect.getProperty(modif, name));
-        return Reflect.getProperty(modif, name);
-    }
-
-
-    /*public static function addShaderToCamera(cam:FlxCamera, shad:Dynamic) //piece of shit dont wanna work, literally gives no error messages even on a test debug build
-    {
-        @:privateAccess
-        {
-            //var curShaders:Array<BitmapFilter> = cam._filters;
-            //curShaders.push(new ShaderFilter(shad.shader));
-            //cam.setFilters(curShaders);
-        }
-    }
-
-    public static function removeShaderFromCamera(cam:FlxCamera, shad:Dynamic)
-    {
-        @:privateAccess
-        {
-            var curShaders:Array<BitmapFilter> = cam._filters;
-            var shadfilter = new ShaderFilter(shad.shader);
-            for (i in curShaders)
-            {
-                if (i == shadfilter)
-                    curShaders.remove(i);
-            }
-            cam.setFilters(curShaders);
-        }
-    }*/
-
 }

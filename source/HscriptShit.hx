@@ -36,6 +36,8 @@ import Shaders.HSVEffect;
 import Shaders.HSVShader;
 import Shaders.RayMarchEffect;
 import Shaders.RayMarchShader;
+import BabyArrow.StrumSettings;
+
 
 class HscriptShit //funni modcharts
 {
@@ -45,12 +47,16 @@ class HscriptShit //funni modcharts
 
     public function new (path:String)
     {
+        var actualPath = '' + path;
+        if (PlayState.isFreeplayChart)
+            path = "assets/data/charts/" + PlayState.SONG.song.toLowerCase() + "/script.hscript";
+
         #if sys
-		if (FileSystem.exists(path) && PlayState.modcharts)
+		if (FileSystem.exists(actualPath) && PlayState.modcharts)
 		{
             try 
             {
-                loadScript(path);
+                loadScript(actualPath);
                 enabled = true;
                 setScriptVars();
                 interp.execute(script);
@@ -116,8 +122,6 @@ class HscriptShit //funni modcharts
         parser.resumeErrors = true;
         script = parser.parseString(rawCode); //load da shit
         interp = new Interp(); 
-        
-        CacheShit.modcharts.clear(); //so can update modcharts
         //trace(script);
     }
 
@@ -198,6 +202,7 @@ class HscriptShit //funni modcharts
         interp.variables.set("ScriptEvent", ScriptEvent);
         interp.variables.set("EventCallType", EventCallType);
         interp.variables.set("Player", Player);
+        interp.variables.set("StrumSettings", StrumSettings);
 
         interp.variables.set("setStepEvent", function(_time:Dynamic, _function:String, _input:Array<Dynamic>)
         {
@@ -210,6 +215,28 @@ class HscriptShit //funni modcharts
         interp.variables.set("setStrumTimeEvent", function(_time:Dynamic, _function:String, _input:Array<Dynamic>)
         {
             PlayState.instance.scriptEvents.push(new StrumTimeScriptEvent(_time, _function, _input));
+        });
+
+
+
+        interp.variables.set("setMod", function(step:Int, value:Dynamic, mod:String, playernum:Int)
+        {
+            PlayState.instance.scriptEvents.push(new StepScriptEvent(step, 'changeMod', [[mod, value, playernum]]));
+        });
+
+        interp.variables.set("changeMod", function(stuff:Array<Dynamic>)
+        {
+            ModchartUtil.changeModifier(stuff[0], stuff[1], stuff[2]);
+        });
+
+        interp.variables.set("setModTween", function(step:Int, stepsToLast:Int, ease:String, value:Int, mod:String, playernum:Int)
+        {
+            PlayState.instance.scriptEvents.push(new StepScriptEvent(step, 'tweenMod', [[mod, value, playernum, ease, stepsToLast * (Conductor.stepCrochet / 1000)]]));
+        });
+
+        interp.variables.set("tweenMod", function(stuff:Array<Dynamic>)
+        {
+            PlayState.instance.tweenModifier(stuff[0],stuff[1],stuff[2],stuff[3],stuff[4]);
         });
 
         interp.variables.set("add", function(obj:FlxBasic) 

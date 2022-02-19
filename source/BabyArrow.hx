@@ -14,6 +14,41 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxAngle;
 import flixel.math.FlxMath;
 
+class StrumSettings
+{
+    public var x:Float = 0;
+    public var y:Float = 0;
+    public var angle:Float = 0;
+    public var scaleX:Float = 1;
+    public var scaleY:Float = 1;
+    public var alpha:Float = 1;
+    public function new() {}
+    public function set(a:Float,b:Float,c:Float,d:Float,e:Float,f:Float)
+    {
+        x = a;
+        y = b;
+        angle = c;
+        scaleX = d;
+        scaleY = e;
+        alpha = f;
+    }
+    
+    public function tweenX(to:Float,time:Float,ease:String)
+        FlxTween.tween(this, {x: to}, time, {ease: ModchartUtil.getEase(ease)});
+    public function tweenY(to:Float,time:Float,ease:String)
+        FlxTween.tween(this, {y: to}, time, {ease: ModchartUtil.getEase(ease)});
+    public function tweenAngle(to:Float,time:Float,ease:String)
+        FlxTween.tween(this, {angle: to}, time, {ease: ModchartUtil.getEase(ease)});
+    public function tweenScaleX(to:Float,time:Float,ease:String)
+        FlxTween.tween(this, {scaleX: to}, time, {ease: ModchartUtil.getEase(ease)});
+    public function tweenScaleY(to:Float,time:Float,ease:String)
+        FlxTween.tween(this, {scaleY: to}, time, {ease: ModchartUtil.getEase(ease)});
+    public function tweenAlpha(to:Float,time:Float,ease:String)
+        FlxTween.tween(this, {alpha: to}, time, {ease: ModchartUtil.getEase(ease)});
+    public function resetTween(time:Float,ease:String)
+        FlxTween.tween(this, {x: 0, y:0, angle:0, scaleX: 1, scaleY:1, alpha:1}, time, {ease: ModchartUtil.getEase(ease)});
+}
+
 class BabyArrow extends FlxSprite
 {
     var HSV:HSVEffect = new HSVEffect();
@@ -80,6 +115,8 @@ class BabyArrow extends FlxSprite
     public var scaleMulti:Float = 1;
     public var widthMulti:Float = 1;
     public var curMania:Int = 0;
+    public var curScaleX:Float = 0.7;
+    public var curScaleY:Float = 0.7;
 
     public var defaultX:Float = 0;
     public var defaultY:Float = 0;
@@ -88,9 +125,23 @@ class BabyArrow extends FlxSprite
     public var defaultWidth:Float;
     public var curID:Int;
 
+    public var modifiers:Map<String, Dynamic> = [
+        'dark' => 0.0,
+        'stealth' => 0.0,
+        'confusion' => 0.0,
+        'reverse' => 0.0,
+    ];
+
+    public var strumOffsets:StrumSettings = new StrumSettings(); //dont think i can put in shitty map
+    public var strumOffsetsTwo:StrumSettings = new StrumSettings(); //an extra one in case you need it
+    public var bopOffset:StrumSettings = new StrumSettings();
+    public var bopTo:StrumSettings = new StrumSettings();
+    public var pressOffset:StrumSettings = new StrumSettings();
+    public var bopTime:Float = 0;
+    public var bopEase:String = 'cubeInOut';
+    public var noteSine:Array<Float> = [0,0];
     //public var strumLineAngle:Float = 0;
     //public var strumLineCenter:FlxPoint;
-
     public var centerOfArrow:FlxPoint;
 
     var flxcolorToUse:FlxColor = FlxColor.BLACK;
@@ -353,6 +404,11 @@ class BabyArrow extends FlxSprite
                 updateHitbox();
 		}
         animation.play('static');
+        curScaleX = scale.x;
+        curScaleY = scale.y;
+        if ((SaveData.downscroll && whichPlayer == 1) || (SaveData.P2downscroll && whichPlayer == 0))
+            curScaleY *= -1;
+        
     }
 
 
@@ -455,12 +511,13 @@ class BabyArrow extends FlxSprite
     {
         super.update(elapsed);
 
+
+        centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2);
         if (lane != null)
         {
-            lane.x = this.x;
+            lane.x = this.x + PlayState.keyAmmo[curMania];
             lane.y = this.y - 300;
         }
-        centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2);
 
         if (whichPlayer == 2)
         {
@@ -468,8 +525,6 @@ class BabyArrow extends FlxSprite
             x = (PlayState.gf.x + (PlayState.gf.width / 2)) - (Note.noteWidths[0] * 2) + Note.noteWidths[0] * curID;
         }
 
-
-        
         if (inPlayState)
         {
             var StrumGroup:StrumLineGroup = PlayState.p1.strums;
@@ -481,33 +536,42 @@ class BabyArrow extends FlxSprite
             if (this.curID == 10) //from mania changes
                 return;
 
-            this.strumLineAngle = modif.scrollAngle;
+            if (!curPlayer.allowModifiers)
+                return;
+
+            this.strumLineAngle = modif['scrollAngle'];
 
             var distanceToCenter = StrumGroup.strumLineCenter.x - defaultX;
             var strumPos = FlxAngle.getCartesianCoords(distanceToCenter, strumLineAngle + 90);
             this.setPosition(StrumGroup.strumLineCenter.x - strumPos.x, StrumGroup.strumLineCenter.y - strumPos.y);
             this.angle = 0;
+            this.scale.x = curScaleX;
+            this.scale.y = curScaleY;
+            this.alpha = modif['strumAlpha'];
 
-            if (modif.StrumLinefollowAngle)
+            if (modif['StrumLinefollowAngle'])
                 this.angle = this.strumLineAngle + 90;
-            var strumOffset = ModchartUtil.strumOffset(whichPlayer, curID, curMania);
+            var strumOffset = ModchartUtil.strumOffset(whichPlayer, curID, curMania, this);
 
             this.x += strumOffset[0];
             this.y += strumOffset[1];
             this.angle += strumOffset[2];
+            this.scale.x *= strumOffset[3];
+            this.scale.y *= strumOffset[4];
+            this.alpha *= strumOffset[5];
 
-            this.alpha = modif.strumAlpha;
-            this.scrollFactor.set(modif.strumScrollFactor[0], modif.strumScrollFactor[1]); //can change scroll factor because funi
 
-            if (modif.boundStrums)
+            this.scrollFactor.set(modif['strumScrollFactor'][0], modif['strumScrollFactor'][1]); //can change scroll factor because funi
+
+            if (modif['boundStrums'])
             {
                 x = (x + FlxG.width) % FlxG.width;
                 y = (y + FlxG.height) % FlxG.height;
             }
 
-            if (modif.strumsFollowNotes != 0)
+            if (modif['strumsFollowNotes'] != 0)
             {
-                y = FlxMath.remapToRange(Conductor.songPosition % (Conductor.stepCrochet * (32 * modif.strumsFollowNotes)), 0, Conductor.stepCrochet * (32 * modif.strumsFollowNotes), 0, FlxG.height * 2);
+                y = FlxMath.remapToRange(Conductor.songPosition % (Conductor.stepCrochet * (32 * modif['strumsFollowNotes'])), 0, Conductor.stepCrochet * (32 * modif['strumsFollowNotes']), 0, FlxG.height * 2);
                 if (y > FlxG.height)
                     y = FlxMath.remapToRange(y, 0, FlxG.height, FlxG.height, 0) + FlxG.height;
 
@@ -521,11 +585,11 @@ class BabyArrow extends FlxSprite
 
             if (whichPlayer == 0)
             {
-                if (modif.overlap != 0)
+                if (modif['overlap'] != 0)
                 {
-                    x = FlxMath.remapToRange(modif.overlap, 0, 1, this.x, PlayState.p1.strums.members[this.curID].x);
-                    y = FlxMath.remapToRange(modif.overlap, 0, 1, this.x, PlayState.p1.strums.members[this.curID].y);
-                    angle = FlxMath.remapToRange(modif.overlap, 0, 1, this.x, PlayState.p1.strums.members[this.curID].angle);
+                    x = FlxMath.remapToRange(modif['overlap'], 0, 1, this.x, PlayState.p1.strums.members[this.curID].x);
+                    y = FlxMath.remapToRange(modif['overlap'], 0, 1, this.x, PlayState.p1.strums.members[this.curID].y);
+                    angle = FlxMath.remapToRange(modif['overlap'], 0, 1, this.x, PlayState.p1.strums.members[this.curID].angle);
                 }
             }
 
@@ -533,6 +597,23 @@ class BabyArrow extends FlxSprite
 
         }
 
+    }
+
+
+
+    public function tweenMod(modifToChange:String, modifValue:Dynamic, ?time:Float, ease:String = "linear") //new ver, literally just swapped time and ease args so it makes sense
+    {
+        if (time == null)
+            time = Conductor.crochet / 1000;
+        var easeToUse = ModchartUtil.getEase(ease);
+        var startVal = modifiers[modifToChange];
+
+        FlxTween.num(startVal, modifValue, time, {onUpdate: function(tween:FlxTween){
+            var ting = FlxMath.lerp(startVal,modifValue, tween.percent);
+            modifiers[modifToChange] = ting;
+        }, ease: easeToUse, onComplete: function(tween:FlxTween) {
+            modifiers[modifToChange] = modifValue;
+        }});
     }
         
 }

@@ -1,8 +1,5 @@
 package;
 
-import openfl.display.Bitmap;
-import openfl.geom.Rectangle;
-import openfl.ui.Multitouch;
 import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -52,6 +49,7 @@ class Note extends FlxSprite
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
 	public var sustainHit:Bool = false;
+	public var sustainScaleY:Float = 1;
 
 	public static var MaxNoteData:Int = 9; // :troll:
 
@@ -91,7 +89,7 @@ class Note extends FlxSprite
 	public static var hitTiming = 145;
 	public var earlyHitTiming = hitTiming;
 	public var lateHitTiming = -hitTiming;
-	public static var followAngle:Bool = false;
+	public static var followAngle:Bool = true;
 	public static var StrumLinefollowAngle:Bool = false;
 	public var incomingAngle:Float = -90;
 
@@ -191,6 +189,10 @@ class Note extends FlxSprite
 	public var curIncomingAngle:Float = -90;
 	public var noteDataToFollow:Int = 0;
 
+	public var curPos:Float = 0;
+	public var noteDist:Float = 0.45;
+	public var noteDistMulti:Float = 1; //just for scroll switch modifiers
+
 	////////////////////////////////////////////////////////////
 
 	//event note shit
@@ -220,12 +222,8 @@ class Note extends FlxSprite
 
 	//experimental stuff
 
-	//public var noteCam:FlxCamera; //just because i want multiple shaders on a note
-	//terrible idea, pc almost exploded playing bopeebo
-
-	//var StrumGroup:StrumLineGroup; //i think this can cause lag
 	public var beenFlipped:Bool = false;
-	public var curPos:Float = 0;
+
 
 	///////////////////////////////////////////////////////////
 
@@ -496,8 +494,6 @@ class Note extends FlxSprite
 					alpha = 0.3;
 			}
 		}
-
-
 	}
 
 	function deleteShit():Void
@@ -629,6 +625,10 @@ class Note extends FlxSprite
 		if (PlayState.curStage.startsWith('school'))
 			x += 30;
 
+		sustainScaleY = scale.y;
+
+		origin.set(frameWidth * 0.5, 0);
+
 		if (prevNote.isSustainNote)
 		{
 			prevNote.animation.play(frameN[mania][prevNote.noteData % MaxNoteData] + 'hold');
@@ -636,6 +636,9 @@ class Note extends FlxSprite
 			prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (scaleToUse * scaleMulti));
 			prevNote.updateHitbox();
 
+			centerOrigin();
+
+			prevNote.sustainScaleY = prevNote.scale.y;
 			//prevNote.sustainOffset = Math.round(-prevNote.offset.y);
 			//sustainOffset = Math.round(-offset.y);
 
@@ -914,12 +917,25 @@ class Note extends FlxSprite
 		var right = (angleshit <= 45 && angleshit >= 315);
 		var down = (angleshit <= 135 && angleshit >= 45);
 
+		if (noteDist * noteDistMulti < 0)
+		{
+			up = !up;
+			down = !down;
+		}
+
 
 		if (up) //regular clipping
 		{
 			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
 			fuckYouRect.y = ((clipTo.y - y) / scale.y);
 			fuckYouRect.height -= fuckYouRect.y;
+			clipRect = fuckYouRect;
+		}
+		else if (down)
+		{
+			var fuckYouRect = new FlxRect(0, 0, frameWidth * 2, frameHeight * 2);
+			fuckYouRect.height = ((clipTo.y - y) / scale.y);
+			fuckYouRect.y = frameHeight - fuckYouRect.height;
 			clipRect = fuckYouRect;
 		}
 		else 
