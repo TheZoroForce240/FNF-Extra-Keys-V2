@@ -1,5 +1,6 @@
 package;
 
+import Section.NoteEvent;
 import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -33,25 +34,27 @@ class Note extends FlxSprite
 	////////////////////////////////////////////////////////////
 
 	//important note shit
-	public var strumTime:Float = 0;
-	public var baseStrum:Float = 0;
+	public var strumTime:Float = 0; //time note is played in song (in milliseconds)
+	public var baseStrum:Float = 0; //not used
 
-	public var mustPress:Bool = false; 
+	public var mustPress:Bool = false; //changes if note is for player or opponent 
 	public var strumID:Int = 0; //support for multiple strums :)
 
-	public var noteData:Int = 0;
-	public var canBeHit:Bool = false;
+	public var noteData:Int = 0; //note direction
+
+	public var canBeHit:Bool = false; //used for hit timings and shit
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
-	public var prevNote:Note;
-	public var parentNote:Note;
 
-	public var sustainLength:Float = 0;
-	public var isSustainNote:Bool = false;
-	public var sustainHit:Bool = false;
-	public var sustainScaleY:Float = 1;
+	public var prevNote:Note; //how sustains are made
+	public var parentNote:Note; //not used
 
-	public static var MaxNoteData:Int = 9; // :troll:
+	public var sustainLength:Float = 0; //how long sustain is
+	public var isSustainNote:Bool = false; //changes if sustain
+	public var sustainHit:Bool = false; //sustains get removed later to fix clipping
+	public var sustainScaleY:Float = 1; //used to store default scale y so it auto adjusts based on note dist
+
+	public static var MaxNoteData:Int = 9; //max note data, will use mod by this amount if you add more keys (you can technically add more keys just by typing the number in)
 
 	var HSV:HSVEffect = new HSVEffect();
 
@@ -60,7 +63,7 @@ class Note extends FlxSprite
 	//note type shit
 	public var noteType:Int = 0;
 
-	public static var noteTypeList = [
+	public static var noteTypeList = [ //TODO: move n types to string instead of int for compat with other engines and shit
 		"regular",
 		"burning",
 		"death",
@@ -75,7 +78,7 @@ class Note extends FlxSprite
 
 	public var normalNote:Bool = true; //just to make checking easier i guess
 	public var warningNoteType:Bool = false;
-	public var badNoteType:Bool = false;
+	public var badNoteType:Bool = false; //so it has smaller hit timing
 
 	public var healthChangesOnHit:Float = 0; //0 for sustains, used as default
 	public var healthChangesOnMiss:Float = 0.15;
@@ -91,29 +94,31 @@ class Note extends FlxSprite
 	public var lateHitTiming = -hitTiming;
 	public static var followAngle:Bool = true;
 	public static var StrumLinefollowAngle:Bool = false;
-	public var incomingAngle:Float = -90;
+	public var incomingAngle:Float = -90; //angle note comes at, default is up
 
 	////////////////////////////////////////////////////////////
 
 	//mania shit
-	public static var mania:Int = 0; 
-	public static var swagWidth:Float = 160 * 0.7;
-	public static var noteScale:Float;
-	public static var pixelnoteScale:Float;
-	public static var tooMuch:Float = 30;
-	public var scaleToUse:Float = 1;
+	public static var mania:Int = 0; //val for indexing amount of keys from keyAmmo
+	public static var swagWidth:Float = 160 * 0.7; //note width (for positioning and sus clips)
+	public static var noteScale:Float; //scale bruh
+	public static var pixelnoteScale:Float; //pixel notes are scaled different
+	
+	public var scaleToUse:Float = 1; //old shit
 	public var changesMania:Bool = false;
 
-	public static var ammoToMania:Array<Int> = [0, 6, 7, 8, 0, 3, 1, 4, 5, 2];
+	public static var ammoToMania:Array<Int> = [0, 6, 7, 8, 0, 3, 1, 4, 5, 2]; //mania based stuff
 	public static var noteScales:Array<Float> = [0.7, 0.6, 0.5, 0.65, 0.58, 0.55, 0.7, 0.7, 0.7];
 	public static var pixelNoteScales:Array<Float> = [1, 0.83, 0.7, 0.9, 0.8, 0.74, 1, 1, 1];
 	public static var noteWidths:Array<Float> = [112, 84, 66.5, 91, 77, 70, 140, 126, 119];
-	public var sustainXOffset:Float = 1;
+	public static var maniaXOffsets:Array<Float> = [40, 20, -30, 30, -10, -20, 0, 0, 0];
+
+	public var sustainXOffset:Float = 1; //updates every frame to correctly position sustains
 
 	////////////////////////////////////////////////////////////
 
 	//note anim stuff
-	public static var frameN:Array<Dynamic> = [ //changed so i dont have to have a ton of case statements
+	public static var frameN:Array<Dynamic> = [ //note colors for anim names
 		['purple', 'blue', 'green', 'red'],
 		['purple', 'green', 'red', 'yellow', 'blue', 'dark'],
 		['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'],
@@ -160,9 +165,9 @@ class Note extends FlxSprite
 		"poison",
 		"poison" //forgot to change xml when copy pasting drain notes, if youre wondering why theres 2 poison
 	];
-	public var style:String = "";
-	public static var noteColors:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark'];
-	public var colorShit:Array<Float>;
+	public var style:String = ""; //note style (for pixel notes)
+	public static var noteColors:Array<String> = ['purple', 'blue', 'green', 'red', 'white', 'yellow', 'violet', 'darkred', 'dark']; //just list for all colors
+	public var colorShit:Array<Float>; //hsv stuff
 	var pathToUse:Int = 0;
 
 	public static var pixelAssetPaths:Array<Array<String>> = [ //for noteTypes, code cleanup
@@ -185,12 +190,13 @@ class Note extends FlxSprite
 	public var speedMulti:Float = 1;
 	public var velocityChangeTime:Float;
 	public var startPos:Float = 0;
-	public var curAlpha:Float = 1;
-	public var curIncomingAngle:Float = -90;
-	public var noteDataToFollow:Int = 0;
 
-	public var curPos:Float = 0;
-	public var noteDist:Float = 0.45;
+	public var curAlpha:Float = 1; //for sustain alpha (0.6)
+	public var curIncomingAngle:Float = -90; //used for fixing sustain clipping
+	public var noteDataToFollow:Int = 0; //can change for funnys
+
+	public var curPos:Float = 0; //basically songpos - strumtime (but accounts for velocity shit as well)
+	public var noteDist:Float = 0.45; //changes how close note is to strum (basically a way to change speed while fixing sustains)
 	public var noteDistMulti:Float = 1; //just for scroll switch modifiers
 
 	////////////////////////////////////////////////////////////
@@ -202,14 +208,14 @@ class Note extends FlxSprite
 
 	////////////////////////////////////////////////////////////
 
-	public var rawNoteData:Int = 0; //for charter
-	public var playedSound:Bool = true;
+	public var rawNoteData:Int = 0; //stops from removing notes on wrong side
+	public var playedSound:Bool = true; //for hitsound
 	public var canPlaySound:Bool = true;
-	public var inCharter:Bool = false;
-	public var updated:Bool = true;
-	public var beingGrabbed:Bool = false;
-	public var highlighted:Bool = false;
-	public var section:Int = 0;
+	public var inCharter:Bool = false; 
+	public var updated:Bool = true; //for reloading sections and shit (notes dont get remade every time you reload section)
+	public var beingGrabbed:Bool = false; //for sustain pulling with rclick
+	public var highlighted:Bool = false; //highlighting notes
+	public var section:Int = 0; //used for copy paste to fix strumtimes
 
 	////////////////////////////////////////////////////////////
 
@@ -223,7 +229,8 @@ class Note extends FlxSprite
 	//experimental stuff
 
 	public var beenFlipped:Bool = false;
-
+	public var stepHeight:Float = 1;
+	public var prevNoteStrum:Float = 0;
 
 	///////////////////////////////////////////////////////////
 
@@ -246,7 +253,9 @@ class Note extends FlxSprite
 			pixelnoteScale = pixelNoteScales[mania];
 		}
 
-		if (!PlayState.regeneratingNotes)
+		inCharter = charter;
+		
+		if (!PlayState.regeneratingNotes && !inCharter)
 		{
 			PlayState.p1.curNoteScale = noteScale;
 			PlayState.p2.curNoteScale = noteScale;
@@ -296,7 +305,7 @@ class Note extends FlxSprite
 		}
 
 		mustPress = _mustPress;
-		inCharter = charter;
+		
 		if (_eventData != null)
 		{
 			eventData = _eventData;
@@ -505,10 +514,7 @@ class Note extends FlxSprite
 	{
 		y -= 2000;
 		x += 50;
-		if (mania == 2)
-		{
-			x -= tooMuch; //moves notes a little to the left on 9k
-		}
+		x += maniaXOffsets[mania];
 		x += noteWidths[mania] * noteData;
 	}
 
@@ -627,16 +633,20 @@ class Note extends FlxSprite
 
 		sustainScaleY = scale.y;
 
+		stepHeight = Conductor.stepCrochet * 0.01 * 1.5;
+
 		origin.set(frameWidth * 0.5, 0);
 
 		if (prevNote.isSustainNote)
 		{
 			prevNote.animation.play(frameN[mania][prevNote.noteData % MaxNoteData] + 'hold');
 			prevNote.updateHitbox();
-			prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * speed * (0.7 / (scaleToUse * scaleMulti));
+			prevNote.scale.y *= stepHeight * speed * (0.7 / (scaleToUse * scaleMulti));
 			prevNote.updateHitbox();
 
 			centerOrigin();
+
+			prevNoteStrum = prevNote.strumTime;
 
 			prevNote.sustainScaleY = prevNote.scale.y;
 			//prevNote.sustainOffset = Math.round(-prevNote.offset.y);
@@ -910,18 +920,36 @@ class Note extends FlxSprite
 		//var rectPos = FlxAngle.getCartesianCoords(rectshit., angle + 90);
 		//fuckYouRect.y = (clipTo.y - rectPos.y) / scale.y;
 
-		var angleshit = ((curIncomingAngle % 360) + 360) % 360; //do mod twice to make negative numbers positive
+		var angleshit = (curIncomingAngle + 360) % 360;
 
 		var up = (angleshit <= 315 && angleshit >= 225);
 		var left = (angleshit <= 225 && angleshit >= 135);
-		var right = (angleshit <= 45 && angleshit >= 315);
+		var right = (angleshit <= 45 && angleshit >= 315 || angleshit == 0); //crossover point for negative angles
 		var down = (angleshit <= 135 && angleshit >= 45);
+
+		//trace(angleshit);
 
 		if (noteDist * noteDistMulti < 0)
 		{
 			up = !up;
 			down = !down;
 		}
+
+
+		/*var thisPoint:FlxPoint = new FlxPoint(this.x, this.y);
+		var dist = thisPoint.distanceTo(clipTo);
+		var angleBetween = thisPoint.angleBetween(clipTo);
+		//angleBetween -= 90; //match with angleshit
+		dist *= -1;
+		//trace("incoming angle " + angleshit);
+		//trace("angle between" + angleBetween);
+		if (angleBetween - angleshit >= 45 || angleBetween - angleshit <= -45)
+			dist *= -1; //when it goes past clip point
+
+		var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
+		fuckYouRect.y = (dist / scale.y);
+		fuckYouRect.height -= fuckYouRect.y;
+		clipRect = fuckYouRect;*/
 
 
 		if (up) //regular clipping
@@ -938,10 +966,21 @@ class Note extends FlxSprite
 			fuckYouRect.y = frameHeight - fuckYouRect.height;
 			clipRect = fuckYouRect;
 		}
-		else 
+		else if (left)
 		{
-			if (strumTime + Conductor.stepCrochet <= Conductor.songPosition)
-				visible = false; //dumb workaround while i figure out angled clipping
+			var fuckYouRect = new FlxRect(0, 0, width / scale.x, height / scale.y);
+			fuckYouRect.y = ((clipTo.x - x) / scale.y);
+			fuckYouRect.height -= fuckYouRect.y;
+			clipRect = fuckYouRect;
+			//trace('left');
+		}
+		else if (right)
+		{
+			var fuckYouRect = new FlxRect(0, 0, frameWidth * 2, frameHeight * 2);
+			fuckYouRect.height = ((clipTo.x - x) / scale.y);
+			fuckYouRect.y = frameHeight - fuckYouRect.height;
+			clipRect = fuckYouRect;
+			//trace('right');
 		}
 	}
 }
@@ -983,5 +1022,18 @@ class CharterSustain extends FlxSprite //so i can do the grabbing thing
 				flxcolorToUse = FlxColor.BLUE;
 		}
 		this.color = flxcolorToUse;
+	}
+}
+
+class EventSprite extends FlxSprite
+{
+	public var event:NoteEvent;
+
+	public function new(x:Float,y:Float, event:NoteEvent)
+	{
+		this.event = event;
+		super(x,y);
+		loadGraphic(Paths.image('scrollArrow'));
+		angle = 90;
 	}
 }

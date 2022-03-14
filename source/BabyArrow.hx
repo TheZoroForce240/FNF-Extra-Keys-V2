@@ -14,6 +14,8 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxAngle;
 import flixel.math.FlxMath;
 
+using StringTools;
+
 class StrumSettings
 {
     public var x:Float = 0;
@@ -22,6 +24,12 @@ class StrumSettings
     public var scaleX:Float = 1;
     public var scaleY:Float = 1;
     public var alpha:Float = 1;
+
+    public var pn:Int = 1;
+
+    //extra stuff for notes
+    public var nDistMulti:Float = 1; //for reverse and shit on notes (fix sustains and shit)
+    public var incomingAngle:Float = 0;
     public function new() {}
     public function set(a:Float,b:Float,c:Float,d:Float,e:Float,f:Float)
     {
@@ -31,6 +39,15 @@ class StrumSettings
         scaleX = d;
         scaleY = e;
         alpha = f;
+    }
+    public function addOffsets(a:StrumSettings)
+    {
+        this.x += a.x;
+        this.y += a.y;
+        this.angle += a.angle;
+        this.scaleX *= a.scaleX;
+        this.scaleX *= a.scaleY;
+        this.alpha *= a.alpha;
     }
     
     public function tweenX(to:Float,time:Float,ease:String)
@@ -53,22 +70,9 @@ class BabyArrow extends FlxSprite
 {
     var HSV:HSVEffect = new HSVEffect();
 
-    public static var offsetshit:Float = 56;
+    public static var offsetshit:Float = 56; //112 is default width so half that is center, fixes all offsets on any scale
 
     var pathList:Array<String> = Note.pathList;
-
-    public static var maniaSwitchPositions:Array<Dynamic> = [
-        [0, 1, 2, 3, "alpha0", "alpha0", "alpha0", "alpha0", "alpha0"],
-        [0, 4, 1, 2, "alpha0", 3, "alpha0", "alpha0", 5],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        [0, 1, 3, 4, 2, "alpha0", "alpha0", "alpha0", "alpha0"],
-        [0, 5, 1, 2, 3, 4, "alpha0", "alpha0", 6],
-        [0, 1, 2, 3, "alpha0", 4, 5, 6, 7],
-        ["alpha0", "alpha0", "alpha0", "alpha0", 0, "alpha0", "alpha0", "alpha0", "alpha0"],
-        [0, "alpha0", "alpha0", 1, "alpha0", "alpha0", "alpha0", "alpha0", "alpha0"],
-        [0, "alpha0", "alpha0", 2, 1, "alpha0", "alpha0", "alpha0", "alpha0"]
-    ];
-
 
     public static var dirArray:Array<Dynamic> = [
         ['LEFT', 'DOWN', 'UP', 'RIGHT'],
@@ -107,23 +111,24 @@ class BabyArrow extends FlxSprite
         0
     ];
 
-
+    public var nCol:String = ""; //note color
     public var whichPlayer:Int = 0;
-    public var stylelol:String = "";
-    public var colorShiz:Array<Float>;
-    var pathToUse:Int = 0;
-    public var scaleMulti:Float = 1;
-    public var widthMulti:Float = 1;
-    public var curMania:Int = 0;
-    public var curScaleX:Float = 0.7;
+    public var stylelol:String = ""; //note style (for pixel notes)
+    public var colorShiz:Array<Float>; //hsv shit
+    var pathToUse:Int = 0; //file path index for list
+    public var scaleMulti:Float = 1; //for middlescroll
+    public var widthMulti:Float = 1; //not used rn but can probably set up
+    public var curMania:Int = 0; //for mania changes
+    public var curScaleX:Float = 0.7; //for updating scale every frame
     public var curScaleY:Float = 0.7;
 
-    public var defaultX:Float = 0;
+    public var defaultX:Float = 0; //for modchart shit
     public var defaultY:Float = 0;
     public var defaultAngle:Float = 0;
 
     public var defaultWidth:Float;
-    public var curID:Int;
+
+    public var curID:Int; //allows modcharts to use correct shit when using noteData with mania changes
 
     public var modifiers:Map<String, Dynamic> = [
         'dark' => 0.0,
@@ -142,12 +147,13 @@ class BabyArrow extends FlxSprite
     public var noteSine:Array<Float> = [0,0];
     //public var strumLineAngle:Float = 0;
     //public var strumLineCenter:FlxPoint;
-    public var centerOfArrow:FlxPoint;
 
-    var flxcolorToUse:FlxColor = FlxColor.BLACK;
-    var inPlayState:Bool = true;
+    public var centerOfArrow:FlxPoint; //for sustain clipping
 
-    public var strumLineAngle:Float = -90;
+    var flxcolorToUse:FlxColor = FlxColor.BLACK; //for lanes
+    var inPlayState:Bool = true; //fix customization menu
+
+    public var strumLineAngle:Float = -90; //the entire strumtime can be angled, this is default num
 
     public function new(strumline:Float, player:Int, i:Int, style:String, ?isPlayState:Bool = true)
     {
@@ -204,8 +210,9 @@ class BabyArrow extends FlxSprite
         this.shader = HSV.shader;
         
 
-        setupStrum();
         positionStrum();
+        setupStrum();
+        
 
 
 
@@ -243,11 +250,7 @@ class BabyArrow extends FlxSprite
     {
         this.x = 50;
         x += Note.noteWidths[curMania] * curID * scaleMulti * widthMulti; 
-        switch (curMania)
-        {
-            case 2:
-                x -= Note.tooMuch;
-        }
+        x += Note.maniaXOffsets[curMania];
         if (SaveData.middlescroll && whichPlayer == 1)
             x += ((FlxG.width / 2) * 0.5) + ((Note.noteWidths[curMania] * widthMulti) / 2);
         else 
@@ -318,10 +321,9 @@ class BabyArrow extends FlxSprite
 
     function createLane():Void 
     {
-        var color = Note.frameN[curMania][curID % Note.MaxNoteData];
         if (SaveData.arrowLanes == "Colored")
         {
-            switch (color)
+            switch (nCol)
             {
                 case "purple": 
                     flxcolorToUse = FlxColor.PURPLE;
@@ -359,7 +361,7 @@ class BabyArrow extends FlxSprite
         frames = null;
         animation.destroyAnimations();
 
-        var color = Note.frameN[curMania][this.ID];
+        nCol = Note.frameN[curMania][this.ID];
 
         switch (stylelol)
         {
@@ -399,8 +401,8 @@ class BabyArrow extends FlxSprite
                 setGraphicSize(Std.int(width * Note.noteScales[curMania] * scaleMulti));
 
                 animation.addByPrefix('static', 'arrow' + dir);
-                animation.addByPrefix('pressed', color + ' press', 24, false);
-                animation.addByPrefix('confirm', color + ' confirm', 24, false);
+                animation.addByPrefix('pressed', nCol + ' press', 24, false);
+                animation.addByPrefix('confirm', nCol + ' confirm', 24, false);
                 updateHitbox();
 		}
         animation.play('static');
@@ -464,7 +466,7 @@ class BabyArrow extends FlxSprite
             scale.y *= -1;
         }
         
-        if (maniaSwitchPositions[newMania][spr.ID] == "alpha0")
+        /*if (maniaSwitchPositions[newMania][spr.ID] == "alpha0")
         {
             spr.visible = false; //changed it visible rather than alpha so it doesnt interfere with modifiers
             curID = 10;
@@ -474,14 +476,26 @@ class BabyArrow extends FlxSprite
         {
             spr.x += Note.noteWidths[newMania] * maniaSwitchPositions[newMania][spr.ID] * scaleMulti * widthMulti;
             curID = maniaSwitchPositions[newMania][spr.ID];
+        }*/
+
+        var nCol = Note.frameN[PlayState.mania][spr.ID];
+        if (Note.frameN[newMania].contains(nCol)) ////softcoded ye fuck you
+        {
+            curID = Note.frameN[newMania].indexOf(nCol);
+            spr.x += Note.noteWidths[newMania] * curID * scaleMulti * widthMulti;
+        }
+        else
+        {
+            spr.visible = false; //changed it visible rather than alpha so it doesnt interfere with modifiers
+            curID = 10;
+            spr.x += 2000; //make it offscreen to not fuck with the arrow lanes
         }
 
-        if (newMania == 2)
-            spr.x -= Note.tooMuch;
+        spr.x += Note.maniaXOffsets[newMania];
             
         spr.x += 50;
         if (SaveData.middlescroll && player == 1)
-            spr.x += ((FlxG.width / 2) * 0.5) + ((Note.noteWidths[newMania] * widthMulti) / 2);
+            spr.x += ((FlxG.width / 2) * 0.5) + ((Note.noteWidths[newMania] * widthMulti) / 2) - 40;
         else 
             spr.x += ((FlxG.width / 2) * player);
 
@@ -507,12 +521,22 @@ class BabyArrow extends FlxSprite
 
         defaultX = spr.x;
     }
+
+    static var rainbowColors:Array<FlxColor> = [
+        0xFFFF0000,
+        0xFFFF7F00,
+        0xFFFFFF00,
+        0xFF00FF00,
+        0xFF0000FF,
+        0xFF4B0082,
+        0xFF9400D3
+    ];
     override function update(elapsed:Float) 
     {
         super.update(elapsed);
 
 
-        centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2, y + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2);
+        centerOfArrow.set(x + (Note.noteWidths[curMania] * scaleMulti * widthMulti * 0.75), y + (Note.noteWidths[curMania] * scaleMulti * widthMulti) / 2);
         if (lane != null)
         {
             lane.x = this.x + PlayState.keyAmmo[curMania];
@@ -539,7 +563,7 @@ class BabyArrow extends FlxSprite
             if (!curPlayer.allowModifiers)
                 return;
 
-            this.strumLineAngle = modif['scrollAngle'];
+            //this.strumLineAngle = modif['scrollAngle'];
 
             var distanceToCenter = StrumGroup.strumLineCenter.x - defaultX;
             var strumPos = FlxAngle.getCartesianCoords(distanceToCenter, strumLineAngle + 90);
@@ -547,43 +571,49 @@ class BabyArrow extends FlxSprite
             this.angle = 0;
             this.scale.x = curScaleX;
             this.scale.y = curScaleY;
-            this.alpha = modif['strumAlpha'];
+            this.alpha = 1; //fucking dumbass
+            this.color = 0x00FFFFFF;
+            //this.alpha = modif['strumAlpha'];
 
-            if (modif['StrumLinefollowAngle'])
-                this.angle = this.strumLineAngle + 90;
+            //if (modif['StrumLinefollowAngle'])
+                //this.angle = this.strumLineAngle + 90;
             var strumOffset = ModchartUtil.strumOffset(whichPlayer, curID, curMania, this);
 
-            this.x += strumOffset[0];
-            this.y += strumOffset[1];
-            this.angle += strumOffset[2];
-            this.scale.x *= strumOffset[3];
-            this.scale.y *= strumOffset[4];
-            this.alpha *= strumOffset[5];
+            this.x += strumOffset.x;
+            this.y += strumOffset.y;
+            this.angle += strumOffset.angle;
+            this.scale.x *= strumOffset.scaleX;
+            this.scale.y *= strumOffset.scaleY;
+            this.alpha *= strumOffset.alpha;
 
+            if (modif['rainbowNotes'] != 0)
+            {
+                this.color = rainbowColors[(Math.floor(PlayState.instance.currentBeat * modif['rainbowNotes'])) % rainbowColors.length];  
+            }
+            if (modif['flash'] != 0)
+            {
+                this.color = FlxColor.WHITE;
+            }
 
-            this.scrollFactor.set(modif['strumScrollFactor'][0], modif['strumScrollFactor'][1]); //can change scroll factor because funi
+            //this.scrollFactor.set(modif['strumScrollFactor'][0], modif['strumScrollFactor'][1]); //can change scroll factor because funi
 
-            if (modif['boundStrums'])
+            /*if (modif['boundStrums'])
             {
                 x = (x + FlxG.width) % FlxG.width;
                 y = (y + FlxG.height) % FlxG.height;
-            }
+            }*/
 
-            if (modif['strumsFollowNotes'] != 0)
+            /*if (modif['strumsFollowNotes'] != 0)
             {
                 y = FlxMath.remapToRange(Conductor.songPosition % (Conductor.stepCrochet * (32 * modif['strumsFollowNotes'])), 0, Conductor.stepCrochet * (32 * modif['strumsFollowNotes']), 0, FlxG.height * 2);
                 if (y > FlxG.height)
                     y = FlxMath.remapToRange(y, 0, FlxG.height, FlxG.height, 0) + FlxG.height;
 
                 y -= Note.noteWidths[curMania] / 2;
-            }
+            }*/
 
 
-
-            PlayState.instance.call("StrumOffsets", [this]);
-
-
-            if (whichPlayer == 0)
+            /*if (whichPlayer == 0)
             {
                 if (modif['overlap'] != 0)
                 {
@@ -591,9 +621,9 @@ class BabyArrow extends FlxSprite
                     y = FlxMath.remapToRange(modif['overlap'], 0, 1, this.x, PlayState.p1.strums.members[this.curID].y);
                     angle = FlxMath.remapToRange(modif['overlap'], 0, 1, this.x, PlayState.p1.strums.members[this.curID].angle);
                 }
-            }
+            }*/
 
-
+            
 
         }
 

@@ -42,7 +42,7 @@ typedef StageFile =
 typedef StageOffset = 
 {
 	var type:String;
-	var offsets:Array<Int>;
+	var offsets:Array<Float>;
 }
 
 typedef PieceFile = 
@@ -574,7 +574,8 @@ class StagePiece extends FlxSprite
                         antialiasing = json.aa;
                         newx = json.position[0];
                         newy = json.position[1];
-                        setGraphicSize(Std.int(this.width * json.scale));
+                        scale.set(json.scale, json.scale);
+                        updateHitbox();
                         scrollFactor.set(json.scrollFactor[0], json.scrollFactor[1]);
                         danceable = json.isDanceable;
                         danceAnim = json.animToPlayOnDance;
@@ -837,7 +838,7 @@ class StagePiece extends FlxSprite
                         for (ii in json.offsets)
                         {
                             var type:String = ii.type;
-                            var offsets:Array<Int> = ii.offsets; 
+                            var offsets:Array<Float> = ii.offsets; 
                             addStageOffset(type, offsets[0], offsets[1], offsetMap);
                         }
             }

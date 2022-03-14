@@ -348,3 +348,28 @@ class AlphaCharacter extends FlxSprite
 		updateHitbox();
 	}
 }
+
+
+class KeybindPopup extends Alphabet
+{
+	public var strum:BabyArrow;
+	public var yOffset:Float = 0;
+	public var xOffset:Float = 0;
+	public var tweenYOffset:Float = 0;
+	public function new (x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false, menuOffset:Float = 90, vertical:Bool = false)
+	{
+		super(x,y,text,bold,typed,menuOffset,vertical);
+	}
+
+	override function update(elapsed:Float)
+		{
+			if (strum != null)
+			{
+				x = strum.x + xOffset;
+				y = strum.y + yOffset + tweenYOffset;
+			}
+	
+			super.update(elapsed);
+		}
+
+}

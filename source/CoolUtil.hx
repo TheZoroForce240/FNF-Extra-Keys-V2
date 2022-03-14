@@ -338,4 +338,37 @@ class CoolUtil
 
 
 
+	public static function getClosestNoteTime(unspawnNotes:Array<Note>, strumIDToCheck:Int = 1):Float
+	{
+		var idxToCheck = 0;
+		if (unspawnNotes[0] == null)
+			return 0;
+
+		var foundNote = false;
+		while(!foundNote)
+		{
+			if (unspawnNotes[idxToCheck] == null) //null check whatever
+			{
+				foundNote = true;
+				return 0;
+			}
+			else 
+			{
+				if (unspawnNotes[idxToCheck].strumID == strumIDToCheck)
+				{
+					foundNote = true;
+					return unspawnNotes[idxToCheck].strumTime;
+				}
+				else 
+					idxToCheck++;
+			}
+
+			
+		}
+		return 0;
+	}
+	
+
+
+
 }

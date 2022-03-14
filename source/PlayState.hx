@@ -1,6 +1,7 @@
 package;
 
 
+import flixel.addons.transition.FlxTransitionSprite;
 import HscriptShit.BeatScriptEvent;
 import HscriptShit.StepScriptEvent;
 import HscriptShit.StrumTimeScriptEvent;
@@ -92,6 +93,8 @@ import sys.FileSystem;
 import flash.media.Sound;
 import flash.net.URLRequest;
 import StagePiece.Stages;
+import Alphabet.KeybindPopup;
+import Section.NoteEvent;
 
 using StringTools;
 
@@ -235,6 +238,10 @@ class PlayState extends MusicBeatState
 	public var songtext:String; //for time text
 	public var modeText:String; //also for time text
 	public var botPlayTxt:FlxText;
+
+	public var breakTimer:FlxText;
+	private var timeToNextNoteP1:Float = 0;
+	private var timeToNextNoteP2:Float = 0;
 	//private var P2healthBar:FlxBar; //fuck this it will take too long
 
 	//camera shit
@@ -985,6 +992,14 @@ class PlayState extends MusicBeatState
 		botPlayTxt.screenCenter(X);
 		botPlayTxt.scrollFactor.set();
 		add(botPlayTxt);
+
+		breakTimer = new FlxText(0, 200, 0, "", 20);
+		breakTimer.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+		breakTimer.screenCenter(X);
+		breakTimer.scrollFactor.set();
+		breakTimer.cameras = [camHUD];
+		breakTimer.visible = false;
+		add(breakTimer);
 		
 
 		iconP1 = new HealthIcon(bfcharacter, true);
@@ -1528,7 +1543,7 @@ class PlayState extends MusicBeatState
 			missPress(data, playernum);
 		}
 	}
-	function cacheSong():Void 
+	function cacheSong():Void
 	{
 		var inst = Paths.inst(PlayState.SONG.song, PlayState.SONG.instSuffix);
 		if (CacheShit.sounds[inst] == null)
@@ -1976,15 +1991,7 @@ class PlayState extends MusicBeatState
 
 		var StrumGroup:StrumLineGroup = curPlayer.strums;
 		var playernum = strumID;
-		var modif = curPlayer.modifiers;
 
-		if (curPlayer.allowModifiers)
-		{
-			if (modif['scramble'] != 0)
-				daNote.noteDataToFollow = Std.int(noteData + modif['scramble']) % keyAmmo[mania];
-			else
-				daNote.noteDataToFollow = noteData;
-		}
 		daNote.mustPress = curPlayer.mustHitNotes; //you could probably switch this mid song for a cool effect ig
 		var mustPress:Bool = daNote.mustPress;
 
@@ -1992,14 +1999,14 @@ class PlayState extends MusicBeatState
 		var strumNote:BabyArrow = curPlayer.strums.members[datashit];
 		var middleOfNote:FlxPoint = strumNote.centerOfArrow;
 		
-		noteX = strumNote.x;
-		noteY = strumNote.y;
+		noteX = strumNote.defaultX + daNote.sustainXOffset;
+		noteY = strumNote.defaultY;
 		noteAlpha = strumNote.alpha;
 		noteVisible = strumNote.visible;
 		noteAngle = strumNote.angle;
 
-		var noteScaleX:Float = strumNote.scale.x;
-		var noteScaleY:Float = strumNote.scale.y;
+		var noteScaleX:Float = strumNote.curScaleX;
+		var noteScaleY:Float = strumNote.curScaleY;
 		daNote.curIncomingAngle = daNote.incomingAngle + (strumNote.strumLineAngle + 90);
 		
 
@@ -2008,10 +2015,43 @@ class PlayState extends MusicBeatState
 		var notePos:FlxPoint;
 		var noteCurPos = daNote.startPos - calculatedStrumtime;
 		daNote.curPos = noteCurPos;
-		ModchartUtil.noteModifierShitBefore(daNote, playernum, strumNote); //might need to do things before to fix incoming angle bullshit
+		if (daNote.animation.curAnim.name.endsWith('end') && isSustainNote)
+		{
+			var heightInSongPos = daNote.height * (daNote.stepHeight * daNote.speed * (0.7 / (daNote.scale.x * daNote.scaleMulti)));
+			var adjustAmount:Float = 0;
+			if (daNote.noteDist * daNote.noteDistMulti < 0)
+			{
+				adjustAmount = 1;
+			}
+			if (daNote.curIncomingAngle != -90)
+			{
+				adjustAmount = 1;
+				//adjustAmount /= (daNote.curIncomingAngle+90);
+			}
+
+			
+			
+
+			daNote.curPos -= (((heightInSongPos - daNote.height) / 0.45) - daNote.height/0.45) * adjustAmount;
+		}
+		var strumOffset = ModchartUtil.strumOffset(daNote.strumID, strumNote.curID, strumNote.curMania, strumNote, daNote.curPos, daNote);
+		//ModchartUtil.noteModifierShitBefore(daNote, playernum, strumNote); //might need to do things before to fix incoming angle bullshit
+		daNote.noteDistMulti = 1 * strumOffset.nDistMulti;
+		daNote.curIncomingAngle += strumOffset.incomingAngle;
+
+
 
 		notePos = FlxAngle.getCartesianCoords(daNote.noteDist * daNote.curPos * daNote.noteDistMulti, daNote.curIncomingAngle);		
 		daNote.setPosition(noteX - notePos.x, noteY - notePos.y);
+
+		daNote.alpha = 1;
+		daNote.x += strumOffset.x;
+		daNote.y += strumOffset.y;
+		daNote.alpha *= strumOffset.alpha;
+
+		noteScaleX *= strumOffset.scaleX;
+		noteScaleY *= strumOffset.scaleY;
+
 
 		
 			
@@ -2024,12 +2064,30 @@ class PlayState extends MusicBeatState
 			daNote.angle = noteAngle;
 
 
-		daNote.scale.x = noteScaleX;
-		if (!isSustainNote)
+
+		var updateScale:Bool = false; //prevent updating hitbox every frame
+		if (daNote.scale.x != noteScaleX)
+		{
+			daNote.scale.x = noteScaleX;
+			updateScale = true;
+		}
+		if (!isSustainNote && daNote.scale.y != noteScaleY)
+		{
 			daNote.scale.y = noteScaleY;
-		daNote.updateHitbox();
+			updateScale = true;
+		}
+		if (updateScale)
+			daNote.updateHitbox();
 		
-		daNote.color = strumNote.color;
+		if (daNote.color != strumNote.color)
+			daNote.color = strumNote.color;
+
+		daNote.angle += strumOffset.angle;
+
+
+
+
+		
 
 		/*if (strumID > 2)
 		{
@@ -2041,32 +2099,37 @@ class PlayState extends MusicBeatState
 
 		var holdingSustain:Bool = sustainsHeld[noteData] || (multiplayer && strums == "cpu" && P2sustainsHeld[noteData]);
 		if (isSustainNote)
-			if (!mustPress || daNote.isGFNote || holdingSustain || SaveData.botplay)
+			if (!mustPress || daNote.isGFNote || (holdingSustain && wasGoodHit) || SaveData.botplay)
 				daNote.clipSustain(middleOfNote);
 		
-
-
-		
-	
 		if (isSustainNote)
 		{
-			if (daNote.animation.curAnim.name.endsWith('end') && daNote.noteDist < 0)
-				daNote.origin.set(daNote.frameWidth * 0.5, daNote.frameHeight); //woah it actually fixes it lol
-				
+
+					
 
 			daNote.sustainXOffset = ((37 / 0.7) * daNote.scale.x);
 			if (daNote.style == 'pixel')
 				daNote.sustainXOffset = ((4 / 0.7) * daNote.scale.x);
-			daNote.x += daNote.sustainXOffset;
+			//daNote.x += daNote.sustainXOffset;
 			daNote.angle = daNote.curIncomingAngle + 90; //sustains always follow incoming angle to not look weird
-			if (daNote.noteDist < 0)
-				daNote.angle = daNote.curIncomingAngle - 90;
+			//if (daNote.noteDist * daNote.noteDistMulti < 0)
+				//daNote.angle = daNote.curIncomingAngle - 90;
+			daNote.scale.y = daNote.sustainScaleY * Math.abs((daNote.noteDist * daNote.noteDistMulti) / 0.45);
 
-			daNote.scale.y = daNote.sustainScaleY * Math.abs(daNote.noteDist / 0.45);
 
+			var nextSusStrumDiff = (Conductor.stepCrochet) + (Conductor.stepCrochet / daNote.speed);
+			var nextSusOffset = ModchartUtil.strumOffset(daNote.strumID, strumNote.curID, strumNote.curMania, strumNote, daNote.curPos + (nextSusStrumDiff*0.45), daNote); //get all the shit from where the next sustain "should" be
+			var nextSusIncomingAngle = daNote.incomingAngle + (strumNote.strumLineAngle + 90) + nextSusOffset.incomingAngle; //fix shit with incoming angles
+	
+			var nextSusPos = FlxAngle.getCartesianCoords(daNote.noteDist * (daNote.curPos + (nextSusStrumDiff*0.45)) * daNote.noteDistMulti, nextSusIncomingAngle); //take incoming angles into account
+			var nextSusY = noteY - nextSusPos.y;
+			var nextSusX = noteX - nextSusPos.x;
+			daNote.angle += FlxAngle.asDegrees(Math.atan2(((nextSusY + nextSusOffset.y)-(daNote.y)), ((nextSusX + nextSusOffset.x)-daNote.x))) - 90; //converted from hex modchart, which i think is from notitg or some shit, do -90 to match with incoming angle
+			//trace(FlxAngle.asDegrees(Math.atan2(((nextSusY + nextSusOffset.y)-(daNote.y)), ((nextSusX + nextSusOffset.x)-daNote.x))));
+		
 		}
-		daNote.alpha = modif['noteAlpha'] * daNote.curAlpha;
-		ModchartUtil.noteModifierShit(daNote, playernum, strumNote);
+		//ModchartUtil.noteModifierShit(daNote, playernum, strumNote);
+		daNote.alpha *= daNote.curAlpha;
 
 
 		call("NoteOffsets", [daNote]);
@@ -2197,15 +2260,7 @@ class PlayState extends MusicBeatState
 
 			if (!daNote.isSustainNote)
 			{
-				if (daNote.eventData != null)
-				{
-					var eventName = daNote.eventData[0];
-					var eventData = daNote.eventData[1];
-					EventList.convertEventDataToEvent(eventName, eventData, daNote);
-					//daNote.eventWasValid = false; //fuck you
-				}
-				else 
-					daNote.eventWasValid = false;
+				daNote.eventWasValid = false;
 			}
 			else
 			{
@@ -2654,7 +2709,7 @@ class PlayState extends MusicBeatState
 				FlxG.sound.playMusic(Paths.music('freakyMenu'));
 
 				transIn = FlxTransitionableState.defaultTransIn;
-				transOut = FlxTransitionableState.defaultTransOut;
+				transOut = FlxTransitionableState.defaultTransOut;				
 
 
 
@@ -3695,12 +3750,33 @@ class PlayState extends MusicBeatState
 				
 			}
 		}
+
+		if ((timeToNextNoteP1 - Conductor.songPosition > Conductor.crochet * 7 || breakTimer.visible) && timeToNextNoteP1 - Conductor.songPosition > 0)
+		{
+			//timeToNextNoteP1 = CoolUtil.getClosestNoteTimeDiff(unspawnNotes, 1);
+			breakTimer.visible = true;
+			if (Date.fromTime(timeToNextNoteP1 - Conductor.songPosition).getSeconds() < 10) //so it looks right
+				breakTimer.text = "" + Date.fromTime(timeToNextNoteP1 - Conductor.songPosition).getMinutes() + ":" + "0" + Date.fromTime(timeToNextNoteP1 - Conductor.songPosition).getSeconds(); 
+			else
+				breakTimer.text = "" + Date.fromTime(timeToNextNoteP1 - Conductor.songPosition).getMinutes() + ":" + Date.fromTime(timeToNextNoteP1 - Conductor.songPosition).getSeconds(); 
+			if (timeToNextNoteP1 - Conductor.songPosition < 3000)
+				breakTimer.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.YELLOW, LEFT, OUTLINE, FlxColor.BLACK);
+			else if (timeToNextNoteP1 - Conductor.songPosition < 1000)
+				breakTimer.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.RED, LEFT, OUTLINE, FlxColor.BLACK);
+			else
+				breakTimer.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+		}
+		else
+			breakTimer.visible = false;
+
+		
+
 	}
 	var justChangedMania:Bool = false;
 
 	public function switchMania(newMania:Int, strumnum = 1):Void
 	{
-		if (mania == 2) //so it doesnt break the fucking game
+		if (keyAmmo[mania] >= keyAmmo[newMania]) //so it doesnt break the fucking game
 		{
 			var strums:StrumLineGroup = p1.strums;
 		
@@ -3931,26 +4007,22 @@ class PlayState extends MusicBeatState
 	{
 		for (i in 0...binds.length)
 		{
-			var text:Alphabet = new Alphabet(strums.members[i].x, strums.members[i].y, binds[i], true, false, 90, true);
+			var text:KeybindPopup = new KeybindPopup(strums.members[i].x, strums.members[i].y, binds[i], true, false, 90, true);
 			add(text);
 			text.scrollFactor.set();
+			text.strum = strums.members[i];
 			var yOffset:Float = 100;
 			if (downscroll)
 				yOffset = FlxG.height * 0.55;
 			var xOffset:Float = ((strums.members[i].width - text.members[0].width) / 2);
 
-			text.y += yOffset;
-			text.x += xOffset;
-			
+			text.xOffset = xOffset;
+			text.yOffset = yOffset;
 			text.cameras = [camHUD];
-
-			text.y -= 20;
 			text.alpha = 0;
-			var goTo = 200;
 			FlxTween.tween(text, {alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[mania]))
 			, onUpdate: function(twn:FlxTween){
-				text.x = strums.members[i].x + xOffset;
-				text.y = strums.members[i].y + yOffset + (20 * twn.percent);
+				text.tweenYOffset = (20 * twn.percent);
 			}});
 			new FlxTimer().start(4, function(tmr:FlxTimer)
 			{
@@ -3964,7 +4036,7 @@ class PlayState extends MusicBeatState
 						text.destroy();
 					},
 					onUpdate: function(twn:FlxTween){
-						text.x = strums.members[i].x + xOffset;
+						text.tweenYOffset = (yshit * twn.percent);
 					}
 				});
 			});	
@@ -3974,33 +4046,42 @@ class PlayState extends MusicBeatState
 	{
 		for (i in 0...binds.length)
 		{
-			var text:FlxText = new FlxText(strums.members[i].x, (strumLine.y + 200), 48, binds[i], 32, false);
-			text.setFormat(Paths.font("vcr.ttf"), 48, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
-			add(text);
-			text.scrollFactor.set();
-			if (downscroll)
-				{
-					text.y += 170;	
-					text.x += 15;
-				}
-			else
-				text.x += 40;
-			var id = strums.members[i].curID;
-
-			text.cameras = [camHUD];
-			text.y -= 10;
-			text.alpha = 0;
-			FlxTween.tween(text, {y: text.y + 10, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.05 + (0.1 * ((id * 4) / PlayState.keyAmmo[mania]))});
-			new FlxTimer().start(2, function(tmr:FlxTimer)
+			if (binds[i] != null)
 			{
-				FlxTween.tween(text, {alpha: 0}, 1, {
-					onComplete: function(twn:FlxTween)
-					{
-						remove(text);
-						text.destroy();
-					}
-				});
-			});	
+				var text:KeybindPopup = new KeybindPopup(strums.members[i].x, strums.members[i].y, binds[i], true, false, 90, true);
+				add(text);
+				text.scrollFactor.set();
+				text.strum = strums.members[i];
+				var yOffset:Float = 100;
+				if (downscroll)
+					yOffset = FlxG.height * 0.55;
+				var xOffset:Float = ((strums.members[i].width - text.members[0].width) / 2);
+	
+				text.xOffset = xOffset;
+				text.yOffset = yOffset;
+				text.cameras = [camHUD];
+				text.alpha = 0;
+				FlxTween.tween(text, {alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((strums.members[i].curID * 4) / PlayState.keyAmmo[mania]))
+				, onUpdate: function(twn:FlxTween){
+					text.tweenYOffset = (20 * twn.percent);
+				}});
+				new FlxTimer().start(4, function(tmr:FlxTimer)
+				{
+					var yshit:Float = -300;
+					if (downscroll)
+						yshit = 300;
+					FlxTween.tween(text, {alpha: 0, y: text.y + yshit}, 1, {ease: FlxEase.circIn,
+						onComplete: function(twn:FlxTween)
+						{
+							remove(text);
+							text.destroy();
+						},
+						onUpdate: function(twn:FlxTween){
+							text.tweenYOffset = (yshit * twn.percent);
+						}
+					});
+				});	
+			}
 		}
 	}
 	function collectNotes(shit:FlxTypedGroup<Note>, checkMustPresses:Bool) //lot of functions for code optimizations, and less copy pasted shit
@@ -4535,7 +4616,7 @@ class PlayState extends MusicBeatState
 					var daSpeed = songNotes[4];
 
 					var eventData:Array<String> = songNotes[6];
-					trace(eventData);
+					//trace(eventData);
 
 					var daType = songNotes[3];
 
@@ -4653,10 +4734,9 @@ class PlayState extends MusicBeatState
 		if (scriptEvents.length > 0)
 			for (i in 0...scriptEvents.length)
 				if (scriptEvents[i] is StepScriptEvent)
-					scriptEvents[i].check(curStep);
-
-			
+					scriptEvents[i].check(curStep);	
 	}
+
 
 	override function beatHit()
 	{
@@ -4672,6 +4752,12 @@ class PlayState extends MusicBeatState
 				var curPlayer = getPlayerFromID(i + 3);
 				curPlayer.strums.notes.sort(FlxSort.byY, FlxSort.DESCENDING);
 			}
+
+			if (flipped || multiplayer)
+				timeToNextNoteP2 = CoolUtil.getClosestNoteTime(unspawnNotes, 0);
+			if (!flipped && !breakTimer.visible && p1.strums.notes.length < 1)
+				timeToNextNoteP1 = CoolUtil.getClosestNoteTime(unspawnNotes, 1);
+			breakTimer.x = p1.strums.strumLineCenter.x;
 		}
 		(cast (Lib.current.getChildAt(0), Main)).changeFPS(SaveData.fps); //update fps stuff
 		var frameRateShit = camSpeed * (60 / (cast(Lib.current.getChildAt(0), Main)).getFPS());
@@ -4697,6 +4783,9 @@ class PlayState extends MusicBeatState
 		scoreTxt.color = FlxColor.WHITE; //resets colors
 		if (multiplayer)
 			P2scoreTxt.color = FlxColor.WHITE;
+
+
+		
 
 		if (scriptEvents.length > 0)
 			for (i in 0...scriptEvents.length)
@@ -4873,7 +4962,7 @@ class PlayState extends MusicBeatState
 		var startVal = ModchartUtil.getModifierValue(modifToChange, playernum);
     
         FlxTween.num(startVal, modifValue, time, {onUpdate: function(tween:FlxTween){
-            var ting = FlxMath.lerp(startVal,modifValue, tween.percent);
+            var ting = FlxMath.lerp(startVal,modifValue, easeToUse(tween.percent));
             ModchartUtil.changeModifier(modifToChange, ting, playernum);
         }, ease: easeToUse, onComplete: function(tween:FlxTween) {
             ModchartUtil.changeModifier(modifToChange, modifValue, playernum);

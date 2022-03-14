@@ -2,6 +2,8 @@ package;
 
 
 
+import flixel.math.FlxMath;
+import StagePiece.PieceAnims;
 import openfl.filters.ShaderFilter;
 import flixel.ui.FlxButton;
 import flixel.FlxCamera;
@@ -31,6 +33,7 @@ import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
 import openfl.filters.ShaderFilter;
+import flixel.FlxSubState;
 using StringTools;
 import Shaders;
 
@@ -49,7 +52,7 @@ class StageDebug extends MusicBeatState
 
     var pieces:Array<String> = [];
     var zoom:Float = 1.05;
-    var offsetMap:Map<String, Array<Int>>;
+    var offsetMap:Map<String, Array<Float>>;
 
     var stageOffsets:Array<StageOffset>;
 
@@ -65,14 +68,11 @@ class StageDebug extends MusicBeatState
     var dad:DebugCharacter;
     var pieceText:FlxText;
 
-    var typing:FlxUIInputText;
     var tempLayerNum:Int = 0;
     var pieceDropMenu:FlxUIDropDownMenu = null;
 
     public static var instance:StageDebug;
     var dadCharacter:String = "dad";
-
-    var shaderTest:RayMarchEffect = new RayMarchEffect();
 
     public function new(daStage:String = 'stage', _dad:String = "dad")
     {
@@ -92,7 +92,7 @@ class StageDebug extends MusicBeatState
         layerNums = new FlxTypedGroup<FlxText>();
         add(layerNums);
 
-        offsetMap = new Map<String, Array<Int>>();
+        offsetMap = new Map<String, Array<Float>>();
 
         loadStage();
         loadPieces();
@@ -131,7 +131,6 @@ class StageDebug extends MusicBeatState
         add(gf.posBox);
         add(dad.posBox);
 
-
         camFollow = new FlxObject(0, 0, 2, 2);
 		add(camFollow);
 
@@ -142,8 +141,6 @@ class StageDebug extends MusicBeatState
         FlxG.cameras.add(camHUD);
 
         FlxCamera.defaultCameras = [camGame];
-
-
 
         var piecetabs = [
 			{name: "Piece", label: 'Piece'},
@@ -174,6 +171,8 @@ class StageDebug extends MusicBeatState
 
         createOffsetUI();
         createStageUI();
+        createAnimUI();
+        createPieceUI();
 
         pieceText = new FlxText(0, 0, 0, "", 40);
 		pieceText.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
@@ -254,41 +253,48 @@ class StageDebug extends MusicBeatState
 		Stage_UI.addGroup(tab_group_offset);
     }
     var layerStepper:FlxUINumericStepper;
-    var stageInputText:FlxUIInputText;
-    var pieceInputText:FlxUIInputText;
+    var selectedPieceName:String = "";
     function createStageUI()
     {
 
-        var stagenameLabel = new FlxText(25, 0, 0, "Stage Name");
-        stageInputText = new FlxUIInputText(10, 20, 100, daStage, 8);
-        stageInputText.name = "name";
-        stageInputText.focusGained = function()
+        var stagenameLabel = new FlxText(10, 0, 0, "Stage Name: " + daStage);
+        var stageSelect:FlxButton = new FlxButton(10, 20, "Set Stage Name", function()
         {
-            typing = stageInputText;
-        }
-        typing = stageInputText;
+            openSubState(new SelectionSubState('inputText', function(name:String)
+            {
+                daStage = name;
+                stagenameLabel.text = "Stage Name: " + name;
+            }, 'Enter Stage Name'));
+        });
+        stageSelect.scale.x *= 1.2;
+        stageSelect.updateHitbox();
 
-        var pieceLabel = new FlxText(25, 40, 0, "Piece Name");
-        pieceInputText = new FlxUIInputText(10, 60, 100, "", 8);
-        pieceInputText.name = "piece";
-        pieceInputText.focusGained = function()
+        var pieceLabel = new FlxText(10, 40, 0, "Piece Name: ");
+        var pieceSelect:FlxButton = new FlxButton(10, 60, "Set Piece Name", function()
         {
-            typing = pieceInputText;
-        }
+            openSubState(new SelectionSubState('inputText', function(name:String)
+            {
+                selectedPieceName = name;
+                pieceLabel.text = "Piece Name: " + name;
+            }, 'Enter Piece Name'));
+        });
+        pieceSelect.scale.x *= 1.2;
+        pieceSelect.updateHitbox();
+
 
         var layerLabel = new FlxText(25, 100, 0, "Layer Number");
         layerStepper = new FlxUINumericStepper(25, 120, 1, 0, 0, 999);
         layerStepper.value = tempLayerNum;
         layerStepper.name = 'layer';
 
-        var layerUpdate:FlxButton = new FlxButton(120, 120, "Update Layer", function()
+        var layerUpdate:FlxButton = new FlxButton(110, 120, "Update Layer", function()
         {
-            if (pieces.contains(pieceInputText.text))
+            if (pieces.contains(selectedPieceName))
             {
-                pieces.remove(pieceInputText.text);
-                pieces.insert(tempLayerNum, pieceInputText.text); //updates layering in piece array
+                pieces.remove(selectedPieceName);
+                pieces.insert(tempLayerNum, selectedPieceName); //updates layering in piece array
             }
-            var temp:Array<DebugStagePiece> = [];
+            /*var temp:Array<DebugStagePiece> = [];
             for (piece in StagePieces)
             {
                 temp.push(piece);
@@ -304,25 +310,28 @@ class StageDebug extends MusicBeatState
                         temp[ii].layerNumber.text = "" + i;
                     }
                 }
-            }
-        });
-
-        var addPiece:FlxButton = new FlxButton(130, 60, "Add Piece", function()
-        {
-            if (pieceInputText.text != "")
-                pieces.push(pieceInputText.text);
-        });
-
-        var removePiece:FlxButton = new FlxButton(200, 60, "Remove Piece", function()
-        {
-            if (pieces.contains(pieceInputText.text))
-                pieces.remove(pieceInputText.text);
-        });
-
-        var reloadPieces:FlxButton = new FlxButton(150, 20, "Reload Pieces", function()
-        {
+            }*/
             loadPieces();
         });
+
+        var addPiece:FlxButton = new FlxButton(210, 20, "Add Piece", function()
+        {
+            if (selectedPieceName != "")
+                pieces.push(selectedPieceName);
+            loadPieces();
+        });
+
+        var removePiece:FlxButton = new FlxButton(210, 60, "Remove Piece", function()
+        {
+            if (pieces.contains(selectedPieceName))
+                pieces.remove(selectedPieceName);
+            loadPieces();
+        });
+
+        /*var reloadPieces:FlxButton = new FlxButton(210, 20, "Reload Pieces", function()
+        {
+            loadPieces();
+        });*/
 
 
         var saveShit:FlxButton = new FlxButton(10, 150, "Save Stage", function()
@@ -330,19 +339,24 @@ class StageDebug extends MusicBeatState
             saveStage();
         });
 
-        var pieceDropMenuLabel = new FlxText(200, 130, 0, "Piece List");
-        pieceDropMenu = new FlxUIDropDownMenu(200, 150, FlxUIDropDownMenu.makeStrIdLabelArray(pieces, true), function(piece:String)
+        var pieceListSelection:FlxButton = new FlxButton(210, 120, "Pick Piece From List", function()
         {
-            pieceInputText.text = pieces[Std.parseInt(piece)];
-            tempLayerNum = Std.parseInt(piece);
-            layerStepper.value = tempLayerNum;
+            openSubState(new SelectionSubState('list', function(name:String)
+            {
+                selectedPieceName = name;                
+                tempLayerNum = SelectionSubState.selectedItemID;
+                layerStepper.value = tempLayerNum;
+                if (StagePieces.members[tempLayerNum] != null)
+                    selectedPiece = StagePieces.members[tempLayerNum];
+            }, '',pieces));
         });
-        pieceDropMenu.dropDirection = FlxUIDropDownMenuDropDirection.Up;
+        pieceListSelection.scale.y *= 1.5;
+        pieceListSelection.updateHitbox();
 
         var tab_group_stage = new FlxUI(null, Stage_UI);
         tab_group_stage.name = "Stage";
-        tab_group_stage.add(stageInputText);
-        tab_group_stage.add(pieceInputText);
+        tab_group_stage.add(stageSelect);
+        tab_group_stage.add(pieceSelect);
         tab_group_stage.add(stagenameLabel);
         tab_group_stage.add(pieceLabel);
 
@@ -350,16 +364,141 @@ class StageDebug extends MusicBeatState
         tab_group_stage.add(layerStepper);
         tab_group_stage.add(layerUpdate);
 
-        tab_group_stage.add(pieceDropMenuLabel);
-        tab_group_stage.add(pieceDropMenu);
+        tab_group_stage.add(pieceListSelection);
 
         tab_group_stage.add(saveShit);
 
         tab_group_stage.add(addPiece);
         tab_group_stage.add(removePiece);
-        tab_group_stage.add(reloadPieces);
+        //tab_group_stage.add(reloadPieces);
 
         Stage_UI.addGroup(tab_group_stage);
+    }
+
+    private function getAnimList():Array<String>
+    {
+        var list:Array<String> = [];
+        for (i in selectedPiece.anims)
+            list.push(i.anim);
+        return list;
+
+    }
+
+    var curAnimName:String = "";
+    var curXmlName:String = "";
+    var curFrameRate:Int = 24;
+    var curLoopedToggle:Bool = false;
+    var fpsStepper:FlxUINumericStepper;
+    private function createAnimUI()
+    {
+        var tab_group_anim = new FlxUI(null, Stage_UI);
+        tab_group_anim.name = "Anims";
+        var updateAnim:FlxButton = new FlxButton(10, 10, "Update Anim", function()
+        {
+            for (i in selectedPiece.anims)
+                if (i.anim == curAnimName)
+                    selectedPiece.anims.remove(i); //remove the anim so it can be replaced 
+
+            var animShit:PieceAnims = {
+                anim: curAnimName,
+                xmlname: curXmlName,
+                frameRate: curFrameRate,
+                loop: curLoopedToggle
+            };
+            selectedPiece.anims.push(animShit);
+        });
+        var removeAnim:FlxButton = new FlxButton(100, 10, "Remove Anim", function()
+        {
+            for (i in selectedPiece.anims)
+                if (i.anim == curAnimName)
+                    selectedPiece.anims.remove(i); //remove the anim so it can be replaced 
+        });
+
+        var curAnimNameLabel = new FlxText(10, 100, 0, "Anim Name: " + curAnimName);
+        var animNameSelect:FlxButton = new FlxButton(100, 100, "Set Anim Name", function()
+        {
+            openSubState(new SelectionSubState('inputText', function(name:String)
+            {
+                curAnimName = name;
+                curAnimNameLabel.text = "Anim Name: " + name;
+            }, 'Enter Anim Name'));
+        });
+        var curXmlNameLabel = new FlxText(10, 125, 0, "Xml Prefix: " + curXmlName); //ik its technically not xmlname but prefix idc lol
+        var xmlNameSelected:FlxButton = new FlxButton(100, 125, "Set Xml Prefix", function()
+        {
+            openSubState(new SelectionSubState('inputText', function(name:String)
+            {
+                curXmlName = name;
+                curXmlNameLabel.text = "Xml Prefix: " + name;
+            }, 'Enter Xml Prefix'));
+        });
+        var curFrameRateLabel = new FlxText(15, 150, 0, "Frame Rate: ");
+        fpsStepper = new FlxUINumericStepper(30, 150, 1, 24, 0, 999, 0);
+        fpsStepper.value = curFrameRate;
+        fpsStepper.name = 'fps';
+        var loopedBox = new FlxUICheckBox(10, 175, null, null, "Looped", 100);
+		loopedBox.checked = false;
+		loopedBox.callback = function()
+		{
+			curLoopedToggle = loopedBox.checked;
+		};
+
+
+        var animListSelection:FlxButton = new FlxButton(210, 120, "Pick Anim From List", function()
+        {
+            openSubState(new SelectionSubState('list', function(name:String)
+            {
+                for (i in selectedPiece.anims)
+                    if (i.anim == name)
+                    {
+                        curAnimName = i.anim;
+                        curXmlName = i.xmlname;
+                        curFrameRate = i.frameRate;
+                        curLoopedToggle = i.loop;
+                        break;
+                    }        
+            }, '',getAnimList()));
+        });
+
+        var isAnimatedBox = new FlxUICheckBox(10, 250, null, null, "Is Animated", 100);
+		isAnimatedBox.checked = false;
+		isAnimatedBox.callback = function()
+		{
+			selectedPiece.animated = isAnimatedBox.checked;
+		};
+
+        var danceableBox = new FlxUICheckBox(10, 300, null, null, "Danceable", 100);
+		danceableBox.checked = false;
+		danceableBox.callback = function()
+		{
+			selectedPiece.danceable = danceableBox.checked;
+		};
+
+        tab_group_anim.add(isAnimatedBox);
+        tab_group_anim.add(danceableBox);
+        tab_group_anim.add(animListSelection);
+        tab_group_anim.add(updateAnim);
+        tab_group_anim.add(removeAnim);
+        tab_group_anim.add(curAnimNameLabel);
+        tab_group_anim.add(curXmlNameLabel);
+        tab_group_anim.add(curFrameRateLabel);
+        tab_group_anim.add(animNameSelect);
+        tab_group_anim.add(xmlNameSelected);
+        tab_group_anim.add(fpsStepper);
+        tab_group_anim.add(loopedBox);
+        Piece_UI.addGroup(tab_group_anim);
+    }
+    private function createPieceUI()
+    {
+        var tab_group_piece = new FlxUI(null, Stage_UI);
+        tab_group_piece.name = "Pieces";
+
+        var saveShit:FlxButton = new FlxButton(10, 10, "Save Piece", function()
+        {
+            savePiece();
+        });
+        tab_group_piece.add(saveShit);
+        Piece_UI.addGroup(tab_group_piece);
     }
 
     override function update(elapsed:Float)
@@ -380,100 +519,106 @@ class StageDebug extends MusicBeatState
 
 
 
-        if (!typing.hasFocus)
-        {   
-            if (FlxG.mouse.justPressed)
-                if (FlxG.mouse.overlaps(stageInputText) || FlxG.mouse.overlaps(pieceInputText))
-                    FlxG.camera.zoom = 1;
+  
+        if (FlxG.mouse.wheel != 0)
+        {
+            FlxG.camera.zoom += 0.1 * FlxG.mouse.wheel;
+        }
+        if (FlxG.keys.justPressed.E)
+            FlxG.camera.zoom += 0.25;
+        if (FlxG.keys.justPressed.Q)
+            FlxG.camera.zoom -= 0.25;
 
+        if (FlxG.keys.pressed.W || FlxG.keys.pressed.A || FlxG.keys.pressed.S || FlxG.keys.pressed.D)
+        {
+            var amount:Float = 1;
+            if (FlxG.keys.pressed.SHIFT)
+                amount *= 2;      
 
-            if (FlxG.mouse.wheel != 0)
-            {
-                FlxG.camera.zoom += 0.1 * FlxG.mouse.wheel;
-            }
-            if (FlxG.keys.justPressed.E)
-                FlxG.camera.zoom += 0.25;
-            if (FlxG.keys.justPressed.Q)
-                FlxG.camera.zoom -= 0.25;
-    
-            if (FlxG.keys.pressed.W || FlxG.keys.pressed.A || FlxG.keys.pressed.S || FlxG.keys.pressed.D)
-            {
-                var amount:Float = 1;
-                if (FlxG.keys.pressed.SHIFT)
-                    amount *= 2;      
-    
-                if (FlxG.keys.pressed.W)
-                    camFollow.velocity.y = -350 * amount;
-                else if (FlxG.keys.pressed.S)
-                    camFollow.velocity.y = 350 * amount;
-                else
-                    camFollow.velocity.y = 0;
-    
-                if (FlxG.keys.pressed.A)
-                    camFollow.velocity.x = -350 * amount;
-                else if (FlxG.keys.pressed.D)
-                    camFollow.velocity.x = 350 * amount;
-                else
-                    camFollow.velocity.x = 0;
-            }
+            if (FlxG.keys.pressed.W)
+                camFollow.velocity.y = -350 * amount;
+            else if (FlxG.keys.pressed.S)
+                camFollow.velocity.y = 350 * amount;
             else
-            {
-                camFollow.velocity.set();
+                camFollow.velocity.y = 0;
 
-                //var bytes = Clipboard.get_image();
-            }
+            if (FlxG.keys.pressed.A)
+                camFollow.velocity.x = -350 * amount;
+            else if (FlxG.keys.pressed.D)
+                camFollow.velocity.x = 350 * amount;
+            else
+                camFollow.velocity.x = 0;
+        }
+        else
+        {
+            camFollow.velocity.set();
 
-            if (FlxG.keys.justPressed.TAB)
+            //var bytes = Clipboard.get_image();
+        }
+
+        if (FlxG.keys.justPressed.TAB)
+        {
+            if (pieces.length > 1)
             {
-                if (pieces.length > 1)
+                var idx = Std.parseInt(selectedPiece.layerNumber.text);
+                for (shit in StagePieces)
                 {
-                    var idx = Std.parseInt(selectedPiece.layerNumber.text);
-                    for (shit in StagePieces)
+                    if (FlxG.keys.pressed.SHIFT)
                     {
-                        if (FlxG.keys.pressed.SHIFT)
+                        if (Std.parseInt(shit.layerNumber.text) == idx - 1) //go back a layer
                         {
-                            if (Std.parseInt(shit.layerNumber.text) == idx - 1) //go back a layer
-                            {
-                                selectedPiece = shit;
-                                break;
-                            }
+                            selectedPiece = shit;
+                            break;
                         }
-                        else 
+                    }
+                    else 
+                    {
+                        if (Std.parseInt(shit.layerNumber.text) == idx + 1) //go forward a layer
                         {
-                            if (Std.parseInt(shit.layerNumber.text) == idx + 1) //go forward a layer
-                            {
-                                selectedPiece = shit;
-                                break;
-                            }
+                            selectedPiece = shit;
+                            break;
                         }
                     }
                 }
             }
-    
-            if (selectedPiece != null)
-            {
-                var amount:Float = 1;
-                if (FlxG.keys.pressed.SHIFT)
-                    amount *= 10;
-    
-                if (FlxG.keys.justPressed.LEFT)
-                    selectedPiece.posBox.x -= amount;
-                else if (FlxG.keys.justPressed.RIGHT)
-                    selectedPiece.posBox.x += amount;
-                else if (FlxG.keys.justPressed.UP)
-                    selectedPiece.posBox.y -= amount;
-                else if (FlxG.keys.justPressed.DOWN)
-                    selectedPiece.posBox.y += amount;
-    
-                if (FlxG.keys.justPressed.F)
-                    selectedPiece.flipX = !selectedPiece.flipX;
-            }
-
-            if (FlxG.keys.justPressed.SPACE)
-            {
-                FlxG.camera.zoom = 1;
-            }
         }
+
+        if (selectedPiece != null)
+        {
+            var amount:Float = 1;
+            if (FlxG.keys.pressed.SHIFT)
+                amount *= 10;
+
+            if (FlxG.keys.justPressed.LEFT)
+                selectedPiece.posBox.x -= amount;
+            else if (FlxG.keys.justPressed.RIGHT)
+                selectedPiece.posBox.x += amount;
+            else if (FlxG.keys.justPressed.UP)
+                selectedPiece.posBox.y -= amount;
+            else if (FlxG.keys.justPressed.DOWN)
+                selectedPiece.posBox.y += amount;
+
+            if (FlxG.keys.justPressed.F)
+                selectedPiece.flipX = !selectedPiece.flipX;
+            else if (FlxG.keys.justPressed.O)
+                changeScale(1);
+            else if (FlxG.keys.justPressed.L)
+                changeScale(-1);
+            else if (FlxG.keys.justPressed.U)
+                changeScrollX(1);
+            else if (FlxG.keys.justPressed.J)
+                changeScrollX(-1);
+            else if (FlxG.keys.justPressed.I)
+                changeScrollY(1);
+            else if (FlxG.keys.justPressed.K)
+                changeScrollY(-1);
+        }
+
+        if (FlxG.keys.justPressed.SPACE)
+        {
+            FlxG.camera.zoom = 1;
+        }
+        
         
 
         if (FlxG.keys.justPressed.ESCAPE)
@@ -490,6 +635,23 @@ class StageDebug extends MusicBeatState
         gfsteppery.value = gf.posBox.y;
         dadstepperx.value = dad.posBox.x;
         dadsteppery.value = dad.posBox.y;
+        curFrameRate = Std.int(fpsStepper.value);
+    }
+
+    function changeScale(change:Int)
+    {
+        selectedPiece.scaleShit += (change * 0.1);
+        selectedPiece.scaleShit = FlxMath.roundDecimal(selectedPiece.scaleShit, 1);
+    }
+    function changeScrollX(change:Int)
+    {
+        selectedPiece.scrollFactor.x += (change * 0.1);
+        selectedPiece.scrollFactor.x = FlxMath.roundDecimal(selectedPiece.scrollFactor.x, 1);
+    }
+    function changeScrollY(change:Int)
+    {
+        selectedPiece.scrollFactor.y += (change * 0.1);
+        selectedPiece.scrollFactor.y = FlxMath.roundDecimal(selectedPiece.scrollFactor.y, 1);
     }
 
     override function beatHit()
@@ -566,7 +728,10 @@ class StageDebug extends MusicBeatState
     }
     private function loadPieces()
     {
-        
+        for (piece in StagePieces.members)
+        {
+            offsetMap[piece.part] = [piece.x, piece.y, piece.scaleShit, piece.scrollFactor.x, piece.scrollFactor.y]; //save current pos
+        }
         StagePieces.clear();
         PiecePosBoxes.clear();
         layerNums.clear();
@@ -579,8 +744,22 @@ class StageDebug extends MusicBeatState
                 if (pieces[i] == 'bgDancer')
                     piece.x += (370 * (i - 2));
                 
-                piece.x += piece.newx;
-                piece.y += piece.newy;
+                if (offsetMap[pieces[i]] != null)
+                {
+                    piece.x += offsetMap[pieces[i]][0];
+                    piece.y += offsetMap[pieces[i]][1];
+                    piece.scaleShit = offsetMap[pieces[i]][2];
+                    piece.scale.set(piece.scaleShit,piece.scaleShit);
+                    piece.updateHitbox();
+                    piece.scrollFactor.x = offsetMap[pieces[i]][3];
+                    piece.scrollFactor.y = offsetMap[pieces[i]][4];
+                }
+                else 
+                {
+                    piece.x += piece.newx;
+                    piece.y += piece.newy;
+                }
+
                 piece.posBox = new FlxSprite(piece.x, piece.y).makeGraphic(50,50,FlxColor.WHITE);
                 piece.layerNumber = new FlxText(piece.x, piece.y,0, "");
                 piece.layerNumber.text += i;
@@ -590,12 +769,6 @@ class StageDebug extends MusicBeatState
                 PiecePosBoxes.add(piece.posBox);
                 layerNums.add(piece.layerNumber);
             }
-        }
-
-
-        if (pieceDropMenu != null && pieces.length > 0)
-        {
-            pieceDropMenu.setData(FlxUIDropDownMenu.makeStrIdLabelArray(pieces, true));
         }
     }
 
@@ -695,6 +868,17 @@ class StageDebug extends MusicBeatState
         _file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
         _file = null;
         FlxG.log.error("Problem saving Level data");
+    }
+
+    override function openSubState(SubState:FlxSubState)
+    {
+        persistentUpdate = false;
+        super.openSubState(SubState);
+    }
+    override function closeSubState()
+    {
+        persistentUpdate = true;
+        super.closeSubState();
     }
 
 

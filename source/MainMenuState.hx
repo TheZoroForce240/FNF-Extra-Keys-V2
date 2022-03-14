@@ -150,6 +150,7 @@ class MainMenuState extends MusicBeatState
 
 		Application.current.window.onDropFile.add(function (path:String)
 		{
+			#if sys
 			var rawJson = File.getContent(path).trim();
 			while (!rawJson.endsWith("}"))
 			{
@@ -166,7 +167,14 @@ class MainMenuState extends MusicBeatState
 			PlayState.storyDifficulty = 0;
 			CoolUtil.CurSongDiffs = ['NORMAL'];
 			PlayState.storyWeek = 0;
-			FlxG.switchState(new DownloadingState(PlayState.SONG.downloadingStuff));
+			openSubState(new SelectionSubState('list', function(name:String)
+			{
+				if (name == 'Play Song')
+					FlxG.switchState(new DownloadingState(PlayState.SONG.downloadingStuff));
+				else 
+					LoadingState.loadAndSwitchState(new ChartingState());
+			}, '',['Play Song', 'Load in Chart Editor']));	
+			#end
 		});
 
 		super.create();
@@ -300,6 +308,17 @@ class MainMenuState extends MusicBeatState
 
 			spr.updateHitbox();
 		});
+	}
+
+	override function openSubState(SubState:FlxSubState)
+	{
+		persistentUpdate = false;
+		super.openSubState(SubState);
+	}
+	override function closeSubState()
+	{
+		persistentUpdate = true;
+		super.closeSubState();
 	}
 
 

@@ -299,10 +299,10 @@ class GradientShitShader extends FlxShader
 
 
 
-class GlitchInvertEffect
+class GlitchInvertEffect //spawns a bunch of inverted and messed up boxes on screen
 {                       
     public var shader:GlitchInvertShader = new GlitchInvertShader();
-    public var speed:Float = 50; ///this is a percentage change per frame
+    public var speed:Float = 50; ///this is a percentage chance per frame
 
     public function new(){
         shader.effect1.value = [0,0,0];

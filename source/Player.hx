@@ -48,59 +48,28 @@ class Player
 		npsArray : []
 	};
 
-    public var modifiers:Map<String, Dynamic> = [ //move to a map so no more reflect bullshit (code should hopefully be faster i think??)
-        //manual shit if u want to do that
-        "scrollAngle" => -90, //moves entire strumline angle btw (easy side scroll lol)
-        "incomingAngleIsStrumAngle" => false, //forces the incoming angle of a note to be the strumnotes angle
-        "StrumLinefollowAngle" => false, //makes the strumnote angle snap to the angle of the strumline (just visual)
+    //a lot of this is inspired from notitg and other cool ass fnf modcharts
+    //kinda just trying to replicate and make it all work with different key amounts and mania changes and shit
 
+    public var modifiers:Map<String, Dynamic> = [ //move to a map so no more reflect bullshit (code should hopefully be faster i think??)
         "xOffset" => 0.0, //strum notes total offset (affects all notes)
         "yOffset" => 0.0,
 
-        ////ik you could just use the script to achive the same effect but whatever
-        "sinWaveX" => [0.0,1.0], //range, speed
-        "sinWaveY" => [0.0,1.0],
-        "cosWaveX" => [0.0,1.0],
-        "cosWaveY" => [0.0,1.0],
-        "sinMoveX" => [0.0,1.0], //move just does all notes in sync, may not be as useful but still nice to have
-        "sinMoveY" => [0.0,1.0],
-        "cosMoveX" => [0.0,1.0],
-        "cosMoveY" => [0.0,1.0],
-
-        "noteAlpha" => 1.0,
-        "strumAlpha" => 1.0,
-        "strumScrollFactor" => [0.0,0.0], //doesnt work rn
-
         ///fun modifiers
-        "twist" => 0.0, //flips one half to the other side
         "spin" => 0.0, //makes notes spin
         "ghostNotes" => 0.0, //disappear when about to be hit
         "inverseGhostNotes" => 0.0, //appear when about to be hit
-        "ghostOffset" => 300.0,
-        "boundStrums" => false, //strums will loop around the screen if they go offscreen, kinda wonky though
-        "drugged" => 0.0, //sin wave on note incoming angles
+        
         "scramble" => 0.0, //notes follow the wrong strum note, doesnt change the input you have to press to hit the note
         "strumsFollowNotes" => 0.0, //instead of notes falling onto strums, strums move into the notes, value affects speed, smaller = faster
         "overlap" => 0.0, //overlaps p2 strums over p1, only works when used on p2
-
-        //ideas for these are from my friend death1nsurance
-        "swing" => 0.0, // notes move up and down
-        "dislocated" => 0.0, //notes are offcentered slightly
-        "chaos" => 0.0, //note go fucking everywhere
-        "clutter" => 0.0, //notes move into each other
-        "bop" => 0.0, //notes bounce with the beat
-        "press" => 0.0, //notes move when pressed
-        "jumpy" => 0.0, //they bounce
-
 
         //stuff from the hex modchart (which i think was from notitg or stepmania or something idk lol)
         "flip" => 0.0,
         "invert" => 0.0,
         "drunk" => 0.0,
-        "tipsy" => 0.0,
-        
+        "tipsy" => 0.0,        
 
-        //gonna have to recode these cuz note cam shit with my current setup for downscroll
         "reverse" => 0.0, //opposite scroll
         "split" => 0.0, //split scroll
         "cross" => 0.0, //middle notes change scroll
@@ -114,9 +83,70 @@ class Player
 
         "pingPong" => 0.0, //from hex again
         "halo" => 0.0,
-        "haloWidth" => 280.0,
-        "haloHeight" => 70.0,
-       
+        
+        //my own shitty math
+        "sideways" => 0.0, // side scroll (can do -1 for other side)
+        "center" => 0.0, //center scroll (notes come from outside)
+        "waveyAngle" => 0.0, //drunk/tipsy on incoming angles
+        "druggedAngle" => 0.0, 
+
+        //just basic stuff in case you need it
+        "tanYAll" => 0.0,
+        "tanYSplit" => 0.0,
+        "tanYCross" => 0.0,
+        "tanYAlternate" => 0.0,
+
+        "tanXAll" => 0.0,
+        "tanXSplit" => 0.0,
+        "tanXCross" => 0.0,
+        "tanXAlternate" => 0.0,
+
+        "waveX" => 0.0,
+        "waveY" => 0.0,
+
+        //ideas for these are from my friend death1nsurance
+        "swing" => 0.0, // notes move up and down
+        "jumpy" => 0.0, //they bounce
+        //unfinished
+        "dislocated" => 0.0, //notes are offcentered slightly
+        "chaos" => 0.0, //note go fucking everywhere
+        "clutter" => 0.0, //notes move into each other
+        "bop" => 0.0, //notes bounce with the beat
+        "press" => 0.0, //notes move when pressed
+
+        "scaleUp" => 0.0, //NOTE JUMPSCARE
+        "rainbowNotes" => 0.0,
+        "flash" => 0.0, //make notes white
+
+        "slitherY" => 0.0,
+        "slitherX" => 0.0, 
+        "slitherScaleY" => 0.0,
+        "slitherScaleX" => 0.0,
+        "slitherIncomingAngle" => 0.0,
+        
+    ];
+    public var modifiersValues:Map<String, Dynamic> = [ //stuff that doesnt use functions
+        
+        "scrollAngle" => -90, //moves entire strumline angle btw (easy side scroll lol)
+        "incomingAngleIsStrumAngle" => false, //forces the incoming angle of a note to be the strumnotes angle
+        "StrumLinefollowAngle" => false, //makes the strumnote angle snap to the angle of the strumline (just visual)
+        "strumScrollFactor" => [0.0,0.0], //doesnt work rn
+
+        "ghostOffset" => 300.0,
+        "boundStrums" => false, //strums will loop around the screen if they go offscreen, kinda wonky though
+
+        "haloWidth" => 50.0,
+        "haloHeight" => 25.0,
+
+        "drunkSpeed" => 1.0,
+        "tipsySpeed" => 1.0,
+
+        "tanWidth" => 32.0,
+        "tanHeight" => 32.0,
+        "tanSpeed" => 0.25,
+        "waveWidth" => 32.0,
+        "waveHeight" => 32.0,
+        "waveSpeed" => 0.25,
     ];
 
     //NO LONGER USING THIS BECAUSE ITS A DUMB SYSTEM (still here to prevent crashes on old modcharts)

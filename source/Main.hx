@@ -241,7 +241,7 @@ class Main extends Sprite
 		PlayState.poisonNoteDamage = note.poisonNoteDamage;
 		PlayState.HealthDrainFromGlitchAndBob = note.HealthDrainFromGlitchAndBob;
 
-		BabyArrow.maniaSwitchPositions = note.maniaSwitchPositions;
+		//BabyArrow.maniaSwitchPositions = note.maniaSwitchPositions;
 		BabyArrow.dirArray = note.dirArray;
 		BabyArrow.colorFromData = note.colorFromData;
 		BabyArrow.laneOffset = note.laneOffset;

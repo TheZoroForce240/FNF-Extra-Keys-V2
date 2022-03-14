@@ -84,15 +84,10 @@ class HscriptShit //funni modcharts
     {
 		if (interp.variables.exists(tfisthis)) //make sure it exists
         {
-            //interp.variables.get(tfisthis)(); //uhh i think this work idk
-            //trace(interp.variables.get(tfisthis));
             if (shitToGoIn.length > 0)
                 interp.variables.get(tfisthis)(shitToGoIn[0]);
             else
                 interp.variables.get(tfisthis)(); //if function doesnt need an arg
-
-            //trace(shitToGoIn);
-
         }
             
 	}
@@ -226,6 +221,7 @@ class HscriptShit //funni modcharts
 
         interp.variables.set("changeMod", function(stuff:Array<Dynamic>)
         {
+            //mod, val, pn
             ModchartUtil.changeModifier(stuff[0], stuff[1], stuff[2]);
         });
 
@@ -236,6 +232,7 @@ class HscriptShit //funni modcharts
 
         interp.variables.set("tweenMod", function(stuff:Array<Dynamic>)
         {
+            //mod, val, pn, ease, time
             PlayState.instance.tweenModifier(stuff[0],stuff[1],stuff[2],stuff[3],stuff[4]);
         });
 
@@ -307,7 +304,7 @@ class ScriptEvent //a way to make modcharts cleaner by setting events at the sta
 
     public function callEvent()
     {
-        trace("called event");
+        //trace("called event");
         PlayState.instance.call(functionToCall, functionInput); //call the modchart function
         wasCalled = true;
         remove();
@@ -354,5 +351,19 @@ class BeatScriptEvent extends ScriptEvent
     {
         if (shit >= callTime && !wasCalled)
             callEvent(); 
+    }
+}
+
+
+class NoteEventScriptEvent extends StrumTimeScriptEvent
+{
+    public function new(_time:Dynamic, _function:String, _input:Array<Dynamic>)
+    {
+        super(_time, _function, _input);
+    }
+
+    override public function callEvent()
+    {
+
     }
 }
