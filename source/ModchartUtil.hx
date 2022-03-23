@@ -758,6 +758,12 @@ class Modifier //TODO, set up so its not checking modifiers every frame, only ac
     {
         pos.incomingAngle += 20 * Math.sin( (curPos+250)/76 ) * val;  
     }
+
+
+    public static function scaleX(val:Float, arrowSize:Float, noteData:Int, mania:Int, pos:StrumSettings, curPos:Float)
+        pos.scaleX *= val;
+    public static function scaleY(val:Float, arrowSize:Float, noteData:Int, mania:Int, pos:StrumSettings, curPos:Float)
+        pos.scaleY *= val;
         
 }
 

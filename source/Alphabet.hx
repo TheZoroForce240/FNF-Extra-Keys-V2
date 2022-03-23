@@ -53,6 +53,8 @@ class Alphabet extends FlxSpriteGroup
 		isBold = bold;
 		menuItemOffset = menuOffset;
 
+		isVertical = vertical;
+
 		if (text != "")
 		{
 			if (typed)
@@ -271,10 +273,16 @@ class AlphaCharacter extends FlxSprite
 
 	public var row:Int = 0;
 	var tex = Paths.getSparrowAtlas('alphabet');
+
+	public var defaultX:Float = 0;
+	public var defaultY:Float = 0;
+
 	public function new(x:Float, y:Float)
 	{
 		super(x, y);
 		antialiasing = true;
+		defaultX = x;
+		defaultY = y;
 	}
 
 	public function createBold(letter:String)

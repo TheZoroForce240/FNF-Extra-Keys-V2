@@ -4002,41 +4002,52 @@ class PlayState extends MusicBeatState
 		return movement;
 	}
 
+	var currentBindPopups:Array<KeybindPopup> = [];
+
 
 	function createKeybindText(strums:StrumLineGroup, binds:Array<String>, downscroll:Bool):Void
 	{
+		for (shit in currentBindPopups)
+		{
+			remove(shit);
+		}
+		currentBindPopups = [];
 		for (i in 0...binds.length)
 		{
-			var text:KeybindPopup = new KeybindPopup(strums.members[i].x, strums.members[i].y, binds[i], true, false, 90, true);
+			var text:KeybindPopup = new KeybindPopup(0, 0, binds[i], true, false, 90, true);
 			add(text);
 			text.scrollFactor.set();
 			text.strum = strums.members[i];
 			var yOffset:Float = 100;
 			if (downscroll)
-				yOffset = FlxG.height * 0.55;
+			{
+				yOffset = -100 - (binds[i].length * 67) + 50 + FlxG.height * 0.77;
+			}
+				
 			var xOffset:Float = ((strums.members[i].width - text.members[0].width) / 2);
 
 			text.xOffset = xOffset;
 			text.yOffset = yOffset;
 			text.cameras = [camHUD];
 			text.alpha = 0;
-			FlxTween.tween(text, {alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((i * 4) / PlayState.keyAmmo[mania]))
+			currentBindPopups.push(text);
+			FlxTween.tween(text, {alpha: 1}, 0.1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * ((strums.members[i].curID * 4) / keyAmmo[mania]))
 			, onUpdate: function(twn:FlxTween){
-				text.tweenYOffset = (20 * twn.percent);
+				text.tweenYOffset = (20 * FlxEase.circOut(twn.percent));
 			}});
 			new FlxTimer().start(4, function(tmr:FlxTimer)
 			{
 				var yshit:Float = -300;
 				if (downscroll)
 					yshit = 300;
-				FlxTween.tween(text, {alpha: 0, y: text.y + yshit}, 1, {ease: FlxEase.circIn,
+				FlxTween.tween(text, {alpha: 0, y: text.y + yshit}, 1, {ease: FlxEase.circIn, startDelay: 0.1 + (0.2 * ((strums.members[i].curID * 4) / keyAmmo[mania])),
 					onComplete: function(twn:FlxTween)
 					{
 						remove(text);
 						text.destroy();
 					},
 					onUpdate: function(twn:FlxTween){
-						text.tweenYOffset = (yshit * twn.percent);
+						text.tweenYOffset = (yshit * FlxEase.circIn(twn.percent));
 					}
 				});
 			});	

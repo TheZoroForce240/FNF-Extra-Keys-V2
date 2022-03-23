@@ -452,8 +452,8 @@ class BabyArrow extends FlxSprite
             offset.x = frameWidth / 2;
             offset.y = frameHeight / 2;
 
-            offset.x -= (offsetshit / 0.7) * (scale.x * scaleMulti);
-            offset.y -= (offsetshit / 0.7) * (scale.x * scaleMulti); //do scale.x on y so it matches correctly, changing to scale.y will fuck it up just leave it
+            offset.x -= (offsetshit / 0.7) * (scale.x);
+            offset.y -= (offsetshit / 0.7) * (scale.x); //do scale.x on y so it matches correctly, changing to scale.y will fuck it up just leave it
         }
     }
     public function moveKeyPositions(spr:FlxSprite, newMania:Int, player:Int):Void 
