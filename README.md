@@ -1,5 +1,7 @@
 # FNF Zoro Engine
 
+this engine is dead lol dont use it
+
 This is a mod for Friday Night Funkin, and mainly adds more features to the base game, for easier modding.
 I mainly use this engine to test ideas and mess around with code, but you can still make mods with this of course!
 
